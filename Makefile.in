@@ -1,0 +1,109 @@
+ifdef $(DLPATH)
+  $(DLPATH):=$($(DLPATH)):$(DLPATH_ADD)
+else
+  $(DLPATH):=$(DLPATH_ADD)
+endif
+
+LIBDIR=lib
+
+QUIET_CC  = @echo '   ' CC  ' ' $@;
+# QUIET_CXX = @echo '   ' CXX ' ' $@;
+QUIET_AR  = @echo '   ' AR  ' ' $@;
+
+AT=@
+
+SRC_PATH = ./src
+INC_PATH = ./src
+
+BUILD_DIRS = $(SRC_PATH)\
+	     $(SRC_PATH)/base\
+	     $(SRC_PATH)/numbers\
+	     $(SRC_PATH)/polynomials\
+	     $(SRC_PATH)/tstar\
+	     $(SRC_PATH)/caches\
+	     $(SRC_PATH)/geometry\
+	     $(SRC_PATH)/lists\
+	     $(SRC_PATH)/metadatas\
+	     $(SRC_PATH)/newton\
+	     $(SRC_PATH)/ccluster
+
+TEMPLATE_DIRS = 
+
+export
+
+SOURCES = 
+LIB_SOURCES = $(wildcard $(patsubst %, %/*.c, $(BUILD_DIRS)))  $(patsubst %, %/*.c, $(TEMPLATE_DIRS))
+HEADERS =     $(foreach x, $(BUILD_DIRS), $(wildcard $(x)/*.h))
+# OBJS =        $(patsubst %.c, build/%.o, $(LIB_SOURCES))
+# LIB_OBJS =    $(patsubst %, build/%/*.o, $(BUILD_DIRS))
+OBJS=$(LIB_SOURCES:%.c=%.o)
+# LIB_OBJS =    $(patsubst %, build/%/*.o, $(LIB_SOURCES))
+
+# LOBJS = $(patsubst %.c, build/%.lo, $(LIB_SOURCES))
+LOBJS=$(LIB_SOURCES:%.c=%.lo)
+# LIB_LOBJS = $(patsubst %, build/%/*.lo, $(BUILD_DIRS))
+# LIB_LOBJS = $(patsubst %, build/%/*.lo, $(LIB_SOURCES))
+
+all: library
+
+quiet: library
+
+verbose:
+# 	$(MAKE) AT= QUIET_CC= QUIET_CXX= QUIET_AR=
+	$(MAKE) AT= QUIET_CC= QUIET_AR=
+
+clean: 
+	@echo "Cleaning all"
+	rm -rf $(OBJS) $(LOBJS) libccluster.a $(CCLUSTER_LIB) \
+	$(CCLUSTER_LIBNAME) $(CCLUSTER_LIBNAME).$(CCLUSTER_MAJOR)
+	
+# 	$(wildcard $(CCLUSTER_LIBNAME)*)
+
+distclean: clean
+	rm -f Makefile
+	
+$(CCLUSTER_LIB): $(LOBJS) $(LIB_SOURCES) $(HEADERS)
+	@echo "Building $@"
+	$(CC) $(CFLAGS) -o $@ -shared $(LOBJS) $(LIBS2) ;
+	ln -sf "$(CCLUSTER_LIB)" "$(CCLUSTER_LIBNAME)"; \
+	ln -sf "$(CCLUSTER_LIB)" "$(CCLUSTER_LIBNAME).$(CCLUSTER_MAJOR)"; \
+
+libccluster.a: $(OBJS) $(LIB_SOURCES) $(HEADERS)
+	$(AR) rcs libccluster.a $(OBJS)
+	
+# build/%.lo: %.c $(HEADERS) | build
+# 	$(QUIET_CC) $(CC) $(PIC_FLAG) $(CFLAGS) $(INCS) -I$(INC_PATH) -c $< -o $@;
+# 
+# build/%.o: %.c $(HEADERS) | build
+# 	$(QUIET_CC) $(CC) $(CFLAGS) $(INCS) -I$(INC_PATH) -c $< -o $@;
+
+%.lo : %.c $(HEADERS)
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(PIC_FLAG) $(DFLAGS) $(CFLAGS) $(INCS) -c $< -o $@;
+	
+%.o : %.c $(HEADERS)
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(DFLAGS) $(CFLAGS) $(INCS) -c $< -o $@;
+
+library:
+	$(AT)if [ "$(CCLUSTER_SHARED)" -eq "1" ]; then \
+		$(MAKE) shared; \
+	fi
+	$(AT)if [ "$(CCLUSTER_STATIC)" -eq "1" ]; then \
+		$(MAKE) static; \
+	fi
+
+shared: $(CCLUSTER_LIB)
+
+static: libccluster.a
+
+print-%:
+	@echo '$*=$($*)'
+	
+# print: 
+# 	@echo "BUILD_DIRS:  " $(BUILD_DIRS)
+# 	@echo "LIB_SOURCES: " $(LIB_SOURCES)
+# 	@echo "HEADERS:     " $(HEADERS)
+# 	@echo "OBJS:        " $(OBJS)
+# 	@echo "LIB_OBJS:    " $(LIB_OBJS)
+# 	@echo "LIB_OBJS:    " $(LIB_OBJS)
