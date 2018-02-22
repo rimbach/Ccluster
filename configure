@@ -14,7 +14,7 @@ CCLUSTER_MINOR=0
 CCLUSTER_PATCH=0
 
 PREFIX="/usr/local"
-# GMP_DIR="/usr/local"
+GMP_DIR="/usr/local"
 # MPFR_DIR="/usr/local"
 FLINT_DIR="/usr/local"
 ARB_DIR="/usr/local"
@@ -37,6 +37,9 @@ EXTENSIONS=
 EXT_MODS=
 EXTRA_BUILD=
 EXPERIMENTAL=0
+FOR_WIN32=0
+FOR_WIN64=0
+
 
 usage()
 {
@@ -46,7 +49,7 @@ usage()
    echo "   where <args> may be:"
    echo "     --prefix=<path>      Specify path to installation location (default: /usr/local)"
 #    echo "     --with-mpir=<path>   Specify location of MPIR (default: /usr/local)"
-#    echo "     --with-gmp=<path>    Specify location of GMP (default: /usr/local)"
+   echo "     --with-gmp=<path>    Specify location of GMP (default: /usr/local)"
 #    echo "     --with-mpfr=<path>   Specify location of MPFR (default: /usr/local)"
    echo "     --with-flint=<path>  Specify location of FLINT (default: /usr/local)"
    echo "     --with-arb=<path>    Specify location of ARB (default: /usr/local)"
@@ -80,6 +83,8 @@ usage()
    echo "     ABI=[32|64]          Tell the compiler to use given ABI (default: empty)"
    
    echo "     --experimental       Use experimental version"
+   echo "     --for_win32          build binaries for win32"
+   echo "     --for_win64          build binaries for win64"
 }
 
 
@@ -104,9 +109,9 @@ while [ "$1" != "" ]; do
          usage
          exit 0
          ;;
-#       --with-mpir|--with-gmp)
-#          GMP_DIR=$(absolute_path "$VALUE")
-#          ;;
+      --with-mpir|--with-gmp)
+         GMP_DIR=$(absolute_path "$VALUE")
+         ;;
 #       --with-mpfr)
 #          MPFR_DIR=$(absolute_path "$VALUE")
 #          ;;
@@ -191,6 +196,12 @@ while [ "$1" != "" ]; do
 #       --disable-cxx)
 #          WANT_CXX=0
 #          ;;
+      --for_win32)
+         FOR_WIN32=1
+         ;;
+      --for_win64)
+         FOR_WIN64=1
+         ;;
       AR)
          AR="$VALUE"
          ;;
@@ -221,22 +232,22 @@ done
 
 LIBS="m"
 
-# if [ -d "${GMP_DIR}/lib" ]; then
-#    GMP_LIB_DIR="${GMP_DIR}/lib"
-#    GMP_INC_DIR="${GMP_DIR}/include"
-# elif [ -d "${GMP_DIR}/lib64" ]; then
-#    GMP_LIB_DIR="${GMP_DIR}/lib64"
-#    GMP_INC_DIR="${GMP_DIR}/include"
-# elif [ -d "${GMP_DIR}/.libs" ]; then
-#    GMP_LIB_DIR="${GMP_DIR}/.libs"
-#    GMP_INC_DIR="${GMP_DIR}"
-# else
-#    echo "Invalid GMP directory"
-#    exit 1
-# fi
-# LIB_DIRS="${LIB_DIRS} ${GMP_LIB_DIR}"
-# INC_DIRS="${INC_DIRS} ${GMP_INC_DIR}"
-# LIBS="${LIBS} gmp"
+if [ -d "${GMP_DIR}/lib" ]; then
+   GMP_LIB_DIR="${GMP_DIR}/lib"
+   GMP_INC_DIR="${GMP_DIR}/include"
+elif [ -d "${GMP_DIR}/lib64" ]; then
+   GMP_LIB_DIR="${GMP_DIR}/lib64"
+   GMP_INC_DIR="${GMP_DIR}/include"
+elif [ -d "${GMP_DIR}/.libs" ]; then
+   GMP_LIB_DIR="${GMP_DIR}/.libs"
+   GMP_INC_DIR="${GMP_DIR}"
+else
+   echo "Invalid GMP directory"
+   exit 1
+fi
+LIB_DIRS="${LIB_DIRS} ${GMP_LIB_DIR}"
+INC_DIRS="${INC_DIRS} ${GMP_INC_DIR}"
+LIBS="${LIBS} gmp"
 # 
 # if [ -d "${MPFR_DIR}/lib" ]; then
 #    MPFR_LIB_DIR="${MPFR_DIR}/lib"
@@ -384,6 +395,32 @@ if [ -z "$AR" ]; then
    AR=ar
 fi
 
+if [ "$FOR_WIN32" = "1" ]; then
+    BUILD=x86-MINGW64
+    STATIC=0
+    CC=i686-w64-mingw32-gcc
+    INC_DIRS="${INC_DIRS} /work/libs/gmp-6.0.0"
+    LIB_DIRS="${PWD}/binaries ${LIB_DIRS}"
+    ABI=32
+    LIBS="${LIBS} gmp"
+    ln -sf w32-libflint.dll binaries/libflint.dll
+    ln -sf w32-libarb.dll binaries/libarb.dll
+    ln -sf w32-libwinpthread-1.dll binaries/libpthread.dll
+    ln -sf w32-libgmp-16.dll binaries/libgmp.dll
+fi
+
+if [ "$FOR_WIN64" = "1" ]; then
+    BUILD=x86_64-MINGW64
+    STATIC=0
+    CC=x86_64-w64-mingw32-gcc
+    INC_DIRS="${INC_DIRS} /work/libs/gmp-6.0.0"
+    LIB_DIRS="${PWD}/binaries ${LIB_DIRS}"
+    ABI=64
+    ln -sf w64-libflint.dll binaries/libflint.dll
+    ln -sf w64-libarb.dll binaries/libarb.dll
+    ln -sf w64-libwinpthread-1.dll binaries/libpthread.dll
+    ln -sf w64-libgmp-16.dll binaries/libgmp.dll
+fi
 # Architecture handler
 
 KERNEL=`uname`
