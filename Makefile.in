@@ -97,6 +97,21 @@ shared: $(CCLUSTER_LIB)
 
 static: libccluster.a
 
+install: library
+	mkdir -p $(DESTDIR)$(PREFIX)/$(LIBDIR)
+	mkdir -p $(DESTDIR)$(PREFIX)/include
+	$(AT)if [ "$(CCLUSTER_SHARED)" -eq "1" ]; then \
+		cp $(CCLUSTER_LIB) "$(DESTDIR)$(PREFIX)/$(LIBDIR)"; \
+		cp -a $(shell ls $(CCLUSTER_LIBNAME)*) "$(DESTDIR)$(PREFIX)/$(LIBDIR)"; \
+	fi
+	$(AT)if [ "$(CCLUSTER_STATIC)" -eq "1" ]; then \
+		cp libccluster.a $(DESTDIR)$(PREFIX)/$(LIBDIR); \
+	fi
+	cp $(HEADERS) $(DESTDIR)$(PREFIX)/include
+# 	$(AT)if [ ! -z $(EXT_HEADERS) ]; then \
+# 		cp $(EXT_HEADERS) $(DESTDIR)$(PREFIX)/include; \
+# 	fi
+
 print-%:
 	@echo '$*=$($*)'
 	
