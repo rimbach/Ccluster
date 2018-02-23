@@ -130,70 +130,71 @@ gen: genPolFile
 #==================================================
 # HOUSEKEEPING 
 #==================================================
-print: 
-	@echo $(BENCH_DIRS_FILES)
-
-clean :
-	rm -rf $(TEST_OBJS) $(TEST_EXECS)
-	
-cleanBenchs : 
-	rm -rf $(BENCH_DIRS_FILES)
-
-.c.o :
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ -c $< $(INCLUDE_PATH)
-	
-benchMignotte: benchMignotte.o
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) \
-	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
-	
-debug: benchMignotte.o
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
-	    	-o $@ $< $(INCLUDE_PATH) \
-	
-benchMignotteMul: benchMignotteMul.o
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-benchWilkinson: benchWilkinson.o
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-benchBernoulli: benchBernoulli.o
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-benchWilkRat: benchWilkRat.o
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-benchSpiral: benchSpiral.o
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-benchCluster: benchCluster.o
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-benchWilkMul: benchWilkMul.o
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-genPolFile: genPolFile.o
-	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+# now in ../Makefile with make benchs
+# print: 
+# 	@echo $(BENCH_DIRS_FILES)
+# 
+# clean :
+# 	rm -rf $(TEST_OBJS) $(TEST_EXECS)
+# 	
+# cleanBenchs : 
+# 	rm -rf $(BENCH_DIRS_FILES)
+# 
+# .c.o :
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) -o $@ -c $< $(INCLUDE_PATH)
+# 	
+# benchMignotte: benchMignotte.o
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) \
+# 	    	-o $@ $< $(INCLUDE_PATH) \
+# 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+# 	
+# debug: benchMignotte.o
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) \
+# 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+# 	    	-o $@ $< $(INCLUDE_PATH) \
+# 	
+# benchMignotteMul: benchMignotteMul.o
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
+# 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+# 	
+# benchWilkinson: benchWilkinson.o
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
+# 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+# 	
+# benchBernoulli: benchBernoulli.o
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
+# 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+# 	
+# benchWilkRat: benchWilkRat.o
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
+# 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+# 	
+# benchSpiral: benchSpiral.o
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
+# 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+# 	
+# benchCluster: benchCluster.o
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
+# 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+# 	
+# benchWilkMul: benchWilkMul.o
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
+# 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+# 	
+# genPolFile: genPolFile.o
+# 	@echo "Building $@"
+# 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
+# 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
 
 #==================================================
 # END 
