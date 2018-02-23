@@ -10,6 +10,9 @@
 /* ************************************************************************** */
 
 #include "app_rat_poly.h"
+
+#ifdef CCLUSTER_HAVE_PTHREAD
+
 #include <pthread.h>
 
 typedef struct {
@@ -220,3 +223,5 @@ void compApp_poly_parallel_taylor_convol_forJulia(compApp_poly_t dest, const com
     compApp_poly_parallel_taylor_convol(dest, p, c,radius, prec, num_threads);
     compApp_clear(c);
 }
+
+#endif

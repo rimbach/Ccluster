@@ -15,7 +15,7 @@ CCLUSTER_PATCH=0
 
 PREFIX="/usr/local"
 GMP_DIR="/usr/local"
-# MPFR_DIR="/usr/local"
+MPFR_DIR="/usr/local"
 FLINT_DIR="/usr/local"
 ARB_DIR="/usr/local"
 # NTL_DIR="/usr/local"
@@ -48,9 +48,9 @@ usage()
    echo "     -h display usage information"
    echo "   where <args> may be:"
    echo "     --prefix=<path>      Specify path to installation location (default: /usr/local)"
-#    echo "     --with-mpir=<path>   Specify location of MPIR (default: /usr/local)"
+   echo "     --with-mpir=<path>   Specify location of MPIR (default: /usr/local)"
    echo "     --with-gmp=<path>    Specify location of GMP (default: /usr/local)"
-#    echo "     --with-mpfr=<path>   Specify location of MPFR (default: /usr/local)"
+   echo "     --with-mpfr=<path>   Specify location of MPFR (default: /usr/local)"
    echo "     --with-flint=<path>  Specify location of FLINT (default: /usr/local)"
    echo "     --with-arb=<path>    Specify location of ARB (default: /usr/local)"
 #    echo "     --with-blas[=<path>] Use BLAS and specify its location (default: /usr/local)"
@@ -112,9 +112,9 @@ while [ "$1" != "" ]; do
       --with-mpir|--with-gmp)
          GMP_DIR=$(absolute_path "$VALUE")
          ;;
-#       --with-mpfr)
-#          MPFR_DIR=$(absolute_path "$VALUE")
-#          ;;
+      --with-mpfr)
+         MPFR_DIR=$(absolute_path "$VALUE")
+         ;;
       --with-flint)
          FLINT_DIR=$(absolute_path "$VALUE")
          ;;
@@ -249,25 +249,25 @@ LIB_DIRS="${LIB_DIRS} ${GMP_LIB_DIR}"
 INC_DIRS="${INC_DIRS} ${GMP_INC_DIR}"
 LIBS="${LIBS} gmp"
 # 
-# if [ -d "${MPFR_DIR}/lib" ]; then
-#    MPFR_LIB_DIR="${MPFR_DIR}/lib"
-#    MPFR_INC_DIR="${MPFR_DIR}/include"
-# elif [ -d "${MPFR_DIR}/lib64" ]; then
-#    MPFR_LIB_DIR="${MPFR_DIR}/lib64"
-#    MPFR_INC_DIR="${MPFR_DIR}/include"
-# elif [ -d "${MPFR_DIR}/.libs" ]; then
-#    MPFR_LIB_DIR="${MPFR_DIR}/.libs"
-#    MPFR_INC_DIR="${MPFR_DIR}"
-# elif [ -d "${MPFR_DIR}/src/.libs" ]; then
-#    MPFR_LIB_DIR="${MPFR_DIR}/src/.libs"
-#    MPFR_INC_DIR="${MPFR_DIR}/src"
-# else
-#    echo "Invalid MPFR directory"
-#    exit 1
-# fi
-# LIB_DIRS="${LIB_DIRS} ${MPFR_LIB_DIR}"
-# INC_DIRS="${INC_DIRS} ${MPFR_INC_DIR}"
-# LIBS="${LIBS} mpfr"
+if [ -d "${MPFR_DIR}/lib" ]; then
+   MPFR_LIB_DIR="${MPFR_DIR}/lib"
+   MPFR_INC_DIR="${MPFR_DIR}/include"
+elif [ -d "${MPFR_DIR}/lib64" ]; then
+   MPFR_LIB_DIR="${MPFR_DIR}/lib64"
+   MPFR_INC_DIR="${MPFR_DIR}/include"
+elif [ -d "${MPFR_DIR}/.libs" ]; then
+   MPFR_LIB_DIR="${MPFR_DIR}/.libs"
+   MPFR_INC_DIR="${MPFR_DIR}"
+elif [ -d "${MPFR_DIR}/src/.libs" ]; then
+   MPFR_LIB_DIR="${MPFR_DIR}/src/.libs"
+   MPFR_INC_DIR="${MPFR_DIR}/src"
+else
+   echo "Invalid MPFR directory"
+   exit 1
+fi
+LIB_DIRS="${LIB_DIRS} ${MPFR_LIB_DIR}"
+INC_DIRS="${INC_DIRS} ${MPFR_INC_DIR}"
+LIBS="${LIBS} mpfr"
 
 # flint
 if [ -d "${FLINT_DIR}/lib" ]; then
