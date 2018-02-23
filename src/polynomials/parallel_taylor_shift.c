@@ -10,6 +10,9 @@
 /* ************************************************************************** */
 
 #include "app_rat_poly.h"
+
+#ifdef CCLUSTER_HAVE_PTHREAD
+
 #include <pthread.h>
 
 
@@ -314,3 +317,4 @@ void compApp_poly_parallel_taylor( compApp_poly_t dest, const compApp_poly_t p, 
 //         }
 //     }
 */    
+#endif
