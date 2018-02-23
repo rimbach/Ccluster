@@ -29,20 +29,27 @@ BUILD_DIRS = $(SRC_PATH)\
 
 TEMPLATE_DIRS = 
 
-export
-
 SOURCES = 
 LIB_SOURCES = $(wildcard $(patsubst %, %/*.c, $(BUILD_DIRS)))  $(patsubst %, %/*.c, $(TEMPLATE_DIRS))
-HEADERS =     $(foreach x, $(BUILD_DIRS), $(wildcard $(x)/*.h))
+LIB_HEADERS = $(foreach x, $(BUILD_DIRS), $(wildcard $(x)/*.h))
 # OBJS =        $(patsubst %.c, build/%.o, $(LIB_SOURCES))
 # LIB_OBJS =    $(patsubst %, build/%/*.o, $(BUILD_DIRS))
-OBJS=$(LIB_SOURCES:%.c=%.o)
+LIB_OBJS=$(LIB_SOURCES:%.c=%.o)
 # LIB_OBJS =    $(patsubst %, build/%/*.o, $(LIB_SOURCES))
 
 # LOBJS = $(patsubst %.c, build/%.lo, $(LIB_SOURCES))
-LOBJS=$(LIB_SOURCES:%.c=%.lo)
+LIB_LOBJS=$(LIB_SOURCES:%.c=%.lo)
 # LIB_LOBJS = $(patsubst %, build/%/*.lo, $(BUILD_DIRS))
 # LIB_LOBJS = $(patsubst %, build/%/*.lo, $(LIB_SOURCES))
+
+BENCHS_DIR = ./benchs
+BENCHS_SOURCES = $(wildcard $(patsubst %, %/*.c, $(BENCHS_DIR)))
+BENCHS_HEADERS = $(wildcard $(patsubst %, %/*.h, $(BENCHS_DIR)))
+BENCHS_OBJS = $(BENCHS_SOURCES:%.c=%.o)
+BENCHS_EXE = $(BENCHS_SOURCES:%.c=%)
+
+export
+
 
 all: library
 
@@ -54,7 +61,7 @@ verbose:
 
 clean: 
 	@echo "Cleaning all"
-	rm -rf $(OBJS) $(LOBJS) libccluster.a $(CCLUSTER_LIB) \
+	rm -rf $(LIB_OBJS) $(LIB_LOBJS) libccluster.a $(CCLUSTER_LIB) \
 	$(CCLUSTER_LIBNAME) $(CCLUSTER_LIBNAME).$(CCLUSTER_MAJOR)
 	
 # 	$(wildcard $(CCLUSTER_LIBNAME)*)
@@ -62,14 +69,14 @@ clean:
 distclean: clean
 	rm -f Makefile
 	
-$(CCLUSTER_LIB): $(LOBJS) $(LIB_SOURCES) $(HEADERS)
+$(CCLUSTER_LIB): $(LIB_LOBJS) $(LIB_SOURCES) $(LIB_HEADERS)
 	@echo "Building $@"
-	$(CC) $(CFLAGS) -o $@ -shared $(LOBJS) $(LIBS2) ;
+	$(CC) $(CFLAGS) -o $@ -shared $(LIB_LOBJS) $(LIBS2) ;
 	ln -sf "$(CCLUSTER_LIB)" "$(CCLUSTER_LIBNAME)"; \
 	ln -sf "$(CCLUSTER_LIB)" "$(CCLUSTER_LIBNAME).$(CCLUSTER_MAJOR)"; \
 
-libccluster.a: $(OBJS) $(LIB_SOURCES) $(HEADERS)
-	$(AR) rcs libccluster.a $(OBJS)
+libccluster.a: $(LIB_OBJS) $(LIB_SOURCES) $(LIB_HEADERS)
+	$(AR) rcs libccluster.a $(LIB_OBJS)
 	
 # build/%.lo: %.c $(HEADERS) | build
 # 	$(QUIET_CC) $(CC) $(PIC_FLAG) $(CFLAGS) $(INCS) -I$(INC_PATH) -c $< -o $@;
@@ -86,6 +93,7 @@ libccluster.a: $(OBJS) $(LIB_SOURCES) $(HEADERS)
 	$(QUIET_CC) $(CC) $(DFLAGS) $(CFLAGS) $(INCS) -c $< -o $@;
 
 library:
+	$(eval HEADERS=$(LIB_HEADERS))
 	$(AT)if [ "$(CCLUSTER_SHARED)" -eq "1" ]; then \
 		$(MAKE) shared; \
 	fi
@@ -96,7 +104,7 @@ library:
 shared: $(CCLUSTER_LIB)
 
 static: libccluster.a
-
+	
 install: library
 	mkdir -p $(DESTDIR)$(PREFIX)/$(LIBDIR)
 	mkdir -p $(DESTDIR)$(PREFIX)/include
@@ -107,11 +115,61 @@ install: library
 	$(AT)if [ "$(CCLUSTER_STATIC)" -eq "1" ]; then \
 		cp libccluster.a $(DESTDIR)$(PREFIX)/$(LIBDIR); \
 	fi
-	cp $(HEADERS) $(DESTDIR)$(PREFIX)/include
+	cp $(LIB_HEADERS) $(DESTDIR)$(PREFIX)/include
 # 	$(AT)if [ ! -z $(EXT_HEADERS) ]; then \
 # 		cp $(EXT_HEADERS) $(DESTDIR)$(PREFIX)/include; \
 # 	fi
 
+benchs: library headers_benchs \
+	benchMignotte benchMignotteMul \
+	benchBernoulli benchWilkinson \
+	benchWilkRat benchSpiral \
+	benchCluster benchWilkMul \
+	genPolFile
+	
+benchsclean: 
+	rm -rf $(BENCHS_OBJS) $(BENCHS_EXE)
+	
+headers_benchs: 
+	$(eval HEADERS=$(LIB_HEADERS) $(BENCHS_HEADERS))
+
+benchMignotte: $(BENCHS_DIR)/benchMignotte.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchMignotteMul: $(BENCHS_DIR)/benchMignotteMul.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchBernoulli: $(BENCHS_DIR)/benchBernoulli.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchWilkinson: $(BENCHS_DIR)/benchWilkinson.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchWilkRat: $(BENCHS_DIR)/benchWilkRat.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchSpiral: $(BENCHS_DIR)/benchSpiral.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchCluster: $(BENCHS_DIR)/benchCluster.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchWilkMul: $(BENCHS_DIR)/benchWilkMul.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+genPolFile: $(BENCHS_DIR)/genPolFile.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+	
 print-%:
 	@echo '$*=$($*)'
 	
