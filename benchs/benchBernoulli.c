@@ -26,7 +26,7 @@ void getApprox(compApp_poly_t dest, slong prec){
 
 int main(int argc, char **argv){
     
-    if (argc<2){
+    if (argc<6){
         printf("usage: %s degree ", argv[0]);
         printf("initial_box epsilon strategy verbosity\n");
         printf("initial_box: for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
@@ -44,6 +44,7 @@ int main(int argc, char **argv){
     int degree;
     int st;
     int verbosity;
+    int nbthreads = 1;
     
     compBox_t bInit;
     realRat_t eps;
@@ -56,6 +57,14 @@ int main(int argc, char **argv){
     parse = parse*scan_epsilon( argv[3], eps );
     parse = parse*scan_strategy(argv[4], &st );
     parse = parse*scan_verbosity(argv[5], &verbosity );
+    
+    if (argc>=7) {
+        parse = parse*scan_nbthreads(argv[6], &nbthreads );
+    }
+    nbthreads = (nbthreads<<5);
+    int add_temp = (st>>6)<<16;
+    st = st&((0x1<<6)-1);
+    st = st + nbthreads + add_temp;
     
     realRat_poly_t pbern;
     realRat_poly_init(pbern);

@@ -28,6 +28,11 @@ void metadatas_clear(metadatas_t m) {
     chronos_clear( metadatas_chronref(m) );
 }
 
+// void metadatas_join(metadatas_t m1, const metadatas_t m2){
+//     chronos_join( metadatas_chronref(m1), metadatas_chronref(m2) );
+//     counters_join( metadatas_countref(m1), metadatas_countref(m2) );
+// }
+
 /* printing */
 
 char * compBox_sprint_for_stat(char * out, const compBox_t x){
@@ -83,7 +88,9 @@ int metadatas_fprint(FILE * file, const metadatas_t meta, const realRat_t eps){
     if (metadatas_usePredictPrec(meta)) len += sprintf( temp + len, " predPrec");
     if (metadatas_useStopWhenCompact(meta)) len += sprintf( temp + len, " stopWhenCompact");
     if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
-    if (metadatas_useCountSols(meta)) len += sprintf( temp + len, " count");
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));
+#endif
     if (metadatas_stratref(meta)->_additionalFlags !=0) 
         len += sprintf(temp +len, " %d", metadatas_stratref(meta)->_additionalFlags);
     r = fprintf(file, "|strat:%-63s|\n", temp);

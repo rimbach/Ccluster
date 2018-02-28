@@ -20,6 +20,10 @@
 
 #include <stdlib.h>
 
+#ifdef CCLUSTER_HAVE_PTHREAD
+#include <pthread.h>
+#endif
+
 typedef struct {
     int nbDiscarded;
     int nbValidated;
@@ -51,6 +55,8 @@ typedef counters_by_depth * counters_by_depth_ptr;
 void counters_by_depth_init( counters_by_depth_t st);
 METADATAS_INLINE void counters_by_depth_clear( counters_by_depth_t st) {}
 
+// void counters_by_depth_join( counters_by_depth_t c1, const counters_by_depth_t c2);
+
 /* void counters_by_depth_get_lenghts_of_str( counters_by_depth_t res, counters_by_depth_t st);*/
 
 typedef struct {
@@ -58,6 +64,9 @@ typedef struct {
         int size_allocated;
         counters_by_depth_ptr table;
         counters_by_depth_t total;
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_t _mutex;
+#endif
 } counters; /* a stat is a table of counters by depth */
 
 typedef counters counters_t[1];
@@ -66,6 +75,21 @@ typedef counters counters_t[1];
 
 void counters_init( counters_t st);
 void counters_clear( counters_t st);
+void counters_adjust_table( counters_t st, int depth );
+
+METADATAS_INLINE void counters_lock(counters_t t){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_lock (&(t->_mutex));
+#endif
+}
+
+METADATAS_INLINE void counters_unlock(counters_t t){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_unlock (&(t->_mutex));
+#endif
+}
+// void counters_join_depth( counters_t c1, const counters_by_depth_t c2, int depth);
+// void counters_join( counters_t c1, const counters_t c2);
 
 void counters_add_discarded( counters_t st, int depth );
 void counters_add_validated( counters_t st, int depth, int nbSols );

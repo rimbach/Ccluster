@@ -646,9 +646,12 @@ fi
 #D flag
 if [ -z "$DFLAGS" ]; then
     if [ "$EXPERIMENTAL" = "1" ]; then
-        DFLAGS="-DCCLUSTER_EXPERIMENTAL"
-    else
-        DFLAGS=""
+        DFLAGS="$DFLAGS -DCCLUSTER_EXPERIMENTAL"
+#     else
+#         DFLAGS=""
+    fi
+    if [ "$PTHREAD" = "1" ]; then
+        DFLAGS="$DFLAGS -DCCLUSTER_HAVE_PTHREAD"
     fi
 fi
 
@@ -682,7 +685,7 @@ fi
 
 #pthread configuration
 
-CONFIG_PTHREAD="#define HAVE_PTHREAD ${PTHREAD}"
+CONFIG_PTHREAD="#define CCLUSTER_HAVE_PTHREAD ${PTHREAD}"
 
 
 #pocess external modules

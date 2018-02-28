@@ -26,7 +26,8 @@ typedef struct {
     int _usePredictPrec;
     int _useStopWhenCompact;
     int _useAnticipate;
-    int _useCountSols;
+//     int _useCountSols;
+    int _useNBThreads;
     int _additionalFlags;
 } strategies;
 
@@ -39,7 +40,8 @@ void strategies_set_int ( strategies_t strat, int useNewton,
                                               int usePredictPrec, 
                                               int useStopWhenCompact, 
                                               int useAnticipate, 
-                                              int useCountSols,
+//                                               int useCountSols,
+                                              int useNBThreads,
                                               int additionalFlags
                         );
 void strategies_set( strategies_t strat, const strategies_t strat2);
@@ -50,6 +52,7 @@ METADATAS_INLINE int strategies_useTstarOptim     ( const strategies_t strat ) {
 METADATAS_INLINE int strategies_usePredictPrec    ( const strategies_t strat ) { return strat->_usePredictPrec    ; }
 METADATAS_INLINE int strategies_useStopWhenCompact( const strategies_t strat ) { return strat->_useStopWhenCompact; }
 METADATAS_INLINE int strategies_useAnticipate     ( const strategies_t strat ) { return strat->_useAnticipate     ; }
-METADATAS_INLINE int strategies_useCountSols      ( const strategies_t strat ) { return strat->_useCountSols      ; }
+// METADATAS_INLINE int strategies_useCountSols      ( const strategies_t strat ) { return strat->_useCountSols      ; }
+METADATAS_INLINE int strategies_useNBThreads      ( const strategies_t strat ) { return strat->_useNBThreads      ; }
 
 #endif

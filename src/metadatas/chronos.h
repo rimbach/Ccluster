@@ -18,8 +18,11 @@
 #define METADATAS_INLINE static __inline__
 #endif
 
-#include<time.h>
-
+#include <time.h>
+#ifdef CCLUSTER_HAVE_PTHREAD
+#include <pthread.h>
+#endif
+    
 typedef struct {
     clock_t _clicks_Approxi;
     clock_t _clicks_Graeffe;
@@ -39,6 +42,9 @@ typedef struct {
     double  _clicks_CclusAl_cumul;
     double  _clicks_Evaluat_cumul;
     double  _clicks_Derivat_cumul;
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_t _mutex;
+#endif    
 } chronos;
 
 typedef chronos chronos_t[1];
@@ -46,6 +52,71 @@ typedef chronos * chronos_ptr;
     
 void chronos_init( chronos_t times );
 void chronos_clear( chronos_t times );
+
+// void chronos_join ( chronos_t t1, const chronos_t t2 );
+METADATAS_INLINE void chronos_lock(chronos_t t){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_lock (&(t->_mutex));
+#endif
+}
+
+METADATAS_INLINE void chronos_unlock(chronos_t t){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_unlock (&(t->_mutex));
+#endif
+}
+
+METADATAS_INLINE void   chronos_add_time_Approxi( chronos_t times, double d, int nbThreads ){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (nbThreads>1)
+        times->_clicks_Approxi_cumul += d/(nbThreads*CLOCKS_PER_SEC);
+    else 
+        times->_clicks_Approxi_cumul += d/CLOCKS_PER_SEC;
+#else
+    times->_clicks_Approxi_cumul += d/CLOCKS_PER_SEC;
+#endif
+}
+
+METADATAS_INLINE void   chronos_add_time_Taylors( chronos_t times, double d, int nbThreads ){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (nbThreads>1)
+        times->_clicks_Taylors_cumul += d/(nbThreads*CLOCKS_PER_SEC);
+    else 
+        times->_clicks_Taylors_cumul += d/CLOCKS_PER_SEC;
+#else
+    times->_clicks_Taylors_cumul += d/CLOCKS_PER_SEC;
+#endif
+}
+METADATAS_INLINE void   chronos_add_time_Graeffe( chronos_t times, double d, int nbThreads ){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (nbThreads>1)
+        times->_clicks_Graeffe_cumul += d/(nbThreads*CLOCKS_PER_SEC);
+    else 
+        times->_clicks_Graeffe_cumul += d/CLOCKS_PER_SEC;
+#else
+    times->_clicks_Graeffe_cumul += d/CLOCKS_PER_SEC;
+#endif
+}
+METADATAS_INLINE void   chronos_add_time_T0Tests( chronos_t times, double d, int nbThreads ){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (nbThreads>1)
+        times->_clicks_T0Tests_cumul += d/(nbThreads*CLOCKS_PER_SEC);
+    else 
+        times->_clicks_T0Tests_cumul += d/CLOCKS_PER_SEC;
+#else
+    times->_clicks_T0Tests_cumul += d/CLOCKS_PER_SEC;
+#endif
+}
+METADATAS_INLINE void   chronos_add_time_TSTests( chronos_t times, double d, int nbThreads ){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (nbThreads>1)
+        times->_clicks_TSTests_cumul += d/(nbThreads*CLOCKS_PER_SEC);
+    else 
+        times->_clicks_TSTests_cumul += d/CLOCKS_PER_SEC;
+#else
+    times->_clicks_TSTests_cumul += d/CLOCKS_PER_SEC;
+#endif
+}
 
 METADATAS_INLINE void   chronos_tic_Approxi      ( chronos_t times ) { times->_clicks_Approxi = clock(); }
 METADATAS_INLINE void   chronos_toc_Approxi      ( chronos_t times ) { times->_clicks_Approxi_cumul += ((double) (clock() - times->_clicks_Approxi))/ CLOCKS_PER_SEC; }

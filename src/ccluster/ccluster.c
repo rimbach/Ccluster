@@ -11,6 +11,8 @@
 
 #include "ccluster/ccluster.h"
 
+#include <pthread.h>
+
 slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta){
@@ -38,8 +40,35 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
         btemp = compBox_list_pop(boxes);
         compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
+// #ifdef MULTITHREADED
+//         metadatas_t meta_temp;
+//         metadatas_init( meta_temp, metadatas_initBref(meta), metadatas_stratref(meta) , metadatas_getVerbo(meta));
+//         
+//         parallel_discard_arg_t * args = (parallel_discard_arg_t *) malloc ( sizeof(parallel_discard_arg_t) * 1 );
+//         args[0].nbsol = -2;
+//         args[0].prec = res.appPrec;
+//         args[0].box  = btemp;
+//         args[0].cache = (cacheApp_ptr) cache;
+//         args[0].meta = (metadatas_ptr) meta_temp;
+// //         
+//         pthread_t * threads = (pthread_t *) malloc (sizeof(pthread_t) * 1);
+//         pthread_create(&threads[0], NULL, _parallel_discard_worker, &args[0]);
+//         pthread_join(threads[0], NULL);
+//         
+// //         printf("nbsols before: %d\n", args[0].nbsol );
+// //         _parallel_discard_worker( args );
+// //         printf("nbsols after: %d\n", args[0].nbsol );
+//         
+//         res.nbOfSol = args[0].nbsol;
+//         res.appPrec = args[0].prec;
+//         
+// //         res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta_temp);
+//         metadatas_join(meta, meta_temp);
+//         metadatas_clear(meta_temp);
+//         free(args);
+// #else
         res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);
-        
+// #endif        
         if (res.nbOfSol==0) {
             metadatas_add_discarded( meta, depth);
             compBox_clear(btemp);
@@ -124,8 +153,15 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
         compBox_clear(btemp);
         free(btemp);//comment it for julia...
     }
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (metadatas_useNBThreads(meta)>1)
+        prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta);
+    else
+        prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
+#else
     prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
-//     prec = ccluster_discard_compBox_list( subBoxes, cache, connCmp_nSols(cc), prec, meta);
+#endif
+    
     while (!compBox_list_is_empty(subBoxes)) {
         btemp = compBox_list_pop(subBoxes);
         connCmp_union_compBox( ltemp, btemp);
@@ -456,7 +492,8 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
     
     cacheApp_init(cache, func);
     strategies_init(strat);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
     
     metadatas_init(meta, initialBox, strat, verb);
     connCmp_list_init(qRes);

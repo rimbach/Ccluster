@@ -25,6 +25,17 @@ void compBox_inflate_realRat(compBox_t d, const compBox_t e, const realRat_t f){
     compBox_inflate_realRat_inplace(d,f);
 }
 
+slong compBox_getDepth(const compBox_t b, const compBox_t initialBox) {
+    realRat_t depth;
+    realRat_init(depth);
+    realRat_set(depth, compBox_bwidthref(b));
+    realRat_div( depth, compBox_bwidthref(initialBox),  depth);
+    slong res = fmpz_clog_ui( realRat_numref(depth), 2);
+    
+    realRat_clear(depth);
+    return res;
+}
+
 /* Precondition:  b1 and b2 have disjoint centers and same width                               */
 /* Specification: returns 1 if b1 and b2 are connected (8 adjacency),                          */
 /*                        0 otherwise                                                          */

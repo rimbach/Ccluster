@@ -21,6 +21,10 @@ void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, s
     cache->_der_size         = (int *) malloc ( (cache->_allocsize) * sizeof(int) );
     cache->_cache_der        = (compApp_poly_t **) malloc ( (cache->_allocsize) * sizeof(compApp_poly_t *) );
 #endif
+    
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_init ( &(cache->_mutex), NULL);
+#endif
 /*     compApp_poly_init(cacheApp_workref(cache));    */
 /*     cache->_nbIterations = 0;                      */
 }
@@ -159,6 +163,10 @@ void cacheApp_clear ( cacheApp_t cache ) {
 #endif    
     cache->_size      = 0;
     cache->_allocsize = 0;
+    
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_destroy( &(cache->_mutex) );
+#endif
     
 //     compApp_poly_clear(cacheApp_workref(cache));
 }

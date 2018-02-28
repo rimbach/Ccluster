@@ -88,6 +88,10 @@ int scan_strategy(char * argv, int * target ) {
     return sscanf(argv, "%d", target);
 }
 
+int scan_nbthreads(char * argv, int * target ) {
+    return sscanf(argv, "%d", target);
+}
+
 int scan_verbosity(char * argv, int * target ) {
     return sscanf(argv, "%d", target);
 }

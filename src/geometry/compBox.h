@@ -34,6 +34,8 @@ typedef compBox * compBox_ptr;
 #define compBox_bwidthref(X) (&(X)->bwidth)
 #define compBox_nbMSolref(X) (X->nbMSol)
 
+slong compBox_getDepth(const compBox_t b, const compBox_t initialBox);
+
 /* memory managment */
 GEOMETRY_INLINE void compBox_init(compBox_t x) { 
     compRat_init(compBox_centerref(x)); 

@@ -27,9 +27,33 @@
 #include "tstar/tstar.h"
 #include "newton/newton.h"
 
+#ifdef CCLUSTER_HAVE_PTHREAD
+// typedef struct {
+//     int nbsol;
+//     slong prec;
+//     compBox_ptr box;
+//     cacheApp_ptr cache;
+//     metadatas_ptr meta;
+// } parallel_discard_arg_t;
+
+typedef struct {
+    slong prec;
+    compBox_list_ptr boxes;
+    cacheApp_ptr cache;
+    metadatas_ptr meta;
+} parallel_discard_list_arg_t;
+
+// void * _parallel_discard_worker( void * arg_ptr );
+
+void * _parallel_discard_list_worker( void * arg_ptr );
+
+slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
+                                        slong prec, metadatas_t meta);
+
 slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta);
+#endif
 
 void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t discardedCcs, cacheApp_t cache, metadatas_t meta);  
 

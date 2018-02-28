@@ -28,6 +28,10 @@
 
 #include "math.h"
 
+#ifdef CCLUSTER_HAVE_PTHREAD
+#include <pthread.h>
+#endif
+
 typedef struct {
     int nbOfSol;   /* the number of solutions: -1: can not decide, >=0 otherwise */
     slong appPrec; /* the arithmetic precision that has been used to decide      */
@@ -76,6 +80,12 @@ void tstar_evaluate_horner( compApp_t res, const compApp_poly_t p, const compApp
 void tstar_evaluate2( compApp_t res, compApp_t res2, const compApp_poly_t p, const compApp_t point, slong prec, metadatas_t meta, int depth);
 
 int tstar_inclusion_test( cacheApp_t cache,
+                          const compDsk_t d,
+                          slong prec,
+                          int depth, /* just for display*/
+                          metadatas_t meta);
+
+int tstar_inclusion_test_wn( cacheApp_t cache,
                           const compDsk_t d,
                           slong prec,
                           int depth, /* just for display*/

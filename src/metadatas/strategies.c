@@ -19,7 +19,8 @@ void strategies_set_int( strategies_t strat, int useNewton,
                                              int usePredictPrec, 
                                              int useStopWhenCompact, 
                                              int useAnticipate, 
-                                             int useCountSols,
+//                                              int useCountSols,
+                                             int useNBThreads,
                                              int additionalFlags    
                                              ){
     strat->_useNewton             = useNewton;
@@ -27,7 +28,8 @@ void strategies_set_int( strategies_t strat, int useNewton,
     strat->_usePredictPrec        = usePredictPrec;
     strat->_useStopWhenCompact    = useStopWhenCompact;
     strat->_useAnticipate         = useAnticipate;
-    strat->_useCountSols          = useCountSols;
+//     strat->_useCountSols          = useCountSols;
+    strat->_useNBThreads          = useNBThreads;
     strat->_additionalFlags       = additionalFlags;
 }
 
@@ -37,6 +39,7 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
     strat->_usePredictPrec        = strat2->_usePredictPrec    ;
     strat->_useStopWhenCompact    = strat2->_useStopWhenCompact;
     strat->_useAnticipate         = strat2->_useAnticipate     ;
-    strat->_useCountSols          = strat2->_useCountSols      ;
+//     strat->_useCountSols          = strat2->_useCountSols      ;
+    strat->_useNBThreads          = strat2->_useNBThreads      ;
     strat->_additionalFlags       = strat2->_additionalFlags   ;
 }

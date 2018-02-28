@@ -10,28 +10,47 @@
 /* ************************************************************************** */
 
 #include "tstar/tstar.h"
+#include<time.h>
 
 void tstar_getApproximation( compApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta){
-        chronos_tic_Approxi(metadatas_chronref(meta));
+//         chronos_tic_Approxi(metadatas_chronref(meta));
+        clock_t start = clock();
+        cacheApp_lock(cache);
+        
         compApp_poly_set(res, cacheApp_getApproximation ( cache, prec ));
-        chronos_toc_Approxi(metadatas_chronref(meta));
+        
+        cacheApp_unlock(cache);
+        metadatas_lock(meta);
+        metadatas_add_time_Approxi(meta, (double) (clock() - start) );
+        metadatas_unlock(meta);
+//         chronos_toc_Approxi(metadatas_chronref(meta));
+        
 }
 
 void tstar_taylor_shift_inplace( compApp_poly_t res, const compDsk_t d, slong prec, metadatas_t meta){
-        chronos_tic_Taylors(metadatas_chronref(meta));
+//         chronos_tic_Taylors(metadatas_chronref(meta));
+        clock_t start = clock();
         compApp_poly_taylorShift_in_place( res, 
                                            compRat_realref(compDsk_centerref(d)), 
                                            compRat_imagref(compDsk_centerref(d)), 
                                            compDsk_radiusref(d), 
                                            prec );
-        chronos_toc_Taylors(metadatas_chronref(meta));
+        
+        metadatas_lock(meta);
+        metadatas_add_time_Taylors(meta, (double) (clock() - start) );
+        metadatas_unlock(meta);     
+//         chronos_toc_Taylors(metadatas_chronref(meta));
 }
 
 void tstar_graeffe_iterations_inplace( compApp_poly_t res, int N, slong prec, metadatas_t meta){
-        chronos_tic_Graeffe(metadatas_chronref(meta));
+//         chronos_tic_Graeffe(metadatas_chronref(meta));
+        clock_t start = clock();
         for(int i = 0; i < N; i++)
             compApp_poly_oneGraeffeIteration_in_place( res, prec );
-        chronos_toc_Graeffe(metadatas_chronref(meta));
+        metadatas_lock(meta);
+        metadatas_add_time_Graeffe(meta, (double) (clock() - start) );
+        metadatas_unlock(meta);
+//         chronos_toc_Graeffe(metadatas_chronref(meta));
 }
 
 void tstar_graeffe_iterations_abs_two_first_coeffs( realApp_t coeff0, realApp_t coeff1, const compApp_poly_t pApprox, int N, slong prec, metadatas_t meta){
@@ -89,7 +108,9 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
                            int depth,          /*the depth for counter                           */
                            metadatas_t meta){
     
-    chronos_tic_Test(metadatas_chronref(meta), discard);
+//     chronos_tic_Test(metadatas_chronref(meta), discard);
+    clock_t start = clock();
+    
     tstar_res res;
     res.nbOfSol = -1;
     res.appPrec = prec;
@@ -126,14 +147,21 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
             restemp = 0;
         
     }
-    
-    metadatas_add_Test( meta, depth, (restemp!=0), discard, 1, nbTaylorsRepeted, N, nbGraeffeRepeted);
-    
+        
     compApp_poly_clear(pApprox);
     realApp_clear(sum);
     
     if (restemp==0) res.nbOfSol = -1;
-    chronos_toc_Test(metadatas_chronref(meta), discard);
+
+    metadatas_lock(meta);
+    metadatas_add_Test( meta, depth, (restemp!=0), discard, 1, nbTaylorsRepeted, N, nbGraeffeRepeted);
+    if (discard)
+        metadatas_add_time_T0Tests(meta, (double) (clock() - start) );
+    else
+        metadatas_add_time_TSTests(meta, (double) (clock() - start) );
+    metadatas_unlock(meta);
+//     chronos_toc_Test(metadatas_chronref(meta), discard);
+    
     return res;
 }
 
@@ -144,7 +172,8 @@ tstar_res tstar_optimized( cacheApp_t cache,
                            slong prec,        /*the "default" arithmetic precision              */
                            int depth,         /*the depth for counter                           */
                            metadatas_t meta){
-    chronos_tic_Test(metadatas_chronref(meta), discard);
+//     chronos_tic_Test(metadatas_chronref(meta), discard);
+    clock_t start = clock();
     
 //     if (discard) printf("discarding test, depth: %d\n", depth);
     tstar_res res;
@@ -168,8 +197,8 @@ tstar_res tstar_optimized( cacheApp_t cache,
 #ifdef CCLUSTER_EXPERIMENTAL
     int restemptemp = 0;
     if ((discard)&&( CCLUSTER_INC_TEST(meta) )) {
-//         tstar_inclusion_test_wn( cache, d, res.appPrec, depth, meta);
-        restemptemp = tstar_inclusion_test( cache, d, res.appPrec, depth, meta);
+        restemptemp = tstar_inclusion_test_wn( cache, d, res.appPrec, depth, meta);
+//         restemptemp = tstar_inclusion_test( cache, d, res.appPrec, depth, meta);
         if (restemptemp==1) {
             compApp_poly_clear(pApprox);
             realApp_clear(sum);
@@ -346,8 +375,6 @@ tstar_res tstar_optimized( cacheApp_t cache,
         iteration +=1;
     }
     
-    metadatas_add_Test( meta, depth, (restemp==1), discard, 1, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted);
-    
     /*for test */
 //     if ((metadatas_useCountSols(meta))&&(restemp>0)&&(discard)){
 //         compApp_poly_set(cacheApp_workref(cache),pApprox); 
@@ -364,8 +391,16 @@ tstar_res tstar_optimized( cacheApp_t cache,
         printf("discard: depth: %d, prec: %d, nb Graeffe: %d, nbSols: %d\n", depth, res.appPrec,nbGraeffe, res.nbOfSol);
     else 
         printf("validate: depth: %d, prec: %d, nb Graeffe: %d, nbSols: %d\n", depth, res.appPrec, nbGraeffe, res.nbOfSol);*/      
+        
+    metadatas_lock(meta);
+    metadatas_add_Test( meta, depth, (restemp==1), discard, 1, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted);
+    if (discard)
+        metadatas_add_time_T0Tests(meta, (double) (clock() - start) );
+    else
+        metadatas_add_time_TSTests(meta, (double) (clock() - start) );
+    metadatas_unlock(meta);
     
-    chronos_toc_Test(metadatas_chronref(meta), discard);
+//     chronos_toc_Test(metadatas_chronref(meta), discard);
     return res;
     
 }

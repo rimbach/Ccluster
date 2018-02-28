@@ -46,6 +46,18 @@ typedef metadatas * metadatas_ptr;
 void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_t strategy, int verbosity);
 void metadatas_clear(metadatas_t m);
 
+// void metadatas_join(metadatas_t m1, const metadatas_t m2);
+
+METADATAS_INLINE void metadatas_lock(metadatas_t m){
+    counters_lock(metadatas_countref(m));
+    chronos_lock(metadatas_chronref(m));
+}
+
+METADATAS_INLINE void metadatas_unlock(metadatas_t m){
+    counters_unlock(metadatas_countref(m));
+    chronos_unlock(metadatas_chronref(m));
+}  
+
 METADATAS_INLINE int  metadatas_getVerbo(const metadatas_t m) { return m->verbo; }
 
 // /* strategies */
@@ -54,7 +66,8 @@ METADATAS_INLINE int metadatas_useTstarOptim     ( const metadatas_t m ) { retur
 METADATAS_INLINE int metadatas_usePredictPrec    ( const metadatas_t m ) { return strategies_usePredictPrec    (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useStopWhenCompact( const metadatas_t m ) { return strategies_useStopWhenCompact(metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useAnticipate     ( const metadatas_t m ) { return strategies_useAnticipate     (metadatas_stratref(m)); }
-METADATAS_INLINE int metadatas_useCountSols      ( const metadatas_t m ) { return strategies_useCountSols      (metadatas_stratref(m)); }
+// METADATAS_INLINE int metadatas_useCountSols      ( const metadatas_t m ) { return strategies_useCountSols      (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_useNBThreads      ( const metadatas_t m ) { return strategies_useNBThreads      (metadatas_stratref(m)); }
 // /* counters */
 METADATAS_INLINE void metadatas_add_discarded( metadatas_t m, int depth ) { counters_add_discarded(metadatas_countref(m), depth); }
 METADATAS_INLINE void metadatas_add_validated( metadatas_t m, int depth, int nbSols ) { counters_add_validated(metadatas_countref(m), depth, nbSols);}
@@ -100,6 +113,26 @@ METADATAS_INLINE double metadatas_get_time_Newtons ( const metadatas_t m ) { ret
 METADATAS_INLINE double metadatas_get_time_CclusAl ( const metadatas_t m ) { return chronos_get_time_CclusAl (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_Evaluat ( const metadatas_t m ) { return chronos_get_time_Evaluat (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_Derivat ( const metadatas_t m ) { return chronos_get_time_Derivat (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_Approxi(metadatas_t m, double d){
+    chronos_add_time_Approxi( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+}
+
+METADATAS_INLINE void metadatas_add_time_Taylors(metadatas_t m, double d){
+    chronos_add_time_Taylors( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+}
+
+METADATAS_INLINE void metadatas_add_time_Graeffe(metadatas_t m, double d){
+    chronos_add_time_Graeffe( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+}
+
+METADATAS_INLINE void metadatas_add_time_T0Tests(metadatas_t m, double d){
+    chronos_add_time_T0Tests( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+}
+
+METADATAS_INLINE void metadatas_add_time_TSTests(metadatas_t m, double d){
+    chronos_add_time_TSTests( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+}
 
 /* printing */
 int metadatas_fprint(FILE * file, const metadatas_t meta, const realRat_t eps);

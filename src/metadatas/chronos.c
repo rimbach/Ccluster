@@ -21,6 +21,25 @@ void chronos_init( chronos_t times ){
     times->_clicks_CclusAl_cumul = 0.0;
     times->_clicks_Evaluat_cumul = 0.0;
     times->_clicks_Derivat_cumul = 0.0;
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_init ( &(times->_mutex), NULL);
+#endif
 }
 
-void chronos_clear( chronos_t times ) {}
+void chronos_clear( chronos_t times ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_destroy( &(times->_mutex) );
+#endif    
+}
+
+// void chronos_join ( chronos_t t1, const chronos_t t2 ){
+//     t1->_clicks_Approxi_cumul += t2->_clicks_Approxi_cumul;
+//     t1->_clicks_Graeffe_cumul += t2->_clicks_Graeffe_cumul;
+//     t1->_clicks_Taylors_cumul += t2->_clicks_Taylors_cumul;
+//     t1->_clicks_T0Tests_cumul += t2->_clicks_T0Tests_cumul;
+//     t1->_clicks_TSTests_cumul += t2->_clicks_TSTests_cumul;
+//     t1->_clicks_Newtons_cumul += t2->_clicks_Newtons_cumul;
+//     t1->_clicks_CclusAl_cumul += t2->_clicks_CclusAl_cumul;
+//     t1->_clicks_Evaluat_cumul += t2->_clicks_Evaluat_cumul;
+//     t1->_clicks_Derivat_cumul += t2->_clicks_Derivat_cumul;
+// }

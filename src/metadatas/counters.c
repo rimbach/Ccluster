@@ -29,20 +29,57 @@ void counters_by_depth_init( counters_by_depth_t st) {
     st->nbTaylorsRepetedInTSTests = 0;
     st->nbNewton                  = 0;
     st->nbFailingNewton           = 0;
-    st->nbEval           = 0;
+    st->nbEval                    = 0;
 }
+
+// void counters_by_depth_join( counters_by_depth_t c1, const counters_by_depth_t c2){
+//     c1->nbDiscarded                += c2->nbDiscarded               ;
+//     c1->nbValidated                += c2->nbValidated               ;
+//     c1->nbSolutions                += c2->nbSolutions               ;
+//     c1->nbT0Tests                  += c2->nbT0Tests                 ;
+//     c1->nbFailingT0Tests           += c2->nbFailingT0Tests          ;
+//     c1->nbGraeffeInT0Tests         += c2->nbGraeffeInT0Tests        ;
+//     c1->nbGraeffeRepetedInT0Tests  += c2->nbGraeffeRepetedInT0Tests ;
+//     c1->nbTaylorsInT0Tests         += c2->nbTaylorsInT0Tests        ;
+//     c1->nbTaylorsRepetedInT0Tests  += c2->nbTaylorsRepetedInT0Tests ;
+//     c1->nbTSTests                  += c2->nbTSTests                 ;
+//     c1->nbFailingTSTests           += c2->nbFailingTSTests          ;
+//     c1->nbGraeffeInTSTests         += c2->nbGraeffeInTSTests        ;
+//     c1->nbGraeffeRepetedInTSTests  += c2->nbGraeffeRepetedInTSTests ;
+//     c1->nbTaylorsInTSTests         += c2->nbTaylorsInTSTests        ;
+//     c1->nbTaylorsRepetedInTSTests  += c2->nbTaylorsRepetedInTSTests ;
+//     c1->nbNewton                   += c2->nbNewton                  ;
+//     c1->nbFailingNewton            += c2->nbFailingNewton           ;
+//     c1->nbEval                     += c2->nbEval                    ;
+// }
 
 void counters_init( counters * st) {
     st->size = 0;
     st->size_allocated = INIT_SIZE_STATS;
     st->table = (counters_by_depth_ptr) malloc (INIT_SIZE_STATS*sizeof(counters_by_depth));
     counters_by_depth_init( st->total );
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_init ( &(st->_mutex), NULL);
+#endif    
 }
 
 void counters_clear( counters * st) {
     free(st->table);
     counters_by_depth_clear( st->total );
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_destroy( &(st->_mutex) );
+#endif
 }
+
+// void counters_join_depth( counters_t c1, const counters_by_depth_t c2, int depth){
+//     counters_adjust_table(c1, depth);
+//     counters_by_depth_join( &(c1->table[depth]), c2);
+// }
+// 
+// void counters_join( counters_t c1, const counters_t c2){
+//     for (int i=0; i<c2->size; i++)
+//         counters_join_depth(c1, &(c2->table[i]), i);
+// }
 
 void counters_adjust_table( counters_t st, int depth ){
     /* realocate size if needed */

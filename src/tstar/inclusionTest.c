@@ -74,12 +74,12 @@ int tstar_inclusion_radius_th9_wn( cacheApp_t cache,
     /* test if inclusion_radius <= nrad */
     res = realApp_soft_compare( nrad, inclusion_radius, nprec );
     
-    printf(" k: %d, inclusion radius: ", (int) k);
-    realApp_printd(inclusion_radius, 20);
-    printf("\n");
+//     printf(" k: %d, inclusion radius: ", (int) k);
+//     realApp_printd(inclusion_radius, 20);
+//     printf("\n");
         
-    while ((res !=1)&&(k<deg)) {
-//     while ((res !=1)&&(k<1)) {
+//     while ((res !=1)&&(k<deg)) {
+    while ((res !=1)&&(k<1)) {
         k = k+1;
         /*compute pk*/
         tstar_getDerivative( pk, cache, nprec, (slong) k, meta);
@@ -100,16 +100,16 @@ int tstar_inclusion_radius_th9_wn( cacheApp_t cache,
         realApp_root_ui( inclusion_radius, inclusion_radius, (ulong) k, nprec );
         /* test if inclusion_radius <= nrad */
         res = realApp_soft_compare( nrad, inclusion_radius, nprec );
-        printf(" k: %d, inclusion radius: ", (int) k);
-        realApp_printd(inclusion_radius, 20);
-        printf("\n");
+//         printf(" k: %d, inclusion radius: ", (int) k);
+//         realApp_printd(inclusion_radius, 20);
+//         printf("\n");
     }
-    printf("  :  , current radius:   ");
-    realApp_printd(nrad, 20);
-    printf("\n");
+//     printf("  :  , current radius:   ");
+//     realApp_printd(nrad, 20);
+//     printf("\n");
     
     if (res==1) {
-        printf("---depth: %d, prec %d, success of th9, k: %d \n", depth, (int) nprec, k);
+//         printf("---depth: %d, prec %d, success of th9, k: %d \n", depth, (int) nprec, k);
 //         printf(" inclusion radius: "); 
 //         realApp_printd(inclusion_radius, 20);
         
@@ -228,12 +228,12 @@ int tstar_inclusion_radius_th10_wn( cacheApp_t cache,
             realRat_pow_si(radtothek, compDsk_radiusref(d), (slong) k);
             realApp_set_realRat(current_radius, radtothek, nprec);
             stop = realApp_soft_compare( current_radius, res, nprec );
-            printf(" k: %d, inclusion radius: ", (int) k);
-            realApp_printd(res, 20);
-            printf("\n");
-            printf("  :  , current radius:   ");
-            realApp_printd(current_radius, 20);
-            printf("\n");
+//             printf(" k: %d, inclusion radius: ", (int) k);
+//             realApp_printd(res, 20);
+//             printf("\n");
+//             printf("  :  , current radius:   ");
+//             realApp_printd(current_radius, 20);
+//             printf("\n");
         }
         
         else stop = 0;
@@ -243,12 +243,12 @@ int tstar_inclusion_radius_th10_wn( cacheApp_t cache,
      
      
      if (stop==1) {
-        printf("---depth: %d, prec %d, success of th10, k: %d \n", depth, (int) nprec, (int) k);
+//         printf("---depth: %d, prec %d, success of th10, k: %d \n", depth, (int) nprec, (int) k);
 //         printf(" inclusion radius: "); 
 //         realApp_printd(res, 20);
      }
      else {
-        printf("---depth: %d, prec %d, fail    of th10, k: %d \n", depth, (int) nprec, (int) k);
+//         printf("---depth: %d, prec %d, fail    of th10, k: %d \n", depth, (int) nprec, (int) k);
 //         printf(" inclusion radius: "); 
 //         realApp_printd(res, 20);
          
@@ -363,8 +363,8 @@ int tstar_inclusion_test_wn( cacheApp_t cache,
 //             printf("---depth: %d, prec: %d, inclusion radius wn: apply thm  9, success: %d\n", depth, (int) nprec, res); 
         }
         if (choice==0) {
-//             res = tstar_inclusion_radius_th10_wn(cache, d, nprec, depth, meta);
-            printf("---depth: %d, prec: %d, inclusion radius wn: apply thm 10, success: %d\n", depth, (int) nprec, 0);  
+            res = tstar_inclusion_radius_th10_wn(cache, d, nprec, depth, meta);
+            printf("---depth: %d, prec: %d, inclusion radius wn: apply thm 10, success: %d\n", depth, (int) nprec, res);  
         }
     }
     else {
@@ -441,7 +441,8 @@ int tstar_inclusion_radius_th9( cacheApp_t cache,
     realApp_set_realRat(current_radius, radtothek, nprec);
     res = realApp_soft_compare( current_radius, inclusion_radius, nprec );
     
-    while ((res !=1)&&(k<deg)) {
+//     while ((res !=1)&&(k<deg)) {
+    while ((res !=1)&&(k<1)) {
         k = k+1;
         /*compute pk*/
         tstar_getDerivative( pk, cache, nprec, (slong) k, meta);
@@ -589,12 +590,12 @@ int tstar_inclusion_radius_th10( cacheApp_t cache,
             realRat_pow_si(radtothek, compDsk_radiusref(d), (slong) k);
             realApp_set_realRat(current_radius, radtothek, nprec);
             stop = realApp_soft_compare( current_radius, res, nprec );
-            printf(" k: %d, inclusion radius: ", (int) k);
-            realApp_printd(res, 20);
-            printf("\n");
-            printf("  :  , current radius:   ");
-            realApp_printd(current_radius, 20);
-            printf("\n");
+//             printf(" k: %d, inclusion radius: ", (int) k);
+//             realApp_printd(res, 20);
+//             printf("\n");
+//             printf("  :  , current radius:   ");
+//             realApp_printd(current_radius, 20);
+//             printf("\n");
         }
         
         else stop = 0;
@@ -604,12 +605,12 @@ int tstar_inclusion_radius_th10( cacheApp_t cache,
      
      
      if (stop==1) {
-        printf("---depth: %d, prec %d, success of th10, k: %d \n", depth, (int) nprec, (int) k);
+//         printf("---depth: %d, prec %d, success of th10, k: %d \n", depth, (int) nprec, (int) k);
 //         printf(" inclusion radius: "); 
 //         realApp_printd(res, 20);
      }
      else {
-        printf("---depth: %d, prec %d, fail    of th10, k: %d \n", depth, (int) nprec, (int) k);
+//         printf("---depth: %d, prec %d, fail    of th10, k: %d \n", depth, (int) nprec, (int) k);
 //         printf(" inclusion radius: "); 
 //         realApp_printd(res, 20);
          
