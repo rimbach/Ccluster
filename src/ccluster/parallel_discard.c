@@ -27,6 +27,7 @@ void * _parallel_bisect_worker( void * arg_ptr ){
 void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_list_ptr discardedCcs,
                                             connCmp_list_ptr toBeBisected, cacheApp_t cache, metadatas_t meta){
     
+    printf("ccluster_parallel_bisect_connCmp_list: nb connCmp: %d, nb threads: %d \n", (int) connCmp_list_get_size(toBeBisected), (int) metadatas_useNBThreads(meta) );
     slong nb_threads = metadatas_useNBThreads(meta);
     slong nb_args = CCLUSTER_MIN(nb_threads,connCmp_list_get_size(toBeBisected));
     parallel_bisect_arg_t * args = (parallel_bisect_arg_t *) malloc ( sizeof(parallel_bisect_arg_t) * nb_args );
