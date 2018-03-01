@@ -18,7 +18,7 @@
 void * _parallel_bisect_worker( void * arg_ptr ){
     
     parallel_bisect_arg_t * arg = (parallel_bisect_arg_t *) arg_ptr;
-    ccluster_bisect_connCmp( arg->res, arg->cc, arg->dis, arg->cache, arg->meta);
+    ccluster_bisect_connCmp( arg->res, arg->cc, arg->dis, arg->cache, arg->meta, arg->nbThreads);
     flint_cleanup();
     return NULL;
     
@@ -29,6 +29,11 @@ void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_
     
     printf("ccluster_parallel_bisect_connCmp_list: nb connCmp: %d, nb threads: %d \n", (int) connCmp_list_get_size(toBeBisected), (int) metadatas_useNBThreads(meta) );
     slong nb_threads = metadatas_useNBThreads(meta);
+    slong nb_threads_by_task;
+    if (connCmp_list_get_size(toBeBisected)>0)
+        nb_threads_by_task = (slong) (nb_threads / connCmp_list_get_size(toBeBisected));
+    else
+        nb_threads_by_task = nb_threads;
     slong nb_args = CCLUSTER_MIN(nb_threads,connCmp_list_get_size(toBeBisected));
     parallel_bisect_arg_t * args = (parallel_bisect_arg_t *) malloc ( sizeof(parallel_bisect_arg_t) * nb_args );
     pthread_t * threads = (pthread_t *) malloc (sizeof(pthread_t) * nb_args);
@@ -50,6 +55,7 @@ void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_
             args[i].cc  = ccur;
             args[i].meta = (metadatas_ptr) meta;
             args[i].cache = (cacheApp_ptr) cache;
+            args[i].nbThreads = nb_threads_by_task;
             pthread_create(&threads[i], NULL, _parallel_bisect_worker, &args[i]);
         }
         for ( int i=0; i< (int) nb_pop; i++) {
@@ -117,9 +123,10 @@ void * _parallel_discard_list_worker( void * arg_ptr ){
 }
 
 slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
-                                        slong prec, metadatas_t meta){
+                                        slong prec, metadatas_t meta, slong nbThreads){
     
-    slong nb_threads = metadatas_useNBThreads(meta);
+//     slong nb_threads = metadatas_useNBThreads(meta);
+    slong nb_threads = nbThreads;
     slong precres = prec;
     slong nb_args = CCLUSTER_MIN(nb_threads,compBox_list_get_size(boxes));
     parallel_discard_list_arg_t * args = (parallel_discard_list_arg_t *) malloc ( sizeof(parallel_discard_list_arg_t) * nb_args );

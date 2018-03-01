@@ -136,7 +136,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
     return res.appPrec;
 }
 
-void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t discardedCcs, cacheApp_t cache, metadatas_t meta){
+void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t discardedCcs, cacheApp_t cache, metadatas_t meta, slong nbThreads){
     
     slong prec = connCmp_appPr(cc);
     compBox_list_t subBoxes;
@@ -153,14 +153,14 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
         compBox_clear(btemp);
         free(btemp);//comment it for julia...
     }
-// #ifdef CCLUSTER_HAVE_PTHREAD
-//     if (metadatas_useNBThreads(meta)>1)
-//         prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta);
-//     else
-//         prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
-// #else
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (nbThreads>1)
+        prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta, nbThreads);
+    else
+        prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
+#else
     prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
-// #endif
+#endif
     
     while (!compBox_list_is_empty(subBoxes)) {
         btemp = compBox_list_pop(subBoxes);
@@ -234,14 +234,14 @@ void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, con
             if (metadatas_useNBThreads(meta) >1)
                 connCmp_list_push(toBeBisected, ctemp);
             else {            
-                ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta);
+                ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta,1);
                 while (!connCmp_list_is_empty(ltemp))
                     connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
                 connCmp_clear(ctemp);
                 free(ctemp);
             }
 #else
-            ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta);
+            ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ctemp);
@@ -404,14 +404,14 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
             if (metadatas_useNBThreads(meta) >1)
                 connCmp_list_push(toBeBisected, ccur);
             else {
-                ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta);
+                ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
                 while (!connCmp_list_is_empty(ltemp))
                     connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
                 connCmp_clear(ccur);
                 free(ccur);
             }
 #else
-            ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta);
+            ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
