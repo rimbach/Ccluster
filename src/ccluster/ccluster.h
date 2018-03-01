@@ -28,6 +28,8 @@
 #include "newton/newton.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
+#include <pthread.h>
+
 // typedef struct {
 //     int nbsol;
 //     slong prec;
@@ -41,7 +43,12 @@ typedef struct {
     compBox_list_ptr boxes;
     cacheApp_ptr cache;
     metadatas_ptr meta;
+    int status; /* 0: default, 1: is_running, 2: is_finnished */
+    pthread_mutex_t mutex;
 } parallel_discard_list_arg_t;
+
+int nb_thread_running;
+pthread_mutex_t mutex_nb_running;
 
 typedef struct {
     connCmp_list_ptr res;

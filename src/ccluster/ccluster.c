@@ -155,7 +155,7 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
     }
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (nbThreads>1) {
-        printf("--ccluster_parallel_bisect_connCmp: nb threads: %d \n", (int) nbThreads );
+//         printf("--ccluster_parallel_bisect_connCmp: nb threads: %d \n", (int) nbThreads );
         prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta, nbThreads);
     }
     else

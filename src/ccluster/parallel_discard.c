@@ -80,6 +80,9 @@ void * _parallel_discard_list_worker( void * arg_ptr ){
     
     parallel_discard_list_arg_t * arg = (parallel_discard_list_arg_t *) arg_ptr;
     
+    /* arg->status has been set to 1 by caller           */
+    /* nb_thread_running has been incremented by caller; */
+    
     tstar_res res;
     res.appPrec = arg->prec;
     
@@ -118,6 +121,15 @@ void * _parallel_discard_list_worker( void * arg_ptr ){
     arg->prec = res.appPrec;
     
     flint_cleanup();
+    
+    /*actualize datas for the scheduler */
+    pthread_mutex_lock (&(arg->mutex));
+    arg->status =2; /*is finished*/
+    pthread_mutex_unlock (&(arg->mutex));
+    pthread_mutex_lock (&(mutex_nb_running));
+    nb_thread_running --;
+    pthread_mutex_unlock (&(mutex_nb_running));
+    
     return NULL;
     
 }
@@ -131,59 +143,141 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
     slong nb_args = CCLUSTER_MIN(nb_threads,compBox_list_get_size(boxes));
     parallel_discard_list_arg_t * args = (parallel_discard_list_arg_t *) malloc ( sizeof(parallel_discard_list_arg_t) * nb_args );
     pthread_t * threads = (pthread_t *) malloc (sizeof(pthread_t) * nb_args);
-//     metadatas_ptr metas = meta;
-    
-    /*splits boxes in nbthreads lists*/
     compBox_list_ptr lists = (compBox_list_ptr) malloc (sizeof(compBox_list)* nb_args);
-    int nb_boxes_by_thread = ((int) compBox_list_get_size(boxes))/((int) nb_args);
     
-    for (int i = 0; i< (int) nb_args; i++) {
-        compBox_list_init(&lists[i]);
-        int j=0;
-        while ( (!compBox_list_is_empty(boxes))&& ((j<nb_boxes_by_thread)||(i==(nb_args-1)) ) ) {
-            compBox_list_push(&lists[i], compBox_list_pop(boxes));
-            j++;
-        }
-        /* create the thread */
-        args[i].prec = precres;
-        args[i].boxes  = (compBox_list_ptr) &lists[i];
+    compBox_list_t ltemp;
+    compBox_list_init(ltemp);
+    
+    nb_thread_running = 0;
+    pthread_mutex_init ( &mutex_nb_running, NULL);
+    /*initialize args, lists */
+    for (int i = 0; i< (int) nb_args; i++){
         args[i].cache = (cacheApp_ptr) cache;
         args[i].meta = (metadatas_ptr) meta;
-        pthread_create(&threads[i], NULL, _parallel_discard_list_worker, &args[i]);
+        args[i].status = 0;
+        pthread_mutex_init ( &(args[i].mutex), NULL);
+        compBox_list_init(&lists[i]);
     }
-//     printf("size of boxes: %d\n", (int) compBox_list_get_size(boxes));
+//     printf("----ccluster_parallel_discard_compBox_list: nb_boxes: %d, nb_args: %d\n", (int) compBox_list_get_size(boxes), (int) nb_args);
+    /*main loop*/
+//     while ( (!compBox_list_is_empty(boxes)) && (nb_thread_running<nb_args) ) {
+    while (!compBox_list_is_empty(boxes)) {
+        
+        if (nb_thread_running<nb_args) {
+            int thread = 0;
+            /* find an available thread */
+            while( (thread < nb_args) && (args[thread].status==1) ) thread++;
+            if (args[thread].status==2) { /* join the thread */
+//                 printf("----join: %d\n", thread);
+                pthread_join(threads[thread], NULL);
+                if (args[thread].prec > precres)
+                    precres = args[thread].prec;
+                /* fill boxes */
+                while (!compBox_list_is_empty(&lists[thread]))
+                    compBox_list_push(ltemp, compBox_list_pop(&lists[thread]));
+            }
+            /* actualize arg and nbrunning */
+            compBox_list_push(&lists[thread], compBox_list_pop(boxes));
+            args[thread].prec = precres;
+            args[thread].boxes  = (compBox_list_ptr) &lists[thread];
+            args[thread].status=1;
+            pthread_mutex_lock (&(mutex_nb_running));
+            nb_thread_running ++;
+            pthread_mutex_unlock (&(mutex_nb_running));
+            /* create the thread */
+//             printf("----create: %d\n", thread);
+            pthread_create(&threads[thread], NULL, _parallel_discard_list_worker, &args[thread]);
+        }
+        
+    }
+    /* join threads still running */
+    for (int i = 0; i< (int) nb_args; i++){
+        if (args[i].status>0) { /* join the thread */
+//             printf("----join: %d\n", i);
+            pthread_join(threads[i], NULL);
+            if (args[i].prec > precres)
+                precres = args[i].prec;
+            /* fill boxes */
+            while (!compBox_list_is_empty(&lists[i]))
+                compBox_list_push(ltemp, compBox_list_pop(&lists[i]));
+        }
+        pthread_mutex_destroy( &(args[i].mutex) );
+        compBox_list_clear(&lists[i]);
+    }
+       
+    compBox_list_swap(boxes, ltemp);
+//     printf("----ccluster_parallel_discard_compBox_list: nb_boxes: %d\n", (int) compBox_list_get_size(boxes));
+    free(args);
+    free(threads);
+    free(lists);
+    compBox_list_clear(ltemp);
+    pthread_mutex_destroy( &mutex_nb_running );
     
-//     for(int i = 0; i< (int) nb_args; i++) {
+    return precres;
+}
+
+// slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
+//                                         slong prec, metadatas_t meta, slong nbThreads){
+//     
+// //     slong nb_threads = metadatas_useNBThreads(meta);
+//     slong nb_threads = nbThreads;
+//     slong precres = prec;
+//     slong nb_args = CCLUSTER_MIN(nb_threads,compBox_list_get_size(boxes));
+//     parallel_discard_list_arg_t * args = (parallel_discard_list_arg_t *) malloc ( sizeof(parallel_discard_list_arg_t) * nb_args );
+//     pthread_t * threads = (pthread_t *) malloc (sizeof(pthread_t) * nb_args);
+// //     metadatas_ptr metas = meta;
+//     
+//     /*splits boxes in nbthreads lists*/
+//     compBox_list_ptr lists = (compBox_list_ptr) malloc (sizeof(compBox_list)* nb_args);
+//     int nb_boxes_by_thread = ((int) compBox_list_get_size(boxes))/((int) nb_args);
+//     
+//     for (int i = 0; i< (int) nb_args; i++) {
+//         compBox_list_init(&lists[i]);
+//         int j=0;
+//         while ( (!compBox_list_is_empty(boxes))&& ((j<nb_boxes_by_thread)||(i==(nb_args-1)) ) ) {
+//             compBox_list_push(&lists[i], compBox_list_pop(boxes));
+//             j++;
+//         }
+//         /* create the thread */
 //         args[i].prec = precres;
 //         args[i].boxes  = (compBox_list_ptr) &lists[i];
 //         args[i].cache = (cacheApp_ptr) cache;
 //         args[i].meta = (metadatas_ptr) meta;
 //         pthread_create(&threads[i], NULL, _parallel_discard_list_worker, &args[i]);
 //     }
-    
-    for(int i = 0; i< (int) nb_args; i++) {
-        pthread_join(threads[i], NULL);
-        if (args[i].prec > precres)
-            precres = args[i].prec;
-        /* fill boxes */
-        while (!compBox_list_is_empty(&lists[i]))
-            compBox_list_push(boxes, compBox_list_pop(&lists[i]));
-        compBox_list_clear(&lists[i]);
-    }
-    
-//     /*fill boxes*/
-//     for (int i = 0; i< (int) nb_args; i++) {
+// //     printf("size of boxes: %d\n", (int) compBox_list_get_size(boxes));
+//     
+// //     for(int i = 0; i< (int) nb_args; i++) {
+// //         args[i].prec = precres;
+// //         args[i].boxes  = (compBox_list_ptr) &lists[i];
+// //         args[i].cache = (cacheApp_ptr) cache;
+// //         args[i].meta = (metadatas_ptr) meta;
+// //         pthread_create(&threads[i], NULL, _parallel_discard_list_worker, &args[i]);
+// //     }
+//     
+//     for(int i = 0; i< (int) nb_args; i++) {
+//         pthread_join(threads[i], NULL);
+//         if (args[i].prec > precres)
+//             precres = args[i].prec;
+//         /* fill boxes */
 //         while (!compBox_list_is_empty(&lists[i]))
 //             compBox_list_push(boxes, compBox_list_pop(&lists[i]));
 //         compBox_list_clear(&lists[i]);
 //     }
-    
-    free(args);
-    free(threads);
-    free(lists);
-    
-    return precres;
-}
+//     
+// //     /*fill boxes*/
+// //     for (int i = 0; i< (int) nb_args; i++) {
+// //         while (!compBox_list_is_empty(&lists[i]))
+// //             compBox_list_push(boxes, compBox_list_pop(&lists[i]));
+// //         compBox_list_clear(&lists[i]);
+// //     }
+//     
+//     free(args);
+//     free(threads);
+//     free(lists);
+//     
+//     return precres;
+// }
 
 // void * _parallel_discard_worker( void * arg_ptr ){
 //     
