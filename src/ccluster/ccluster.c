@@ -216,6 +216,12 @@ void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, con
     realRat_mul(halfwidth, halfwidth, compBox_bwidthref(metadatas_initBref(meta)) );
     
     connCmp_ptr ctemp;
+    
+#ifdef CCLUSTER_HAVE_PTHREAD
+    connCmp_list_t toBeBisected;
+    connCmp_list_init(toBeBisected);
+#endif
+    
     while (!connCmp_list_is_empty(qPrepLoop)) {
         
         ctemp = connCmp_list_pop(qPrepLoop);
@@ -224,17 +230,37 @@ void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, con
         if ( connCmp_is_confined(ctemp, metadatas_initBref(meta)) && (realRat_cmp(diam, halfwidth)<0) )
             connCmp_list_insert_sorted(qMainLoop, ctemp);
         else {
+#ifdef CCLUSTER_HAVE_PTHREAD
+            if (metadatas_useNBThreads(meta) >1)
+                connCmp_list_push(toBeBisected, ctemp);
+            else {            
+                ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta);
+                while (!connCmp_list_is_empty(ltemp))
+                    connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
+                connCmp_clear(ctemp);
+                free(ctemp);
+            }
+#else
             ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ctemp);
-            free(ctemp);//comment it for julia...
+            free(ctemp);
+#endif
         }
+#ifdef CCLUSTER_HAVE_PTHREAD
+        if (metadatas_useNBThreads(meta) >1)
+            if (connCmp_list_is_empty(qPrepLoop))
+                ccluster_parallel_bisect_connCmp_list(qPrepLoop, discardedCcs, toBeBisected, cache, meta);
+#endif        
     }
     
     connCmp_list_clear(ltemp);
     realRat_clear(halfwidth);
     realRat_clear(diam);
+#ifdef CCLUSTER_HAVE_PTHREAD
+    connCmp_list_clear(toBeBisected);
+#endif
 }
 
 int  ccluster_compDsk_is_separated( const compDsk_t d, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs ){
@@ -408,6 +434,9 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
     realRat_clear(threeWidth);
     compRat_clear(initPoint);
     connCmp_list_clear(ltemp);
+#ifdef CCLUSTER_HAVE_PTHREAD
+    connCmp_list_clear(toBeBisected);
+#endif
 }
 
 void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
