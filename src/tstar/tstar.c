@@ -10,18 +10,29 @@
 /* ************************************************************************** */
 
 #include "tstar/tstar.h"
-#include<time.h>
+#include <time.h>
 
 void tstar_getApproximation( compApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta){
 //         chronos_tic_Approxi(metadatas_chronref(meta));
         clock_t start = clock();
+// struct timespec begin, end;
+// double elapsed;
+// clock_gettime(CLOCK_MONOTONIC, &begin);
         cacheApp_lock(cache);
         
         compApp_poly_set(res, cacheApp_getApproximation ( cache, prec ));
         
         cacheApp_unlock(cache);
+        
+// clock_gettime(CLOCK_MONOTONIC, &end);        
+// elapsed = end.tv_sec - begin.tv_sec;
+// elapsed += (end.tv_nsec - begin.tv_nsec) / 1000000000.0;
+
         metadatas_lock(meta);
+        
+//         metadatas_chronref(meta)->_clicks_Approxi_cumul += elapsed;
         metadatas_add_time_Approxi(meta, (double) (clock() - start) );
+        
         metadatas_unlock(meta);
 //         chronos_toc_Approxi(metadatas_chronref(meta));
         

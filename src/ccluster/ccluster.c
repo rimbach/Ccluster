@@ -153,14 +153,14 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
         compBox_clear(btemp);
         free(btemp);//comment it for julia...
     }
-#ifdef CCLUSTER_HAVE_PTHREAD
-    if (metadatas_useNBThreads(meta)>1)
-        prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta);
-    else
-        prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
-#else
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//     if (metadatas_useNBThreads(meta)>1)
+//         prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta);
+//     else
+//         prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
+// #else
     prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
-#endif
+// #endif
     
     while (!compBox_list_is_empty(subBoxes)) {
         btemp = compBox_list_pop(subBoxes);
@@ -280,6 +280,11 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
     realRat_set_si(four, 4, 1);
     realRat_set_si(three, 3, 1);
     
+#ifdef CCLUSTER_HAVE_PTHREAD
+    connCmp_list_t toBeBisected;
+    connCmp_list_init(toBeBisected);
+#endif
+    
     while (!connCmp_list_is_empty(qMainLoop)) {
         
         resNewton.nflag = 0;
@@ -369,13 +374,29 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         else {
 //             if (connCmp_nSols(ccur)==0) 
 //                 printf("ici\n");
+#ifdef CCLUSTER_HAVE_PTHREAD
+            if (metadatas_useNBThreads(meta) >1)
+                connCmp_list_push(toBeBisected, ccur);
+            else {
+                ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta);
+                while (!connCmp_list_is_empty(ltemp))
+                    connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
+                connCmp_clear(ccur);
+                free(ccur);
+            }
+#else
             ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
             free(ccur);
+#endif
         }
-            
+#ifdef CCLUSTER_HAVE_PTHREAD
+        if (metadatas_useNBThreads(meta) >1)
+            if (connCmp_list_is_empty(qMainLoop))
+                ccluster_parallel_bisect_connCmp_list(qMainLoop, discardedCcs, toBeBisected, cache, meta);
+#endif
         
     }
     

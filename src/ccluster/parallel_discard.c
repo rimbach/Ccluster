@@ -15,6 +15,60 @@
 
 #include <pthread.h>
 
+void * _parallel_bisect_worker( void * arg_ptr ){
+    
+    parallel_bisect_arg_t * arg = (parallel_bisect_arg_t *) arg_ptr;
+    ccluster_bisect_connCmp( arg->res, arg->cc, arg->dis, arg->cache, arg->meta);
+    flint_cleanup();
+    return NULL;
+    
+}
+
+void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_list_ptr discardedCcs,
+                                            connCmp_list_ptr toBeBisected, cacheApp_t cache, metadatas_t meta){
+    
+    slong nb_threads = metadatas_useNBThreads(meta);
+    slong nb_args = CCLUSTER_MIN(nb_threads,connCmp_list_get_size(toBeBisected));
+    parallel_bisect_arg_t * args = (parallel_bisect_arg_t *) malloc ( sizeof(parallel_bisect_arg_t) * nb_args );
+    pthread_t * threads = (pthread_t *) malloc (sizeof(pthread_t) * nb_args);
+    
+    connCmp_list_ptr ress = (connCmp_list_ptr) malloc (sizeof(connCmp_list) * nb_args);
+    connCmp_list_ptr diss = (connCmp_list_ptr) malloc (sizeof(connCmp_list) * nb_args);
+    
+    slong nb_pop;
+    connCmp_ptr ccur;
+    while (!connCmp_list_is_empty(toBeBisected)){
+        
+        nb_pop = CCLUSTER_MIN( connCmp_list_get_size(toBeBisected), nb_args );
+        for ( int i=0; i< (int) nb_pop; i++) {
+            ccur = connCmp_list_pop(toBeBisected);
+            connCmp_list_init(&ress[i]);
+            connCmp_list_init(&diss[i]);
+            args[i].res = &ress[i];
+            args[i].dis = &diss[i];
+            args[i].cc  = ccur;
+            args[i].meta = (metadatas_ptr) meta;
+            args[i].cache = (cacheApp_ptr) cache;
+            pthread_create(&threads[i], NULL, _parallel_bisect_worker, &args[i]);
+        }
+        for ( int i=0; i< (int) nb_pop; i++) {
+            pthread_join(threads[i], NULL);
+            while (!connCmp_list_is_empty(&ress[i]))
+                connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(&ress[i]));
+            while (!connCmp_list_is_empty(&diss[i]))
+                connCmp_list_insert_sorted(discardedCcs, connCmp_list_pop(&diss[i]));
+            connCmp_clear(args[i].cc);
+            free(args[i].cc);
+            connCmp_list_clear(&ress[i]);
+            connCmp_list_clear(&diss[i]);
+        }
+    }
+    free(args);
+    free(threads);
+    free(ress);
+    free(diss);
+}
+
 void * _parallel_discard_list_worker( void * arg_ptr ){
     
     parallel_discard_list_arg_t * arg = (parallel_discard_list_arg_t *) arg_ptr;
