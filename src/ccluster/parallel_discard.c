@@ -126,9 +126,9 @@ void * _parallel_discard_list_worker( void * arg_ptr ){
     pthread_mutex_lock (&(arg->mutex));
     arg->status =2; /*is finished*/
     pthread_mutex_unlock (&(arg->mutex));
-    pthread_mutex_lock (&(mutex_nb_running));
-    nb_thread_running --;
-    pthread_mutex_unlock (&(mutex_nb_running));
+    pthread_mutex_lock (arg->mutex_nb_running);
+    (*(arg->nb_thread_running))--;
+    pthread_mutex_unlock (arg->mutex_nb_running);
     
     return NULL;
     
@@ -148,14 +148,18 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
     compBox_list_t ltemp;
     compBox_list_init(ltemp);
     
-    nb_thread_running = 0;
+    int nb_thread_running = 0;
+    pthread_mutex_t mutex_nb_running;
     pthread_mutex_init ( &mutex_nb_running, NULL);
+    
     /*initialize args, lists */
     for (int i = 0; i< (int) nb_args; i++){
         args[i].cache = (cacheApp_ptr) cache;
         args[i].meta = (metadatas_ptr) meta;
         args[i].status = 0;
         pthread_mutex_init ( &(args[i].mutex), NULL);
+        args[i].nb_thread_running = &nb_thread_running;
+        args[i].mutex_nb_running  = &mutex_nb_running;
         compBox_list_init(&lists[i]);
     }
 //     printf("----ccluster_parallel_discard_compBox_list: nb_boxes: %d, nb_args: %d\n", (int) compBox_list_get_size(boxes), (int) nb_args);
@@ -175,6 +179,7 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
                 /* fill boxes */
                 while (!compBox_list_is_empty(&lists[thread]))
                     compBox_list_push(ltemp, compBox_list_pop(&lists[thread]));
+//                 compBox_list_clear(&lists[thread]);
             }
             /* actualize arg and nbrunning */
             compBox_list_push(&lists[thread], compBox_list_pop(boxes));

@@ -45,10 +45,12 @@ typedef struct {
     metadatas_ptr meta;
     int status; /* 0: default, 1: is_running, 2: is_finnished */
     pthread_mutex_t mutex;
+    int * nb_thread_running;
+    pthread_mutex_t * mutex_nb_running;
 } parallel_discard_list_arg_t;
 
-int nb_thread_running;
-pthread_mutex_t mutex_nb_running;
+// int nb_thread_running;
+// pthread_mutex_t mutex_nb_running;
 
 typedef struct {
     connCmp_list_ptr res;
