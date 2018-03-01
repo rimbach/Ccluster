@@ -403,42 +403,43 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         else {
 //             if (connCmp_nSols(ccur)==0) 
 //                 printf("ici\n");
-#ifdef CCLUSTER_HAVE_PTHREAD
-            if (metadatas_useNBThreads(meta) >1)
-                connCmp_list_push(toBeBisected, ccur);
-            else {
-                ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
-                while (!connCmp_list_is_empty(ltemp))
-                    connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
-                connCmp_clear(ccur);
-                free(ccur);
-            }
-#else
-            ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//             if (metadatas_useNBThreads(meta) >1)
+//                 connCmp_list_push(toBeBisected, ccur);
+//             else {
+//                 ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
+//                 while (!connCmp_list_is_empty(ltemp))
+//                     connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
+//                 connCmp_clear(ccur);
+//                 free(ccur);
+//             }
+// #else
+//             ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
+            ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
             free(ccur);
-#endif
+// #endif
         }
-#ifdef CCLUSTER_HAVE_PTHREAD
-        if (metadatas_useNBThreads(meta) >1) {
-            if (connCmp_list_is_empty(qMainLoop)) {
-                if (connCmp_list_get_size(toBeBisected)>1)
-                    ccluster_parallel_bisect_connCmp_list(qMainLoop, discardedCcs, toBeBisected, cache, meta);
-                else {
-                    if (connCmp_list_get_size(toBeBisected)>0) {
-                        ccur = connCmp_list_pop(toBeBisected);
-                        ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
-                        while (!connCmp_list_is_empty(ltemp))
-                            connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
-                        connCmp_clear(ccur);
-                        free(ccur);
-                    }
-                }
-            }
-        }
-#endif
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//         if (metadatas_useNBThreads(meta) >1) {
+//             if (connCmp_list_is_empty(qMainLoop)) {
+//                 if (connCmp_list_get_size(toBeBisected)>1)
+//                     ccluster_parallel_bisect_connCmp_list(qMainLoop, discardedCcs, toBeBisected, cache, meta);
+//                 else {
+//                     if (connCmp_list_get_size(toBeBisected)>0) {
+//                         ccur = connCmp_list_pop(toBeBisected);
+//                         ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
+//                         while (!connCmp_list_is_empty(ltemp))
+//                             connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
+//                         connCmp_clear(ccur);
+//                         free(ccur);
+//                     }
+//                 }
+//             }
+//         }
+// #endif
         
     }
     
