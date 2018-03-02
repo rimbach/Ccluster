@@ -40,39 +40,17 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
         btemp = compBox_list_pop(boxes);
         compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
-// #ifdef MULTITHREADED
-//         metadatas_t meta_temp;
-//         metadatas_init( meta_temp, metadatas_initBref(meta), metadatas_stratref(meta) , metadatas_getVerbo(meta));
-//         
-//         parallel_discard_arg_t * args = (parallel_discard_arg_t *) malloc ( sizeof(parallel_discard_arg_t) * 1 );
-//         args[0].nbsol = -2;
-//         args[0].prec = res.appPrec;
-//         args[0].box  = btemp;
-//         args[0].cache = (cacheApp_ptr) cache;
-//         args[0].meta = (metadatas_ptr) meta_temp;
-// //         
-//         pthread_t * threads = (pthread_t *) malloc (sizeof(pthread_t) * 1);
-//         pthread_create(&threads[0], NULL, _parallel_discard_worker, &args[0]);
-//         pthread_join(threads[0], NULL);
-//         
-// //         printf("nbsols before: %d\n", args[0].nbsol );
-// //         _parallel_discard_worker( args );
-// //         printf("nbsols after: %d\n", args[0].nbsol );
-//         
-//         res.nbOfSol = args[0].nbsol;
-//         res.appPrec = args[0].prec;
-//         
-// //         res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta_temp);
-//         metadatas_join(meta, meta_temp);
-//         metadatas_clear(meta_temp);
-//         free(args);
-// #else
-        res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);
-// #endif        
+        res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);    
         if (res.nbOfSol==0) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+            metadatas_lock(meta);
+#endif
             metadatas_add_discarded( meta, depth);
+#ifdef CCLUSTER_HAVE_PTHREAD
+            metadatas_unlock(meta);
+#endif
             compBox_clear(btemp);
-            free(btemp); //comment it for julia...
+            free(btemp);
         }
         
         else{
@@ -116,6 +94,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
                 if (res.nbOfSol>0)
                     btemp->nbMSol = res.nbOfSol;
                 compBox_list_push(ltemp, btemp);
+//                 compBox_list_insert_sorted(ltemp, btemp);
 //             }
         }
     }
@@ -151,7 +130,7 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
         btemp = connCmp_pop(cc);
         subdBox_quadrisect( subBoxes, btemp );
         compBox_clear(btemp);
-        free(btemp);//comment it for julia...
+        free(btemp);
     }
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (nbThreads>1) {
@@ -219,10 +198,10 @@ void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, con
     
     connCmp_ptr ctemp;
     
-#ifdef CCLUSTER_HAVE_PTHREAD
-    connCmp_list_t toBeBisected;
-    connCmp_list_init(toBeBisected);
-#endif
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//     connCmp_list_t toBeBisected;
+//     connCmp_list_init(toBeBisected);
+// #endif
     
     while (!connCmp_list_is_empty(qPrepLoop)) {
         
@@ -261,9 +240,9 @@ void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, con
     connCmp_list_clear(ltemp);
     realRat_clear(halfwidth);
     realRat_clear(diam);
-#ifdef CCLUSTER_HAVE_PTHREAD
-    connCmp_list_clear(toBeBisected);
-#endif
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//     connCmp_list_clear(toBeBisected);
+// #endif
 }
 
 int  ccluster_compDsk_is_separated( const compDsk_t d, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs ){

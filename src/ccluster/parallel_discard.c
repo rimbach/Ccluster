@@ -27,7 +27,7 @@ void * _parallel_bisect_worker( void * arg_ptr ){
 void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_list_ptr discardedCcs,
                                             connCmp_list_ptr toBeBisected, cacheApp_t cache, metadatas_t meta){
     
-    printf("--ccluster_parallel_bisect_connCmp_list: nb connCmp: %d, nb threads: %d \n", (int) connCmp_list_get_size(toBeBisected), (int) metadatas_useNBThreads(meta) );
+//     printf("--ccluster_parallel_bisect_connCmp_list: nb connCmp: %d, nb threads: %d \n", (int) connCmp_list_get_size(toBeBisected), (int) metadatas_useNBThreads(meta) );
     slong nb_threads = metadatas_useNBThreads(meta);
     slong nb_threads_by_task;
     if (connCmp_list_get_size(toBeBisected)>0)
@@ -83,42 +83,7 @@ void * _parallel_discard_list_worker( void * arg_ptr ){
     /* arg->status has been set to 1 by caller           */
     /* nb_thread_running has been incremented by caller; */
     
-    tstar_res res;
-    res.appPrec = arg->prec;
-    
-    slong depth;
-    
-    compBox_list_t ltemp;
-    compDsk_t bdisk;
-    compBox_list_init(ltemp);
-    compDsk_init(bdisk);
-    compBox_ptr btemp;
-    
-    while (!compBox_list_is_empty(arg->boxes)){
-        btemp = compBox_list_pop(arg->boxes);
-        compBox_get_containing_dsk(bdisk, btemp);
-        depth = compDsk_getDepth(bdisk, metadatas_initBref(arg->meta));
-        res = tstar_interface( arg->cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, arg->meta);
-        
-        if (res.nbOfSol==0) {
-            metadatas_lock(arg->meta); 
-            metadatas_add_discarded( arg->meta, depth);
-            metadatas_unlock(arg->meta);
-            compBox_clear(btemp);
-            free(btemp);
-        }
-        
-        else{
-            if (res.nbOfSol>0)
-                    btemp->nbMSol = res.nbOfSol;
-                compBox_list_push(ltemp, btemp);
-        }
-    }
-    compBox_list_swap(arg->boxes, ltemp);
-    compBox_list_clear(ltemp);
-    compDsk_clear(bdisk);
-    
-    arg->prec = res.appPrec;
+    arg->prec = ccluster_discard_compBox_list( arg->boxes, arg->cache, arg->prec, arg->meta);
     
     flint_cleanup();
     
@@ -152,7 +117,7 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
     pthread_mutex_t mutex_nb_running;
     pthread_mutex_init ( &mutex_nb_running, NULL);
     
-    /*initialize args, lists */
+    /*initialize args, lists and create nb_args threads */
     for (int i = 0; i< (int) nb_args; i++){
         args[i].cache = (cacheApp_ptr) cache;
         args[i].meta = (metadatas_ptr) meta;
@@ -161,10 +126,22 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
         args[i].nb_thread_running = &nb_thread_running;
         args[i].mutex_nb_running  = &mutex_nb_running;
         compBox_list_init(&lists[i]);
+        
+        compBox_list_push(&lists[i], compBox_list_pop(boxes));
+        args[i].prec = precres;
+        args[i].boxes  = (compBox_list_ptr) &lists[i];
+        args[i].status=1;
+        pthread_mutex_lock (&(mutex_nb_running));
+        nb_thread_running ++;
+        pthread_mutex_unlock (&(mutex_nb_running));
+        /* create the thread */
+//         printf("----create: %d\n", i);
+        pthread_create(&threads[i], NULL, _parallel_discard_list_worker, &args[i]);
     }
+    
 //     printf("----ccluster_parallel_discard_compBox_list: nb_boxes: %d, nb_args: %d\n", (int) compBox_list_get_size(boxes), (int) nb_args);
-    /*main loop*/
-//     while ( (!compBox_list_is_empty(boxes)) && (nb_thread_running<nb_args) ) {
+    
+    /*main loop: empty boxes*/
     while (!compBox_list_is_empty(boxes)) {
         
         if (nb_thread_running<nb_args) {
@@ -179,7 +156,7 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
                 /* fill boxes */
                 while (!compBox_list_is_empty(&lists[thread]))
                     compBox_list_push(ltemp, compBox_list_pop(&lists[thread]));
-//                 compBox_list_clear(&lists[thread]);
+//                     compBox_list_insert_sorted(ltemp, compBox_list_pop(&lists[thread]));
             }
             /* actualize arg and nbrunning */
             compBox_list_push(&lists[thread], compBox_list_pop(boxes));
@@ -205,13 +182,14 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
             /* fill boxes */
             while (!compBox_list_is_empty(&lists[i]))
                 compBox_list_push(ltemp, compBox_list_pop(&lists[i]));
+//                 compBox_list_insert_sorted(ltemp, compBox_list_pop(&lists[i]));
         }
         pthread_mutex_destroy( &(args[i].mutex) );
         compBox_list_clear(&lists[i]);
     }
        
     compBox_list_swap(boxes, ltemp);
-//     printf("----ccluster_parallel_discard_compBox_list: nb_boxes: %d\n", (int) compBox_list_get_size(boxes));
+    
     free(args);
     free(threads);
     free(lists);

@@ -26,12 +26,19 @@
 
 #include <string.h>
 
+// #ifdef CCLUSTER_HAVE_PTHREAD
+// #include <pthread.h>
+// #endif
+
 typedef struct{
     compBox    initB;
     int        verbo;
     strategies strat;
     counters   count;
     chronos    chron;
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//     pthread_mutex_t _mutex;
+// #endif
 } metadatas;
 
 typedef metadatas metadatas_t[1];
@@ -49,11 +56,13 @@ void metadatas_clear(metadatas_t m);
 // void metadatas_join(metadatas_t m1, const metadatas_t m2);
 
 METADATAS_INLINE void metadatas_lock(metadatas_t m){
+//     pthread_mutex_lock (&(m->_mutex));
     counters_lock(metadatas_countref(m));
     chronos_lock(metadatas_chronref(m));
 }
 
 METADATAS_INLINE void metadatas_unlock(metadatas_t m){
+//     pthread_mutex_unlock (&(m->_mutex));
     counters_unlock(metadatas_countref(m));
     chronos_unlock(metadatas_chronref(m));
 }  
