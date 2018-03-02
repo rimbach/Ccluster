@@ -27,7 +27,7 @@ void connCmp_union_compBox( connCmp_list_t ccs, compBox_t b){
         if (connCmp_are_8connected(cctemp, b)){
             connCmp_merge_2_connCmp(cb, cctemp);
             connCmp_clear(cctemp);
-            free(cctemp); //comment it for julia...
+            free(cctemp);
         }
         else 
             connCmp_list_push(ltemp, cctemp);
