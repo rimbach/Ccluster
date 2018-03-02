@@ -29,11 +29,9 @@ void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_
     
 //     printf("--ccluster_parallel_bisect_connCmp_list: nb connCmp: %d, nb threads: %d \n", (int) connCmp_list_get_size(toBeBisected), (int) metadatas_useNBThreads(meta) );
     slong nb_threads = metadatas_useNBThreads(meta);
-    slong nb_threads_by_task;
+    slong nb_threads_by_task = nb_threads;
     if (connCmp_list_get_size(toBeBisected)>0)
         nb_threads_by_task = (slong) (nb_threads / connCmp_list_get_size(toBeBisected));
-    else
-        nb_threads_by_task = nb_threads;
     slong nb_args = CCLUSTER_MIN(nb_threads,connCmp_list_get_size(toBeBisected));
     parallel_bisect_arg_t * args = (parallel_bisect_arg_t *) malloc ( sizeof(parallel_bisect_arg_t) * nb_args );
     pthread_t * threads = (pthread_t *) malloc (sizeof(pthread_t) * nb_args);

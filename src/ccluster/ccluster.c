@@ -362,12 +362,12 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
-//             printf("+++depth: %d, validated\n", depth);
+            printf("+++depth: %d, validated\n", depth);
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
-//             printf("+++depth: %d, validated\n", depth);
+            printf("+++depth: %d, validated\n", depth);
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
             connCmp_list_insert_sorted(qMainLoop, ccur);
