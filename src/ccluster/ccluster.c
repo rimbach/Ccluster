@@ -535,7 +535,7 @@ void connCmp_list_print_for_results(FILE * f, const connCmp_list_t l, metadatas_
 }
 
 void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_t initialBox, const realRat_t eps, int st, int verb){
-    
+
     cacheApp_t cache;
     strategies_t strat;
     metadatas_t meta;
