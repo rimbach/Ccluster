@@ -40,25 +40,26 @@
 
 typedef struct {
     slong prec;
-    compBox_list_ptr boxes;
+    compBox_list_t boxes;
     cacheApp_ptr cache;
     metadatas_ptr meta;
+//     int status; /* 0: default, 1: is_running, 2: is_finnished */
+//     pthread_mutex_t mutex;
+//     int * nb_thread_running;
+//     pthread_mutex_t * mutex_nb_running;
+} parallel_discard_list_arg_t;
+
+typedef struct {
+    connCmp_list_t res;
+    connCmp_ptr      cc;
+    connCmp_list_t dis;
+    cacheApp_ptr cache;
+    metadatas_ptr meta;
+    slong nbThreads;
     int status; /* 0: default, 1: is_running, 2: is_finnished */
     pthread_mutex_t mutex;
     int * nb_thread_running;
     pthread_mutex_t * mutex_nb_running;
-} parallel_discard_list_arg_t;
-
-// int nb_thread_running;
-// pthread_mutex_t mutex_nb_running;
-
-typedef struct {
-    connCmp_list_ptr res;
-    connCmp_ptr      cc;
-    connCmp_list_ptr dis;
-    cacheApp_ptr cache;
-    metadatas_ptr meta;
-    slong nbThreads;
 } parallel_bisect_arg_t;
 
 // void * _parallel_discard_worker( void * arg_ptr );
