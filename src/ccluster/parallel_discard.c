@@ -85,11 +85,11 @@ void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_
 //     printf("--ccluster_parallel_bisect_connCmp_list: nb connCmp: %d, nb threads: %d \n", (int) connCmp_list_get_size(toBeBisected), (int) metadatas_useNBThreads(meta) );
     slong nb_threads = metadatas_useNBThreads(meta);
     
-    /*for test*/
-    if (metadatas_useNBThreads(meta)==1023) {
-        nb_threads = connCmp_list_get_size(toBeBisected);
-    }
-    /*end test*/
+//     /*for test*/
+//     if (metadatas_useNBThreads(meta)==1023) {
+//         nb_threads = connCmp_list_get_size(toBeBisected);
+//     }
+//     /*end test*/
     slong nb_threads_by_task = nb_threads;
     if (connCmp_list_get_size(toBeBisected)>0)
         nb_threads_by_task = (slong) (nb_threads / connCmp_list_get_size(toBeBisected));
