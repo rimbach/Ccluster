@@ -302,11 +302,11 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
 //     slong nb_threads = metadatas_useNBThreads(meta);
     slong nb_threads = nbThreads;
     
-    /*for test*/
-    if (metadatas_useNBThreads(meta)==1023) {
-        nb_threads = compBox_list_get_size(boxes);
-    }
-    /*fin test*/
+//     /*for test*/
+//     if (metadatas_useNBThreads(meta)==1023) {
+//         nb_threads = compBox_list_get_size(boxes);
+//     }
+//     /*end test*/
     
     slong precres = prec;
     slong nb_args = CCLUSTER_MIN(nb_threads,compBox_list_get_size(boxes));
