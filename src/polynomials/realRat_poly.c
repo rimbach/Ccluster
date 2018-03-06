@@ -90,3 +90,36 @@ void mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize){
     realRat_clear(coeff);
     realRat_clear(two);
 }
+
+void mignotte_generalized(realRat_poly_t poly, slong deg, ulong pow, slong bitsize){
+    
+    realRat_t coeff, two;
+    realRat_init(coeff);
+    realRat_init(two);
+    realRat_poly_t p1, p2;
+    realRat_poly_init(p1);
+    realRat_poly_init(p2);
+    realRat_poly_fit_length(poly,deg+1);
+    
+    realRat_set_si(two, 2,1);
+    realRat_pow_si(coeff, two, bitsize); /*coeff = 2^(bitsize) */
+    realRat_poly_set_coeff_realRat(p1, 1, coeff); /* p1 = coeff*x */
+    realRat_poly_set_coeff_realRat(p2, 1, coeff); /* p2 = coeff*x */
+    realRat_set_si(coeff, -1,1);
+    realRat_poly_set_coeff_realRat(p1, 0, coeff); /* p1 = coeff*x -1 */
+    realRat_set_si(coeff, 1,1);
+    realRat_poly_set_coeff_realRat(p2, 0, coeff); /* p2 = coeff*x +1 */
+    realRat_poly_pow(p1, p1, pow);                /* p1 = (coeff*x -1)^pow */
+    realRat_poly_pow(p2, p2, pow);                /* p2 = (coeff*x +1)^pow */
+    realRat_poly_mul(poly, p1, p2);               /* poly = (coeff*x -1)^pow*(coeff*x +1)^pow*/
+    realRat_poly_add(poly, poly, poly);           /* poly = 2*(coeff*x -1)^pow*(coeff*x +1)^pow*/
+    fmpq_poly_neg(poly, poly);                    /* poly = -2*(coeff*x -1)^pow*(coeff*x +1)^pow*/
+    
+    realRat_set_si(coeff, 1,1);
+    realRat_poly_set_coeff_realRat(poly, deg, coeff); /* poly = x^deg -2*(coeff*x -1)^pow*(coeff*x +1)^pow*/
+    
+    realRat_clear(coeff);
+    realRat_clear(two);
+    realRat_poly_clear(p1);
+    realRat_poly_clear(p2);
+}

@@ -19,6 +19,7 @@
 
 void genBernPolFile( FILE * file, slong degree);
 void genMignPolFile( FILE * file, slong degree, slong bitsize);
+void genMignGenPolFile( FILE * file, slong degree, slong bitsize, slong power);
 void genMignMulPolFile( FILE * file, slong degree, slong bitsize, slong power);
 void genWilkPolFile( FILE * file, slong degree);
 void genWilkRatPolFile( FILE * file, slong degree);
@@ -37,6 +38,7 @@ int main(int argc, char **argv){
     if (argc<3){
         printf("usage: %s Bernoulli   degree\n", argv[0]);
         printf("usage: %s Mignotte    degree bitsize\n", argv[0]);
+        printf("usage: %s MignotteGen degree bitsize power\n", argv[0]);
         printf("usage: %s MignotteMul degree bitsize power\n", argv[0]);
         printf("usage: %s Wilkinson   degree\n", argv[0]);
         printf("usage: %s WilkRat     degree\n", argv[0]);
@@ -50,6 +52,7 @@ int main(int argc, char **argv){
 //     char filename[100];
     char bernoulli[] = "Bernoulli\0";
     char mignotte[] = "Mignotte\0";
+    char mignotteGen[] = "MignotteGen\0";
     char mignotteMul[] = "MignotteMul\0";
     char wilkinson[] = "Wilkinson\0";
     char wilkRat[] = "WilkRat\0";
@@ -90,6 +93,14 @@ int main(int argc, char **argv){
             printf("usage: %s Mignotte degree bitsize\n", argv[0]);
         else{
             genMignPolFile(stdout, degree, thirdArg);
+        }
+    }
+    
+    if (strcmp(poly, mignotteGen)==0) {
+        if (argc<5)
+            printf("usage: %s Mignotte degree bitsize power\n", argv[0]);
+        else{
+            genMignGenPolFile(stdout, degree, thirdArg, fourthArg);
         }
     }
     
@@ -161,6 +172,33 @@ void genMignPolFile( FILE * file, slong degree, slong bitsize){
     fprintf(file, "Real;\n");
     fprintf(file, "Rational;\n");
     fprintf(file, "Degree = %d;\n", (int) degree);
+    fprintf(file, "\n");
+    
+    for(int i = degree; i>=0; i--){
+        realRat_poly_get_coeff_realRat(coeff, pmign, i);
+        if (!realRat_is_zero(coeff)) {
+            fprintf(file, "%d ", i);
+            realRat_fprint(file, coeff);
+            fprintf(file, "\n");
+        }
+    }
+    realRat_poly_clear(pmign);
+    realRat_clear(coeff);
+}
+
+void genMignGenPolFile( FILE * file, slong degree, slong bitsize, slong power){
+    realRat_poly_t pmign;
+    realRat_poly_init(pmign);
+    realRat_t coeff;
+    realRat_init(coeff);
+    
+    mignotte_generalized(pmign, degree, (ulong) power, bitsize);
+    
+    fprintf(file, "Sparse;\n");
+    fprintf(file, "Monomial;\n");
+    fprintf(file, "Real;\n");
+    fprintf(file, "Rational;\n");
+    fprintf(file, "Degree = %d;\n", (int) (degree));
     fprintf(file, "\n");
     
     for(int i = degree; i>=0; i--){

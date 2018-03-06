@@ -101,5 +101,6 @@ POLYNOMIALS_INLINE void bernoulli_polynomial( realRat_poly_t poly, slong deg) {
     arith_bernoulli_polynomial(poly , deg);
 }
 void mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize);
+void mignotte_generalized(realRat_poly_t poly, slong deg, ulong pow, slong bitsize);
 
 #endif

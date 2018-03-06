@@ -121,7 +121,7 @@ install: library
 # 	fi
 
 benchs: library headers_benchs \
-	benchMignotte benchMignotteMul \
+	benchMignotte benchMignotteMul benchMignotteGen\
 	benchBernoulli benchWilkinson \
 	benchWilkRat benchSpiral \
 	benchCluster benchWilkMul \
@@ -138,6 +138,10 @@ benchMignotte: $(BENCHS_DIR)/benchMignotte.o
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
 	
 benchMignotteMul: $(BENCHS_DIR)/benchMignotteMul.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchMignotteGen: $(BENCHS_DIR)/benchMignotteGen.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
 	
