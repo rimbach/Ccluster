@@ -185,7 +185,7 @@ LINE_V4P_TABLE=" (V4'), \$\epsilon = 2^{$EPSILONCCL}\$ "
 POL_NAME="Bernoulli"
 
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& TSize & Tdepth & n4 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v4p.out" ]; then
@@ -234,7 +234,7 @@ LINE_V43_TABLE=$LINE_V43_TABLE" & $TSV43 & $TDV43 & $N4V43 & `format_time $TV43`
 POL_NAME="Mignotte"
 
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& TSize & Tdepth & n4 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v4p.out" ]; then
@@ -282,7 +282,7 @@ LINE_V43_TABLE=$LINE_V43_TABLE" & $TSV43 & $TDV43 & $N4V43 & `format_time $TV43`
 #-----------------------------------------------Wilkinson-----------------------------------------
 POL_NAME="Wilkinson"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& TSize & Tdepth & n4 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v4p.out" ]; then
@@ -330,7 +330,7 @@ LINE_V43_TABLE=$LINE_V43_TABLE" & $TSV43 & $TDV43 & $N4V43 & `format_time $TV43`
 #-----------------------------------------------Spiral-----------------------------------------
 POL_NAME="Spiral"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& TSize & Tdepth & n4 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v4p.out" ]; then
@@ -410,7 +410,7 @@ DEGREE=$(( $DEGREE / 2 ))
 
 POL_NAME="WilkMul"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$nbSols=$NBSOLS\$, \$d=$DEGREE\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$nbSols=$NBSOLS\$, \$d=$DEGREE\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& TSize & Tdepth & n4 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v4p.out" ]; then
@@ -461,7 +461,7 @@ DEGREE=$DEGSAVE
 POL_NAME="MignotteGen"
 
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE\$, \$k=$POW\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE\$, \$k=$POW\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& TSize & Tdepth & n4 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v4p.out" ]; then
@@ -512,7 +512,7 @@ DEGREE=$(( 3 ** $ITTS ))
 
 POL_NAME="Cluster"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& TSize & Tdepth & n4 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v4p.out" ]; then

@@ -160,7 +160,7 @@ LINE_V3_TABLE=" (V3) "
 #-----------------------------------------------bernoulli-----------------------------------------
 POL_NAME="Bernoulli"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& n1 & n2 & n3 & time"  
 
 
@@ -199,7 +199,7 @@ LINE_V3_TABLE=$LINE_V3_TABLE" & $N1V3 & $N2V3 & $N3V3 & `format_time $TV3` s "
 #-----------------------------------------------Mignotte-----------------------------------------
 POL_NAME="Mignotte"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& n1 & n2 & n3 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_v1.out" ]; then
@@ -237,7 +237,7 @@ LINE_V3_TABLE=$LINE_V3_TABLE" & $N1V3 & $N2V3 & $N3V3 & `format_time $TV3` s "
 #-----------------------------------------------Wilkinson-----------------------------------------
 POL_NAME="Wilkinson"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& n1 & n2 & n3 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_v1.out" ]; then
@@ -275,7 +275,7 @@ LINE_V3_TABLE=$LINE_V3_TABLE" & $N1V3 & $N2V3 & $N3V3 & `format_time $TV3` s "
 #-----------------------------------------------Spiral-----------------------------------------
 POL_NAME="Spiral"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& n1 & n2 & n3 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_v1.out" ]; then
@@ -342,7 +342,7 @@ DEGTEMP=$(( $DEGTEMP / 2 ))
 
 POL_NAME="WilkMul"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$nbSols=$NBSOLS\$, \$d=$DEGTEMP\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$nbSols=$NBSOLS\$, \$d=$DEGTEMP\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& n1 & n2 & n3 & time"  
 
 
@@ -382,7 +382,7 @@ LINE_V3_TABLE=$LINE_V3_TABLE" & $N1V3 & $N2V3 & $N3V3 & `format_time $TV3` s "
 
 POL_NAME="MignotteGen"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE\$, \$k=$POW\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE\$, \$k=$POW\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& n1 & n2 & n3 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_v1.out" ]; then
@@ -422,7 +422,7 @@ DEGTEMP=$(( 3 ** $ITTS ))
 
 POL_NAME="Cluster"
 HEAD_TABLE=$HEAD_TABLE"c|c|c|c||"
-FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEGTEMP\$}"
+FIRST_LINE_TABLE=$FIRST_LINE_TABLE"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEGTEMP\$}"
 SECOND_LINE_TABLE=$SECOND_LINE_TABLE"& n1 & n2 & n3 & time"  
 
 if [ ! -e $REP"/"$POL_NAME"_v1.out" ]; then

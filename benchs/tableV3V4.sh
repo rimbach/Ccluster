@@ -161,7 +161,7 @@ POL_NAME="Bernoulli"
 
 for DEG in $DEGREE; do
     HEAD_TABLE_T=$HEAD_TABLE_T"c|c|c|c||"
-    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEG\$}"
+    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEG\$}"
     SECOND_LINE_TABLE_T=$SECOND_LINE_TABLE_T"& n1 & n2 & n3 & time" 
     
     if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
@@ -208,7 +208,7 @@ POL_NAME="Mignotte"
 
 for DEG in $DEGREE; do
     HEAD_TABLE_T=$HEAD_TABLE_T"c|c|c|c||"
-    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$}"
+    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$}"
     SECOND_LINE_TABLE_T=$SECOND_LINE_TABLE_T"& n1 & n2 & n3 & time" 
     
     if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
@@ -255,7 +255,7 @@ POL_NAME="Wilkinson"
 
 for DEG in $DEGREE; do
     HEAD_TABLE_T=$HEAD_TABLE_T"c|c|c|c||"
-    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$}"
+    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$}"
     SECOND_LINE_TABLE_T=$SECOND_LINE_TABLE_T"& n1 & n2 & n3 & time" 
     
     if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
@@ -302,7 +302,7 @@ POL_NAME="Spiral"
 
 for DEG in $DEGREE; do
     HEAD_TABLE_T=$HEAD_TABLE_T"c|c|c|c||"
-    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$}"
+    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$}"
     SECOND_LINE_TABLE_T=$SECOND_LINE_TABLE_T"& n1 & n2 & n3 & time" 
     
     if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
@@ -353,7 +353,7 @@ for NBSOL in $NBSOLS; do
     DEG=$(( $DEG / 2 ))
 
     HEAD_TABLE_T=$HEAD_TABLE_T"c|c|c|c||"
-    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{|c||}{$POL_NAME, \$nbSols=$NBSOL\$, \$d=$DEG\$}"
+    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{c||}{$POL_NAME, \$nbSols=$NBSOL\$, \$d=$DEG\$}"
     SECOND_LINE_TABLE_T=$SECOND_LINE_TABLE_T"& n1 & n2 & n3 & time" 
     
     if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
@@ -400,7 +400,7 @@ POL_NAME="MignotteGen"
 
 for DEG in $DEGREE; do
     HEAD_TABLE_T=$HEAD_TABLE_T"c|c|c|c||"
-    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$, \$k=$POW\$}"
+    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$, \$k=$POW\$}"
     SECOND_LINE_TABLE_T=$SECOND_LINE_TABLE_T"& n1 & n2 & n3 & time" 
     
     if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
@@ -450,7 +450,7 @@ for ITT in $ITTS; do
     DEG=$(( 3 ** $ITT ))
 
     HEAD_TABLE_T=$HEAD_TABLE_T"c|c|c|c||"
-    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{|c||}{$POL_NAME, \$d=$DEG\$}"
+    FIRST_LINE_TABLE_T=$FIRST_LINE_TABLE_T"&\multicolumn{4}{c||}{$POL_NAME, \$d=$DEG\$}"
     SECOND_LINE_TABLE_T=$SECOND_LINE_TABLE_T"& n1 & n2 & n3 & time" 
     
     if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
