@@ -52,7 +52,7 @@ int compApp_poly_TkGtilda_with_sum( const compApp_poly_t f, const realApp_t s, c
     realApp_sub(diff, s, abs, prec);
 
     res = realApp_soft_compare( abs, diff, prec);
-    arb_clear(abs);
-    arb_clear(diff);
+    realApp_clear(abs);
+    realApp_clear(diff);
     return res;
 }

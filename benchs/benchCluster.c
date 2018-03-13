@@ -128,6 +128,7 @@ int main(int argc, char **argv){
     int degree;
     int st;
     int verbosity;
+    int nbthreads = 1;
     
     compBox_t bInit;
     realRat_t eps;
@@ -141,10 +142,18 @@ int main(int argc, char **argv){
     parse = parse*scan_strategy(argv[4], &st );
     parse = parse*scan_verbosity(argv[5], &verbosity );
     
+    if (argc>=7) {
+        parse = parse*scan_nbthreads(argv[6], &nbthreads );
+    }
+    nbthreads = (nbthreads<<5);
+    int add_temp = (st>>6)<<16;
+    st = st&((0x1<<6)-1);
+    st = st + nbthreads + add_temp;
+    
     p_degree = (slong) degree;
     
     if (parse==1)
-        ccluster_interface_func( getApprox, bInit, eps, st, 2);
+        ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
     
     realRat_clear(eps);
     compBox_clear(bInit);

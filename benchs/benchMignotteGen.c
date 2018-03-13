@@ -45,6 +45,7 @@ int main(int argc, char **argv){
     int power;
     int st;
     int verbosity;
+    int nbthreads = 1;
     
     compBox_t bInit;
     realRat_t eps;
@@ -59,6 +60,14 @@ int main(int argc, char **argv){
     parse = parse*scan_epsilon( argv[5], eps );
     parse = parse*scan_strategy(argv[6], &st );
     parse = parse*scan_verbosity(argv[7], &verbosity );
+    
+    if (argc>=9) {
+        parse = parse*scan_nbthreads(argv[8], &nbthreads );
+    }
+    nbthreads = (nbthreads<<5);
+    int add_temp = (st>>6)<<16;
+    st = st&((0x1<<6)-1);
+    st = st + nbthreads + add_temp;
     
     realRat_poly_t pmign;
     realRat_poly_init(pmign);

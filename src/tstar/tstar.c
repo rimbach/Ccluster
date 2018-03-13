@@ -99,10 +99,12 @@ tstar_res tstar_interface( cacheApp_t cache,
         nprec = prec;
     
     if (metadatas_useTstarOptim(meta)) {
-//         if (discard)
-//             return tstar_optimized( cache, d, 0, discard, nprec, depth, meta);
-//         else
+        if (discard&&CCLUSTER_V2(meta)){
+            return tstar_optimized( cache, d, 0,           discard, nprec, depth, meta);
+        }
+        else {
             return tstar_optimized( cache, d, max_nb_sols, discard, nprec, depth, meta);
+        }
     }
     if (discard)
         return tstar_asInPaper( cache, d, 0, discard, nprec, depth, meta);
@@ -342,15 +344,64 @@ tstar_res tstar_optimized( cacheApp_t cache,
             res.nbOfSol += 1;
             restemp = compApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
             
+//             if ((restemp==1)&&(iteration==7)){
+//                 
+//                 printf("---disk: "); compDsk_print(d); printf("\n");
+//                 printf("iteration: %d, restemp: %d\n", iteration, restemp);
+//                 
+//                 realApp_init(coeff0);
+//                 compApp_abs( coeff0, compApp_poly_getCoeff(pApprox, 0), res.appPrec);
+//                 printf("abs of 0-th coeff: "); realApp_printd(coeff0, 50); printf("\n");
+//                 realApp_sub(coeff0, sum, coeff0, prec);
+//                 printf("sum of other coeff: "); realApp_printd(coeff0, 50); printf("\n");
+//                 
+//                 tstar_graeffe_iterations_inplace( pApprox, 1, res.appPrec, meta);
+//                 compApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
+//                 
+//                 int restemp2 = compApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
+//                 printf("iteration: %d, restemp2: %d\n", iteration+1, restemp2);
+//                 
+//                 compApp_abs( coeff0, compApp_poly_getCoeff(pApprox, 0), res.appPrec);
+//                 printf("abs of 0-th coeff: "); realApp_printd(coeff0, 50); printf("\n");
+//                 realApp_sub(coeff0, sum, coeff0, prec);
+//                 printf("sum of other coeff: "); realApp_printd(coeff0, 50); printf("\n");
+//                 
+//                 tstar_graeffe_iterations_inplace( pApprox, 1, res.appPrec, meta);
+//                 compApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
+//                 
+//                 restemp2 = compApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
+//                 printf("iteration: %d, restemp2: %d\n", iteration+2, restemp2);
+//                 
+//                 compApp_abs( coeff0, compApp_poly_getCoeff(pApprox, 0), res.appPrec);
+//                 printf("abs of 0-th coeff: "); realApp_printd(coeff0, 50); printf("\n");
+//                 realApp_sub(coeff0, sum, coeff0, prec);
+//                 printf("sum of other coeff: "); realApp_printd(coeff0, 50); printf("\n");
+//                 
+//                 tstar_graeffe_iterations_inplace( pApprox, 1, res.appPrec, meta);
+//                 compApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
+//                 
+//                 restemp2 = compApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
+//                 printf("iteration: %d, restemp2: %d\n", iteration+3, restemp2);
+//                 
+//                 compApp_abs( coeff0, compApp_poly_getCoeff(pApprox, 0), res.appPrec);
+//                 printf("abs of 0-th coeff: "); realApp_printd(coeff0, 50); printf("\n");
+//                 realApp_sub(coeff0, sum, coeff0, prec);
+//                 printf("sum of other coeff: "); realApp_printd(coeff0, 50); printf("\n");
+//                 
+//                 realApp_clear(coeff0);
+//             }
+        
             while( restemp == -2 ){
                 res.appPrec *=2;
                 tstar_getApproximation( pApprox, cache, res.appPrec, meta);
                 tstar_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
-                tstar_graeffe_iterations_inplace( pApprox, iteration+1, res.appPrec, meta);
+//                 tstar_graeffe_iterations_inplace( pApprox, iteration+1, res.appPrec, meta);
+                tstar_graeffe_iterations_inplace( pApprox, iteration, res.appPrec, meta);
                 compApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
                 restemp = compApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
                 nbTaylorsRepeted +=1;
-                nbGraeffeRepeted +=(iteration+1);
+//                 nbGraeffeRepeted +=(iteration+1);
+                nbGraeffeRepeted +=(iteration);
             }
         }
         
