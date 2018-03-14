@@ -152,9 +152,54 @@
 //     }
 // }
 
-int tstar_D0_test(cacheApp_t cache, const compApp_t coeff0, 
-                                    const compApp_t coeff1, 
-                                    const compDsk_t d, int depth, slong prec, metadatas_t meta ){
+void completeTaylorShift(cacheApp_t cache, compApp_poly_t shiftedPol, int nbCoeffComputed, const compDsk_t d, slong prec, metadatas_t meta ){
+    
+    slong deg = cacheApp_getDegree(cache);
+    slong deg2 = deg - (nbCoeffComputed-1);
+    
+    compApp_poly_set_length(shiftedPol, deg+1);
+    
+    if (deg2>1) {
+        compApp_poly_t pp;
+        realRat_t fac, scaleFactor;
+        realRat_init(fac);
+        realRat_init(scaleFactor);
+//         printf("deg: %d, nbCoeffComputed: %d, deg2: %d\n", (int) deg, (int) nbCoeffComputed, (int) deg2);
+        compApp_poly_init2(pp, deg2+1);
+        
+        tstar_getDerivative (pp, cache, prec, nbCoeffComputed , meta);
+        tstar_taylor_shift_inplace( pp, d, prec, meta);
+        
+        realRat_pow_si(scaleFactor, compDsk_radiusref(d), (slong) nbCoeffComputed);
+        realRat_set_si(fac, 1,1);
+        for(int i=2; i<nbCoeffComputed; i++) 
+            fmpz_mul_si( realRat_denref(fac), realRat_denref(fac), (slong) i);
+        
+        for(int i=nbCoeffComputed; i<=deg; i++) {
+            
+            fmpz_mul_si( realRat_denref(fac), realRat_denref(fac), (slong) i);
+            if ((i-nbCoeffComputed)>=1)
+                fmpz_mul_si( realRat_numref(fac), realRat_numref(fac), ((slong) (i-nbCoeffComputed)));
+            
+            compApp_mul_realRat( (shiftedPol->coeffs) + i,
+                                (pp->coeffs) + (i-nbCoeffComputed),
+                                scaleFactor, prec);
+            compApp_mul_realRat_in_place( (shiftedPol->coeffs) + i,
+                                        fac, prec);
+        }
+        
+        realRat_clear(fac);
+        realRat_clear(scaleFactor);
+        compApp_poly_clear(pp);
+    }
+}
+    
+int tstar_D0_test(cacheApp_t cache, 
+//                   const compApp_t coeff0, 
+//                   const compApp_t coeff1,
+                  compApp_poly_t shiftedPol,
+                  int * nbCoeffComputed,
+                  const compDsk_t d, int depth, slong prec, metadatas_t meta ){
     
     slong degree = cacheApp_getDegree(cache);
     realRat_t fac, nrad, scaleFactor;
@@ -187,9 +232,11 @@ int tstar_D0_test(cacheApp_t cache, const compApp_t coeff0,
     realRat_set_si(fac,1,2);
     realRat_set(scaleFactor, compDsk_radiusref(d));
     
-    compApp_abs(abscoeff0, coeff0, prec);
-    compApp_abs(abscoeff1, coeff1, prec);
-    realApp_mul_realRat( abscoeff1, abscoeff1, scaleFactor, prec );
+//     compApp_abs(abscoeff0, coeff0, prec);
+//     compApp_abs(abscoeff1, coeff1, prec);
+    compApp_abs(abscoeff0, (shiftedPol->coeffs)+0, prec);
+    compApp_abs(abscoeff1, (shiftedPol->coeffs)+1, prec);
+//     realApp_mul_realRat( abscoeff1, abscoeff1, scaleFactor, prec );
     realApp_set(sumofabscoeff, abscoeff1);
     
     realRat_mul( scaleFactor, scaleFactor, compDsk_radiusref(d));
@@ -210,10 +257,16 @@ int tstar_D0_test(cacheApp_t cache, const compApp_t coeff0,
         
         if (!(res==1)){
             res = 0;
-            tstar_evaluate(pballCor, pp, c, prec, meta, depth);    /* pballCor <- (p^(i))(c)*/
-            compApp_mul_realRat_in_place(pballCor, fac, prec);     /* pballCor <- pballCor / i!*/
-            compApp_abs(abscoeffi, pballCor, prec);
-            realApp_mul_realRat( abscoeffi, abscoeffi, scaleFactor, prec );
+//             tstar_evaluate(pballCor, pp, c, prec, meta, depth);    /* pballCor <- (p^(i))(c)*/
+//             compApp_mul_realRat_in_place(pballCor, fac, prec);     /* pballCor <- pballCor / i!*/
+//             compApp_abs(abscoeffi, pballCor, prec);
+//             realApp_mul_realRat( abscoeffi, abscoeffi, scaleFactor, prec );
+            
+            tstar_evaluate((shiftedPol->coeffs)+((int) i), pp, c, prec, meta, depth);
+            compApp_mul_realRat_in_place((shiftedPol->coeffs)+((int) i), fac, prec);
+            compApp_mul_realRat_in_place((shiftedPol->coeffs)+((int) i), scaleFactor, prec);
+            compApp_abs(abscoeffi, (shiftedPol->coeffs)+((int) i), prec);
+            
             realApp_add(sumofabscoeff, sumofabscoeff, abscoeffi, prec);
             dominates = realApp_soft_compare( abscoeff0, sumofabscoeff, prec );
             if (!(dominates==1)) dominates = 0;
@@ -221,6 +274,7 @@ int tstar_D0_test(cacheApp_t cache, const compApp_t coeff0,
             compApp_mul(ballmctoi, ballmctoi, ballmc, prec);
             realRat_mul( scaleFactor, scaleFactor, compDsk_radiusref(d));
             fmpz_mul_si( realRat_denref(fac), realRat_denref(fac), (slong) i);
+            *nbCoeffComputed = (int) i;
         }
         
     }
