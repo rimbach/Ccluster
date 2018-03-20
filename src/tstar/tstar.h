@@ -91,17 +91,14 @@ int tstar_inclusion_test_wn( cacheApp_t cache,
                           int depth, /* just for display*/
                           metadatas_t meta);
 
-int tstar_numerical_test( compApp_poly_t pApprox, const compDsk_t d, slong prec, metadatas_t meta);
-int tstar_C0_test( cacheApp_t cache, const compDsk_t d, int depth, slong prec, metadatas_t meta );
+int D0N1_test ( cacheApp_t cache, compApp_poly_t pApprox, const compDsk_t d, int depth, slong prec, metadatas_t meta );
 void completeTaylorShift(cacheApp_t cache, compApp_poly_t shiftedPol, int nbCoeffComputed, const compDsk_t d, slong prec, metadatas_t meta );
 int tstar_D0_test(cacheApp_t cache, 
-//                   const compApp_t coeff0, 
-//                   const compApp_t coeff1,
                   compApp_poly_t shiftedPol,
                   int * nbCoeffComputed,
                   const compDsk_t d, int depth, slong prec, metadatas_t meta );
-int tstar_N1_test(cacheApp_t cache, const compApp_t coeff0, 
-                                    const compApp_t coeff1, 
+int tstar_N1_test(cacheApp_t cache, compApp_poly_t shiftedPol,
+                                    int * nbCoeffComputed,
                                     const compDsk_t d, int depth, slong prec, metadatas_t meta );
 
 #endif

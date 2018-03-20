@@ -210,81 +210,23 @@ tstar_res tstar_optimized( cacheApp_t cache,
     N = (int) 5+ceil(log2(1+log2(deg)));
     
 #ifdef CCLUSTER_EXPERIMENTAL
-    int restemptemp = 0;
     if ((discard)&&( CCLUSTER_INC_TEST(meta) )) {
-        restemptemp = tstar_inclusion_test_wn( cache, d, res.appPrec, depth, meta);
-//         restemptemp = tstar_inclusion_test( cache, d, res.appPrec, depth, meta);
-        if (restemptemp==1) {
+        restemp = tstar_inclusion_test_wn( cache, d, res.appPrec, depth, meta);
+        if (restemp==1) {
             compApp_poly_clear(pApprox);
             realApp_clear(sum);
             res.nbOfSol = -1;
             metadatas_add_Test( meta, depth, 0, discard, 0, 0, 0, 0);
-//             printf("&&depth: %d, success of N1 non-discarding discarding predicate\n", depth);
             return res;
         }
-        restemptemp = 0;
-        
+        restemp = 0;
     }
     
-    if ( discard && (CCLUSTER_EXP_NUM_T0(meta)||CCLUSTER_EXP_NUM_T1(meta)) 
-        && (max_nb_sols<=1) 
-       ) {
+    if ( discard && (CCLUSTER_EXP_NUM_T0(meta)||CCLUSTER_EXP_NUM_T1(meta)) && (max_nb_sols<=1) ) {
         
-        realRat_t radtothen;
-        compApp_t c;
-        realRat_init(radtothen);
-        compApp_init(c);
-        realApp_init(coeff0);
-        realApp_init(coeff1);
-        realApp_init(coeffn);
+        restemp = D0N1_test ( cache, pApprox, d, depth, res.appPrec, meta );
         
-        compApp_poly_t pshifted;
-        int nbCoeffcomputed=2;
-        compApp_poly_init2(pshifted, deg+1);
-        
-        realRat_pow_si(radtothen, compDsk_radiusref(d), deg );
-        compApp_set_compRat( c, compDsk_centerref(d), res.appPrec);
-        tstar_getApproximation( pApprox, cache, res.appPrec, meta);
-        compApp_mul_realRat((pshifted->coeffs)+((int) deg), (pApprox->coeffs)+((int) deg), radtothen, res.appPrec);
-        compApp_abs( coeffn, (pshifted->coeffs)+((int) deg), res.appPrec);
-        tstar_evaluate((pshifted->coeffs)+0, pApprox, c, res.appPrec, meta, depth);
-        tstar_getDerivative(pApprox, cache, res.appPrec, 1 , meta);
-        tstar_evaluate((pshifted->coeffs)+1, pApprox, c, res.appPrec, meta, depth);
-        compApp_mul_realRat_in_place((pshifted->coeffs)+1, compDsk_radiusref(d), res.appPrec);
-        compApp_abs(coeff0, (pshifted->coeffs)+0, res.appPrec);
-        compApp_abs(coeff1, (pshifted->coeffs)+1, res.appPrec);
-        realApp_add(sum, coeff1, coeffn, res.appPrec);
-        int test = realApp_soft_compare( coeff0, sum, res.appPrec );
-        int restemptemp = -1;
-        
-        if ( (test==1) && CCLUSTER_EXP_NUM_T0(meta) ) {
-//             printf("&&depth: %d, apply D0 discarding predicate\n", depth);
-//             restemptemp = tstar_D0_test(cache, coe0, coe1, compApp_poly_getCoeff(pApprox, compApp_poly_degree(pApprox)),
-//                                         d, depth, res.appPrec, meta );
-//             restemptemp = tstar_D0_test(cache, coe0, coe1, d, depth, res.appPrec, meta );
-            restemptemp = tstar_D0_test(cache, pshifted, &nbCoeffcomputed, d, depth, res.appPrec, meta );
-//             printf("-----, disk: "); compDsk_print(d); printf("\n");
-//             printf("nbCoeffcomputed: %d\n", nbCoeffcomputed);
-            
-//             printf("pshifted: "); compApp_poly_printd( pshifted, 20 ); printf("\n");
-            
-//             tstar_getApproximation( pApprox, cache, res.appPrec, meta);
-//             tstar_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
-//             printf("-----\n");
-//             printf("pApprox: "); compApp_poly_printd( pApprox, 20 ); printf("\n");
-        }
-        
-//         if ( (test==0) && CCLUSTER_EXP_NUM_T1(meta) ) {
-//             realApp_add(sum, coeff0, coeffn, res.appPrec);
-//             test = realApp_soft_compare( coeff1, sum, res.appPrec );
-//             if (test==1) {
-// //                 printf("&&depth: %d, apply N1 non-discarding predicate\n", depth);
-//                 restemptemp = tstar_N1_test(cache, coe0, coe1, d, depth, res.appPrec, meta );
-// //                 printf("&&depth: %d, apply N1 non-discarding predicate, res: %d\n", depth,restemptemp);
-//             }
-//         }
-        
-        if (restemptemp==0) {
+        if (restemp==0) {
             compApp_poly_clear(pApprox);
             realApp_clear(sum);
             res.nbOfSol = 0;
@@ -293,7 +235,7 @@ tstar_res tstar_optimized( cacheApp_t cache,
             return res;
         }
         
-        if (restemptemp==1) {
+        if (restemp==1) {
             compApp_poly_clear(pApprox);
             realApp_clear(sum);
             res.nbOfSol = 1;
@@ -301,27 +243,18 @@ tstar_res tstar_optimized( cacheApp_t cache,
 //             printf("&&depth: %d, success of N1 non-discarding discarding predicate\n", depth);
             return res;
         }
-        
-        completeTaylorShift(cache, pshifted, nbCoeffcomputed, d, res.appPrec, meta );
+    
         TS_has_been_computed = 1;
-        compApp_poly_set(pApprox, pshifted);
-        
-        realApp_zero(sum);
-        realRat_clear(radtothen);
-        compApp_clear(c);
-        realApp_clear(coeff0);
-        realApp_clear(coeff1);
-        realApp_clear(coeffn);
-        compApp_poly_clear(pshifted);
+        restemp = 0;
     }
 #endif
 
-    if ((restemp==0)&&(TS_has_been_computed==0)) {
+    if (TS_has_been_computed==0) {
         tstar_getApproximation( pApprox, cache, res.appPrec, meta);
         tstar_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
     }
     
-    if ( (restemp==0)&&(discard)&&(metadatas_useAnticipate(meta)) ){
+    if ( (discard)&&(metadatas_useAnticipate(meta)) ){
         realApp_init(coeff0);
         realApp_init(coeffn);
         
