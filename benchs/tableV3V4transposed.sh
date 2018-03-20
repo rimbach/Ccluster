@@ -224,7 +224,7 @@ done
 POL_NAME="Wilkinson"
 
 for DEG in $DEGREE; do
-    LINE_TAB="$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$"
+    LINE_TAB="$POL_NAME, \$d=$DEG\$"
     
     if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$REP"/"$POL_NAME"_"$DEG"_v3.out" > /dev/stderr
@@ -253,7 +253,7 @@ done
 POL_NAME="Spiral"
 
 for DEG in $DEGREE; do
-    LINE_TAB="$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$"
+    LINE_TAB="$POL_NAME, \$d=$DEG\$"
     
     if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$REP"/"$POL_NAME"_"$DEG"_v3.out" > /dev/stderr
