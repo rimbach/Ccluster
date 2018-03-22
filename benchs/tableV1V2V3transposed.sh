@@ -159,7 +159,7 @@ fi
 
 HEAD_TABLE="\begin{tabular}{l||c|c||c|c||c|c||}"
 FIRST_LINE_TABLE="     &\multicolumn{2}{c||}{ V1 }&\multicolumn{2}{c||}{ V2 }&\multicolumn{2}{c||}{ V3 }\\\\\\hline"
-SECOND_LINE_TABLE="     & (n1, n2, n3) & tV1 & (n1, n2, n3) & tV2/tV1 & (n1, n2, n3) & tV3/tV1\\\\\\hline "
+SECOND_LINE_TABLE="     & (n1, n2, n3) & tV1 & (n1, n2, n3) & tV2/tV1 & (n1, n2, n3) & tV3/tV1\\\\\\hline\\hline "
 TAIL_TAB="\end{tabular}"
 
 LINES_TAB=""

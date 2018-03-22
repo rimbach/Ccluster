@@ -125,8 +125,8 @@ tableV1V2V3m:
 tableV3V4m:
 	./tableV3V4transposed.sh --purge --degree="64 128 256" --bitsize=14 --nbSols="11 12 13" --pow=3 --itts="3 4 5" 2>/dev/null
 	
-tableV4escapem:
-	./tableV4escape.sh --purge --degree=64 --bitsize=14 --epsilon=-53 --eps1=-53 --eps2=-530 --eps3=-5300  --nbSols=11 --pow=3 --itts=4 2>/dev/null
+tableV4V4escm:
+	./tableV4V4esc.sh --purge --degree=64 --bitsize=14 --epsilon=-53 --eps1=-53 --eps2=-530 --eps3=-5300  --nbSols=11 --pow=3 --itts=4 2>/dev/null
 
 #==================================================
 # COMPILING 

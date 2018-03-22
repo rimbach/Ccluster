@@ -153,7 +153,8 @@ fi
 
 HEAD_TABLE="\begin{tabular}{l||c|c||c|c||}"
 FIRST_LINE_TABLE="     &\multicolumn{2}{c||}{ V3 }&\multicolumn{2}{c||}{ V4 }\\\\\\hline"
-SECOND_LINE_TABLE="     & (n1, n2, n3) & tV1 & (n1, n2, n3) & tV4/tV3\\\\\\hline "
+# SECOND_LINE_TABLE="     & (n1, n2, n3) & tV3 & (n1, n2, n3) & tV4/tV3\\\\\\hline\\hline "
+SECOND_LINE_TABLE="     & n3 & tV3 & n3 & tV4/tV3\\\\\\hline\\hline "
 TAIL_TAB="\end{tabular}"
 
 LINES_TAB=""
@@ -161,121 +162,100 @@ TEMPTABFILE="temptabfile.txt"
 rm -rf $TEMPTABFILE
 touch $TEMPTABFILE
 
+make_line()
+{
+    LINE=""
+    FILE1=$1
+    FILE2=$2
+#     N1V3=$(grep "tree size:" $FILE1 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+#     N1V4=$(grep "tree size:" $FILE2 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+#     N2V3=$(grep -m 1 "conclusion" $FILE1 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+#     N2V4=$(grep -m 1 "conclusion" $FILE2 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    N3V3=$(grep -m 1 "total number GR:" $FILE1 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    N3V4=$(grep -m 1 "total number GR:" $FILE2 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TV3=$(grep "total time:" $FILE1 | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TV4=$(grep "total time:" $FILE2 | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+#     LINE=$LINE"& ($N1V3,$N2V3,$N3V3) & `format_time $TV3`"
+#     LINE=$LINE"& ($N1V4,$N2V4,$N3V4) & `ratio_time $TV4 $TV3`"
+    LINE=$LINE"& $N3V3 & `format_time $TV3`"
+    LINE=$LINE"& $N3V4 & `ratio_time $TV4 $TV3`"
+}
+
 #-----------------------------------------------bernoulli-----------------------------------------
 
 POL_NAME="Bernoulli"
 
 for DEG in $DEGREE; do
-    LINE_TAB="$POL_NAME, \$d=$DEG\$"  
-    
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$REP"/"$POL_NAME"_"$DEG"_v3.out" > /dev/stderr
-        ./benchBernoulli $DEG $BOX $EPSILONCCL $V3FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v3.out"
+    LINE_TAB="Bernoulli, \$d=$DEG\$"  
+    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE1 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
+        ./benchBernoulli $DEG $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
     fi
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v4.out" ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$REP"/"$POL_NAME"_"$DEG"_v4.out" > /dev/stderr
-        ./benchBernoulli $DEG $BOX $EPSILONCCL $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE2 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
+        ./benchBernoulli $DEG $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
     fi
-    N1V3=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v3.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N1V4=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v4.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V3=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V4=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V3=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V4=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    TV3=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    TV4=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `format_time $TV3`"
-    LINE_TAB=$LINE_TAB"& ($N1V4,$N2V4,$N3V4) & `ratio_time $TV4 $TV3`"
-
-    LINE_TAB=$LINE_TAB"\\\\\\hline"
-    echo $LINE_TAB >> $TEMPTABFILE
+      make_line $FILE1 $FILE2
+      echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
 
 #-----------------------------------------------Mignotte-----------------------------------------
 POL_NAME="Mignotte"
 
 for DEG in $DEGREE; do
-    LINE_TAB="$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$"
-    
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$REP"/"$POL_NAME"_"$DEG"_v3.out" > /dev/stderr
-        ./benchMignotte $DEG $BITSIZE $BOX $EPSILONCCL $V3FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v3.out"
+    LINE_TAB="Mignotte, \$d=$DEG\$, \$\sigma=$BITSIZE\$"
+    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE1 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
+        ./benchMignotte $DEG $BITSIZE $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
     fi
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v4.out" ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$REP"/"$POL_NAME"_"$DEG"_v4.out" > /dev/stderr
-        ./benchMignotte $DEG $BITSIZE $BOX $EPSILONCCL $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE2 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
+        ./benchMignotte $DEG $BITSIZE $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
     fi
-    N1V3=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v3.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N1V4=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v4.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V3=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V4=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V3=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V4=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    TV3=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    TV4=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `format_time $TV3`"
-    LINE_TAB=$LINE_TAB"& ($N1V4,$N2V4,$N3V4) & `ratio_time $TV4 $TV3`"
-
-    LINE_TAB=$LINE_TAB"\\\\\\hline"
-    echo $LINE_TAB >> $TEMPTABFILE
+    make_line $FILE1 $FILE2
+    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
 # 
 #-----------------------------------------------Wilkinson-----------------------------------------
 POL_NAME="Wilkinson"
 
 for DEG in $DEGREE; do
-    LINE_TAB="$POL_NAME, \$d=$DEG\$"
-    
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$REP"/"$POL_NAME"_"$DEG"_v3.out" > /dev/stderr
-        ./benchWilkinson $DEG $BOX $EPSILONCCL $V3FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v3.out"
+    LINE_TAB="Wilkinson, \$d=$DEG\$"
+    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE1 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
+        ./benchWilkinson $DEG $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
     fi
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v4.out" ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$REP"/"$POL_NAME"_"$DEG"_v4.out" > /dev/stderr
-        ./benchWilkinson $DEG $BOX $EPSILONCCL $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE2 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
+        ./benchWilkinson $DEG $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
     fi
-    N1V3=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v3.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N1V4=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v4.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V3=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V4=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V3=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V4=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    TV3=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    TV4=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `format_time $TV3`"
-    LINE_TAB=$LINE_TAB"& ($N1V4,$N2V4,$N3V4) & `ratio_time $TV4 $TV3`"
-
-    LINE_TAB=$LINE_TAB"\\\\\\hline"
-    echo $LINE_TAB >> $TEMPTABFILE
+    make_line $FILE1 $FILE2
+    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
 
 # #-----------------------------------------------Spiral-----------------------------------------
 POL_NAME="Spiral"
 
 for DEG in $DEGREE; do
-    LINE_TAB="$POL_NAME, \$d=$DEG\$"
-    
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$REP"/"$POL_NAME"_"$DEG"_v3.out" > /dev/stderr
-        ./benchSpiral $DEG $BOX $EPSILONCCL $V3FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v3.out"
+    LINE_TAB="Spiral, \$d=$DEG\$"
+    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE1 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
+        ./benchSpiral $DEG $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
     fi
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v4.out" ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$REP"/"$POL_NAME"_"$DEG"_v4.out" > /dev/stderr
-        ./benchSpiral $DEG $BOX $EPSILONCCL $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE2 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
+        ./benchSpiral $DEG $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
     fi
-    N1V3=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v3.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N1V4=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v4.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V3=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V4=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V3=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V4=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    TV3=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    TV4=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `format_time $TV3`"
-    LINE_TAB=$LINE_TAB"& ($N1V4,$N2V4,$N3V4) & `ratio_time $TV4 $TV3`"
-
-    LINE_TAB=$LINE_TAB"\\\\\\hline"
-    echo $LINE_TAB >> $TEMPTABFILE
+    make_line $FILE1 $FILE2
+    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
 
 
@@ -287,58 +267,38 @@ for NBSOL in $NBSOLS; do
     DEG=$(( $NBSOL * $(( $NBSOL + 1 )) ))
     DEG=$(( $DEG / 2 ))
 
-    LINE_TAB="$POL_NAME, \$nbSols=$NBSOL\$, \$d=$DEG\$"
-    
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
-        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V3 output in "$REP"/"$POL_NAME"_"$DEG"_v3.out" > /dev/stderr
-        ./benchWilkMul $NBSOL $BOX $EPSILONCCL $V3FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v3.out"
+    LINE_TAB="Wilkinson Mult., \$nbSols=$NBSOL\$, \$d=$DEG\$"
+    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE1 ]; then
+        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V3 output in "$FILE1 > /dev/stderr
+        ./benchWilkMul $NBSOL $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
     fi
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v4.out" ]; then
-        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V4 output in "$REP"/"$POL_NAME"_"$DEG"_v4.out" > /dev/stderr
-        ./benchWilkMul $NBSOL $BOX $EPSILONCCL $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE2 ]; then
+        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V4 output in "$FILE2 > /dev/stderr
+        ./benchWilkMul $NBSOL $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
     fi
-    N1V3=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v3.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N1V4=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v4.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V3=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V4=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V3=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V4=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    TV3=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    TV4=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `format_time $TV3`"
-    LINE_TAB=$LINE_TAB"& ($N1V4,$N2V4,$N3V4) & `ratio_time $TV4 $TV3`"
-
-    LINE_TAB=$LINE_TAB"\\\\\\hline"
-    echo $LINE_TAB >> $TEMPTABFILE
+    make_line $FILE1 $FILE2
+    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
 
 #-----------------------------------------------MignotteGen-----------------------------------------
 POL_NAME="MignotteGen"
 
 for DEG in $DEGREE; do
-    LINE_TAB="$POL_NAME, \$d=$DEG\$, \$\sigma=$BITSIZE\$, \$k=$POW\$"
-    
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$REP"/"$POL_NAME"_"$DEG"_v3.out" > /dev/stderr
-        ./benchMignotteGen $DEG $BITSIZE $POW $BOX $EPSILONCCL $V3FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v3.out"
+    LINE_TAB="Mignotte Mult., \$d=$DEG\$, \$\sigma=$BITSIZE\$, \$k=$POW\$"
+    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE1 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
+        ./benchMignotteGen $DEG $BITSIZE $POW $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
     fi
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v4.out" ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$REP"/"$POL_NAME"_"$DEG"_v4.out" > /dev/stderr
-        ./benchMignotteGen $DEG $BITSIZE $POW $BOX $EPSILONCCL $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE2 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
+        ./benchMignotteGen $DEG $BITSIZE $POW $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
     fi
-    N1V3=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v3.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N1V4=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v4.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V3=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V4=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V3=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V4=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    TV3=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    TV4=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `format_time $TV3`"
-    LINE_TAB=$LINE_TAB"& ($N1V4,$N2V4,$N3V4) & `ratio_time $TV4 $TV3`"
-
-    LINE_TAB=$LINE_TAB"\\\\\\hline"
-    echo $LINE_TAB >> $TEMPTABFILE
+    make_line $FILE1 $FILE2
+    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
 # 
 # #-----------------------------------------------Cluster-----------------------------------------
@@ -348,29 +308,19 @@ for ITT in $ITTS; do
     
     DEG=$(( 3 ** $ITT ))
 
-    LINE_TAB="$POL_NAME, \$d=$DEG\$"
-    
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v3.out" ]; then
-        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V3 output in "$REP"/"$POL_NAME"_"$DEG"_v3.out" > /dev/stderr
-        ./benchCluster $ITT $BOX $EPSILONCCL $V3FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v3.out"
+    LINE_TAB="Nested Clusters, \$d=$DEG\$"
+    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE1 ]; then
+        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V3 output in "$FILE1 > /dev/stderr
+        ./benchCluster $ITT $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
     fi
-    if [ ! -e $REP"/"$POL_NAME"_"$DEG"_v4.out" ]; then
-        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V4 output in "$REP"/"$POL_NAME"_"$DEG"_v4.out" > /dev/stderr
-        ./benchCluster $ITT $BOX $EPSILONCCL $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEG"_v4.out"
+    if [ ! -e $FILE2 ]; then
+        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V4 output in "$FILE2 > /dev/stderr
+        ./benchCluster $ITT $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
     fi
-    N1V3=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v3.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N1V4=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEG"_v4.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V3=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N2V4=$(grep -m 1 "conclusion" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V3=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    N3V4=$(grep -m 1 "total number GR:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    TV3=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    TV4=$(grep "total time:" $REP"/"$POL_NAME"_"$DEG"_v4.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `format_time $TV3`"
-    LINE_TAB=$LINE_TAB"& ($N1V4,$N2V4,$N3V4) & `ratio_time $TV4 $TV3`"
-
-    LINE_TAB=$LINE_TAB"\\\\\\hline"
-    echo $LINE_TAB >> $TEMPTABFILE
+    make_line $FILE1 $FILE2
+    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
 
 echo $HEAD_TABLE
