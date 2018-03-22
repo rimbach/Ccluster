@@ -312,11 +312,11 @@ for ITT in $ITTS; do
     FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
     FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
     if [ ! -e $FILE1 ]; then
-        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V3 output in "$FILE1 > /dev/stderr
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
         ./benchCluster $ITT $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
     fi
     if [ ! -e $FILE2 ]; then
-        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V4 output in "$FILE2 > /dev/stderr
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
         ./benchCluster $ITT $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
     fi
     make_line $FILE1 $FILE2

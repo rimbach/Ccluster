@@ -163,12 +163,16 @@ for DEG in $DEGREES; do
     fi
     $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
     if [ ! -e $FILENAME_MPSOLVE_U_OUT ]; then
-        echo "Isolating roots in C with MPSOLVE UNISOLVE........."
-        (time $MPSOLVE_CALL $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_U_OUT) &>> $FILENAME_MPSOLVE_U_OUT
+        if [ $(( $DEG < 300 ? 0 : 1 )) -eq 0 ]; then
+            echo "Isolating roots in C with MPSOLVE UNISOLVE........." > /dev/stderr
+            (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_U_OUT) &>> $FILENAME_MPSOLVE_U_OUT
+        else
+            echo "real    \$>1000\$" > $FILENAME_MPSOLVE_U_OUT
+        fi
     fi
     if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
-        echo "Isolating roots in C with MPSOLVE SECSOLVE........."
-        (time $MPSOLVE_CALL_S $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_S_OUT) &>> $FILENAME_MPSOLVE_S_OUT
+        echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
+        (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL_S $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_S_OUT) &>> $FILENAME_MPSOLVE_S_OUT
     fi
     TCCLUSTER_L=$(grep "time:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     TDCCLUSTER_L=$(grep "tree depth:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
@@ -182,8 +186,8 @@ for DEG in $DEGREES; do
     NBCLUSTERS_G=$(grep "number of clusters:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
     NBSOLUTION_G=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
     
-    TMPSOLVE=$(grep "user" $FILENAME_MPSOLVE_U_OUT| cut -f2 -d'r' | tr -d ' ')
-    TMPSOLVE_S=$(grep "user" $FILENAME_MPSOLVE_S_OUT| cut -f2 -d'r' | tr -d ' ')
+    TMPSOLVE=$(grep "real" $FILENAME_MPSOLVE_U_OUT| cut -f2 -d'l' | tr -d ' ')
+    TMPSOLVE_S=$(grep "real" $FILENAME_MPSOLVE_S_OUT| cut -f2 -d'l' | tr -d ' ')
     
     LINE_TAB=$LINE_TAB"&("$NBSOLUTION_L":"$NBCLUSTERS_L")&("$TDCCLUSTER_L":"$TSCCLUSTER_L")&`format_time $TCCLUSTER_L`"
     LINE_TAB=$LINE_TAB"&("$NBSOLUTION_G":"$NBCLUSTERS_G")&("$TDCCLUSTER_G":"$TSCCLUSTER_G")&`format_time $TCCLUSTER_G`"

@@ -119,6 +119,9 @@ testWilkinson1 tW1:
 # TABLES 
 #==================================================
 
+tableBernoullim:
+	./tableBernoulli.sh --purge --degrees="64 128" --stop-when-compact --anticipate 2>/dev/null > tableBernoulli.txt &
+	
 tableV1V2V3m:
 	./tableV1V2V3transposed.sh --purge --degree=64 --bitsize=14 --nbSols=11 --pow=3 --itts=4 2>/dev/null
 	
