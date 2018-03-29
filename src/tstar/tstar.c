@@ -209,7 +209,7 @@ tstar_res tstar_optimized( cacheApp_t cache,
     realApp_t coeff0, coeff1, coeffn; /* for anticipate */
     int anticipate_already_applied = 0;
 //     N = (int) 5+ceil(log2(1+log2(deg)));
-    N = (int) 5+ceil(log2(1+log2(deg)));
+    N = (int) 4+ceil(log2(1+log2(deg)));
     
 #ifdef CCLUSTER_EXPERIMENTAL
     if ((discard)&&( CCLUSTER_INC_TEST(meta) )) {
