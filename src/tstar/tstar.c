@@ -361,7 +361,8 @@ tstar_res tstar_optimized( cacheApp_t cache,
         
         if ( (discard) && (metadatas_useAnticipate(meta)) && (anticipate_already_applied==0) && (restemp == 0) ) {
            
-            int test_anticipate = ((0x1 << (N-iteration)) <= (compApp_poly_degree(pApprox)/2)); 
+//             int test_anticipate = ((0x1 << (N-iteration)) <= (compApp_poly_degree(pApprox)/2));
+            int test_anticipate = ((0x1 << (N-iteration)) <= (compApp_poly_degree(pApprox)/4));
             if (test_anticipate) {
                 anticipate_already_applied = 1;
                 realApp_init(coeff0);
