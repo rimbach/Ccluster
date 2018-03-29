@@ -89,7 +89,7 @@ if [ -z "$BLOCAL" ]; then
 fi
 
 if [ -z "$BGLOBAL" ]; then
-   BGLOBAL="0,1,0,1,150,1"
+   BGLOBAL="0,1,0,1,300,1"
 fi
 
 if [ -z "$STOPWHENCOMPACT" ]; then
