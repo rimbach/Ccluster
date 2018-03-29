@@ -135,7 +135,8 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
     compApp_poly_init2(pApprox, cacheApp_getDegree(cache)+1);
     realApp_t sum;
     realApp_init(sum);
-    N = (int) 5+ceil(log2(1+log2(cacheApp_getDegree(cache))));
+//     N = (int) 5+ceil(log2(1+log2(cacheApp_getDegree(cache))));
+    N = (int) 4+ceil(log2(1+log2(cacheApp_getDegree(cache))));
     
     tstar_getApproximation( pApprox, cache, res.appPrec, meta);
     tstar_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
@@ -207,6 +208,7 @@ tstar_res tstar_optimized( cacheApp_t cache,
     
     realApp_t coeff0, coeff1, coeffn; /* for anticipate */
     int anticipate_already_applied = 0;
+//     N = (int) 5+ceil(log2(1+log2(deg)));
     N = (int) 5+ceil(log2(1+log2(deg)));
     
 #ifdef CCLUSTER_EXPERIMENTAL

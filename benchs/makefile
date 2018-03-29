@@ -120,10 +120,10 @@ testWilkinson1 tW1:
 #==================================================
 
 tableBernoullim:
-	./tableBernoulli.sh --degrees="64 128" --stop-when-compact --anticipate 2>/dev/null > tableBernoulli.txt &
+	./tableBernoulli.sh --degrees="64 128 191 256 383 512 767" --stop-when-compact --anticipate 2>/dev/null > tableBernoulli.txt &
 	
 tableV1V2V3m:
-	./tableV1V2V3transposed.sh --degree=64 --bitsize=14 --nbSols=11 --pow=3 --itts=4 2>/dev/null
+	./tableV1V2V3transposed.sh --purge --degree=64 --bitsize=14 --nbSols=11 --pow=3 --itts=4 2>/dev/null
 	
 tableV3V4m:
 	./tableV3V4transposed.sh --degree="64 128 256" --bitsize=14 --nbSols="11 12 13" --pow=3 --itts="3 4 5" 2>/dev/null
