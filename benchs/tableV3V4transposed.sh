@@ -34,7 +34,8 @@ ratio_time()
 {
     NUM=$1
     DEN=$2
-    RATIO=0`echo $NUM/$DEN|bc -l`
+#     RATIO=0`echo $NUM/$DEN|bc -l`
+    RATIO=`echo $NUM/$DEN|bc -l`
 #     echo $RATIO
     echo `format_time $RATIO`
 }
@@ -154,7 +155,7 @@ fi
 HEAD_TABLE="\begin{tabular}{l||c|c||c|c||}"
 FIRST_LINE_TABLE="     &\multicolumn{2}{c||}{ V3 }&\multicolumn{2}{c||}{ V4 }\\\\\\hline"
 # SECOND_LINE_TABLE="     & (n1, n2, n3) & tV3 & (n1, n2, n3) & tV4/tV3\\\\\\hline\\hline "
-SECOND_LINE_TABLE="     & n3 & tV3 & n3 & tV4/tV3\\\\\\hline\\hline "
+SECOND_LINE_TABLE="     & n3 & tV3 & n3 & tV3/tV4\\\\\\hline\\hline "
 TAIL_TAB="\end{tabular}"
 
 LINES_TAB=""
@@ -178,7 +179,7 @@ make_line()
 #     LINE=$LINE"& ($N1V3,$N2V3,$N3V3) & `format_time $TV3`"
 #     LINE=$LINE"& ($N1V4,$N2V4,$N3V4) & `ratio_time $TV4 $TV3`"
     LINE=$LINE"& $N3V3 & `format_time $TV3`"
-    LINE=$LINE"& $N3V4 & `ratio_time $TV4 $TV3`"
+    LINE=$LINE"& $N3V4 & `ratio_time $TV3 $TV4`"
 }
 
 #-----------------------------------------------bernoulli-----------------------------------------
