@@ -34,7 +34,8 @@ ratio_time()
 {
     NUM=$1
     DEN=$2
-    RATIO=0`echo $NUM/$DEN|bc -l`
+    RATIO=`echo $NUM/$DEN|bc -l`
+#     RATIO=0`echo $NUM/$DEN|bc -l`
 #     echo $RATIO
     echo `format_time $RATIO`
 }
@@ -200,8 +201,8 @@ TV2=$(grep "total time:" $REP"/"$POL_NAME"_v2.out" | cut -f2 -d':'| cut -f1 -d's
 TV3=$(grep "total time:" $REP"/"$POL_NAME"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
 
 LINE_TAB=$LINE_TAB"& ($N1V1,$N2V1,$N3V1) & `format_time $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV2 $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV3 $TV1`"
+LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV1 $TV2`"
+LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV1 $TV3`"
 
 LINE_TAB=$LINE_TAB"\\\\\\hline"
 echo $LINE_TAB >> $TEMPTABFILE
@@ -239,8 +240,8 @@ TV2=$(grep "total time:" $REP"/"$POL_NAME"_v2.out" | cut -f2 -d':'| cut -f1 -d's
 TV3=$(grep "total time:" $REP"/"$POL_NAME"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
 
 LINE_TAB=$LINE_TAB"& ($N1V1,$N2V1,$N3V1) & `format_time $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV2 $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV3 $TV1`"
+LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV1 $TV2`"
+LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV1 $TV3`"
 
 LINE_TAB=$LINE_TAB"\\\\\\hline"
 echo $LINE_TAB >> $TEMPTABFILE
@@ -278,8 +279,8 @@ TV2=$(grep "total time:" $REP"/"$POL_NAME"_v2.out" | cut -f2 -d':'| cut -f1 -d's
 TV3=$(grep "total time:" $REP"/"$POL_NAME"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
 
 LINE_TAB=$LINE_TAB"& ($N1V1,$N2V1,$N3V1) & `format_time $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV2 $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV3 $TV1`"
+LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV1 $TV2`"
+LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV1 $TV3`"
 
 LINE_TAB=$LINE_TAB"\\\\\\hline"
 echo $LINE_TAB >> $TEMPTABFILE
@@ -317,8 +318,8 @@ TV2=$(grep "total time:" $REP"/"$POL_NAME"_v2.out" | cut -f2 -d':'| cut -f1 -d's
 TV3=$(grep "total time:" $REP"/"$POL_NAME"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
 
 LINE_TAB=$LINE_TAB"& ($N1V1,$N2V1,$N3V1) & `format_time $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV2 $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV3 $TV1`"
+LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV1 $TV2`"
+LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV1 $TV3`"
 
 LINE_TAB=$LINE_TAB"\\\\\\hline"
 echo $LINE_TAB >> $TEMPTABFILE
@@ -361,8 +362,8 @@ TV2=$(grep "total time:" $REP"/"$POL_NAME"_v2.out" | cut -f2 -d':'| cut -f1 -d's
 TV3=$(grep "total time:" $REP"/"$POL_NAME"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
 
 LINE_TAB=$LINE_TAB"& ($N1V1,$N2V1,$N3V1) & `format_time $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV2 $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV3 $TV1`"
+LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV1 $TV2`"
+LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV1 $TV3`"
 
 LINE_TAB=$LINE_TAB"\\\\\\hline"
 echo $LINE_TAB >> $TEMPTABFILE
@@ -401,8 +402,8 @@ TV2=$(grep "total time:" $REP"/"$POL_NAME"_v2.out" | cut -f2 -d':'| cut -f1 -d's
 TV3=$(grep "total time:" $REP"/"$POL_NAME"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
 
 LINE_TAB=$LINE_TAB"& ($N1V1,$N2V1,$N3V1) & `format_time $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV2 $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV3 $TV1`"
+LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV1 $TV2`"
+LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV1 $TV3`"
 
 LINE_TAB=$LINE_TAB"\\\\\\hline"
 echo $LINE_TAB >> $TEMPTABFILE
@@ -442,8 +443,8 @@ TV2=$(grep "total time:" $REP"/"$POL_NAME"_v2.out" | cut -f2 -d':'| cut -f1 -d's
 TV3=$(grep "total time:" $REP"/"$POL_NAME"_v3.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
 
 LINE_TAB=$LINE_TAB"& ($N1V1,$N2V1,$N3V1) & `format_time $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV2 $TV1`"
-LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV3 $TV1`"
+LINE_TAB=$LINE_TAB"& ($N1V2,$N2V2,$N3V2) & `ratio_time $TV1 $TV2`"
+LINE_TAB=$LINE_TAB"& ($N1V3,$N2V3,$N3V3) & `ratio_time $TV1 $TV3`"
 
 LINE_TAB=$LINE_TAB"\\\\\\hline"
 echo $LINE_TAB >> $TEMPTABFILE
