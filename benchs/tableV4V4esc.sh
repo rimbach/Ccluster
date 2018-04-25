@@ -224,7 +224,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -246,7 +246,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4p_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -275,7 +275,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -297,7 +297,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4p_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -326,7 +326,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -348,7 +348,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4p_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -377,7 +377,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -399,7 +399,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4p_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -432,7 +432,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -454,7 +454,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4p_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -484,7 +484,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -506,7 +506,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4p_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -537,7 +537,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
@@ -559,7 +559,7 @@ for EPS in $EPSS; do
         LINE_TAB=$LINE_TAB"& `format_time $TREF`"
     else
         TACT=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v4p_$EPS.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-        LINE_TAB=$LINE_TAB"& `ratio_time $TACT $TREF`"
+        LINE_TAB=$LINE_TAB"& `ratio_time $TREF $TACT`"
     fi
     INDEX=$(( 1 + $INDEX ))
 done
