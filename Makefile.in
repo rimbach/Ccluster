@@ -122,7 +122,7 @@ install: library
 
 benchs: library headers_benchs \
 	benchMignotte benchMignotteMul benchMignotteGen\
-	benchBernoulli benchWilkinson \
+	benchBernoulli benchBernoulliDAC benchWilkinson \
 	benchWilkRat benchSpiral \
 	benchCluster benchWilkMul \
 	genPolFile
@@ -146,6 +146,10 @@ benchMignotteGen: $(BENCHS_DIR)/benchMignotteGen.o
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
 	
 benchBernoulli: $(BENCHS_DIR)/benchBernoulli.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchBernoulliDAC: $(BENCHS_DIR)/benchBernoulliDAC.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
 	

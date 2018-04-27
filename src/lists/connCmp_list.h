@@ -79,6 +79,11 @@ LISTS_INLINE void connCmp_list_insert_sorted(connCmp_list_t l, connCmp_ptr b){
     gen_list_insert_sorted(l, b, connCmp_isgreater_for_list);
 }
 
+LISTS_INLINE void connCmp_list_insert_sorted_inv(connCmp_list_t l, connCmp_ptr b){
+    gen_list_insert_sorted(l, b, connCmp_isless_for_list);
+//     gen_list_insert_sorted(l, b, connCmp_isgreater_for_list);
+}
+
 LISTS_INLINE void connCmp_list_fprint(FILE * file, const connCmp_list_t l){
     gen_list_fprint(file, l, connCmp_fprint_for_list);
 }
