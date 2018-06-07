@@ -277,7 +277,7 @@ int  ccluster_compDsk_is_separated( const compDsk_t d, connCmp_list_t qMainLoop,
     }
     return res;
 }
-    
+                         
 void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
     
     int separationFlag;
@@ -314,7 +314,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
 #endif
     
     while (!connCmp_list_is_empty(qMainLoop)) {
-        
+
         resNewton.nflag = 0;
         
         ccur = connCmp_list_pop(qMainLoop);
@@ -326,6 +326,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
+        
 #ifdef CCLUSTER_HAVE_PTHREAD
         if (!connCmp_list_is_empty(toBeBisected))
             separationFlag = separationFlag&&ccluster_compDsk_is_separated(fourCCDisk, toBeBisected, dummy);
@@ -335,23 +336,26 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
 //         if ((separationFlag)) {
-//             printf("depth: %d, connCmp_nSolsref(ccur): %d\n", depth, connCmp_nSolsref(ccur));
+//             printf("depth: %d, connCmp_nSolsref(ccur): %d, prec: %d\n", (int) depth, (int) connCmp_nSolsref(ccur), (int) prec);
             if (connCmp_nSolsref(ccur)==-1){
                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
+//                 ???
+                prec = resTstar.appPrec;
             }
-//             printf("validate: prec avant: %d prec apres: %d\n", prec, resTstar.appPrec);
-            prec = resTstar.appPrec;
+//             printf("validate: prec avant: %d prec apres: %d\n", (int) prec, (int) resTstar.appPrec);
+//             ???
+//             prec = resTstar.appPrec;
         }
         
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && !widthFlag )
             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) ) {
-            
+        
             if (connCmp_nSols(ccur)==1) 
                 compRat_set(initPoint, compBox_centerref(componentBox));
             else
                 connCmp_find_point_outside_connCmp( initPoint, ccur, metadatas_initBref(meta) );
-            
+        
             connCmp_ptr nCC;
             nCC = (connCmp_ptr) malloc (sizeof(connCmp));
             connCmp_init(nCC);
@@ -379,8 +383,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
                 connCmp_newSuref(ccur) = 0;
                 connCmp_clear(nCC);
                 free(nCC);
-            }
-                
+            }  
         }
         
         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
@@ -442,7 +445,6 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
             }
         }
 #endif
-        
     }
     
     compBox_clear(componentBox);
@@ -491,6 +493,48 @@ void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const r
     realRat_clear(factor);
     connCmp_list_clear(qMainLoop);
     connCmp_list_clear(qPrepLoop);
+    connCmp_list_clear(discardedCcs);
+    
+    chronos_toc_CclusAl(metadatas_chronref(meta));
+}
+
+void ccluster_refine( connCmp_list_t qResults, 
+                      connCmp_list_t qMainLoop,
+//                       const compBox_t initialBox, 
+                      const realRat_t eps, 
+                      cacheApp_t cache, 
+                      metadatas_t meta){
+    
+    chronos_tic_CclusAl(metadatas_chronref(meta));
+    
+//     realRat_t factor;
+//     realRat_init(factor);
+//     realRat_set_si(factor, 5, 4);
+//     
+//     compBox_ptr bEnlarged;
+//     bEnlarged = (compBox_ptr) malloc (sizeof(compBox));
+//     compBox_init(bEnlarged);
+//     compBox_inflate_realRat(bEnlarged, initialBox, factor);
+//     compBox_nbMSolref(bEnlarged) = cacheApp_getDegree ( cache );
+//     
+//     connCmp_ptr initialCC;
+//     initialCC = (connCmp_ptr) malloc (sizeof(connCmp));
+//     connCmp_init_compBox(initialCC, bEnlarged);
+    
+    connCmp_list_t discardedCcs;
+//     connCmp_list_init(qMainLoop);
+//     connCmp_list_init(qPrepLoop);
+    connCmp_list_init(discardedCcs);
+    
+//     connCmp_list_push(qPrepLoop, initialCC);
+//     printf("preploop: \n");
+//     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
+//     connCmp_list_push(qMainLoop, ccur);
+    ccluster_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    
+//     realRat_clear(factor);
+//     connCmp_list_clear(qMainLoop);
+//     connCmp_list_clear(qPrepLoop);
     connCmp_list_clear(discardedCcs);
     
     chronos_toc_CclusAl(metadatas_chronref(meta));
@@ -580,6 +624,36 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
     strategies_clear(strat);
     metadatas_clear(meta);
     connCmp_list_clear(qRes);
+}
+
+void ccluster_refine_forJulia( connCmp_list_t qResults,
+                               connCmp_list_t qMainLoop,
+                                  void(*func)(compApp_poly_t, slong), 
+                                  const compBox_t initialBox, 
+                                  const realRat_t eps, 
+                                  int st, 
+                                  int verb){
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    
+    cacheApp_init(cache, func);
+    strategies_init(strat);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    
+    ccluster_refine( qResults, qMainLoop, eps, cache, meta);
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    if (verb>=3) {
+        connCmp_list_print_for_results(stdout, qResults, meta);
+//         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
 }
 
 void ccluster_interface_forJulia( connCmp_list_t qResults, 
