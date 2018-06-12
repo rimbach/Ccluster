@@ -8,7 +8,7 @@
 /*  by the Free Software Foundation; either version 2.1 of the License, or    */
 /*  (at your option) any later version.  See <http://www.gnu.org/licenses/>.  */
 /* ************************************************************************** */
-
+/* test */
 #include "ccluster/cclusterDAC.h"
 
 void ccluster_prep_loop_DAC( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, connCmp_list_t discardedCcs, cacheApp_t cache, metadatas_t meta) {
