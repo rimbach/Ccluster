@@ -62,8 +62,8 @@ verbose:
 clean: 
 	@echo "Cleaning all"
 	rm -rf $(LIB_OBJS) $(LIB_LOBJS) libccluster.a $(CCLUSTER_LIB) \
-	$(CCLUSTER_LIBNAME) $(CCLUSTER_LIBNAME).$(CCLUSTER_MAJOR)
-	
+	$(CCLUSTER_LIBNAME) $(CCLUSTER_LIBNAME).$(CCLUSTER_MAJOR) 
+	rm -rf build
 # 	$(wildcard $(CCLUSTER_LIBNAME)*)
 
 distclean: clean benchsclean
