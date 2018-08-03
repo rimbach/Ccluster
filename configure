@@ -515,7 +515,7 @@ if [ -z "$CCLUSTER_LIB" ]; then
       CYGWIN* | MINGW*)
          CCLUSTER_LIBNAME="libccluster.dll"
 	 CCLUSTER_LIB="libccluster-$CCLUSTER_MAJOR.dll"
-	 EXTRA_SHARED_FLAGS="-static-libgcc -shared -Wl,--export-all-symbols -Wl,-soname,libarb-$CCLUSTER_MAJOR.dll.$CCLUSTER_MINOR.$CCLUSTER_PATCH";;
+	 EXTRA_SHARED_FLAGS="-static-libgcc -shared -Wl,--export-all-symbols -Wl,-soname,libccluster-$CCLUSTER_MAJOR.dll.$CCLUSTER_MINOR.$CCLUSTER_PATCH";;
       *)
          CCLUSTER_LIBNAME="libccluster.so"
 	 CCLUSTER_LIB="libccluster.so.$CCLUSTER_MAJOR.$CCLUSTER_MINOR.$CCLUSTER_PATCH"
