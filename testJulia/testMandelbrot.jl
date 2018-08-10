@@ -14,32 +14,26 @@ using Ccluster
 
 R, x = PolynomialRing(Nemo.QQ, "x")
 
-n = 64 #degree
-P = zero(R)
-Nemo.bernoulli_cache(n)
-for k = 0:n
-    coefficient = (Nemo.binom(n,k))*(Nemo.bernoulli(n-k))
-    P = P + coefficient*x^k
+n = 63 #degree
+k=Int(floor(log2(n+1)))
+P = one(R)
+for i = 1:k
+    P = x*P*P +1
 end
+# degree(P)
 # N = round(Int,4+ceil(log2(1+log2(degree(P)))))
 # print("N: $N, 2^$N: $(2^N), N-log2(degree(P)): $(N-log2(degree(P)))\n")
+# print("P: $P\n")
 
-
-function getAppBern( dest::Ptr{acb_poly}, prec::Int )
+function getAppMan( dest::Ptr{acb_poly}, prec::Int )
     ccall((:acb_poly_set_fmpq_poly, :libarb), Void,
                 (Ptr{acb_poly}, Ptr{fmpq_poly}, Int), dest, &P, prec)
 end
 
-# bInit = [fmpq(0,1),fmpq(0,1),fmpq(150,1)]
-# bInit = [fmpq(5,4),fmpq(0,1),fmpq(1,100)]
-bInit = [fmpq(0,1),fmpq(0,1),fmpq(15,1)]
-# bInit = [0,0,1]
-eps = fmpq(1,10)
-#eps = fmpq(1,2^(53))
-# eps = fmpq(2^(23),1)
-#case with adventitious components: n=30, bInit = box(0,0,5), eps = Nemo.fmpq(1,10)
-#case with adventitious components: n=70, bInit = box(0,0,10), eps = Nemo.fmpq(1,10)
+# bInit = [fmpq(-1,1),fmpq(0,1),fmpq(4,1)]
+bInit = [fmpq(-16,10),fmpq(0,1),fmpq(1,10)]
+# eps = fmpq(1,10)
+eps = fmpq(1,2^(53))
     
-Res = ccluster(getAppBern, bInit, eps, 7, 2);
-plotCcluster(Res, bInit, false)
-
+Res = ccluster(getAppMan, bInit, eps, 23, 2);
+plotCcluster(Res, bInit, false) 

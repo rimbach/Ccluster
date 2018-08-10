@@ -27,7 +27,8 @@ void genWilkMulPolFile( FILE * file, slong degree);
 void genSpiralPolFile( FILE * file, slong degree, slong prec);
 void clustersIterate( compApp_poly_ptr tabres, compApp_poly_ptr tabprec, int i, slong prec);
 void genClusterPolFile( FILE * file, int iterations, slong prec);
-
+void genMandelbrotPolFile( FILE * file, int iterations);
+void genLaguerrePolFile( FILE * file, int degree);
 
 
 
@@ -44,7 +45,9 @@ int main(int argc, char **argv){
         printf("usage: %s WilkRat     degree\n", argv[0]);
         printf("usage: %s WilkMul     degree\n", argv[0]);
         printf("usage: %s Spiral      degree prec\n", argv[0]);
-        printf("usage: %s Cluster     degree prec\n", argv[0]);
+        printf("usage: %s Cluster     iterations prec\n", argv[0]);
+        printf("usage: %s Mandelbrot  iterations \n", argv[0]);
+        printf("usage: %s Laguerre    degree \n", argv[0]);
         return -1;
     }
     
@@ -59,6 +62,8 @@ int main(int argc, char **argv){
     char wilkMul[] = "WilkMul\0";
     char spiral[] = "Spiral\0";
     char cluster[] = "Cluster\0";
+    char mandelbrot[] = "Mandelbrot\0";
+    char laguerre[] = "Laguerre\0";
     int degree = 0;
     int thirdArg = 0;
     int fourthArg = 0;
@@ -125,6 +130,20 @@ int main(int argc, char **argv){
             printf("usage: %s Cluster degree prec\n", argv[0]);
         else{
             genClusterPolFile(stdout, degree, thirdArg);
+        }
+    }
+    if (strcmp(poly, mandelbrot)==0) {
+        if (argc<3)
+            printf("usage: %s Mandelbrot iterations \n", argv[0]);
+        else{
+            genMandelbrotPolFile(stdout, degree);
+        }
+    }
+    if (strcmp(poly, laguerre)==0) {
+        if (argc<3)
+            printf("usage: %s laguerre iterations \n", argv[0]);
+        else{
+            genLaguerrePolFile(stdout, degree);
         }
     }
     
@@ -553,4 +572,91 @@ void genClusterPolFile( FILE * file, int iterations, slong prec){
 
     compApp_clear(coeff);    
     compApp_poly_clear(dest);
+}
+
+void genMandelbrotPolFile( FILE * file, int iterations){
+    
+    realRat_poly_t pmand, pone, px;
+    realRat_poly_init(pmand);
+    realRat_poly_init(pone);
+    realRat_poly_init(px);
+    realRat_t coeff;
+    realRat_init(coeff);
+    
+    realRat_poly_one(pmand);
+    realRat_poly_one(pone);
+    realRat_poly_zero(px);
+    realRat_poly_set_coeff_si_ui(px, 1, 1, 1);
+    
+    for (int i = 1; i<=iterations; i++) {
+        realRat_poly_pow(pmand, pmand, 2);
+        realRat_poly_mul(pmand, pmand, px);
+        realRat_poly_add(pmand, pmand, pone);
+    }
+        
+    slong truedeg = realRat_poly_degree(pmand); 
+    
+    fprintf(file, "Monomial;\n");
+    fprintf(file, "Real;\n");
+    fprintf(file, "Integer;\n");
+    fprintf(file, "Degree = %d;\n", (int) truedeg);
+    fprintf(file, "\n");
+    
+    for(int i = 0; i<=truedeg; i++){
+        realRat_poly_get_coeff_realRat(coeff, pmand, i);
+        realRat_fprint(file, coeff);
+        fprintf(file, "\n");
+    }
+    realRat_poly_clear(pmand);
+    realRat_poly_clear(pone);
+    realRat_poly_clear(px);
+    realRat_clear(coeff);
+}
+
+void genLaguerrePolFile( FILE * file, int degree){
+    
+    realRat_poly_t plag, pone, pzero, ptemp;
+    realRat_poly_init(plag);
+    realRat_poly_init(pone);
+    realRat_poly_init(pzero);
+    realRat_poly_init(ptemp);
+    realRat_t coeff;
+    realRat_init(coeff);
+    
+    realRat_poly_one(pzero);
+    realRat_poly_one(pone);
+    realRat_poly_set_coeff_si_ui(pone, 1, -1, 1);
+    realRat_poly_one(ptemp);
+    realRat_poly_set_coeff_si_ui(ptemp, 1, -1, 1);
+    
+    for (int i = 1; i<degree; i++) {
+        
+        realRat_poly_set_coeff_si_ui(ptemp, 0, 2*i+1, 1);
+        
+        realRat_poly_mul(plag, ptemp, pone);
+        realRat_set_si(coeff, (slong) i, 1);
+        realRat_mul_si(coeff, coeff, (slong) -i);
+        realRat_poly_scalar_mul_realRat(pzero, pzero, coeff);
+        realRat_poly_add(plag, plag, pzero);
+        
+        realRat_poly_set(pzero, pone);
+        realRat_poly_set(pone, plag);
+    }
+    
+    fprintf(file, "Monomial;\n");
+    fprintf(file, "Real;\n");
+    fprintf(file, "Integer;\n");
+    fprintf(file, "Degree = %d;\n", degree);
+    fprintf(file, "\n");
+    
+    for(int i = 0; i<=degree; i++){
+        realRat_poly_get_coeff_realRat(coeff, plag, i);
+        realRat_fprint(file, coeff);
+        fprintf(file, "\n");
+    }
+    realRat_poly_clear(plag);
+    realRat_poly_clear(pone);
+    realRat_poly_clear(pzero);
+    realRat_poly_clear(ptemp);
+    realRat_clear(coeff);
 }

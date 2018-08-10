@@ -47,6 +47,8 @@ typedef struct {
     int nbFailingNewton;
     /* Temp */
     int nbEval;
+    int nbDouble;
+    int nbOthers;
 } counters_by_depth;
 
 typedef counters_by_depth counters_by_depth_t[1];
@@ -95,7 +97,9 @@ void counters_add_discarded( counters_t st, int depth );
 void counters_add_validated( counters_t st, int depth, int nbSols );
 void counters_add_Test     ( counters_t st, int depth, int res, int discard, 
                              int nbTaylors, int nbTaylorsRepeted, 
-                             int nbGraeffe, int nbGraeffeRepeted);
+                             int nbGraeffe, int nbGraeffeRepeted,
+                             int prec
+                           );
 
 void counters_add_Newton   ( counters_t st, int depth, int res );
 
@@ -122,6 +126,8 @@ int counters_getNbTaylorsRepetedInTSTests   ( const counters_t st );
 int counters_getNbNewton                    ( const counters_t st );
 int counters_getNbFailingNewton             ( const counters_t st );
 int counters_getNbEval                      ( const counters_t st );
+int counters_getNbDouble                    ( const counters_t st );
+int counters_getNbOthers                    ( const counters_t st );
 
 void counters_add_Eval( counters_t st, int nbEvals, int depth );
 #endif

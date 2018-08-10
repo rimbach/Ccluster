@@ -138,6 +138,7 @@ benchs: benchMignotte benchMignotteMul \
     benchBernoulli benchWilkinson \
     benchWilkRat benchSpiral \
     benchCluster benchWilkMul \
+    benchMandelbrot benchLaguerre\
     gen
 
 gen: genPolFile

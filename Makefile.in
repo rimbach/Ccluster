@@ -125,6 +125,7 @@ benchs: library headers_benchs \
 	benchBernoulli benchBernoulliDAC benchWilkinson \
 	benchWilkRat benchSpiral \
 	benchCluster benchWilkMul \
+	benchMandelbrot benchLaguerre\
 	genPolFile
 	
 benchsclean: 
@@ -170,6 +171,14 @@ benchCluster: $(BENCHS_DIR)/benchCluster.o
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
 	
 benchWilkMul: $(BENCHS_DIR)/benchWilkMul.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchMandelbrot: $(BENCHS_DIR)/benchMandelbrot.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+	
+benchLaguerre: $(BENCHS_DIR)/benchLaguerre.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
 	

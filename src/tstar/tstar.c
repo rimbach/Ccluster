@@ -168,7 +168,7 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
     if (restemp==0) res.nbOfSol = -1;
 
     metadatas_lock(meta);
-    metadatas_add_Test( meta, depth, (restemp!=0), discard, 1, nbTaylorsRepeted, N, nbGraeffeRepeted);
+    metadatas_add_Test( meta, depth, (restemp!=0), discard, 1, nbTaylorsRepeted, N, nbGraeffeRepeted, (int) res.appPrec);
     if (discard)
         metadatas_add_time_T0Tests(meta, (double) (clock() - start) );
     else
@@ -401,13 +401,13 @@ tstar_res tstar_optimized( cacheApp_t cache,
     
     if ((restemp==0)||(restemp==-1)) res.nbOfSol = -1;
     
-/*   if (discard) 
-        printf("discard: depth: %d, prec: %d, nb Graeffe: %d, nbSols: %d\n", depth, res.appPrec,nbGraeffe, res.nbOfSol);
-    else 
-        printf("validate: depth: %d, prec: %d, nb Graeffe: %d, nbSols: %d\n", depth, res.appPrec, nbGraeffe, res.nbOfSol);*/      
+//   if (discard) 
+//         printf("discard: depth: %d, prec: %ld, nb Graeffe: %d, nbSols: %d\n", depth, res.appPrec,nbGraeffe, res.nbOfSol);
+//     else 
+//         printf("validate: depth: %d, prec: %ld, nb Graeffe: %d, nbSols: %d\n", depth, res.appPrec, nbGraeffe, res.nbOfSol);      
         
     metadatas_lock(meta);
-    metadatas_add_Test( meta, depth, (restemp==1), discard, 1, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted);
+    metadatas_add_Test( meta, depth, (restemp==1), discard, 1, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted, (int) res.appPrec);
     if (discard)
         metadatas_add_time_T0Tests(meta, (double) (clock() - start) );
     else

@@ -80,8 +80,8 @@ METADATAS_INLINE int metadatas_useNBThreads      ( const metadatas_t m ) { retur
 // /* counters */
 METADATAS_INLINE void metadatas_add_discarded( metadatas_t m, int depth ) { counters_add_discarded(metadatas_countref(m), depth); }
 METADATAS_INLINE void metadatas_add_validated( metadatas_t m, int depth, int nbSols ) { counters_add_validated(metadatas_countref(m), depth, nbSols);}
-METADATAS_INLINE void metadatas_add_Test     ( metadatas_t m, int depth, int res, int discard, int nbTaylors, int nbTaylorsRepeted, int nbGraeffe, int nbGraeffeRepeted) {
-    counters_add_Test( metadatas_countref(m), depth, res, discard, nbTaylors, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted);
+METADATAS_INLINE void metadatas_add_Test     ( metadatas_t m, int depth, int res, int discard, int nbTaylors, int nbTaylorsRepeted, int nbGraeffe, int nbGraeffeRepeted, int prec) {
+    counters_add_Test( metadatas_countref(m), depth, res, discard, nbTaylors, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted, prec);
 }
 // METADATAS_INLINE void metadatas_add_discarding_test( metadatas_t m, int depth, int res, int nbTaylorsRepeted, int nbGraeffe, int nbGraeffeRepeted){
 //     return counters_add_discarding_test( metadatas_countref(m), depth, res, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted);
@@ -110,6 +110,8 @@ METADATAS_INLINE int  metadatas_getNbTaylorsRepetedInTSTests   ( const metadatas
 METADATAS_INLINE int  metadatas_getNbNewton                    ( const metadatas_t m ){ return counters_getNbNewton                    (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbFailingNewton             ( const metadatas_t m ){ return counters_getNbFailingNewton             (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbEval             ( const metadatas_t m ){ return counters_getNbEval             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbDouble             ( const metadatas_t m ){ return counters_getNbDouble             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbOthers             ( const metadatas_t m ){ return counters_getNbOthers             (metadatas_countref(m));}
 
 // 
 // /* chronos */

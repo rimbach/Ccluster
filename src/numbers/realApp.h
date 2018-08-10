@@ -34,6 +34,7 @@ NUMBERS_INLINE void realApp_zero      (realApp_t x                              
 NUMBERS_INLINE void realApp_one       (realApp_t x                                ) { arb_one      (x); }
 NUMBERS_INLINE void realApp_set       (realApp_t y, const realApp_t x             ) { arb_set      (y, x); }
 NUMBERS_INLINE void realApp_set_fmpq  (realApp_t y, const fmpq_t    x, slong prec ) { arb_set_fmpq (y, x, prec); }
+NUMBERS_INLINE void realApp_set_d     (realApp_t y, const double    x )             { arb_set_d (y, x); }
 
 /* comparisons */
 NUMBERS_INLINE int realApp_eq(const realApp_t x, const realApp_t y) { return arb_eq(x,y); }
