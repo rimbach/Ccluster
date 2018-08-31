@@ -18,6 +18,7 @@
 
 #define CCLUSTER_MIN(A,B) (A<=B? A : B)
 #define CCLUSTER_MAX(A,B) (A>=B? A : B)
+#define CCLUSTER_ABS(A) (A<=0? -A : A)
 
 /* flags for experiments */
 #define CCLUSTER_EXP_NUM_T0(A) ( ((&(A)->strat)->_additionalFlags)&(0x1<<0) ) /* strat + 64 */

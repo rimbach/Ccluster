@@ -79,12 +79,29 @@ void compApp_poly_taylorShift_new( compApp_poly_t res,
     compApp_clear(c);
 }
 
-void compApp_poly_taylorShift_in_place( compApp_poly_t f, const realRat_t creal, const realRat_t cimag, const realRat_t radius, slong prec ) {
+// void compApp_poly_taylorShift_in_place( compApp_poly_t f, const realRat_t creal, const realRat_t cimag, const realRat_t radius, slong prec ) {
+//     
+//     compApp_t c;
+//     compApp_init(c);
+//     compApp_setreal_realRat(c, creal, prec);
+//     compApp_setimag_realRat(c, cimag, prec);
+//     
+//     compApp_ptr fptr = f->coeffs;
+//     const slong len  = f->length;
+//     _acb_poly_taylor_shift_convolution(fptr, c, len, prec);
+// /*    _acb_poly_taylor_shift_horner(fptr, c, len, prec);
+//     _acb_poly_taylor_shift_divconquer(fptr, c, len, prec);
+//     _compApp_poly_taylor_shift_convolution(fptr, c, len, prec);*/
+//     compApp_poly_scale_realRat_in_place( fptr, radius, len, prec );
+//     
+//     compApp_clear(c);
+// }
+void compApp_poly_taylorShift_in_place( compApp_poly_t f, const compRat_t center, const realRat_t radius, slong prec ) {
     
     compApp_t c;
     compApp_init(c);
-    compApp_setreal_realRat(c, creal, prec);
-    compApp_setimag_realRat(c, cimag, prec);
+    compApp_setreal_realRat(c, compRat_realref(center), prec);
+    compApp_setimag_realRat(c, compRat_imagref(center), prec);
     
     compApp_ptr fptr = f->coeffs;
     const slong len  = f->length;

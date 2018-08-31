@@ -43,6 +43,60 @@ void compApp_mul_realRat_in_place( compApp_t x, const realRat_t y, slong prec ) 
     acb_div_fmpz(x, x, fmpq_denref(y), prec);
 }
 
+void compApp_mul_compRat( compApp_t z, const compApp_t x, const compRat_t y, slong prec ){
+#define a compApp_realref(x)
+#define b compApp_imagref(x)
+#define c compRat_realref(y)
+#define d compRat_imagref(y)
+#define e compApp_realref(z)
+#define f compApp_imagref(z)  
+    /* TODO 
+    if ( realApp_is_zero(b) ) {
+    }
+    else if ( realRat_is_zero(d) ) {
+    }
+    else if ( realApp_is_zero(a) ) {
+    }
+    else if ( realRat_is_zero(c) ) {
+    }
+    else {
+        if (z == x) {
+        }
+        else {
+    */
+            /* Gauss multiplication: e = ac-bd
+                                     f = (a+b)(c+d) - ac - bd
+            */
+            realApp_t t;
+            realApp_init(t);
+            realRat_t u;
+            realRat_init(u);
+            
+            realApp_mul_realRat(e, a, c, prec);
+            realApp_mul_realRat(t, b, d, prec);
+            
+            realRat_add(u, c, d);
+            realApp_add(f, a, b, prec);
+            realApp_mul_realRat(f, f, u, prec);
+            realApp_sub(f, f, e, prec);
+            realApp_sub(f, f, t, prec);
+            
+            realApp_sub(e, e, t, prec);
+            
+            realApp_clear(t);
+            realRat_clear(u);
+    /*
+        }
+    }
+    */
+#undef a
+#undef b
+#undef c
+#undef d
+#undef e
+#undef f
+}
+
 /*getting a realRat lying in the ball defined by a realApp */
 void realApp_get_realRat( realRat_t res, realApp_t x){
     arf_srcptr midpoint;

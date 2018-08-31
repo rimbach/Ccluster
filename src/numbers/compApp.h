@@ -76,6 +76,9 @@ NUMBERS_INLINE void compApp_printn(const compApp_t x, slong digits, ulong flags)
 NUMBERS_INLINE int compApp_contains_zero (const compApp_t ball) {
     return acb_contains_zero(ball);
 }
+NUMBERS_INLINE int compApp_contains (const compApp_t x, const compApp_t y) {
+    return acb_contains(x,y);
+}
 NUMBERS_INLINE int compApp_intersection(compApp_t z, const compApp_t x, const compApp_t y, slong prec) { 
     if (realApp_intersection( compApp_realref(z), compApp_realref(x), compApp_realref(y), prec) !=0)
         return realApp_intersection( compApp_imagref(z), compApp_imagref(x), compApp_imagref(y), prec);

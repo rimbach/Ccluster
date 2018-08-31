@@ -150,3 +150,35 @@ test_c0_pred: test_c0_pred.c
 test_TS: test_TS.c
 	@echo "Building $@"
 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG)
+	
+test_doubRealApp: test_doubRealApp.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_doubCompApp: test_doubCompApp.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_doubCompApp_poly: test_doubCompApp_poly.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_doubCompApp_poly_mul: test_doubCompApp_poly_mul.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_doubCompApp_poly_mulk: test_doubCompApp_poly_mulk.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_doubCompApp_poly_sqr: test_doubCompApp_poly_sqr.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_doubCompApp_poly_sqrk: test_doubCompApp_poly_sqrk.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_doubCompApp_poly_TS: test_doubCompApp_poly_TS.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm

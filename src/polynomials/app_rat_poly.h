@@ -37,7 +37,11 @@ POLYNOMIALS_INLINE void compApp_poly_set_compRat_poly(compApp_poly_t poly, const
 /* requires: r is canonical */ 
 void compApp_poly_scale_realRat_in_place( compApp_ptr fptr, const realRat_t r, slong len, slong prec );
 
+/*
 void compApp_poly_taylorShift_in_place( compApp_poly_t f, const realRat_t creal, const realRat_t cimag, const realRat_t radius, slong prec );
+*/
+void compApp_poly_taylorShift_in_place( compApp_poly_t f, const compRat_t center, const realRat_t radius, slong prec );
+
 void compApp_poly_taylorShift( compApp_poly_t res, 
                                const compApp_poly_t f, 
                                const realRat_t creal, const realRat_t cimag, const realRat_t radius, 

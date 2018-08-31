@@ -41,9 +41,13 @@ void tstar_getApproximation( compApp_poly_t res, cacheApp_t cache, slong prec, m
 void tstar_taylor_shift_inplace( compApp_poly_t res, const compDsk_t d, slong prec, metadatas_t meta){
 //         chronos_tic_Taylors(metadatas_chronref(meta));
         clock_t start = clock();
-        compApp_poly_taylorShift_in_place( res, 
+        /*compApp_poly_taylorShift_in_place( res, 
                                            compRat_realref(compDsk_centerref(d)), 
                                            compRat_imagref(compDsk_centerref(d)), 
+                                           compDsk_radiusref(d), 
+                                           prec );*/
+        compApp_poly_taylorShift_in_place( res, 
+                                           compDsk_centerref(d), 
                                            compDsk_radiusref(d), 
                                            prec );
         

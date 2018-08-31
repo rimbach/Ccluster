@@ -25,7 +25,8 @@ BUILD_DIRS = $(SRC_PATH)\
 	     $(SRC_PATH)/lists\
 	     $(SRC_PATH)/metadatas\
 	     $(SRC_PATH)/newton\
-	     $(SRC_PATH)/ccluster
+	     $(SRC_PATH)/ccluster\
+	     $(SRC_PATH)/doubApp
 
 TEMPLATE_DIRS = 
 
