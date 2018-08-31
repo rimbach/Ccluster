@@ -1,0 +1,54 @@
+# TESTING VARIABLES
+
+# for testMignotte:
+degree=64
+bitsize=14
+box=0,1,0,1,20,1 		# (x,y), width
+epsilon=1,200			# 1/100
+strategy=15
+verbosity=2
+
+#==================================================
+# TESTING 
+#==================================================
+
+testMignotte1 tM1:
+	./mignotte${EXEEXT} 64 14 0,1,0,1,20,1 1,2000 15 2 
+
+testMignotte tM:
+	./mignotte${EXEEXT} \
+		${degree} \
+		${bitsize} \
+		${box} \
+		${epsilon} \
+		${strategy} \
+		${verbosity} \
+
+testMignotte2 tM2:
+	make testMignotte \
+	    bitsize=200 \
+	    epsilon=1,1000000000000 \
+	    box=0,1,0,1,2,1 \
+	    verbosity=3
+
+testBernoulli tB:
+	./bernoulli${EXEEXT} \
+		${degree} \
+		${box} \
+		${epsilon} \
+		${strategy} \
+		${verbosity} \
+
+testBernoulli1 tB1:
+	./bernoulli${EXEEXT} 64 0,1,0,1,20,1  1,2000 15 2 
+
+testWilkinson tW:
+	./wilkinson${EXEEXT} \
+		${degree} \
+		${box} \
+		${epsilon} \
+		${strategy} \
+		${verbosity} \
+
+testWilkinson1 tW1:
+	./wilkinson${EXEEXT} 64 0,1,0,1,20,1  1,2000 15 2 

@@ -67,8 +67,9 @@ clean:
 	rm -rf build
 # 	$(wildcard $(CCLUSTER_LIBNAME)*)
 
-distclean: clean benchsclean
+distclean: clean benchsclean testclean
 	rm -f Makefile
+	rm -f test/Makefile
 	
 $(CCLUSTER_LIB): $(LIB_LOBJS) $(LIB_SOURCES) $(LIB_HEADERS)
 	@echo "Building $@"
@@ -128,6 +129,15 @@ benchs: library headers_benchs \
 	benchCluster benchWilkMul \
 	benchMandelbrot benchLaguerre\
 	genPolFile
+	
+comptest: library
+	cd test && make build && cd ..
+	
+test: comptest
+	cd test && make tM1 && cd ..
+	
+testclean: 
+	cd test && make clean && cd ..
 	
 benchsclean: 
 	rm -rf $(BENCHS_OBJS) $(BENCHS_EXE)
