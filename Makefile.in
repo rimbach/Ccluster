@@ -122,13 +122,8 @@ install: library
 # 		cp $(EXT_HEADERS) $(DESTDIR)$(PREFIX)/include; \
 # 	fi
 
-benchs: library headers_benchs \
-	benchMignotte benchMignotteMul benchMignotteGen\
-	benchBernoulli benchBernoulliDAC benchWilkinson \
-	benchWilkRat benchSpiral \
-	benchCluster benchWilkMul \
-	benchMandelbrot benchLaguerre\
-	genPolFile
+compbenchs: library comptest
+	cd benchs && make build && cd ..
 	
 comptest: library
 	cd test && make build && cd ..
@@ -136,66 +131,69 @@ comptest: library
 test: comptest
 	cd test && make tM1 && cd ..
 	
+benchICMS: compbenchs
+	cd benchs && make tableICMS && cd ..
+	
 testclean: 
 	cd test && make clean && cd ..
 	
 benchsclean: 
-	rm -rf $(BENCHS_OBJS) $(BENCHS_EXE)
+	cd benchs && make clean && make cleanBenchs && cd ..
 	
-headers_benchs: 
-	$(eval HEADERS=$(LIB_HEADERS) $(BENCHS_HEADERS))
-
-benchMignotte: $(BENCHS_DIR)/benchMignotte.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchMignotteMul: $(BENCHS_DIR)/benchMignotteMul.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchMignotteGen: $(BENCHS_DIR)/benchMignotteGen.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchBernoulli: $(BENCHS_DIR)/benchBernoulli.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchBernoulliDAC: $(BENCHS_DIR)/benchBernoulliDAC.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchWilkinson: $(BENCHS_DIR)/benchWilkinson.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchWilkRat: $(BENCHS_DIR)/benchWilkRat.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchSpiral: $(BENCHS_DIR)/benchSpiral.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchCluster: $(BENCHS_DIR)/benchCluster.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchWilkMul: $(BENCHS_DIR)/benchWilkMul.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchMandelbrot: $(BENCHS_DIR)/benchMandelbrot.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-benchLaguerre: $(BENCHS_DIR)/benchLaguerre.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
-	
-genPolFile: $(BENCHS_DIR)/genPolFile.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# headers_benchs: 
+# 	$(eval HEADERS=$(LIB_HEADERS) $(BENCHS_HEADERS))
+# 
+# benchMignotte: $(BENCHS_DIR)/benchMignotte.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchMignotteMul: $(BENCHS_DIR)/benchMignotteMul.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchMignotteGen: $(BENCHS_DIR)/benchMignotteGen.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchBernoulli: $(BENCHS_DIR)/benchBernoulli.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchBernoulliDAC: $(BENCHS_DIR)/benchBernoulliDAC.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchWilkinson: $(BENCHS_DIR)/benchWilkinson.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchWilkRat: $(BENCHS_DIR)/benchWilkRat.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchSpiral: $(BENCHS_DIR)/benchSpiral.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchCluster: $(BENCHS_DIR)/benchCluster.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchWilkMul: $(BENCHS_DIR)/benchWilkMul.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchMandelbrot: $(BENCHS_DIR)/benchMandelbrot.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# benchLaguerre: $(BENCHS_DIR)/benchLaguerre.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
+# 	
+# genPolFile: $(BENCHS_DIR)/genPolFile.o
+# # 	@echo "Building $@"
+# 	$(QUIET_CC) $(CC) $(CFLAGS) -o $(BENCHS_DIR)/$@ $< $(INCS) $(LIBS2) -lccluster
 	
 	
 print-%:

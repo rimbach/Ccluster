@@ -12,7 +12,7 @@ TEST_EXECS=$(TEST:%.c=%)
 #==================================================
 # COMPILING 
 #==================================================
-build: mignotte mignotteMul \
+build: mignotte mignotteMul mignotteGen \
     bernoulli wilkinson \
     wilkRat spiral \
     cluster wilkMul \
@@ -44,6 +44,11 @@ debug: mignotte.o
 	    	-o $@ $< $(INCLUDE_PATH) \
 	
 mignotteMul: mignotteMul.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+	    	
+mignotteGen: mignotteGen.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
