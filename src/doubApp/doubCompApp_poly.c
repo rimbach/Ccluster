@@ -102,7 +102,7 @@ void doubCompApp_poly_fprint (FILE * file, const doubCompApp_poly_t x){
         return;
     }
     for (i = 0; i <len; i++){
-        if (! doubCompApp_is_zero(x->coeffs+i)) {
+        if ( (!doubCompApp_is_zero(x->coeffs+i))||(i==len-1) ) {
             OK=1;
             fprintf(file, "deg %5ld: ",i);
             doubCompApp_fprint(file, x->coeffs+i);
@@ -236,6 +236,190 @@ void _doubCompApp_poly_reverse(doubCompApp_ptr res, doubCompApp_srcptr poly, slo
     }
 }
 
+/* assume len>0 and p->alloc >= len +1 */
+void _doubCompApp_poly_timesRXPC_inplace (doubCompApp_ptr p, const doubCompApp_t c, const doubRealApp_t r, slong len){
+    slong i;
+    doubCompApp_t t;
+    doubCompApp_mul_doubRealApp(p+len, p+len-1, r);
+    for (i = len-1; i>0; i--) {
+        doubCompApp_mul(p+i, p+i, c);
+        doubCompApp_mul_doubRealApp(t, p+i-1, r);
+        doubCompApp_add(p+i, p+i, t);
+    }
+    doubCompApp_mul(p, p, c);
+}
+
+void _doubCompApp_poly_taylor_shift_horner( doubCompApp_ptr res, doubCompApp_srcptr src, const doubCompApp_t c, const doubRealApp_t r, slong len){
+    
+    slong i;
+    doubCompApp_set(res, src + len-1);
+    for( i=1; i<len; i++) {
+        _doubCompApp_poly_timesRXPC_inplace (res, c, r, i);
+        doubCompApp_add(res, res, src + (len-1) -i);
+    }
+    
+}
+
+#define TS_CUTOFF 32
+void _doubCompApp_poly_taylor_shift_DQ( doubCompApp_ptr res, doubCompApp_poly_ptr pows, 
+                                        doubCompApp_srcptr src, const doubCompApp_t c, const doubRealApp_t r, slong len){
+    slong i;
+    if ( len <= TS_CUTOFF ){
+//         _doubCompApp_poly_taylor_shift_horner( res, src, c, r, len);
+        /*copy src in res*/
+        for (i=0; i<len; i++)
+            doubCompApp_set(res + i, src +i);
+        _doubCompApp_poly_taylor_shift_convolution( res, c, len);
+        return;
+    }
+    
+    slong cut = len/2;
+    int pow = 0x1;
+    int log = 0;
+//     slong i;
+    while (pow < cut){
+        pow = pow<<1;
+        log++;
+    }
+//     printf("DQ: len: %ld, cut: %ld, log: %d\n", len, cut, log);
+    doubCompApp_poly_t t1, t2, t3;
+    doubCompApp_poly_init2(t1, cut);
+    doubCompApp_poly_init2(t2, cut);
+    doubCompApp_poly_init2(t3, len);
+    for (i=0;i<len;i++) {
+//         if (i<cut){
+//             doubCompApp_zero(t1->coeffs+i);
+//             doubCompApp_zero(t2->coeffs+i);
+//         }
+        doubCompApp_zero(t3->coeffs+i);
+    }
+    
+//     printf("src: \n"); 
+//     for (i=0; i<len; i++){
+//         printf("deg %ld: ",i);
+//         doubCompApp_print(src + i);
+//         printf("\n");
+//     }
+//     printf("\n");
+    
+    _doubCompApp_poly_taylor_shift_DQ( t1->coeffs, pows, src, c, r, cut);
+    _doubCompApp_poly_taylor_shift_DQ( t2->coeffs, pows, src+cut, c, r, cut);
+    
+//     printf("powers: \n"); doubCompApp_poly_print(pows+log); printf("\n\n");
+//     _doubCompApp_poly_mullow_classical(t3->coeffs, t2->coeffs, cut, (pows+log)->coeffs, (pows+log)->length, len);
+    _doubCompApp_poly_set_length(t3, len);
+    _doubCompApp_poly_set_length(t2, cut);
+    doubCompApp_poly_mul_karatsuba(t3, t2, pows+log );
+    _doubCompApp_poly_add( res, t1->coeffs, cut, t3->coeffs, len, len );
+    
+//     printf("t1: \n"); 
+//     for (i=0; i<cut; i++){
+//         printf("deg %ld: ",i);
+//         doubCompApp_print(t1->coeffs + i);
+//         printf("\n");
+//     }
+//     printf("\n");
+//     
+//     printf("t2: \n"); 
+//     for (i=0; i<cut; i++){
+//         printf("deg %ld: ",i);
+//         doubCompApp_print(t2->coeffs + i);
+//         printf("\n");
+//     }
+//     printf("\n");
+//     
+//     printf("res: \n"); 
+//     for (i=0; i<len; i++){
+//         printf("deg %ld: ",i);
+//         doubCompApp_print(res + i);
+//         printf("\n");
+//     }
+//     printf("\n");
+    
+    doubCompApp_poly_clear(t1);
+    doubCompApp_poly_clear(t2);
+    doubCompApp_poly_clear(t3);
+}
+
+void doubCompApp_poly_taylor_shift_DQ( doubCompApp_poly_t res, doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r){
+    
+    int nlen = 0x1;
+    int log = 0;
+    slong i;
+    doubCompApp_poly_t nf;
+    doubCompApp_poly_init(nf);
+    doubCompApp_poly_set(nf, f);
+    
+    /* find the first power of 2 greater than len of f */
+    while ( nlen < f->length ) {
+        nlen = nlen<<1;
+        log++;
+    }
+//     printf("nlen: %d, log: %d\n", nlen, log);
+    
+    /* copy f */
+    doubCompApp_poly_fit_length(res, nlen);
+    doubCompApp_poly_fit_length(nf, nlen);
+    _doubCompApp_poly_set_length(nf, nlen);
+    
+    /* pad nf with 0 */
+    for (i=f->length; i<nlen; i++)
+        doubCompApp_zero(nf->coeffs + i);
+    
+    /* compute the powers of (rx+c) */
+    doubCompApp_poly_ptr powers = NULL;
+    powers = flint_realloc(powers, log * sizeof(doubCompApp_poly));
+    doubCompApp_poly_init2(powers,2);
+    doubCompApp_set(powers->coeffs, c);
+    doubCompApp_set_doubRealApp(powers->coeffs+1, r);
+    _doubCompApp_poly_set_length(powers, 2);
+    for (i=1; i<log; i++){
+        doubCompApp_poly_init(powers + i);
+//         doubCompApp_poly_mul_classical(powers + i, powers + (i-1), powers + (i-1));
+        doubCompApp_poly_sqr_karatsuba( powers+i, powers + (i-1));   
+    }
+//     printf("powers: \n");
+//     for (i=0; i<log; i++) {
+//         printf("--i: %ld \n", i); doubCompApp_poly_print(powers+i); printf("\n");
+//     }
+//     
+//     printf("++  f: "); doubCompApp_poly_print(f); printf("\n");
+//     printf("++ nf: "); doubCompApp_poly_print(nf); printf("\n");
+    
+    /* call the main function */
+    _doubCompApp_poly_taylor_shift_DQ( res->coeffs, powers, nf->coeffs, c, r, nlen);
+    /* clear powers */
+    for (i=0; i<log; i++)
+        doubCompApp_poly_clear(powers + i);
+    flint_free(powers);
+    
+    _doubCompApp_poly_set_length(res, f->length);
+    _doubCompApp_poly_normalise(res);
+    doubCompApp_poly_clear(nf);
+}
+
+void doubCompApp_poly_taylor_shift_horner_inplace( doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r){
+    doubCompApp_poly_t t;
+    doubCompApp_poly_init2(t, f->length);
+    
+    _doubCompApp_poly_taylor_shift_horner( t->coeffs, f->coeffs, c, r, f->length);
+    
+    _doubCompApp_poly_set_length(t, f->length);
+    _doubCompApp_poly_normalise(t);
+    
+    doubCompApp_poly_swap(f,t);
+    doubCompApp_poly_clear(t);
+    
+}
+
+void doubCompApp_poly_taylor_shift_horner( doubCompApp_poly_t res, const doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r){
+    
+    doubCompApp_poly_fit_length(res, f->length);
+    _doubCompApp_poly_taylor_shift_horner( res->coeffs, f->coeffs, c, r, f->length);
+    _doubCompApp_poly_set_length(res, f->length);
+    _doubCompApp_poly_normalise(res);
+}
+
 void _doubCompApp_poly_taylor_shift_convolution(doubCompApp_ptr p, const doubCompApp_t c, slong len) {
     slong i, n = len - 1;
     doubCompApp_t d;
@@ -325,6 +509,14 @@ void _doubCompApp_poly_taylor_shift_convolution(doubCompApp_ptr p, const doubCom
 
     doubRealApp_clear(f);
     doubCompApp_clear(d);
+}
+
+void doubCompApp_poly_taylor_shift_convolution( doubCompApp_poly_t res, const doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r){
+    
+    doubCompApp_poly_set(res, f);
+    _doubCompApp_poly_taylor_shift_convolution( res->coeffs, c, res->length);
+    _doubCompApp_poly_set_length(res, f->length);
+    _doubCompApp_poly_normalise(res);
 }
 
 // void doubCompApp_poly_taylorShift_in_place( doubCompApp_poly_t f, const compRat_t center, const realRat_t radius){

@@ -116,13 +116,13 @@ void compApp_poly_taylorShift_in_place( compApp_poly_t f, const compRat_t center
 
 void compApp_poly_taylorShift( compApp_poly_t res, 
                                const compApp_poly_t f, 
-                               const realRat_t creal, const realRat_t cimag, const realRat_t radius, 
+                               const compRat_t center, const realRat_t radius, 
                                slong prec ) {
     
     compApp_t c;
     compApp_init(c);
-    compApp_setreal_realRat(c, creal, prec);
-    compApp_setimag_realRat(c, cimag, prec);
+    compApp_setreal_realRat(c, compRat_realref(center), prec);
+    compApp_setimag_realRat(c, compRat_imagref(center), prec);
     
     acb_poly_taylor_shift_convolution(res, f, c, prec);
 /*     compApp_poly_taylor_shift_convolution(res, f, c, prec);*/

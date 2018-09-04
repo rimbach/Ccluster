@@ -93,17 +93,21 @@ void _doubCompApp_poly_mullow_karatsuba(doubCompApp_ptr res,
     doubCompApp_srcptr x, slong lenx,
     doubCompApp_srcptr y, slong leny){
     
+    slong lenres = lenx + leny -1;
+    
     if (lenx<=KARATSUBA_CUTOFF || leny<=KARATSUBA_CUTOFF){
-        _doubCompApp_poly_mullow_classical(res, x, lenx, y, leny, lenx+leny-1);
+        _doubCompApp_poly_mullow_classical(res, x, lenx, y, leny, lenres);
         return;
     }
     
-    slong lenres = lenx + leny -1;
     slong cut = lenx/2;
     slong maxlen = lenx-cut;
     
-    _doubCompApp_poly_mullow_karatsuba(res, x, cut, y, cut);
-    _doubCompApp_poly_mullow_karatsuba(res + (2*cut), x + cut, maxlen, y+cut, maxlen);
+//     _doubCompApp_poly_mullow_karatsuba(res, x, cut, y, cut);
+    _doubCompApp_poly_mullow_karatsuba(res, x, cut, y, CCLUSTER_MIN(cut, leny));
+//     _doubCompApp_poly_mullow_karatsuba(res + (2*cut), x + cut, maxlen, y+cut, maxlen);
+    if (leny>cut)
+        _doubCompApp_poly_mullow_karatsuba(res + (2*cut), x + cut, maxlen, y+cut, leny-cut);
     
     doubCompApp_poly_t t1, t2, t3;
     doubCompApp_poly_init2(t1, maxlen);
@@ -113,10 +117,17 @@ void _doubCompApp_poly_mullow_karatsuba(doubCompApp_ptr res,
     for (i = 0; i<3*maxlen-1; i++)
             doubCompApp_zero( t3->coeffs + i );
     _doubCompApp_poly_add( t1->coeffs, x, cut, x + cut, maxlen, maxlen);
+    slong lent2;
+    if (leny>cut)
+        lent2 = CCLUSTER_MAX(cut, leny-cut);
+    else
+        lent2 = leny;
     _doubCompApp_poly_add( t2->coeffs, y, cut, y + cut, maxlen, maxlen);
-    _doubCompApp_poly_mullow_karatsuba(t3->coeffs, t1->coeffs, maxlen, t2->coeffs, maxlen);
+//     _doubCompApp_poly_mullow_karatsuba(t3->coeffs, t1->coeffs, maxlen, t2->coeffs, maxlen);
+    _doubCompApp_poly_mullow_karatsuba(t3->coeffs, t1->coeffs, maxlen, t2->coeffs, lent2);
     _doubCompApp_poly_sub( t3->coeffs, t3->coeffs, 2*maxlen-1, res, 2*cut-1, 2*cut-1);
-    _doubCompApp_poly_sub( t3->coeffs, t3->coeffs, 2*maxlen-1, res + (2*cut), 2*maxlen-1, 2*maxlen-1);
+    if (leny>cut)
+        _doubCompApp_poly_sub( t3->coeffs, t3->coeffs, 2*maxlen-1, res + (2*cut), 2*maxlen-1, 2*maxlen-1);
     _doubCompApp_poly_shift_left(t3->coeffs, t3->coeffs, 2*maxlen-1, cut);
 //     _doubCompApp_poly_set_length(t3, 3*cut-1);
     
@@ -129,14 +140,28 @@ void _doubCompApp_poly_mullow_karatsuba(doubCompApp_ptr res,
 
 void doubCompApp_poly_mul_karatsuba( doubCompApp_poly_t res, const doubCompApp_poly_t x, const doubCompApp_poly_t y){
     
-    slong lenres, i;
-    
     if (x->length == 0 || y->length == 0){
         doubCompApp_poly_zero(res);
         return;
     }
     
-    lenres = x->length + y->length -1;
+    if (x->length<y->length) {
+        doubCompApp_poly_mul_karatsuba( res, y, x);
+        return;
+    }
+    
+    slong lenres, i;
+    lenres = x->length + x->length -1;
+    
+    doubCompApp_poly_t ny;
+    doubCompApp_poly_init2(ny, x->length);
+    for (i=0; i<x->length; i++){
+        if (i<y->length)
+            doubCompApp_set(ny->coeffs + i, y->coeffs+i);
+        else
+            doubCompApp_zero(ny->coeffs+i);
+    }
+    
     
     if (res==x || res==y) {/*aliasing*/
         doubCompApp_poly_t t;
@@ -146,20 +171,24 @@ void doubCompApp_poly_mul_karatsuba( doubCompApp_poly_t res, const doubCompApp_p
             doubCompApp_zero( t->coeffs + i );
     
         _doubCompApp_poly_mullow_karatsuba(t->coeffs, x->coeffs, x->length,
-                                                      y->coeffs, y->length);
+                                                      ny->coeffs, y->length);
         doubCompApp_poly_swap(res, t);
         doubCompApp_poly_clear(t);
     }
     else {
+//         printf("lenres: %ld, len of res: %ld\n", lenres, res->length);
         doubCompApp_poly_fit_length(res, lenres);
         /* initialize the coefficients of res to 0*/
         for (i = 0; i<lenres; i++)
             doubCompApp_zero( res->coeffs + i );
         _doubCompApp_poly_mullow_karatsuba(res->coeffs, x->coeffs, x->length,
-                                                        y->coeffs, y->length);
+                                                        ny->coeffs, y->length);
     }
-    _doubCompApp_poly_set_length(res, lenres);
+    
+    _doubCompApp_poly_set_length(res, x->length + y->length -1);
     _doubCompApp_poly_normalise(res);
+    
+    doubCompApp_poly_clear(ny);
     
     
 }

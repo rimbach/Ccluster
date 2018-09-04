@@ -85,6 +85,10 @@ DOUBAPP_INLINE void doubCompApp_set_compApp   (doubCompApp_t z, const compApp_t 
     doubRealApp_set_realApp   (doubCompApp_realref(z), compApp_realref(x) );
     doubRealApp_set_realApp   (doubCompApp_imagref(z), compApp_imagref(x) );
 }
+DOUBAPP_INLINE void doubCompApp_set_doubRealApp   (doubCompApp_t z, const doubRealApp_t x ){
+    doubRealApp_set   (doubCompApp_realref(z), x );
+    doubRealApp_zero  (doubCompApp_imagref(z));
+}
 DOUBAPP_INLINE void doubCompApp_get_compApp   (compApp_t z, const doubCompApp_t x ){
     doubRealApp_get_realApp   (compApp_realref(z), doubCompApp_realref(x) );
     doubRealApp_get_realApp   (compApp_imagref(z), doubCompApp_imagref(x) );

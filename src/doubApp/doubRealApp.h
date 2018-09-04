@@ -26,12 +26,15 @@
 #include "numbers/realRat.h"
 #include "numbers/realApp.h"
 
+typedef double number;
+// typedef long double number;
+
 typedef struct {
     /* Assuming rounding upward; 
      *low stores MINUS the lower 
      * bound of the interval;*/
-    double low;
-    double upp;
+    number low;
+    number upp;
 } doubRealApp;
 
 typedef doubRealApp doubRealApp_t[1];
@@ -58,6 +61,7 @@ DOUBAPP_INLINE void doubRealApp_set_d     (doubRealApp_t y, const double    x ) 
 /* comparisons */
 DOUBAPP_INLINE int doubRealApp_is_zero(const doubRealApp_t x) { return (x->low==0.) && (x->upp==0.); }
 DOUBAPP_INLINE int doubRealApp_is_one(const doubRealApp_t x) { return (x->low==-1) && (x->upp==1); }
+DOUBAPP_INLINE int doubRealApp_is_exact(const doubRealApp_t x) { return (x->low==-x->upp); }
 DOUBAPP_INLINE int doubRealApp_contains_zero(const doubRealApp_t x) { return (x->low>=0.) && (x->upp>=0.); }
 DOUBAPP_INLINE int doubRealApp_is_positive(const doubRealApp_t x) { return (x->low<=0.); }
 DOUBAPP_INLINE int doubRealApp_is_negative(const doubRealApp_t x) { return (x->upp<=0.); }

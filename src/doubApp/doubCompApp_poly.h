@@ -33,6 +33,7 @@ typedef struct
 doubCompApp_poly;
 
 typedef doubCompApp_poly doubCompApp_poly_t[1];
+typedef doubCompApp_poly * doubCompApp_poly_ptr;
 
 /* Memory management */
 
@@ -121,6 +122,12 @@ void _doubCompApp_poly_reverse(doubCompApp_ptr res, doubCompApp_srcptr poly, slo
 void _doubCompApp_poly_taylor_shift_convolution(doubCompApp_ptr p, const doubCompApp_t c, slong len);
 // void doubCompApp_poly_taylorShift_in_place( doubCompApp_poly_t f, const compRat_t center, const realRat_t radius);
 
+void _doubCompApp_poly_timesRXPC_inplace (doubCompApp_ptr p, const doubCompApp_t c, const doubRealApp_t r, slong len);
+void _doubCompApp_poly_taylor_shift_horner( doubCompApp_ptr res, doubCompApp_srcptr src, const doubCompApp_t c, const doubRealApp_t r, slong len);
+void doubCompApp_poly_taylor_shift_horner_inplace( doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r);
+void doubCompApp_poly_taylor_shift_horner( doubCompApp_poly_t res, const doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r);
+void doubCompApp_poly_taylor_shift_DQ( doubCompApp_poly_t res, doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r);
+void doubCompApp_poly_taylor_shift_convolution( doubCompApp_poly_t res, const doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r);
 /* DEPRECATED */
 void doubCompApp_poly_mul_block( doubCompApp_poly_t res, const doubCompApp_poly_t x, const doubCompApp_poly_t y);
 

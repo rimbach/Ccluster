@@ -45,6 +45,9 @@ int main() {
     printf("3x+2 : \n"); doubCompApp_poly_print(q); printf("\n\n");
     printf("2x+1 * 3x+2 kara: \n"); doubCompApp_poly_print(r); printf("\n\n");
     
+    doubCompApp_poly_mul_classical(r, p, q);
+    printf("2x+1 * 3x+2 class: \n"); doubCompApp_poly_print(r); printf("\n\n");
+    
     /* degree 2 */
     doubCompApp_poly_shift_left(p, p, 1);
     doubCompApp_mul_si(p->coeffs+2, p->coeffs+2, 2);
@@ -61,32 +64,28 @@ int main() {
     doubCompApp_poly_mul_classical(r, p, q);
     printf("4x2+3x+1 * 6x2+2x+5 class: \n"); doubCompApp_poly_print(r); printf("\n\n");
     
-    int degree = 50;
+    int degree1 = 7;
+    int degree2 = 7;
     realRat_poly_t pbern, pbern2;
     realRat_poly_init(pbern);
     realRat_poly_init(pbern2);
-    bernoulli_polynomial(pbern, degree);
-    bernoulli_polynomial(pbern2, degree);
-    realRat_poly_add(pbern2, pbern2, pbern);
+    bernoulli_polynomial(pbern, degree1);
+    bernoulli_polynomial(pbern2, degree2);
+//     realRat_poly_add(pbern2, pbern2, pbern);
     compApp_poly_t pp, qq, rr;
     compApp_poly_init(pp);
     compApp_poly_init(qq);
     compApp_poly_init(rr);
-    compApp_poly_set2_fmpq_poly( pp, pbern, pbern2, prec);
-    compApp_poly_set2_fmpq_poly( qq, pbern2, pbern, prec);
+    compApp_poly_set_fmpq_poly( pp, pbern, prec);
+    compApp_poly_set_fmpq_poly( qq, pbern2, prec);
     doubCompApp_poly_set_compApp_poly(p,pp);
     doubCompApp_poly_set_compApp_poly(q,qq);
     
     doubCompApp_poly_mul_karatsuba(r, p, q);
-    printf("degree %d, kara: \n", degree); doubCompApp_poly_print(r); printf("\n\n");
-//     doubCompApp_poly_mul_classical(r, p, q);
-//     printf("degree %d, class: \n", degree); doubCompApp_poly_print(r); printf("\n\n");
-//     acb_poly_mullow_classical( rr, pp, qq, pp->length + qq->length, prec);
-    acb_poly_mul( rr, pp, qq, prec);
-    printf("degree %d, acb_: \n", degree); compApp_poly_printd(rr, 10); printf("\n\n");
+    printf("degrees %d,%d, kara: \n", degree1, degree2); doubCompApp_poly_print(r); printf("\n\n");
+    doubCompApp_poly_mul_classical(r, p, q);
+    printf("degrees %d,%d, class: \n", degree1, degree2); doubCompApp_poly_print(r); printf("\n\n");
     
-//     doubCompApp_poly_mul_classical(r, p, q);
-//     printf("degree %d, class: \n", degree); doubCompApp_poly_print(r); printf("\n\n");
     
     doubCompApp_poly_clear(p);
     doubCompApp_poly_clear(q);

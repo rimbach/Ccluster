@@ -76,6 +76,7 @@ void mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize){
     realRat_pow_si(coeff, two, bitsize); /*coeff = 2^(bitsize) */
     
     realRat_poly_fit_length(poly,deg+1);
+    realRat_poly_zero(poly);
     realRat_poly_set_coeff_realRat(poly, 1, coeff); /* poly = coeff*x */
     
     realRat_set_si(coeff, -1,1);
@@ -100,6 +101,7 @@ void mignotte_generalized(realRat_poly_t poly, slong deg, ulong pow, slong bitsi
     realRat_poly_init(p1);
     realRat_poly_init(p2);
     realRat_poly_fit_length(poly,deg+1);
+    realRat_poly_zero(poly);
     
     realRat_set_si(two, 2,1);
     realRat_pow_si(coeff, two, bitsize); /*coeff = 2^(bitsize) */

@@ -44,7 +44,7 @@ void compApp_poly_taylorShift_in_place( compApp_poly_t f, const compRat_t center
 
 void compApp_poly_taylorShift( compApp_poly_t res, 
                                const compApp_poly_t f, 
-                               const realRat_t creal, const realRat_t cimag, const realRat_t radius, 
+                               const compRat_t center, const realRat_t radius, 
                                slong prec );
 
 /*void compApp_poly_taylorShift_in_place_new( compApp_poly_t f, const realRat_t creal, const realRat_t cimag, const realRat_t radius, slong prec );*/

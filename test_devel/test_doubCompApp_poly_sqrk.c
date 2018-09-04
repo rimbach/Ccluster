@@ -16,9 +16,10 @@ int main() {
     slong prec = 53;
     
     /* degree 0 */
-    doubCompApp_poly_t p, r;
+    doubCompApp_poly_t p, r, q;
     doubCompApp_poly_init(p);
     doubCompApp_poly_init(r);
+    doubCompApp_poly_init(q);
     
     doubCompApp_poly_one(p);
     
@@ -46,7 +47,7 @@ int main() {
  doubCompApp_poly_mul_classical(r, p, p);
     printf("4x2+3x+1 * 4x2+3x+1 class: \n"); doubCompApp_poly_print(r); printf("\n\n");
     
-    int degree = 10;
+    int degree = 40;
     realRat_poly_t pbern, pbern2;
     realRat_poly_init(pbern);
     realRat_poly_init(pbern2);
@@ -61,8 +62,12 @@ int main() {
     doubCompApp_poly_set_compApp_poly(p,pp);
     doubCompApp_poly_sqr_karatsuba(r, p);
     printf("degree %d, kara: \n", degree); doubCompApp_poly_print(r); printf("\n\n");
-    doubCompApp_poly_mul_classical(r, p, p);
-    printf("degree %d, class: \n", degree); doubCompApp_poly_print(r); printf("\n\n");
+    doubCompApp_poly_mul_classical(q, p, p);
+    printf("degree %d, class: \n", degree); doubCompApp_poly_print(q); printf("\n\n");
+    
+    doubCompApp_poly_sub(r, q, r);
+    printf("degree %d, diff: \n", degree); doubCompApp_poly_print(r); printf("\n\n");
+    
 //     acb_poly_mullow_classical( rr, pp, qq, pp->length + qq->length, prec);
 //     acb_poly_mul( rr, pp, qq, prec);
 //     printf("degree %d, acb_: \n", degree); compApp_poly_printd(rr, 10); printf("\n\n");
