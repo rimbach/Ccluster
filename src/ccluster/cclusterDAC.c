@@ -46,7 +46,13 @@ void ccluster_prep_loop_DAC( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop,
     realRat_clear(diam);
 }
 
-void ccluster_main_loop_DAC( connCmp_list_t qResults,  connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+void ccluster_main_loop_DAC( connCmp_list_t qResults,  
+                             connCmp_list_t qMainLoop, 
+                             connCmp_list_t discardedCcs, 
+                             int nbSols,
+                             const realRat_t eps, 
+                             cacheApp_t cache, 
+                             metadatas_t meta){
     
     int separationFlag;
     int widthFlag;
@@ -81,8 +87,10 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,  connCmp_list_t qMainLoop,
     connCmp_list_init(dummy);
 #endif
     
+    int nbSolsAlreadyFound = 0;
 //     while (!connCmp_list_is_empty(qMainLoop)) {
-    while (connCmp_list_is_empty(qResults)) {    
+//     while (connCmp_list_is_empty(qResults)) {
+    while (nbSolsAlreadyFound<nbSols) {
         
         resNewton.nflag = 0;
         
@@ -155,11 +163,13 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,  connCmp_list_t qMainLoop,
         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
+            nbSolsAlreadyFound += connCmp_nSols(ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
+            nbSolsAlreadyFound += connCmp_nSols(ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
@@ -235,6 +245,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,  connCmp_list_t qMainLoop,
 void ccluster_DAC_first( connCmp_list_t qResults, 
                          connCmp_list_t qMainLoop,
                          connCmp_list_t discardedCcs,
+                         int nbSols,
                          const compBox_t initialBox, 
                          const realRat_t eps, 
                          cacheApp_t cache, 
@@ -265,7 +276,7 @@ void ccluster_DAC_first( connCmp_list_t qResults,
 //     printf("preploop: \n");
     ccluster_prep_loop_DAC( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     printf("mainloop: \n");
-    ccluster_main_loop_DAC( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    ccluster_main_loop_DAC( qResults,  qMainLoop, discardedCcs, nbSols, eps, cache, meta);
     
     
     realRat_clear(factor);
@@ -280,13 +291,14 @@ void ccluster_DAC_first( connCmp_list_t qResults,
 void ccluster_DAC_next( connCmp_list_t qResults, 
                          connCmp_list_t qMainLoop,
                          connCmp_list_t discardedCcs,
+                         int nbSols,
 //                          const compBox_t initialBox, 
                          const realRat_t eps, 
                          cacheApp_t cache, 
                          metadatas_t meta){
     
     chronos_tic_CclusAl(metadatas_chronref(meta)); 
-    ccluster_main_loop_DAC( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    ccluster_main_loop_DAC( qResults,  qMainLoop, discardedCcs, nbSols, eps, cache, meta);
     chronos_toc_CclusAl(metadatas_chronref(meta));
     
 }
@@ -295,6 +307,7 @@ void ccluster_DAC_first_interface_forJulia( connCmp_list_t qResults,
                          connCmp_list_t qMainLoop,
                          connCmp_list_t discardedCcs,
                          void(*func)(compApp_poly_t, slong), 
+                         int nbSols,
                          const compBox_t initialBox, 
                          const realRat_t eps, 
                          int st, 
@@ -309,7 +322,7 @@ void ccluster_DAC_first_interface_forJulia( connCmp_list_t qResults,
     metadatas_init(meta, initialBox, strat, verb);
     
 //     ccluster_algo( qResults, initialBox, eps, cache, meta);
-    ccluster_DAC_first( qResults, qMainLoop, discardedCcs, initialBox, eps, cache, meta);
+    ccluster_DAC_first( qResults, qMainLoop, discardedCcs, nbSols, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -327,6 +340,7 @@ void ccluster_DAC_next_interface_forJulia( connCmp_list_t qResults,
                          connCmp_list_t qMainLoop,
                          connCmp_list_t discardedCcs,
                          void(*func)(compApp_poly_t, slong), 
+                         int nbSols,
                          const compBox_t initialBox, 
                          const realRat_t eps, 
                          int st, 
@@ -341,7 +355,7 @@ void ccluster_DAC_next_interface_forJulia( connCmp_list_t qResults,
     metadatas_init(meta, initialBox, strat, verb);
     
 //     ccluster_algo( qResults, initialBox, eps, cache, meta);
-    ccluster_DAC_next( qResults, qMainLoop, discardedCcs, eps, cache, meta);
+    ccluster_DAC_next( qResults, qMainLoop, discardedCcs,nbSols, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
