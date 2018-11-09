@@ -90,7 +90,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
     int nbSolsAlreadyFound = 0;
 //     while (!connCmp_list_is_empty(qMainLoop)) {
 //     while (connCmp_list_is_empty(qResults)) {
-    while ((connCmp_list_is_empty(qResults))&&(nbSolsAlreadyFound<nbSols)) {
+    while ((!connCmp_list_is_empty(qMainLoop))&&(nbSolsAlreadyFound<nbSols)) {
         
         resNewton.nflag = 0;
         
