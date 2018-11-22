@@ -260,6 +260,7 @@ tstar_res tstar_optimized( cacheApp_t cache,
         tstar_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
     }
     
+    
     if ( (discard)&&(metadatas_useAnticipate(meta)) ){
         realApp_init(coeff0);
         realApp_init(coeffn);
@@ -295,9 +296,13 @@ tstar_res tstar_optimized( cacheApp_t cache,
         compApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
         
         res.nbOfSol = -1;
-        while( (res.nbOfSol < max_nb_sols)&&(restemp==0) ){
+        while( (res.nbOfSol < max_nb_sols)&&(restemp==0)&&(res.nbOfSol<deg) ){
             res.nbOfSol += 1;
+            
+//             printf("ici: res.nbOfSol: %d, max_nb_sols: %d\n", res.nbOfSol, max_nb_sols); 
+//             compApp_poly_printd(pApprox, 10); printf("\n\n");
             restemp = compApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
+//             printf("la:\n");
             
 //             if ((restemp==1)&&(iteration==7)){
 //                 
