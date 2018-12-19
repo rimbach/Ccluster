@@ -63,6 +63,40 @@ void connCmp_clear_for_tables(connCmp_t x){
     fmpz_clear(connCmp_nwSpdref(x));
 }
 
+void connCmp_set(connCmp_t dest, connCmp_t src){
+    realRat_set( connCmp_widthref(dest), connCmp_widthref(src) );
+    realRat_set( connCmp_infReref(dest), connCmp_infReref(src) );
+    realRat_set( connCmp_supReref(dest), connCmp_supReref(src) );
+    realRat_set( connCmp_infImref(dest), connCmp_infImref(src) );
+    realRat_set( connCmp_supImref(dest), connCmp_supImref(src) );
+    connCmp_nSolsref(dest) = connCmp_nSolsref(src);
+    fmpz_set( connCmp_nwSpdref(dest), connCmp_nwSpdref(src) );
+    connCmp_appPrref(dest) = connCmp_appPrref(src);
+    connCmp_newSuref(dest) = connCmp_newSuref(src);
+    
+    /* copy the boxes */
+    compBox_ptr nBox;
+    
+    compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (src) );
+    while (it!=compBox_list_end()) {
+        
+        nBox = ( compBox_ptr ) malloc (sizeof(compBox));
+        compBox_init(nBox);
+        compBox_set(nBox, compBox_list_elmt(it));
+        compBox_list_push(connCmp_boxesref (dest), nBox);
+        
+        it = compBox_list_next(it);
+    }
+}
+
+connCmp_ptr connCmp_copy(connCmp_t src){
+    connCmp_ptr nCmp;
+    nCmp = ( connCmp_ptr ) malloc (sizeof(connCmp));
+    connCmp_init(nCmp);
+    connCmp_set(nCmp, src);
+    return nCmp;
+}
+
 void connCmp_initiali_nwSpd(connCmp_t x){
     fmpz_set_si(connCmp_nwSpdref(x), 4);
 }
