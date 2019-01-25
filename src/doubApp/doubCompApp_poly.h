@@ -128,6 +128,8 @@ void doubCompApp_poly_taylor_shift_horner_inplace( doubCompApp_poly_t f, const d
 void doubCompApp_poly_taylor_shift_horner( doubCompApp_poly_t res, const doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r);
 void doubCompApp_poly_taylor_shift_DQ( doubCompApp_poly_t res, doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r);
 void doubCompApp_poly_taylor_shift_convolution( doubCompApp_poly_t res, const doubCompApp_poly_t f, const doubCompApp_t c, const doubRealApp_t r);
+
+void doubCompApp_poly_oneGraeffeIteration_in_place( doubCompApp_poly_t f );
 /* DEPRECATED */
 void doubCompApp_poly_mul_block( doubCompApp_poly_t res, const doubCompApp_poly_t x, const doubCompApp_poly_t y);
 

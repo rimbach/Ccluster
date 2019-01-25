@@ -29,13 +29,19 @@
 
 #include "ccluster/ccluster.h"  
 
+int  ccluster_compDsk_is_separated_DAC( const compDsk_t d, 
+                                        connCmp_list_t qMainLoop, 
+                                        connCmp_list_t qAllResults, 
+                                        connCmp_list_t discardedCcs );
+
 void ccluster_prep_loop_DAC( connCmp_list_t qMainLoop, 
                              connCmp_list_t qPrepLoop, 
                              connCmp_list_t discardedCcs,
                              cacheApp_t cache, 
                              metadatas_t meta);
 
-void ccluster_main_loop_DAC( connCmp_list_t qResults,  
+void ccluster_main_loop_DAC( connCmp_list_t qResults,
+                             connCmp_list_t qAllResults,
                              connCmp_list_t qMainLoop, 
                              connCmp_list_t discardedCcs, 
                              int nbSols,
@@ -44,6 +50,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
                              metadatas_t meta);
 
 void ccluster_DAC_first( connCmp_list_t qResults, 
+                         connCmp_list_t qAllResults,
                          connCmp_list_t qMainLoop,
                          connCmp_list_t discardedCcs,
                          int nbSols,
@@ -53,42 +60,44 @@ void ccluster_DAC_first( connCmp_list_t qResults,
                          metadatas_t meta);
 
 void ccluster_DAC_next( connCmp_list_t qResults, 
-                         connCmp_list_t qMainLoop,
-                         connCmp_list_t discardedCcs,
-                         int nbSols,
-//                          const compBox_t initialBox, 
-                         const realRat_t eps, 
-                         cacheApp_t cache, 
-                         metadatas_t meta);
+                        connCmp_list_t qAllResults,
+                        connCmp_list_t qMainLoop,
+                        connCmp_list_t discardedCcs,
+                        int nbSols,
+                        const realRat_t eps, 
+                        cacheApp_t cache, 
+                        metadatas_t meta);
 
 void ccluster_DAC_interface_forJulia( connCmp_list_t qResults, 
-                         connCmp_list_t qMainLoop,
-                         connCmp_list_t discardedCcs,
-                         void(*func)(compApp_poly_t, slong), 
-                         const compBox_t initialBox, 
-                         const realRat_t eps, 
-                         int st, 
-                         int verb);
+                                      connCmp_list_t qMainLoop,
+                                      connCmp_list_t discardedCcs,
+                                      void(*func)(compApp_poly_t, slong), 
+                                      const compBox_t initialBox, 
+                                      const realRat_t eps, 
+                                      int st, 
+                                      int verb);
 
 void ccluster_DAC_next_interface_forJulia( connCmp_list_t qResults, 
-                         connCmp_list_t qMainLoop,
-                         connCmp_list_t discardedCcs,
-                         void(*func)(compApp_poly_t, slong), 
-                         int nbSols,
-                         const compBox_t initialBox, 
-                         const realRat_t eps, 
-                         int st, 
-                         int verb);
+                                           connCmp_list_t qAllResults,
+                                           connCmp_list_t qMainLoop,
+                                           connCmp_list_t discardedCcs,
+                                           void(*func)(compApp_poly_t, slong), 
+                                           int nbSols,
+                                           const compBox_t initialBox, 
+                                           const realRat_t eps, 
+                                           int st, 
+                                           int verb);
 
 void ccluster_DAC_first_interface_forJulia( connCmp_list_t qResults, 
-                         connCmp_list_t qMainLoop,
-                         connCmp_list_t discardedCcs,
-                         void(*func)(compApp_poly_t, slong), 
-                         int nbSols,
-                         const compBox_t initialBox, 
-                         const realRat_t eps, 
-                         int st, 
-                         int verb);
+                                            connCmp_list_t qAllResults,
+                                            connCmp_list_t qMainLoop,
+                                            connCmp_list_t discardedCcs,
+                                            void(*func)(compApp_poly_t, slong), 
+                                            int nbSols,
+                                            const compBox_t initialBox, 
+                                            const realRat_t eps, 
+                                            int st, 
+                                            int verb);
 
 // void ccluster_DAC_first_interface_func( void(*func)(compApp_poly_t, slong), const compBox_t initialBox, const realRat_t eps, int st, int verb);
 
