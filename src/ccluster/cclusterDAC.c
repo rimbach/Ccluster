@@ -13,10 +13,16 @@
 
 int  ccluster_compDsk_is_separated_DAC( const compDsk_t d, 
                                         connCmp_list_t qMainLoop, 
+                                        connCmp_list_t qResults,
                                         connCmp_list_t qAllResults, 
                                         connCmp_list_t discardedCcs ){
     int res = 1;
     connCmp_list_iterator it = connCmp_list_begin(qMainLoop);
+    while ( res && (it!=connCmp_list_end()) ) {
+        res = res && (! connCmp_intersection_is_not_empty_compDsk( connCmp_list_elmt(it) , d));
+        it = connCmp_list_next(it);
+    }
+    it = connCmp_list_begin(qResults);
     while ( res && (it!=connCmp_list_end()) ) {
         res = res && (! connCmp_intersection_is_not_empty_compDsk( connCmp_list_elmt(it) , d));
         it = connCmp_list_next(it);
@@ -125,7 +131,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         prec = connCmp_appPr(ccur);
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
-        separationFlag = ccluster_compDsk_is_separated_DAC(fourCCDisk, qMainLoop, qAllResults, discardedCcs);
+        separationFlag = ccluster_compDsk_is_separated_DAC(fourCCDisk, qMainLoop, qResults, qAllResults, discardedCcs);
 #ifdef CCLUSTER_HAVE_PTHREAD
         if (!connCmp_list_is_empty(toBeBisected))
             separationFlag = separationFlag&&ccluster_compDsk_is_separated(fourCCDisk, toBeBisected, dummy);

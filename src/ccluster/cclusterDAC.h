@@ -31,6 +31,7 @@
 
 int  ccluster_compDsk_is_separated_DAC( const compDsk_t d, 
                                         connCmp_list_t qMainLoop, 
+                                        connCmp_list_t qResults,
                                         connCmp_list_t qAllResults, 
                                         connCmp_list_t discardedCcs );
 
