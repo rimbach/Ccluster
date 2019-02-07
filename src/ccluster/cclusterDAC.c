@@ -100,7 +100,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
     connCmp_list_init(ltemp);
     
     connCmp_ptr ccur;
-    connCmp_ptr ccurCopy;
+//     connCmp_ptr ccurCopy;
     
     realRat_set_si(four, 4, 1);
     realRat_set_si(three, 3, 1);
