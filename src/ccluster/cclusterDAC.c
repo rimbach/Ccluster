@@ -188,18 +188,22 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
             nbSolsAlreadyFound += connCmp_nSols(ccur);
+            /*DEPRECATED*/
             /* push a copied version in qAllResults */
-            ccurCopy = connCmp_copy(ccur);
-            connCmp_list_push(qAllResults, ccurCopy);
+//             ccurCopy = connCmp_copy(ccur);
+//             connCmp_list_push(qAllResults, ccurCopy);
+            /*END DEPRECATED*/
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
             nbSolsAlreadyFound += connCmp_nSols(ccur);
+            /*DEPRECATED*/
             /* push a copied version in qAllResults */
-            ccurCopy = connCmp_copy(ccur);
-            connCmp_list_push(qAllResults, ccurCopy);
+//             ccurCopy = connCmp_copy(ccur);
+//             connCmp_list_push(qAllResults, ccurCopy);
+            /*END DEPRECATED*/
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
