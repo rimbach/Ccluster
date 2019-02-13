@@ -505,39 +505,20 @@ void ccluster_refine( connCmp_list_t qResults,
                       cacheApp_t cache, 
                       metadatas_t meta){
     
+//     printf("ccluster_refine: begin, eps = "); realRat_print(eps); printf("\n");
+    
     chronos_tic_CclusAl(metadatas_chronref(meta));
     
-//     realRat_t factor;
-//     realRat_init(factor);
-//     realRat_set_si(factor, 5, 4);
-//     
-//     compBox_ptr bEnlarged;
-//     bEnlarged = (compBox_ptr) malloc (sizeof(compBox));
-//     compBox_init(bEnlarged);
-//     compBox_inflate_realRat(bEnlarged, initialBox, factor);
-//     compBox_nbMSolref(bEnlarged) = cacheApp_getDegree ( cache );
-//     
-//     connCmp_ptr initialCC;
-//     initialCC = (connCmp_ptr) malloc (sizeof(connCmp));
-//     connCmp_init_compBox(initialCC, bEnlarged);
     
     connCmp_list_t discardedCcs;
-//     connCmp_list_init(qMainLoop);
-//     connCmp_list_init(qPrepLoop);
     connCmp_list_init(discardedCcs);
-    
-//     connCmp_list_push(qPrepLoop, initialCC);
-//     printf("preploop: \n");
-//     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
-//     connCmp_list_push(qMainLoop, ccur);
+
     ccluster_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
     
-//     realRat_clear(factor);
-//     connCmp_list_clear(qMainLoop);
-//     connCmp_list_clear(qPrepLoop);
     connCmp_list_clear(discardedCcs);
     
     chronos_toc_CclusAl(metadatas_chronref(meta));
+//     printf("ccluster_refine: end \n");
 }
 
 void connCmp_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta){

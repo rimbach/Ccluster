@@ -191,6 +191,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         }
         
         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
+//         if (metadatas_useStopWhenCompact(meta) && compactFlag && separationFlag){
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
             nbSolsAlreadyFound += connCmp_nSols(ccur);
@@ -200,6 +201,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
 //             connCmp_list_push(qAllResults, ccurCopy);
             /*END DEPRECATED*/
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
+//             printf("fourCCDisk: "); compDsk_print(fourCCDisk); printf("\n");  
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
