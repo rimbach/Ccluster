@@ -123,6 +123,86 @@ newton_res newton_iteration( compApp_t iteration,
     return res;
 }
 
+/*test: interval newton */
+/* performs a newton test for the compBox b contained in the compDisk d;
+ * returns 1 if interval newton certifies the existence of a solution in b;
+ *         0 otherwise */
+newton_res newton_interval(  compDsk_t d, 
+                             cacheApp_t cache, 
+                             slong prec, 
+                             metadatas_t meta) {
+    
+    newton_res res;
+    res.nflag=0;
+    if (metadatas_usePredictPrec(meta))
+        res.appPrec = prec;
+    else
+        res.appPrec = CCLUSTER_DEFAULT_PREC;
+    
+    compApp_t cBall, ball, fcBall, fpBall;
+    realApp_t bRe, bIm, error;
+    realRat_t nwidth;
+    compApp_poly_t pApprox, ppApprox;
+    
+    compApp_init(cBall);
+    compApp_init(ball);
+    compApp_init(fcBall);
+    compApp_init(fpBall);
+    realApp_init(bRe);
+    realApp_init(bIm);
+    realApp_init(error);
+    realRat_init(nwidth);
+    compApp_poly_init(pApprox);
+    compApp_poly_init(ppApprox);
+    
+    realApp_set_realRat( bRe, compRat_realref( compDsk_centerref(d) ), res.appPrec );
+    realApp_set_realRat( bIm, compRat_imagref( compDsk_centerref(d) ), res.appPrec );
+    realRat_set_si( nwidth, 2,3);
+    realRat_mul( nwidth, nwidth, compDsk_radiusref(d));
+    realApp_set_realRat( error, nwidth, res.appPrec );
+    arb_add_error(bRe, error);
+    arb_add_error(bIm, error);
+    compApp_set_real_realApp(ball, bRe);
+    compApp_set_imag_realApp(ball, bIm);
+    compApp_set_compRat(cBall, compDsk_centerref(d), res.appPrec );
+    
+    tstar_getApproximation( pApprox, cache, res.appPrec, meta);
+    compApp_poly_derivative(ppApprox, pApprox, res.appPrec);
+    
+    compApp_poly_evaluate(fpBall, ppApprox, ball, res.appPrec);
+    if (compApp_contains_zero(fpBall)){
+        res.nflag=0; /* do nothing */
+//         printf("fpBall contains 0: %d, fpBall: ", compApp_contains_zero(fpBall)); compApp_print(fpBall); printf("\n");
+    }
+    else {
+        compApp_poly_evaluate(fcBall, pApprox, cBall, res.appPrec);
+        compApp_div( fcBall, fcBall, fpBall, res.appPrec);
+        compApp_sub( fcBall, cBall, fcBall, res.appPrec);
+        if (compApp_contains(ball, fcBall)) {
+            res.nflag=1;
+        }
+    }
+    
+//     printf("result of interval newton: "); compApp_print(fcBall); printf("\n");
+//     printf("initial box              : "); compApp_print(ball); printf("\n");
+//     printf("interval newton result: %d \n", res.nflag);
+    
+    
+    compApp_clear(cBall);
+    compApp_clear(ball);
+    compApp_clear(fcBall);
+    compApp_clear(fpBall);
+    realApp_clear(bRe);
+    realApp_clear(bIm);
+    realApp_clear(error);
+    realRat_clear(nwidth);
+    compApp_poly_clear(pApprox);
+    compApp_poly_clear(ppApprox);
+    
+    return res;
+}
+/* end test*/
+
 newton_res newton_newton_connCmp( connCmp_t nCC,
                                   connCmp_t CC,
                                   cacheApp_t cache, 
@@ -176,10 +256,27 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
     if (res.nflag) {
 //         precsave = res.appPrec;
 //         if (res.appPrec == prec) res.appPrec *=2;
-        slong depth = connCmp_getDepth(CC, metadatas_initBref(meta));
-        tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, depth, meta);
-        res.appPrec = tres.appPrec;
-        res.nflag = (tres.nbOfSol == connCmp_nSolsref(CC));
+        
+        /*improvement: if one solution, try to validate with interval newton*/
+        /* to avoid a costly taylor-shift in the tstar tes                  */ 
+        newton_res nres;
+        nres.nflag = 0;
+        if (connCmp_nSolsref(CC)==1) {
+//             printf("the CC contains one solution: try to validate with interval newton\n");
+            nres = newton_interval( ndisk, cache, res.appPrec, meta);
+        }
+        
+        if (nres.nflag==0) {
+        
+            slong depth = connCmp_getDepth(CC, metadatas_initBref(meta));
+            tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, depth, meta);
+            res.appPrec = tres.appPrec;
+            res.nflag = (tres.nbOfSol == connCmp_nSolsref(CC));
+        
+        }
+//         printf("number of sols in ndisk from pellet test: %d\n\n", tres.nbOfSol);
+        /* end improvement */
+        
     }
     
 //     printf("Newton: tstarOk     (nflag: %d) prec avant: %d, prec apres: %d \n", res.nflag, prec, res.appPrec);

@@ -42,6 +42,16 @@ newton_res newton_iteration( compApp_t iteration,
                              compApp_t fpcenter,
                              slong prec, metadatas_t meta);
 
+/*test: interval newton */
+/* performs a newton test for the compBox b contained in the compDisk d;
+ * returns 1 if interval newton certifies the existence of a solution in b;
+ *         0 otherwise */
+newton_res newton_interval(  compDsk_t d, 
+                             cacheApp_t cache, 
+                             slong prec, 
+                             metadatas_t meta);
+/* end test*/
+
 /*works in place in CC*/
 newton_res newton_newton_connCmp( connCmp_t nCC,
                                   connCmp_t CC,
