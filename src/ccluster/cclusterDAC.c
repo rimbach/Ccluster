@@ -131,7 +131,13 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         prec = connCmp_appPr(ccur);
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
-        separationFlag = ccluster_compDsk_is_separated_DAC(fourCCDisk, qMainLoop, qResults, qAllResults, discardedCcs);
+        if (connCmp_isSep(ccur)==0) {
+            separationFlag = ccluster_compDsk_is_separated_DAC(fourCCDisk, qMainLoop, qResults, qAllResults, discardedCcs);
+            if (separationFlag)
+                connCmp_isSep(ccur)=1;
+        }
+        else
+            separationFlag = 1;
 #ifdef CCLUSTER_HAVE_PTHREAD
         if (!connCmp_list_is_empty(toBeBisected))
             separationFlag = separationFlag&&ccluster_compDsk_is_separated(fourCCDisk, toBeBisected, dummy);

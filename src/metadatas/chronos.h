@@ -33,6 +33,7 @@ typedef struct {
     clock_t _clicks_CclusAl;
     clock_t _clicks_Evaluat;
     clock_t _clicks_Derivat;
+    clock_t _clicks_Anticip;
     double  _clicks_Approxi_cumul;
     double  _clicks_Graeffe_cumul;
     double  _clicks_Taylors_cumul;
@@ -42,6 +43,7 @@ typedef struct {
     double  _clicks_CclusAl_cumul;
     double  _clicks_Evaluat_cumul;
     double  _clicks_Derivat_cumul;
+    double  _clicks_Anticip_cumul;
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_t _mutex;
 #endif    
@@ -117,6 +119,16 @@ METADATAS_INLINE void   chronos_add_time_TSTests( chronos_t times, double d, int
     times->_clicks_TSTests_cumul += d/CLOCKS_PER_SEC;
 #endif
 }
+METADATAS_INLINE void   chronos_add_time_Anticip( chronos_t times, double d, int nbThreads ){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (nbThreads>1)
+        times->_clicks_Anticip_cumul += d/(nbThreads*CLOCKS_PER_SEC);
+    else 
+        times->_clicks_Anticip_cumul += d/CLOCKS_PER_SEC;
+#else
+    times->_clicks_Anticip_cumul += d/CLOCKS_PER_SEC;
+#endif
+}
 
 METADATAS_INLINE void   chronos_tic_Approxi      ( chronos_t times ) { times->_clicks_Approxi = clock(); }
 METADATAS_INLINE void   chronos_toc_Approxi      ( chronos_t times ) { times->_clicks_Approxi_cumul += ((double) (clock() - times->_clicks_Approxi))/ CLOCKS_PER_SEC; }
@@ -153,6 +165,10 @@ METADATAS_INLINE double chronos_get_time_Evaluat ( const chronos_t times ) { ret
 METADATAS_INLINE void   chronos_tic_Derivat      ( chronos_t times ) { times->_clicks_Derivat = clock(); }
 METADATAS_INLINE void   chronos_toc_Derivat      ( chronos_t times ) { times->_clicks_Derivat_cumul += ((double) (clock() - times->_clicks_Derivat))/ CLOCKS_PER_SEC; }
 METADATAS_INLINE double chronos_get_time_Derivat ( const chronos_t times ) { return times->_clicks_Derivat_cumul; }
+
+METADATAS_INLINE void   chronos_tic_Anticip      ( chronos_t times ) { times->_clicks_Anticip = clock(); }
+METADATAS_INLINE void   chronos_toc_Anticip      ( chronos_t times ) { times->_clicks_Anticip_cumul += ((double) (clock() - times->_clicks_Anticip))/ CLOCKS_PER_SEC; }
+METADATAS_INLINE double chronos_get_time_Anticip ( const chronos_t times ) { return times->_clicks_Anticip_cumul; }
 
 METADATAS_INLINE void   chronos_tic_Test      ( chronos_t times, int discard ) { 
     if (discard) times->_clicks_T0Tests = clock(); 

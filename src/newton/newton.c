@@ -319,6 +319,9 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
             connCmp_insert_compBox(nCC, compBox_list_pop(ltemp));
         connCmp_nSols(nCC) = connCmp_nSols(CC);
         fmpz_set(connCmp_nwSpdref(nCC), connCmp_nwSpdref(CC));
+        /* test */
+        connCmp_isSep(nCC) = connCmp_isSep(CC);
+        /* end test */
         /*connCmp_appPrref(nCC) = res.appPrec;*/ /*adjust the precision in the main loop*/
         
     }

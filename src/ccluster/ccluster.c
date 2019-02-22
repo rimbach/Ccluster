@@ -40,6 +40,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
         btemp = compBox_list_pop(boxes);
         compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
+//         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
         res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);    
         if (res.nbOfSol==0) {
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -190,6 +191,9 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
                 connCmp_decrease_nwSpd(ctemp);
                 /* copy the number of sols */
                 connCmp_nSolsref(ctemp) = connCmp_nSolsref(cc);
+                /* test */
+                connCmp_isSep(ctemp) = connCmp_isSep(cc);
+                /*end test */
             }
             connCmp_list_push(dest, ctemp);
         }
@@ -334,12 +338,22 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
         
+        if (metadatas_getVerbo(meta)>3) {
+            printf("---depth: %d\n", (int) depth);
+            printf("------component Box:"); compBox_print(componentBox); printf("\n");
+            printf("------separation Flag: %d\n", separationFlag);
+            printf("------widthFlag: %d\n", widthFlag); 
+            printf("------compactFlag: %d\n", compactFlag); 
+        }
+        
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
 //         if ((separationFlag)) {
 //             printf("depth: %d, connCmp_nSolsref(ccur): %d, prec: %d\n", (int) depth, (int) connCmp_nSolsref(ccur), (int) prec);
             if (connCmp_nSolsref(ccur)==-1){
                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
+                if (metadatas_getVerbo(meta)>3)
+                    printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));
 //                 ???
                 prec = resTstar.appPrec;
             }
@@ -484,9 +498,9 @@ void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const r
     connCmp_list_init(discardedCcs);
     
     connCmp_list_push(qPrepLoop, initialCC);
-//     printf("preploop: \n");
+    if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
-//     printf("mainloop: \n");
+    if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
     ccluster_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
     
     

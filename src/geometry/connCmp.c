@@ -23,6 +23,7 @@ void connCmp_init(connCmp_t x){
     fmpz_set_si(connCmp_nwSpdref(x), 4);
     connCmp_appPrref(x) = CCLUSTER_DEFAULT_PREC;
     connCmp_newSuref(x) = 0;
+    connCmp_isSepref(x) = 0;
 }
 
 void connCmp_init_compBox(connCmp_t x, compBox_t b){
@@ -73,6 +74,7 @@ void connCmp_set(connCmp_t dest, connCmp_t src){
     fmpz_set( connCmp_nwSpdref(dest), connCmp_nwSpdref(src) );
     connCmp_appPrref(dest) = connCmp_appPrref(src);
     connCmp_newSuref(dest) = connCmp_newSuref(src);
+    connCmp_isSepref(dest) = connCmp_isSepref(src);
     
     /* copy the boxes */
     compBox_ptr nBox;

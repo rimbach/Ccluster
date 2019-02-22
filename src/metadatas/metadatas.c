@@ -122,6 +122,9 @@ int metadatas_fprint(FILE * file, const metadatas_t meta, const realRat_t eps){
     }
     r = fprintf(file, " -------------------Other---------------------------------------------\n");
     r = fprintf(file, "|%-39s %14f %14s|\n", "time in getApproximation:",           metadatas_get_time_Approxi(meta),    " " );
+    if (metadatas_useAnticipate(meta)){
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Anticipate:",                 metadatas_get_time_Anticip(meta),    " " );
+    }
     r = fprintf(file, " -------------------Precision-----------------------------------------\n");
     r = fprintf(file, "|%-39s %14d %14s|\n", "boxes with 53:",           metadatas_getNbDouble(meta),    " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "boxes with 106:",           metadatas_getNbOthers(meta),    " " );

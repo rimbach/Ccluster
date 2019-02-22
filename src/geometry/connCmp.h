@@ -35,6 +35,7 @@ typedef struct {
     fmpz         nwSpd; /* the newton speed                               */
     slong        appPr; /* the number of bit of approximations            */
     int          newSu; /* a flag set to 1 iff the last newton iteration wa successful*/
+    int          isSep; /* a flag set to 1 if the connected component is separated from the other ones*/
 } connCmp;
 
 typedef connCmp connCmp_t[1];
@@ -50,6 +51,7 @@ typedef connCmp * connCmp_ptr;
 #define connCmp_nwSpdref(X) (&(X)->nwSpd)
 #define connCmp_appPrref(X) ( (X)->appPr)
 #define connCmp_newSuref(X) ( (X)->newSu)
+#define connCmp_isSepref(X) ( (X)->isSep)
 
 /* memory managment */
 void connCmp_init(connCmp_t x);
@@ -100,6 +102,7 @@ GEOMETRY_INLINE void connCmp_supIm(realRat_t dest, connCmp_t x){
 #define connCmp_nSols(X) ( (X)->nSols)
 #define connCmp_appPr(X) ( (X)->appPr)
 #define connCmp_newSu(X) ( (X)->newSu)
+#define connCmp_isSep(X) ( (X)->isSep)
 
 GEOMETRY_INLINE void connCmp_nwSpd(fmpz_t dest, connCmp_t x){
     fmpz_set(dest, connCmp_nwSpdref(x));

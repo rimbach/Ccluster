@@ -21,6 +21,7 @@ void chronos_init( chronos_t times ){
     times->_clicks_CclusAl_cumul = 0.0;
     times->_clicks_Evaluat_cumul = 0.0;
     times->_clicks_Derivat_cumul = 0.0;
+    times->_clicks_Anticip_cumul = 0.0;
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(times->_mutex), NULL);
 #endif
@@ -42,4 +43,5 @@ void chronos_clear( chronos_t times ) {
 //     t1->_clicks_CclusAl_cumul += t2->_clicks_CclusAl_cumul;
 //     t1->_clicks_Evaluat_cumul += t2->_clicks_Evaluat_cumul;
 //     t1->_clicks_Derivat_cumul += t2->_clicks_Derivat_cumul;
+//     t1->_clicks_Anticip_cumul += t2->_clicks_Anticip_cumul;
 // }

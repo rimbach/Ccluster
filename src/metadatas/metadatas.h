@@ -124,6 +124,7 @@ METADATAS_INLINE double metadatas_get_time_Newtons ( const metadatas_t m ) { ret
 METADATAS_INLINE double metadatas_get_time_CclusAl ( const metadatas_t m ) { return chronos_get_time_CclusAl (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_Evaluat ( const metadatas_t m ) { return chronos_get_time_Evaluat (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_Derivat ( const metadatas_t m ) { return chronos_get_time_Derivat (metadatas_chronref(m)); }
+METADATAS_INLINE double metadatas_get_time_Anticip ( const metadatas_t m ) { return chronos_get_time_Anticip (metadatas_chronref(m)); }
 
 METADATAS_INLINE void metadatas_add_time_Approxi(metadatas_t m, double d){
     chronos_add_time_Approxi( metadatas_chronref(m), d, metadatas_useNBThreads(m));
@@ -143,6 +144,10 @@ METADATAS_INLINE void metadatas_add_time_T0Tests(metadatas_t m, double d){
 
 METADATAS_INLINE void metadatas_add_time_TSTests(metadatas_t m, double d){
     chronos_add_time_TSTests( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+}
+
+METADATAS_INLINE void metadatas_add_time_Anticip(metadatas_t m, double d){
+    chronos_add_time_Anticip( metadatas_chronref(m), d, metadatas_useNBThreads(m));
 }
 
 /* printing */

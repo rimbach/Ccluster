@@ -22,6 +22,12 @@ void tstar_getApproximation( compApp_poly_t res, cacheApp_t cache, slong prec, m
         
         compApp_poly_set(res, cacheApp_getApproximation ( cache, prec ));
         
+//         if (metadatas_getVerbo(meta)>3){
+//             printf("------tstar_getApproximation, prec: %d \n", (int) prec );
+//             compApp_poly_printd( res, prec );
+//             printf("\n");
+//         }
+        
         cacheApp_unlock(cache);
         
 // clock_gettime(CLOCK_MONOTONIC, &end);        
@@ -373,6 +379,9 @@ tstar_res tstar_optimized( cacheApp_t cache,
 //             int test_anticipate = ((0x1 << (N-iteration)) <= (compApp_poly_degree(pApprox)/2));
             int test_anticipate = ((0x1 << (N-iteration)) <= (compApp_poly_degree(pApprox)/4));
             if (test_anticipate) {
+                
+                clock_t start = clock();
+                
                 anticipate_already_applied = 1;
                 realApp_init(coeff0);
                 realApp_init(coeff1);
@@ -392,6 +401,10 @@ tstar_res tstar_optimized( cacheApp_t cache,
                 realApp_clear(coeff0);
                 realApp_clear(coeff1);
                 realApp_clear(coeffn);
+                
+                metadatas_lock(meta);
+                metadatas_add_time_Anticip(meta, (double) (clock() - start) );
+                metadatas_unlock(meta);
            }
             
         }
