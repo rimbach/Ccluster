@@ -464,16 +464,21 @@ int connCmp_is_imaginary_positive               ( const connCmp_t cc  ){
 /* Precondition: res is initialized                                                            */
 /* Specification: set res to the complex conjugate of cc                                       */
 void connCmp_set_conjugate                      ( connCmp_t res, const connCmp_t cc  ){
-    connCmp_set( res, cc);
-    /* conjugate the bounds */
-    realRat_neg( connCmp_infImref(res), connCmp_supImref(cc) );
-    realRat_neg( connCmp_supImref(res), connCmp_infImref(cc) );
-    /* conjugate the boxes */
-    compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (res) );
+    /* copy the boxes */
+    compBox_ptr nBox;
+    compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (cc) );
     while (it!=compBox_list_end()) {
-        compBox_conjugate_inplace( compBox_list_elmt(it) );
+        
+        nBox = ( compBox_ptr ) malloc (sizeof(compBox));
+        compBox_init(nBox);
+        compBox_set_conjugate(nBox, compBox_list_elmt(it));
+        connCmp_insert_compBox(res, nBox);
+        
         it = compBox_list_next(it);
     }
+    /* the other properties */
+    realRat_set( connCmp_widthref(res), connCmp_widthref(cc) );
+    connCmp_nSolsref(res) = connCmp_nSolsref(cc);
 }
 
 void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc  ){
@@ -487,10 +492,13 @@ void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t
         nBox = ( compBox_ptr ) malloc (sizeof(compBox));
         compBox_init(nBox);
         compBox_set_conjugate(nBox, compBox_list_elmt(it));
+//         printf(" box: "); compBox_print(compBox_list_elmt(it)); printf("\n"); 
+//         printf(" conjugate: "); compBox_print(nBox); printf("\n");
         /* check if the conjugate is in the list */
         compBox_list_iterator it2 = compBox_list_begin( connCmp_boxesref (res) );
-        int isIn = -1;
-        while ( (it2!=compBox_list_end()) && (isIn<0) ) {
+        int isIn = 1;
+        while ( (it2!=compBox_list_end()) && (isIn>0) ) {
+//             printf(" box in res: "); compBox_print(compBox_list_elmt(it2)); printf("\n");
             isIn = compBox_cmp( nBox, compBox_list_elmt(it2) );
             it2 = compBox_list_next(it2);
         }
