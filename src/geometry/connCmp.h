@@ -61,7 +61,7 @@ void connCmp_clear(connCmp_t x);
 void connCmp_clear_for_tables(connCmp_t x);
 
 /* deep copy of a connCmp; for the solver for triangular systems */
-void connCmp_set(connCmp_t dest, connCmp_t src);
+void connCmp_set(connCmp_t dest, const connCmp_t src);
 /* allocate memory + deep copy; if called from C, need to deallocate the result */
 connCmp_ptr connCmp_copy(connCmp_t src);
 
@@ -179,6 +179,20 @@ int connCmp_intersection_is_not_empty( const connCmp_t cc, const compBox_t b );
 int connCmp_are_8connected( const connCmp_t cc, const compBox_t b );
 
 void connCmp_find_point_outside_connCmp( compRat_t res, const connCmp_t cc, const compBox_t initialBox );
+
+/* RealCoeffs */
+/* Precondition:                                                                               */
+/* Specification: returns true only if forall p\in cc, Im(p)<0                                 */
+int connCmp_is_imaginary_negative               ( const connCmp_t cc  );
+/* Precondition:                                                                               */
+/* Specification: returns true only if forall p\in cc, Im(p)>0                                 */
+int connCmp_is_imaginary_positive               ( const connCmp_t cc  );
+
+/* Precondition: res is initialized                                                            */
+/* Specification: set res to the complex conjugate of cc                                       */
+void connCmp_set_conjugate                      ( connCmp_t res, const connCmp_t cc  );
+
+void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc  );
 
 /* DEPRECATED
 void connCmp_find_point_outside_connCmp_for_julia( realRat_t resRe, realRat_t resIm, const connCmp_t cc, const compBox_t initialBox );

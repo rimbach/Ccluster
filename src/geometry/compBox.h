@@ -190,6 +190,18 @@ int compBox_is_point_in_box                     ( const compRat_t p,  const comp
 /*               in particular if p is in b, returns p                                          */
 void compBox_closest_point_on_boundary          (compRat_t res, const compRat_t p, const compBox_t b  );
 
+/* RealCoeffs */
+/* Precondition:                                                                               */
+/* Specification: returns true only if forall p\in b, Im(p)<0                                  */
+int compBox_is_imaginary_negative               ( const compBox_t b  );
+/* Precondition:                                                                               */
+/* Specification: returns true only if forall p\in b, Im(p)>0                                  */
+int compBox_is_imaginary_positive               ( const compBox_t b  );
+/* Precondition: d is initialized                                                              */
+/* Specification: set d to the complex conjugate of b                                          */
+void compBox_set_conjugate                      ( compBox_t d, const compBox_t b  );
+void compBox_conjugate_inplace                  ( compBox_t b  );
+
 /*DEPRECATED
 int compBox_is_point_in_box_forJulia            ( const realRat_t pre, const realRat_t pim,  const compBox_t b  );
 void compBox_closest_point_on_boundary_forJulia          (realRat_t resre, realRat_t resim, const realRat_t pre, const realRat_t pim, const compBox_t b  );

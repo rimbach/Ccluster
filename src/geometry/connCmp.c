@@ -64,7 +64,7 @@ void connCmp_clear_for_tables(connCmp_t x){
     fmpz_clear(connCmp_nwSpdref(x));
 }
 
-void connCmp_set(connCmp_t dest, connCmp_t src){
+void connCmp_set(connCmp_t dest, const connCmp_t src){
     realRat_set( connCmp_widthref(dest), connCmp_widthref(src) );
     realRat_set( connCmp_infReref(dest), connCmp_infReref(src) );
     realRat_set( connCmp_supReref(dest), connCmp_supReref(src) );
@@ -432,6 +432,78 @@ void connCmp_find_point_outside_connCmp( compRat_t res, const connCmp_t cc, cons
     realRat_clear(halfwidth);
     realRat_clear(halfwidthenlarged);
     compBox_clear(componentBox);
+}
+
+/* RealCoeffs */
+/* Precondition:                                                                               */
+/* Specification: returns true only if forall p\in b, Im(p)<0                                  */
+int connCmp_is_imaginary_negative               ( const connCmp_t cc  ){
+    int res;
+    realRat_t zero;
+    realRat_init(zero);
+    realRat_set_si(zero, 0, 1);
+    
+    res = (realRat_cmp(connCmp_supImref(cc), zero) < 0);
+    
+    realRat_clear(zero);
+    return res;
+}
+/* Precondition:                                                                               */
+/* Specification: returns true only if forall p\in b, Im(p)>0                                  */
+int connCmp_is_imaginary_positive               ( const connCmp_t cc  ){
+    int res;
+    realRat_t zero;
+    realRat_init(zero);
+    realRat_set_si(zero, 0, 1);
+    
+    res = (realRat_cmp(connCmp_infImref(cc), zero) > 0);
+    
+    realRat_clear(zero);
+    return res;
+}
+/* Precondition: res is initialized                                                            */
+/* Specification: set res to the complex conjugate of cc                                       */
+void connCmp_set_conjugate                      ( connCmp_t res, const connCmp_t cc  ){
+    connCmp_set( res, cc);
+    /* conjugate the bounds */
+    realRat_neg( connCmp_infImref(res), connCmp_supImref(cc) );
+    realRat_neg( connCmp_supImref(res), connCmp_infImref(cc) );
+    /* conjugate the boxes */
+    compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (res) );
+    while (it!=compBox_list_end()) {
+        compBox_conjugate_inplace( compBox_list_elmt(it) );
+        it = compBox_list_next(it);
+    }
+}
+
+void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc  ){
+    connCmp_set( res, cc);
+    compBox_ptr nBox;
+    
+    compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (cc) );
+    while (it!=compBox_list_end()) {
+        
+        /* get the conjugate */
+        nBox = ( compBox_ptr ) malloc (sizeof(compBox));
+        compBox_init(nBox);
+        compBox_set_conjugate(nBox, compBox_list_elmt(it));
+        /* check if the conjugate is in the list */
+        compBox_list_iterator it2 = compBox_list_begin( connCmp_boxesref (res) );
+        int isIn = -1;
+        while ( (it2!=compBox_list_end()) && (isIn<0) ) {
+            isIn = compBox_cmp( nBox, compBox_list_elmt(it2) );
+            it2 = compBox_list_next(it2);
+        }
+        if (isIn==0) { /* the conjugate is already in the CC */
+            compBox_clear(nBox);
+        }
+        else { /* the conjugate is not already in the CC */
+            connCmp_insert_compBox(res, nBox);
+        }
+        
+        it = compBox_list_next(it);
+        
+    }
 }
 
 /* DEPRECATED

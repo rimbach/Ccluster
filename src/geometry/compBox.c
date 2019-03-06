@@ -209,7 +209,52 @@ void compBox_closest_point_on_boundary          (compRat_t res, const compRat_t 
     realRat_clear(sum);
 }
 
-
+/* RealCoeffs */
+/* Precondition:                                                                               */
+/* Specification: returns true only if forall p\in b, Im(p)<0                                  */
+int compBox_is_imaginary_negative               ( const compBox_t b  ){
+    int res;
+    realRat_t upper, zero;
+    realRat_init(upper);
+    realRat_init(zero);
+    realRat_set_si(zero, 0, 1);
+    realRat_set_si(upper, 1,2);
+    realRat_mul(upper, upper, compBox_bwidthref(b));
+    realRat_add(upper, compRat_imagref(compBox_centerref(b)), upper);
+    
+    res = (realRat_cmp(upper, zero) < 0);
+    
+    realRat_clear(upper);
+    realRat_clear(zero);
+    return res;
+}
+/* Precondition:                                                                               */
+/* Specification: returns true only if forall p\in b, Im(p)>0                                  */
+int compBox_is_imaginary_positive               ( const compBox_t b  ){
+    int res;
+    realRat_t lower, zero;
+    realRat_init(lower);
+    realRat_init(zero);
+    realRat_set_si(zero, 0, 1);
+    realRat_set_si(lower, 1,2);
+    realRat_mul(lower, lower, compBox_bwidthref(b));
+    realRat_sub(lower, compRat_imagref(compBox_centerref(b)), lower);
+    
+    res = (realRat_cmp(lower, zero) > 0);
+    
+    realRat_clear(lower);
+    realRat_clear(zero);
+    return res;
+}
+/* Precondition: d is initialized                                                                              */
+/* Specification: set d to the complex conjugate of b                                          */
+void compBox_set_conjugate                      ( compBox_t d, const compBox_t b  ){
+    compBox_set(d,b);
+    realRat_neg( compRat_imagref(compBox_centerref(d)), compRat_imagref(compBox_centerref(d)) ); 
+}
+void compBox_conjugate_inplace                  ( compBox_t b  ){
+    realRat_neg( compRat_imagref(compBox_centerref(b)), compRat_imagref(compBox_centerref(b)) );
+}
 
 /* DEPRECATED
 

@@ -69,6 +69,7 @@ NUMBERS_INLINE void realRat_max_2_realRat(realRat_t x, const realRat_t y) {
 
 /* arithmetic operations */
 NUMBERS_INLINE void realRat_abs(realRat_t dest, const realRat_t x)                    { fmpq_abs(dest, x); }
+NUMBERS_INLINE void realRat_neg(realRat_t dest, const realRat_t x)                    { fmpq_neg(dest, x); }
 NUMBERS_INLINE void realRat_mul(realRat_t dest, const realRat_t x, const realRat_t y) { fmpq_mul(dest, x, y); }
 NUMBERS_INLINE void realRat_mul_si(realRat_t dest, const realRat_t x, slong y) { 
     fmpz_mul_si(realRat_numref(dest), realRat_numref(dest), y);
