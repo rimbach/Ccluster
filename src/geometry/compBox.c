@@ -212,7 +212,7 @@ void compBox_closest_point_on_boundary          (compRat_t res, const compRat_t 
 /* RealCoeffs */
 /* Precondition:                                                                               */
 /* Specification: returns true only if forall p\in b, Im(p)<0                                  */
-int compBox_is_imaginary_negative               ( const compBox_t b  ){
+int compBox_is_imaginary_negative_strict               ( const compBox_t b  ){
     int res;
     realRat_t upper, zero;
     realRat_init(upper);
@@ -230,7 +230,7 @@ int compBox_is_imaginary_negative               ( const compBox_t b  ){
 }
 /* Precondition:                                                                               */
 /* Specification: returns true only if forall p\in b, Im(p)>0                                  */
-int compBox_is_imaginary_positive               ( const compBox_t b  ){
+int compBox_is_imaginary_positive_strict               ( const compBox_t b  ){
     int res;
     realRat_t lower, zero;
     realRat_init(lower);

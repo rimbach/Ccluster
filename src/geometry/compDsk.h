@@ -103,4 +103,8 @@ void compDsk_inflate_realRat(compDsk_t d, const compDsk_t e, const realRat_t f);
 int compDsk_is_point_in_dsk         ( const compRat_t p, const compDsk_t d);
 int compDsk_is_point_strictly_in_dsk( const compRat_t p, const compDsk_t d);
 
+/* RealCoeffs */
+/* Precondition:                                                                               */
+/* Specification: returns true only if forall p\in cc, Im(p)>0                                 */
+int compDsk_is_imaginary_positive_strict        ( const compDsk_t d  );
 #endif

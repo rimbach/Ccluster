@@ -287,36 +287,36 @@ int main() {
     compRat_set_sisi(c, 0,1,0,1);
     compBox_set_compRat_realRat(b2, c, w);
     printf("b2: "); compBox_print(b2); printf("\n");
-    printf(" is b2 imaginary positive? %d\n", compBox_is_imaginary_positive(b2) );
-    printf(" is b2 imaginary negative? %d\n", compBox_is_imaginary_negative(b2) );
+    printf(" is b2 imaginary positive? %d\n", compBox_is_imaginary_positive_strict(b2) );
+    printf(" is b2 imaginary negative? %d\n", compBox_is_imaginary_negative_strict(b2) );
     
     realRat_set_si(w,  1,1);
     compRat_set_sisi(c, 0,1,1,1);
     compBox_set_compRat_realRat(b2, c, w);
     printf("b2: "); compBox_print(b2); printf("\n");
-    printf(" is b2 imaginary positive? %d\n", compBox_is_imaginary_positive(b2) );
-    printf(" is b2 imaginary negative? %d\n", compBox_is_imaginary_negative(b2) );
+    printf(" is b2 imaginary positive? %d\n", compBox_is_imaginary_positive_strict(b2) );
+    printf(" is b2 imaginary negative? %d\n", compBox_is_imaginary_negative_strict(b2) );
     
     realRat_set_si(w,  2,1);
     compRat_set_sisi(c, 0,1,1,1);
     compBox_set_compRat_realRat(b2, c, w);
     printf("b2: "); compBox_print(b2); printf("\n");
-    printf(" is b2 imaginary positive? %d\n", compBox_is_imaginary_positive(b2) );
-    printf(" is b2 imaginary negative? %d\n", compBox_is_imaginary_negative(b2) );
+    printf(" is b2 imaginary positive? %d\n", compBox_is_imaginary_positive_strict(b2) );
+    printf(" is b2 imaginary negative? %d\n", compBox_is_imaginary_negative_strict(b2) );
     
     realRat_set_si(w,  1,1);
     compRat_set_sisi(c, 0,1,-1,1);
     compBox_set_compRat_realRat(b2, c, w);
     printf("b2: "); compBox_print(b2); printf("\n");
-    printf(" is b2 imaginary positive? %d\n", compBox_is_imaginary_positive(b2) );
-    printf(" is b2 imaginary negative? %d\n", compBox_is_imaginary_negative(b2) );
+    printf(" is b2 imaginary positive? %d\n", compBox_is_imaginary_positive_strict(b2) );
+    printf(" is b2 imaginary negative? %d\n", compBox_is_imaginary_negative_strict(b2) );
     
     realRat_set_si(w,  2,1);
     compRat_set_sisi(c, 0,1,-1,1);
     compBox_set_compRat_realRat(b2, c, w);
     printf("b2: "); compBox_print(b2); printf("\n");
-    printf(" is b2 imaginary positive? %d\n", compBox_is_imaginary_positive(b2) );
-    printf(" is b2 imaginary negative? %d\n", compBox_is_imaginary_negative(b2) );
+    printf(" is b2 imaginary positive? %d\n", compBox_is_imaginary_positive_strict(b2) );
+    printf(" is b2 imaginary negative? %d\n", compBox_is_imaginary_negative_strict(b2) );
     
     compBox_set_conjugate(b,b2);
     printf("conjugate of b2: "); compBox_print(b); printf("\n");

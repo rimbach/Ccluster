@@ -72,6 +72,25 @@ int compDsk_is_point_strictly_in_dsk( const compRat_t p, const compDsk_t d){
     return res;
 }
 
+/* RealCoeffs */
+/* Precondition:                                                                               */
+/* Specification: returns true only if forall p\in cc, Im(p)>0                                 */
+int compDsk_is_imaginary_positive_strict        ( const compDsk_t d  ){
+    int res;
+    realRat_t lower, zero;
+    realRat_init(lower);
+    realRat_init(zero);
+    realRat_set_si(zero, 0, 1);
+    realRat_set(lower, compDsk_radiusref(d));
+    realRat_sub(lower, compRat_imagref(compDsk_centerref(d)), lower);
+    
+    res = (realRat_cmp(lower, zero) > 0);
+    
+    realRat_clear(lower);
+    realRat_clear(zero);
+    return res;
+}
+
 /*
 int compDsk_is_point_strictly_in_dsk( const compRat_t p, const compDsk_t d){
     int res;

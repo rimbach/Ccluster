@@ -437,7 +437,7 @@ void connCmp_find_point_outside_connCmp( compRat_t res, const connCmp_t cc, cons
 /* RealCoeffs */
 /* Precondition:                                                                               */
 /* Specification: returns true only if forall p\in b, Im(p)<0                                  */
-int connCmp_is_imaginary_negative               ( const connCmp_t cc  ){
+int connCmp_is_imaginary_negative_strict               ( const connCmp_t cc  ){
     int res;
     realRat_t zero;
     realRat_init(zero);
@@ -450,13 +450,26 @@ int connCmp_is_imaginary_negative               ( const connCmp_t cc  ){
 }
 /* Precondition:                                                                               */
 /* Specification: returns true only if forall p\in b, Im(p)>0                                  */
-int connCmp_is_imaginary_positive               ( const connCmp_t cc  ){
+int connCmp_is_imaginary_positive_strict               ( const connCmp_t cc  ){
     int res;
     realRat_t zero;
     realRat_init(zero);
     realRat_set_si(zero, 0, 1);
     
     res = (realRat_cmp(connCmp_infImref(cc), zero) > 0);
+    
+    realRat_clear(zero);
+    return res;
+}
+/* Precondition:                                                                                */
+/* Specification: returns true only if forall p\in cc, Im(p)>=0                                 */
+int connCmp_is_imaginary_positive               ( const connCmp_t cc  ){
+    int res;
+    realRat_t zero;
+    realRat_init(zero);
+    realRat_set_si(zero, 0, 1);
+    
+    res = (realRat_cmp(connCmp_infImref(cc), zero) >= 0);
     
     realRat_clear(zero);
     return res;

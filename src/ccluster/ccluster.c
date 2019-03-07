@@ -38,7 +38,8 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
     while (!compBox_list_is_empty(boxes)){
         
         btemp = compBox_list_pop(boxes);
-        if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative(btemp) ) ) {
+        /* Real Coeffs */
+        if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
             compBox_clear(btemp);
             free(btemp);
             continue;
@@ -312,6 +313,10 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
     
     connCmp_ptr ccur;
     
+    /* Real Coeff */
+    connCmp_ptr ccurConjClo, ccurConj;
+    int pushConjugFlag = 0;
+    
     realRat_set_si(four, 4, 1);
     realRat_set_si(three, 3, 1);
     
@@ -327,6 +332,23 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         resNewton.nflag = 0;
         
         ccur = connCmp_list_pop(qMainLoop);
+        
+        /* Real Coeff */
+        pushConjugFlag = 0;
+        if (metadatas_realCoeffs(meta)){
+            /* test if the component contains the real line in its interior */
+            if (!connCmp_is_imaginary_positive(ccur)) {
+                ccurConjClo = ( connCmp_ptr ) malloc (sizeof(connCmp));
+                connCmp_init( ccurConjClo );
+                connCmp_set_conjugate_closure(ccurConjClo, ccur);
+                
+                connCmp_clear_for_tables(ccur);
+//                 connCmp_clear(ccur);
+                free(ccur);
+                ccur = ccurConjClo;
+            }
+        }
+        
         connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
         compBox_get_containing_dsk(ccDisk, componentBox);
         compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
@@ -405,15 +427,49 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
             }  
         }
         
+        /* Real Coeff */
+        if (metadatas_realCoeffs(meta)){
+            /* test if ccur is imaginary positive */
+            if (connCmp_is_imaginary_positive(ccur)) {
+                /* test if the containing disc is strictly imaginary positive */
+                connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
+                compBox_get_containing_dsk(ccDisk, componentBox);
+                if (compDsk_is_imaginary_positive_strict(ccDisk)){
+                    pushConjugFlag = 1;
+                }
+                else {
+                    separationFlag = 0;
+                }
+            }
+        }
+        
         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
+            /* Real Coeff */
+            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+                /*compute the complex conjugate*/
+                ccurConj = ( connCmp_ptr ) malloc (sizeof(connCmp));
+                connCmp_init( ccurConj );
+                connCmp_set_conjugate(ccurConj, ccur);
+                metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
+                connCmp_list_push(qResults, ccurConj);
+            }
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
+            /* Real Coeff */
+            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+                /*compute the complex conjugate*/
+                ccurConj = ( connCmp_ptr ) malloc (sizeof(connCmp));
+                connCmp_init( ccurConj );
+                connCmp_set_conjugate(ccurConj, ccur);
+                metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
+                connCmp_list_push(qResults, ccurConj);
+            }
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
             connCmp_list_insert_sorted(qMainLoop, ccur);
