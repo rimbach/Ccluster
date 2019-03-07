@@ -578,7 +578,8 @@ void ccluster_interface_forJulia_draw( connCmp_list_t qResults, connCmp_list_t q
     
     cacheApp_init(cache, func);
     strategies_init(strat);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
     
     metadatas_init(meta, initialBox, strat, verb);
     

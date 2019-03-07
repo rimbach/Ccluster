@@ -29,6 +29,7 @@ typedef struct {
 //     int _useCountSols;
     int _useNBThreads;
     int _additionalFlags;
+    int _realCoeffs;
 } strategies;
 
 typedef strategies strategies_t[1];
@@ -40,6 +41,7 @@ void strategies_set_int ( strategies_t strat, int useNewton,
                                               int usePredictPrec, 
                                               int useStopWhenCompact, 
                                               int useAnticipate, 
+                                              int realCoeffs,
 //                                               int useCountSols,
                                               int useNBThreads,
                                               int additionalFlags
@@ -54,5 +56,7 @@ METADATAS_INLINE int strategies_useStopWhenCompact( const strategies_t strat ) {
 METADATAS_INLINE int strategies_useAnticipate     ( const strategies_t strat ) { return strat->_useAnticipate     ; }
 // METADATAS_INLINE int strategies_useCountSols      ( const strategies_t strat ) { return strat->_useCountSols      ; }
 METADATAS_INLINE int strategies_useNBThreads      ( const strategies_t strat ) { return strat->_useNBThreads      ; }
+
+METADATAS_INLINE int strategies_realCoeffs        ( const strategies_t strat ) { return strat->_realCoeffs      ; }
 
 #endif

@@ -77,6 +77,7 @@ METADATAS_INLINE int metadatas_useStopWhenCompact( const metadatas_t m ) { retur
 METADATAS_INLINE int metadatas_useAnticipate     ( const metadatas_t m ) { return strategies_useAnticipate     (metadatas_stratref(m)); }
 // METADATAS_INLINE int metadatas_useCountSols      ( const metadatas_t m ) { return strategies_useCountSols      (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useNBThreads      ( const metadatas_t m ) { return strategies_useNBThreads      (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_realCoeffs        ( const metadatas_t m ) { return strategies_realCoeffs        (metadatas_stratref(m)); }
 // /* counters */
 METADATAS_INLINE void metadatas_add_discarded( metadatas_t m, int depth ) { counters_add_discarded(metadatas_countref(m), depth); }
 METADATAS_INLINE void metadatas_add_validated( metadatas_t m, int depth, int nbSols ) { counters_add_validated(metadatas_countref(m), depth, nbSols);}

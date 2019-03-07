@@ -38,6 +38,11 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
     while (!compBox_list_is_empty(boxes)){
         
         btemp = compBox_list_pop(boxes);
+        if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative(btemp) ) ) {
+            compBox_clear(btemp);
+            free(btemp);
+            continue;
+        }
         compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
@@ -601,7 +606,8 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
     cacheApp_init(cache, func);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
     
     metadatas_init(meta, initialBox, strat, verb);
     connCmp_list_init(qRes);
@@ -634,7 +640,8 @@ void ccluster_refine_forJulia( connCmp_list_t qResults,
     
     cacheApp_init(cache, func);
     strategies_init(strat);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
     
     metadatas_init(meta, initialBox, strat, verb);
     
@@ -663,7 +670,8 @@ void ccluster_interface_forJulia( connCmp_list_t qResults,
     
     cacheApp_init(cache, func);
     strategies_init(strat);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
     
     metadatas_init(meta, initialBox, strat, verb);
     

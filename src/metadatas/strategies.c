@@ -19,9 +19,10 @@ void strategies_set_int( strategies_t strat, int useNewton,
                                              int usePredictPrec, 
                                              int useStopWhenCompact, 
                                              int useAnticipate, 
+                                             int realCoeffs,
 //                                              int useCountSols,
                                              int useNBThreads,
-                                             int additionalFlags    
+                                             int additionalFlags
                                              ){
     strat->_useNewton             = useNewton;
     strat->_useTstarOptim         = useTstarOptim;
@@ -31,6 +32,7 @@ void strategies_set_int( strategies_t strat, int useNewton,
 //     strat->_useCountSols          = useCountSols;
     strat->_useNBThreads          = useNBThreads;
     strat->_additionalFlags       = additionalFlags;
+    strat->_realCoeffs            = realCoeffs;
 }
 
 void strategies_set( strategies_t strat, const strategies_t strat2) {
@@ -42,4 +44,5 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
 //     strat->_useCountSols          = strat2->_useCountSols      ;
     strat->_useNBThreads          = strat2->_useNBThreads      ;
     strat->_additionalFlags       = strat2->_additionalFlags   ;
+    strat->_realCoeffs            = strat2->_realCoeffs   ;
 }

@@ -91,6 +91,7 @@ int metadatas_fprint(FILE * file, const metadatas_t meta, const realRat_t eps){
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));
 #endif
+    if (metadatas_realCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
     if (metadatas_stratref(meta)->_additionalFlags !=0) 
         len += sprintf(temp +len, " %d", metadatas_stratref(meta)->_additionalFlags);
     r = fprintf(file, "|strat:%-63s|\n", temp);
