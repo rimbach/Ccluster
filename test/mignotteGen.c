@@ -64,9 +64,9 @@ int main(int argc, char **argv){
     if (argc>=9) {
         parse = parse*scan_nbthreads(argv[8], &nbthreads );
     }
-    nbthreads = (nbthreads<<5);
-    int add_temp = (st>>6)<<16;
-    st = st&((0x1<<6)-1);
+    nbthreads = (nbthreads<<6);
+    int add_temp = (st>>7)<<17;
+    st = st&((0x1<<7)-1);
     st = st + nbthreads + add_temp;
     
     realRat_poly_t pmign;
@@ -84,6 +84,8 @@ int main(int argc, char **argv){
     compRat_poly_clear(p_global);
     realRat_clear(eps);
     compBox_clear(bInit);
+    
+    flint_cleanup();
     
     return 0;
 }

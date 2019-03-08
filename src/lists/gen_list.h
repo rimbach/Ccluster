@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "base/base.h"
 // #include "flint/fmpq.h" /*for definition of FILE*/
 
 struct gen_elmt {

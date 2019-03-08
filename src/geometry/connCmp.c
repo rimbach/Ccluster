@@ -82,7 +82,7 @@ void connCmp_set(connCmp_t dest, const connCmp_t src){
     compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (src) );
     while (it!=compBox_list_end()) {
         
-        nBox = ( compBox_ptr ) malloc (sizeof(compBox));
+        nBox = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
         compBox_init(nBox);
         compBox_set(nBox, compBox_list_elmt(it));
         compBox_list_push(connCmp_boxesref (dest), nBox);
@@ -93,7 +93,7 @@ void connCmp_set(connCmp_t dest, const connCmp_t src){
 
 connCmp_ptr connCmp_copy(connCmp_t src){
     connCmp_ptr nCmp;
-    nCmp = ( connCmp_ptr ) malloc (sizeof(connCmp));
+    nCmp = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
     connCmp_init(nCmp);
     connCmp_set(nCmp, src);
     return nCmp;
@@ -482,7 +482,7 @@ void connCmp_set_conjugate                      ( connCmp_t res, const connCmp_t
     compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (cc) );
     while (it!=compBox_list_end()) {
         
-        nBox = ( compBox_ptr ) malloc (sizeof(compBox));
+        nBox = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
         compBox_init(nBox);
         compBox_set_conjugate(nBox, compBox_list_elmt(it));
         connCmp_insert_compBox(res, nBox);
@@ -502,7 +502,7 @@ void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t
     while (it!=compBox_list_end()) {
         
         /* get the conjugate */
-        nBox = ( compBox_ptr ) malloc (sizeof(compBox));
+        nBox = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
         compBox_init(nBox);
         compBox_set_conjugate(nBox, compBox_list_elmt(it));
 //         printf(" box: "); compBox_print(compBox_list_elmt(it)); printf("\n"); 
@@ -517,6 +517,7 @@ void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t
         }
         if (isIn==0) { /* the conjugate is already in the CC */
             compBox_clear(nBox);
+            ccluster_free(nBox);
         }
         else { /* the conjugate is not already in the CC */
             connCmp_insert_compBox(res, nBox);

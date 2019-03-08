@@ -41,13 +41,13 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
         /* Real Coeffs */
         if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
             compBox_clear(btemp);
-            free(btemp);
+            ccluster_free(btemp);
             continue;
         }
         compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
-        res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);    
+        res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);  
         if (res.nbOfSol==0) {
 #ifdef CCLUSTER_HAVE_PTHREAD
             metadatas_lock(meta);
@@ -57,7 +57,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
             metadatas_unlock(meta);
 #endif
             compBox_clear(btemp);
-            free(btemp);
+            ccluster_free(btemp);
         }
         
         else{
@@ -80,14 +80,14 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
 //                                 btemp = compBox_list_pop(boxes);                                                                               
 //                                 metadatas_add_discarded( meta, depth);                                                                         
 //                                 compBox_clear(btemp);                                                                                          
-//                                 free(btemp);                                                                                                   
+//                                 ccluster_free(btemp);                                                                                                   
 //                             }                                                                                                                  
 //                             /*empty ltemp*/                                                                                                    
 //                             while (!compBox_list_is_empty(ltemp)) {                                                                            
 //                                 btemp = compBox_list_pop(ltemp);                                                                               
 //                                 metadatas_add_discarded( meta, depth);                                                                         
 //                                 compBox_clear(btemp);                                                                                          
-//                                 free(btemp);                                                                                                   
+//                                 ccluster_free(btemp);                                                                                                   
 //                             }                                                                                                                  
 //                         }                                                                                                                      
 //                     }                                                                                                                          
@@ -137,7 +137,7 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
         btemp = connCmp_pop(cc);
         subdBox_quadrisect( subBoxes, btemp );
         compBox_clear(btemp);
-        free(btemp);
+        ccluster_free(btemp);
     }
     
 // #ifdef CCLUSTER_EXPERIMENTAL
@@ -149,7 +149,7 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
             btemp = compBox_list_pop(subBoxes);
             subdBox_quadrisect( subBoxes2, btemp );
             compBox_clear(btemp);
-            free(btemp);
+            ccluster_free(btemp);
         }
         
         compBox_list_swap(subBoxes, subBoxes2);
@@ -247,7 +247,7 @@ void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, con
 //                 while (!connCmp_list_is_empty(ltemp))
 //                     connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
 //                 connCmp_clear(ctemp);
-//                 free(ctemp);
+//                 ccluster_free(ctemp);
 //             }
 // #else
             ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
@@ -255,7 +255,7 @@ void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, con
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ctemp);
-            free(ctemp);
+            ccluster_free(ctemp);
 // #endif
         }
 /*#ifdef CCLUSTER_HAVE_PTHREAD
@@ -338,13 +338,12 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         if (metadatas_realCoeffs(meta)){
             /* test if the component contains the real line in its interior */
             if (!connCmp_is_imaginary_positive(ccur)) {
-                ccurConjClo = ( connCmp_ptr ) malloc (sizeof(connCmp));
+                ccurConjClo = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
                 connCmp_init( ccurConjClo );
                 connCmp_set_conjugate_closure(ccurConjClo, ccur);
                 
-                connCmp_clear_for_tables(ccur);
-//                 connCmp_clear(ccur);
-                free(ccur);
+                connCmp_clear(ccur);
+                ccluster_free(ccur);
                 ccur = ccurConjClo;
             }
         }
@@ -398,14 +397,14 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
                 connCmp_find_point_outside_connCmp( initPoint, ccur, metadatas_initBref(meta) );
         
             connCmp_ptr nCC;
-            nCC = (connCmp_ptr) malloc (sizeof(connCmp));
+            nCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
             connCmp_init(nCC);
             resNewton = newton_newton_connCmp( nCC, ccur, cache, initPoint, prec, meta);
             metadatas_add_Newton   ( meta, depth, resNewton.nflag );
 //             printf("+++depth: %d, connCmp_nSolsref(ccur): %d, res_newton: %d \n", depth, connCmp_nSols(ccur), resNewton.nflag);
             if (resNewton.nflag) {
                 connCmp_clear(ccur);
-                free(ccur);
+                ccluster_free(ccur);
                 ccur = nCC;
                 connCmp_increase_nwSpd(ccur);
                 connCmp_newSuref(ccur) = 1;
@@ -423,7 +422,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
             else {
                 connCmp_newSuref(ccur) = 0;
                 connCmp_clear(nCC);
-                free(nCC);
+                ccluster_free(nCC);
             }  
         }
         
@@ -450,7 +449,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
             /* Real Coeff */
             if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
-                ccurConj = ( connCmp_ptr ) malloc (sizeof(connCmp));
+                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
                 connCmp_init( ccurConj );
                 connCmp_set_conjugate(ccurConj, ccur);
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
@@ -464,7 +463,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
             /* Real Coeff */
             if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
-                ccurConj = ( connCmp_ptr ) malloc (sizeof(connCmp));
+                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
                 connCmp_init( ccurConj );
                 connCmp_set_conjugate(ccurConj, ccur);
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
@@ -492,14 +491,14 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
                 while (!connCmp_list_is_empty(ltemp))
                     connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
                 connCmp_clear(ccur);
-                free(ccur);
+                ccluster_free(ccur);
             }
 #else
             ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
-            free(ccur);
+            ccluster_free(ccur);
 #endif
         }
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -516,7 +515,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
                 while (!connCmp_list_is_empty(ltemp))
                         connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
                 connCmp_clear(ccur);
-                free(ccur);
+                ccluster_free(ccur);
             }
         }
 #endif
@@ -544,13 +543,13 @@ void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const r
     realRat_set_si(factor, 5, 4);
     
     compBox_ptr bEnlarged;
-    bEnlarged = (compBox_ptr) malloc (sizeof(compBox));
+    bEnlarged = (compBox_ptr) ccluster_malloc (sizeof(compBox));
     compBox_init(bEnlarged);
     compBox_inflate_realRat(bEnlarged, initialBox, factor);
     compBox_nbMSolref(bEnlarged) = cacheApp_getDegree ( cache );
     
     connCmp_ptr initialCC;
-    initialCC = (connCmp_ptr) malloc (sizeof(connCmp));
+    initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
     connCmp_init_compBox(initialCC, bEnlarged);
     
     connCmp_list_t qMainLoop, qPrepLoop, discardedCcs;
@@ -663,6 +662,7 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
     
     metadatas_init(meta, initialBox, strat, verb);

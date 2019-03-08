@@ -291,7 +291,7 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
         /*    btemp = compBox_list_pop(ltemp);                                          */
         /*    subdBox_quadrisect_intersect_compDsk(ltemp, btemp, ndisk);                */
         /*    compBox_clear(btemp);                                                     */
-        /*    free(btemp); */                                 /*comment it for julia... */
+        /*    ccluster_free(btemp); */                                 /*comment it for julia... */
         /*}                                                                             */
         /*new version: we directly compute the boxes of width nwidth intersectiong ndisk*/
         compBox_list_t ltemp2;
@@ -301,7 +301,7 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
             btemp = compBox_list_pop(ltemp);
             subdBox_quadrisect_with_compDsk( ltemp2, btemp, ndisk, nwidth);
             compBox_clear(btemp);
-            free(btemp); /*comment it for julia...*/
+            ccluster_free(btemp); /*comment it for julia...*/
         }
         compBox_list_swap(ltemp, ltemp2);
         compBox_list_clear(ltemp2);

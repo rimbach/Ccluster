@@ -134,6 +134,9 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
 //     chronos_tic_Test(metadatas_chronref(meta), discard);
     clock_t start = clock();
     
+//     if (discard) printf("discarding test, depth: %d\n", depth);
+//     else         printf("validating test, depth: %d\n", depth);
+    
     tstar_res res;
     res.nbOfSol = -1;
     res.appPrec = prec;
@@ -141,12 +144,13 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
     int nbTaylorsRepeted = 0;
     int nbGraeffeRepeted = 0;
     int N = 0;
+    slong deg = cacheApp_getDegree(cache);
     compApp_poly_t pApprox;
-    compApp_poly_init2(pApprox, cacheApp_getDegree(cache)+1);
+    compApp_poly_init2(pApprox, deg+1);
     realApp_t sum;
     realApp_init(sum);
 //     N = (int) 5+ceil(log2(1+log2(cacheApp_getDegree(cache))));
-    N = (int) 4+ceil(log2(1+log2(cacheApp_getDegree(cache))));
+    N = (int) 4+ceil(log2(1+log2(deg)));
     
     tstar_getApproximation( pApprox, cache, res.appPrec, meta);
     tstar_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
@@ -186,6 +190,11 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
     metadatas_unlock(meta);
 //     chronos_toc_Test(metadatas_chronref(meta), discard);
     
+/*      if (discard) 
+        printf("discard: depth: %d, prec: %ld, nb Graeffe: %d, nbSols: %d\n", depth, res.appPrec,N, res.nbOfSol);
+    else 
+        printf("validate: depth: %d, prec: %ld, nb Graeffe: %d, nbSols: %d\n", depth, res.appPrec, N, res.nbOfSol);*/ 
+    
     return res;
 }
 
@@ -200,6 +209,7 @@ tstar_res tstar_optimized( cacheApp_t cache,
     clock_t start = clock();
     
 //     if (discard) printf("discarding test, depth: %d\n", depth);
+//     else         printf("validating test, depth: %d\n", depth);
     tstar_res res;
     res.nbOfSol = -1;
     res.appPrec = prec;
@@ -263,7 +273,9 @@ tstar_res tstar_optimized( cacheApp_t cache,
 
     if (TS_has_been_computed==0) {
         tstar_getApproximation( pApprox, cache, res.appPrec, meta);
+//         printf("tstar: pApprox: \n"); compApp_poly_printd(pApprox, 10); printf("\n");
         tstar_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
+//         printf("tstar: pApprox: \n"); compApp_poly_printd(pApprox, 10); printf("\n");
     }
     
     

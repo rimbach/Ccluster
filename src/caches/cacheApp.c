@@ -15,11 +15,11 @@
 void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, slong) ) {
     cache->_size             = 0;
     cache->_allocsize        = CACHE_DEFAULT_SIZE;
-    cache->_cache            = (compApp_poly_t *) malloc ( (cache->_allocsize) * sizeof(compApp_poly_t) );
+    cache->_cache            = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsize) * sizeof(compApp_poly_t) );
     cache->_getApproximation = getApproximation;
 #ifdef CCLUSTER_EXPERIMENTAL    
-    cache->_der_size         = (int *) malloc ( (cache->_allocsize) * sizeof(int) );
-    cache->_cache_der        = (compApp_poly_t **) malloc ( (cache->_allocsize) * sizeof(compApp_poly_t *) );
+    cache->_der_size         = (int *) ccluster_malloc ( (cache->_allocsize) * sizeof(int) );
+    cache->_cache_der        = (compApp_poly_t **) ccluster_malloc ( (cache->_allocsize) * sizeof(compApp_poly_t *) );
 #endif
     
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -56,7 +56,7 @@ compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec ) {
 #ifdef CCLUSTER_EXPERIMENTAL            
             /* initialize cache->_cache_der[cache->_size] */
             slong len = ((cache->_cache)[0])->length;
-            cache->_cache_der[cache->_size] = (compApp_poly_t *) malloc ( (len-1) * sizeof(compApp_poly_t) );
+            cache->_cache_der[cache->_size] = (compApp_poly_t *) ccluster_malloc ( (len-1) * sizeof(compApp_poly_t) );
             for (slong i = 1; i<len; i++)
                 compApp_poly_init2((cache->_cache_der)[cache->_size][i-1], len-i);
             (cache->_der_size)[cache->_size] = 0;
@@ -70,11 +70,11 @@ compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec ) {
     while (index >= cache->_allocsize) 
         cache->_allocsize += CACHE_DEFAULT_SIZE;
     
-    cache->_cache = (compApp_poly_t *) realloc (cache->_cache, (cache->_allocsize) * sizeof(compApp_poly_t) );
+    cache->_cache = (compApp_poly_t *) ccluster_realloc (cache->_cache, (cache->_allocsize) * sizeof(compApp_poly_t) );
 #ifdef CCLUSTER_EXPERIMENTAL     
     /* realloc size for cache->_cache_der*/
-    cache->_cache_der = (compApp_poly_t **) realloc (cache->_cache_der, (cache->_allocsize) * sizeof(compApp_poly_t *) );
-    cache->_der_size = (int *) realloc (cache->_der_size, (cache->_allocsize) * sizeof(int) );
+    cache->_cache_der = (compApp_poly_t **) ccluster_realloc (cache->_cache_der, (cache->_allocsize) * sizeof(compApp_poly_t *) );
+    cache->_der_size = (int *) ccluster_realloc (cache->_der_size, (cache->_allocsize) * sizeof(int) );
 #endif    
     while (index >= cache->_size){
         compApp_poly_init2(cache->_cache[cache->_size], compApp_poly_degree((cache->_cache)[0])+1);
@@ -84,7 +84,7 @@ compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec ) {
 #ifdef CCLUSTER_EXPERIMENTAL
         /* initialize cache->_cache_der[cache->_size] */
         slong len = ((cache->_cache)[0])->length;
-        cache->_cache_der[cache->_size] = (compApp_poly_t *) malloc ( (len-1) * sizeof(compApp_poly_t) );
+        cache->_cache_der[cache->_size] = (compApp_poly_t *) ccluster_malloc ( (len-1) * sizeof(compApp_poly_t) );
         slong i = 1;
         for (i = 1; i<len; i++)
             compApp_poly_init2(cache->_cache_der[cache->_size][i-1], len-i);
@@ -145,7 +145,7 @@ void cacheApp_clear ( cacheApp_t cache ) {
     
     for (int i=0; i<cache->_size; i++)
         compApp_poly_clear( (cache->_cache)[i] );
-    free(cache->_cache);
+    ccluster_free(cache->_cache);
 
 #ifdef CCLUSTER_EXPERIMENTAL
 //     printf("ici, len: %d\n", (int) len);
@@ -155,11 +155,11 @@ void cacheApp_clear ( cacheApp_t cache ) {
 //             printf("j: %d\n", (int) j);
             compApp_poly_clear( (cache->_cache_der)[i][(int) j] );
         }
-        free((cache->_cache_der)[i]);
+        ccluster_free((cache->_cache_der)[i]);
     }
-    free(cache->_cache_der);
+    ccluster_free(cache->_cache_der);
     
-    free(cache->_der_size);
+    ccluster_free(cache->_der_size);
 #endif    
     cache->_size      = 0;
     cache->_allocsize = 0;

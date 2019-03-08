@@ -39,14 +39,14 @@ void gen_list_clear(gen_list_t l){
         voyager = l->_begin;
         l->_begin = l->_begin->_next;
         l->_clear(voyager->_elmt);
-        free(voyager->_elmt);
-        free(voyager);
+        ccluster_free(voyager->_elmt);
+        ccluster_free(voyager);
     }
     
     if (l->_begin!=NULL){
         l->_clear(l->_begin->_elmt);
-        free(l->_begin->_elmt);
-        free(l->_begin);
+        ccluster_free(l->_begin->_elmt);
+        ccluster_free(l->_begin);
         l->_begin = l->_end = NULL;
     }
 
@@ -59,19 +59,19 @@ void gen_list_clear_for_tables(gen_list_t l){
         voyager = l->_begin;
         l->_begin = l->_begin->_next;
         l->_clear(voyager->_elmt);
-        free(voyager);
+        ccluster_free(voyager);
     }
     
     if (l->_begin!=NULL){
         l->_clear(l->_begin->_elmt);
-        free(l->_begin);
+        ccluster_free(l->_begin);
         l->_begin = l->_end = NULL;
     }
 
 }
 
 void gen_list_push(gen_list_t l, void * data){
-    struct gen_elmt * nelmt = (struct gen_elmt *) malloc (sizeof(struct gen_elmt));
+    struct gen_elmt * nelmt = (struct gen_elmt *) ccluster_malloc (sizeof(struct gen_elmt));
     nelmt->_elmt = data;
     nelmt->_next = NULL;
     
@@ -99,7 +99,7 @@ void * gen_list_pop(gen_list_t l){
             l->_begin = l->_end = NULL;
         else
             l->_begin = l->_begin->_next;
-        free(temp);
+        ccluster_free(temp);
         l->_size -=1;
     }
     return res;
@@ -122,7 +122,7 @@ void * gen_list_data_at_index(const gen_list_t l, int index){
 void gen_list_insert_sorted(gen_list_t l, void * data, int (isless_func)(const void * d1, const void * d2)){
     
     struct gen_elmt * voyager = l->_begin;
-    struct gen_elmt * nelmt = (struct gen_elmt *) malloc (sizeof(struct gen_elmt));
+    struct gen_elmt * nelmt = (struct gen_elmt *) ccluster_malloc (sizeof(struct gen_elmt));
     nelmt->_elmt = data;
     nelmt->_next = NULL;
     

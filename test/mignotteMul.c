@@ -60,6 +60,7 @@ int main(int argc, char **argv){
     parse = parse*scan_strategy(argv[6], &st );
     parse = parse*scan_verbosity(argv[7], &verbosity );
     
+    
     realRat_poly_t pmign;
     realRat_poly_init(pmign);
     compRat_poly_init(p_global);
@@ -76,6 +77,8 @@ int main(int argc, char **argv){
     compRat_poly_clear(p_global);
     realRat_clear(eps);
     compBox_clear(bInit);
+    
+    flint_cleanup();
     
     return 0;
 }

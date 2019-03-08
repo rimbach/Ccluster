@@ -18,10 +18,10 @@ void subdBox_quadrisect( compBox_list_t res, const compBox_t b ){
     realRat_init(width);
     
     compBox_ptr bNE, bSE, bSW, bNW;
-    bNE = ( compBox_ptr ) malloc (sizeof(compBox));
-    bSE = ( compBox_ptr ) malloc (sizeof(compBox));
-    bSW = ( compBox_ptr ) malloc (sizeof(compBox));
-    bNW = ( compBox_ptr ) malloc (sizeof(compBox));
+    bNE = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
+    bSE = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
+    bSW = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
+    bNW = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
     compBox_init(bNE);
     compBox_init(bSE);
     compBox_init(bSW);
@@ -158,7 +158,7 @@ void subdBox_quadrisect_with_compDsk( compBox_list_t res, const compBox_t b, con
         
         while (realRat_cmp(compRat_imagref(boxCenter), compRat_imagref(supCenter)) <=0){
         
-            bnew = ( compBox_ptr ) malloc (sizeof(compBox));
+            bnew = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
             compBox_init(bnew);
             compBox_set_compRat_realRat_int(bnew, boxCenter, nwidth, b->nbMSol);
             
@@ -167,7 +167,7 @@ void subdBox_quadrisect_with_compDsk( compBox_list_t res, const compBox_t b, con
             }
             else {
                 compBox_clear(bnew);
-                free(bnew);
+                ccluster_free(bnew);
             }
             /* compBox_list_push(res, bnew); */
             
@@ -213,7 +213,7 @@ void subdBox_quadrisect_intersect_compDsk( compBox_list_t res, const compBox_t b
         }
         else {
             compBox_clear(btemp);
-            free(btemp);
+            ccluster_free(btemp);
         }
     }
     

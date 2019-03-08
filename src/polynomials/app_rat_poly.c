@@ -106,9 +106,11 @@ void compApp_poly_taylorShift_in_place( compApp_poly_t f, const compRat_t center
     compApp_ptr fptr = f->coeffs;
     const slong len  = f->length;
     _acb_poly_taylor_shift_convolution(fptr, c, len, prec);
+//     acb_poly_taylor_shift_convolution(f, f, c, prec);
 /*    _acb_poly_taylor_shift_horner(fptr, c, len, prec);
     _acb_poly_taylor_shift_divconquer(fptr, c, len, prec);
     _compApp_poly_taylor_shift_convolution(fptr, c, len, prec);*/
+
     compApp_poly_scale_realRat_in_place( fptr, radius, len, prec );
     
     compApp_clear(c);

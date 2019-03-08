@@ -58,7 +58,7 @@ void counters_by_depth_init( counters_by_depth_t st) {
 void counters_init( counters * st) {
     st->size = 0;
     st->size_allocated = INIT_SIZE_STATS;
-    st->table = (counters_by_depth_ptr) malloc (INIT_SIZE_STATS*sizeof(counters_by_depth));
+    st->table = (counters_by_depth_ptr) ccluster_malloc (INIT_SIZE_STATS*sizeof(counters_by_depth));
     counters_by_depth_init( st->total );
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(st->_mutex), NULL);
@@ -66,7 +66,7 @@ void counters_init( counters * st) {
 }
 
 void counters_clear( counters * st) {
-    free(st->table);
+    ccluster_free(st->table);
     counters_by_depth_clear( st->total );
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_destroy( &(st->_mutex) );

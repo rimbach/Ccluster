@@ -48,7 +48,7 @@ char * compBox_sprint_for_stat(char * out, const compBox_t x){
         sprintf(wid, "2^(%d)/2^(%d)", (int) lnum, (int) lden);
     }
     sprintf(out, " cRe: %-16s cIm: %-16s wid: %-15s|", cRe, cIm, wid);
-    flint_free(wid);
+    ccluster_free(wid);
     return out;
 }
 
@@ -63,7 +63,7 @@ char * realRat_sprint_for_stat(char * out, const realRat_t x){
         fmpz_get_str( temp, 10, realRat_numref(x));
         sprintf(out, "%s/2^(%d)", temp, (int) l);
     }
-    flint_free(temp);
+    ccluster_free(temp);
     return out;
 }
 

@@ -9,26 +9,6 @@
 /*  (at your option) any later version.  See <http://www.gnu.org/licenses/>.  */
 /* ************************************************************************** */
 
-#ifndef SUBDBOX_H
-#define SUBDBOX_H
+#define BASE_INLINE_C
 
-#include <stdio.h>
 #include "base/base.h"
-#include "geometry/compBox.h"
-#include "geometry/compDsk.h"
-#include "geometry/box_dsk.h"
-#include "lists/compBox_list.h"
-#include "flint/fmpz.h"
-#include "flint/fmpq.h"
-
-
-void subdBox_quadrisect( compBox_list_t res, const compBox_t b );
-
-void subdBox_quadrisect_with_compDsk( compBox_list_t res, const compBox_t b, const compDsk_t d, const realRat_t nwidth);
-
-/*DEPRECATED 
-
-void subdBox_quadrisect_intersect_compDsk( compBox_list_t res, const compBox_t b, const compDsk_t d);
-*/
-
-#endif

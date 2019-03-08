@@ -19,6 +19,7 @@
 #endif
 
 #include <stdlib.h>
+#include "base/base.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include <pthread.h>
