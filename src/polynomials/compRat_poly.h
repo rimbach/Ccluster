@@ -20,6 +20,10 @@
 
 #include "polynomials/realRat_poly.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 typedef struct {
     realRat_poly real;
     realRat_poly imag;
@@ -93,5 +97,9 @@ int compRat_poly_fprint_pretty(FILE * file, const compRat_poly_t poly, const cha
 POLYNOMIALS_INLINE int compRat_poly_print_pretty(const compRat_poly_t poly, const char * var) {
     return compRat_poly_fprint_pretty(stdout, poly, var);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

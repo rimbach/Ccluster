@@ -21,6 +21,10 @@
 #include "numbers/realRat.h"
 #include "numbers/compRat.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 typedef struct {
     compRat center;
     realRat radius;
@@ -107,4 +111,9 @@ int compDsk_is_point_strictly_in_dsk( const compRat_t p, const compDsk_t d);
 /* Precondition:                                                                               */
 /* Specification: returns true only if forall p\in cc, Im(p)>0                                 */
 int compDsk_is_imaginary_positive_strict        ( const compDsk_t d  );
+
+#ifdef __cplusplus
+}
+#endif
+    
 #endif

@@ -27,7 +27,11 @@
 #include "tstar/tstar.h"
 #include "newton/newton.h"
 
-#include "ccluster/ccluster.h"  
+#include "ccluster/ccluster.h" 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int  ccluster_compDsk_is_separated_DAC( const compDsk_t d, 
                                         connCmp_list_t qMainLoop, 
@@ -101,5 +105,10 @@ void ccluster_DAC_first_interface_forJulia( connCmp_list_t qResults,
                                             int verb);
 
 // void ccluster_DAC_first_interface_func( void(*func)(compApp_poly_t, slong), const compBox_t initialBox, const realRat_t eps, int st, int verb);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

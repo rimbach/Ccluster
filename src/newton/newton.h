@@ -27,6 +27,10 @@
 #include "metadatas/metadatas.h"
 #include "tstar/tstar.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 typedef struct {
     int nflag; // 1 if true, 0 if false
     slong appPrec; // the arithmetic precision that has been used to decide
@@ -77,4 +81,9 @@ newton_res newton_newton_connCmp_forjulia(  connCmp_t nCC,
                                             slong prec, 
                                             metadatas_t meta);
 */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

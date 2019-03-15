@@ -23,6 +23,10 @@
 #include "polynomials/compRat_poly.h"
 #include "polynomials/compApp_poly.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* converting realRat_poly to compApp_poly  */
 POLYNOMIALS_INLINE void compApp_poly_set_realRat_poly(compApp_poly_t poly, const realRat_poly_t re, slong prec) {
     compApp_poly_set_fmpq_poly(poly, re, prec);
@@ -63,5 +67,9 @@ void compApp_poly_parallel_taylor_inplace( compApp_poly_t p, const realRat_t cre
 void compApp_poly_parallel_taylor( compApp_poly_t dest, const compApp_poly_t p, const realRat_t creal, const realRat_t cimag, const realRat_t radius, slong prec, slong num_threads);
 
 void compApp_poly_parallel_taylor_convol(compApp_poly_t dest, const compApp_poly_t p, const compApp_t c, const realRat_t radius, slong prec, slong num_threads);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

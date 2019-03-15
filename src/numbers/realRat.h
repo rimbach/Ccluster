@@ -21,6 +21,10 @@
 #include "flint/fmpz.h"
 #include "flint/fmpq.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef fmpq realRat;
 typedef realRat realRat_t[1];
 typedef realRat * realRat_ptr;
@@ -93,5 +97,8 @@ NUMBERS_INLINE void realRat_inv(realRat_t dest, const realRat_t x) { fmpq_inv(de
 NUMBERS_INLINE void realRat_print (const realRat_t x)              { fmpq_print (x); }
 NUMBERS_INLINE void realRat_fprint(FILE * file, const realRat_t x) { fmpq_fprint(file, x); }
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

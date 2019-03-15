@@ -683,6 +683,39 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
     connCmp_list_clear(qRes);
 }
 
+void ccluster_interface_poly( const compRat_poly_t poly, const compBox_t initialBox, const realRat_t eps, int st, int verb){
+    
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    connCmp_list_t qRes;
+    
+    cacheApp_init_compRat_poly(cache, poly);
+    strategies_init(strat);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    connCmp_list_init(qRes);
+    
+    ccluster_algo( qRes, initialBox, eps, cache, meta);
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    
+    if (verb>=3) {
+        connCmp_list_print_for_results(stdout, qRes, meta);
+//         connCmp_list_print_for_results(stdout, qRes, 500, 40, meta);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
+    connCmp_list_clear(qRes);
+    
+}
+
 void ccluster_refine_forJulia( connCmp_list_t qResults,
                                connCmp_list_t qMainLoop,
                                   void(*func)(compApp_poly_t, slong), 

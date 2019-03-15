@@ -21,6 +21,10 @@
 #include "numbers/compApp.h"
 #include "doubRealApp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 typedef struct
 {
     doubRealApp real;
@@ -171,4 +175,9 @@ DOUBAPP_INLINE void doubCompApp_div_doubRealApp( doubCompApp_t dest, const doubC
 // 
                void doubCompApp_fprint (FILE * file, const doubCompApp_t x);
 DOUBAPP_INLINE void doubCompApp_print (const doubCompApp_t x) { doubCompApp_fprint(stdout, x); }
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

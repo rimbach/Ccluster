@@ -18,9 +18,16 @@
 #include "numbers/app_rat.h"
 #include "polynomials/compApp_poly.h"
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 int realApp_soft_compare(const realApp_t a, const realApp_t b, slong prec);
 
 int compApp_poly_TkGtilda_with_sum( const compApp_poly_t f, const realApp_t s, const ulong k, slong prec);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

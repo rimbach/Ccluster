@@ -21,6 +21,10 @@
 #include "arb.h"
 #include "flint/fmpq.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef arb_struct realApp;
 typedef realApp realApp_t[1];
 typedef realApp * realApp_ptr;
@@ -73,5 +77,9 @@ NUMBERS_INLINE void realApp_fprintn(FILE * file, const realApp_t x, slong digits
 NUMBERS_INLINE void realApp_print (const realApp_t x)                           { arb_print (x               ); }
 NUMBERS_INLINE void realApp_printd(const realApp_t x, slong digits)             { arb_printd(x, digits       ); }
 NUMBERS_INLINE void realApp_printn(const realApp_t x, slong digits, ulong flags){ arb_printn(x, digits, flags); }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

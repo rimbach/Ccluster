@@ -20,7 +20,9 @@
 
 #include "base/base.h"
 #include "numbers/compApp.h"
+#include "polynomials/compRat_poly.h"
 #include "polynomials/compApp_poly.h"
+#include "polynomials/app_rat_poly.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include <pthread.h>
@@ -29,11 +31,18 @@
 #define CACHE_DEFAULT_SIZE 10
 // #define DEFAULT_PREC 53
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 typedef struct {
     void(*_getApproximation)(compApp_poly_t, slong);
     compApp_poly_t *_cache;
     int _size;
     int _allocsize;
+    
+    compRat_poly_t _poly;
+    int _from_poly;
 #ifdef CCLUSTER_EXPERIMENTAL
     compApp_poly_t **_cache_der; /* a table of tables caching derivatives */
     int * _der_size;
@@ -67,6 +76,8 @@ CACHE_INLINE void cacheApp_unlock(cacheApp_t cache) {
 
 void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, slong) );
 
+void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly);
+
 compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec );
 slong cacheApp_getDegree ( cacheApp_t cache );
 
@@ -75,5 +86,9 @@ compApp_poly_ptr cacheApp_getDerivative ( cacheApp_t cache, slong prec, slong or
 #endif
 
 void cacheApp_clear ( cacheApp_t cache );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

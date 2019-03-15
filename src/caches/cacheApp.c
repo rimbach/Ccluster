@@ -17,6 +17,8 @@ void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, s
     cache->_allocsize        = CACHE_DEFAULT_SIZE;
     cache->_cache            = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsize) * sizeof(compApp_poly_t) );
     cache->_getApproximation = getApproximation;
+    
+    cache->_from_poly = 0;
 #ifdef CCLUSTER_EXPERIMENTAL    
     cache->_der_size         = (int *) ccluster_malloc ( (cache->_allocsize) * sizeof(int) );
     cache->_cache_der        = (compApp_poly_t **) ccluster_malloc ( (cache->_allocsize) * sizeof(compApp_poly_t *) );
@@ -27,6 +29,17 @@ void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, s
 #endif
 /*     compApp_poly_init(cacheApp_workref(cache));    */
 /*     cache->_nbIterations = 0;                      */
+}
+
+void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly){
+    cache->_size             = 0;
+    cache->_allocsize        = CACHE_DEFAULT_SIZE;
+    cache->_cache            = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsize) * sizeof(compApp_poly_t) );
+    cache->_getApproximation = NULL;
+    
+    compRat_poly_init(cache->_poly);
+    compRat_poly_set(cache->_poly, poly);
+    cache->_from_poly = 1;
 }
 
 //requires: prec is 2^n*CCLUSTER_DEFAULT_PREC
@@ -50,7 +63,12 @@ compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec ) {
 //             printf("end initialize %d\n", cache->_size);
             slong nprec = (0x1<<(cache->_size))*CCLUSTER_DEFAULT_PREC;
 //             printf("call with prec: %d\n", nprec);
-            cache->_getApproximation( cache->_cache[cache->_size], nprec);
+            if (cache->_from_poly==0){
+                cache->_getApproximation( cache->_cache[cache->_size], nprec);
+            }
+            else {
+                compApp_poly_set_compRat_poly(cache->_cache[cache->_size], cache->_poly, nprec);
+            }
 //             printf("end call\n");
 
 #ifdef CCLUSTER_EXPERIMENTAL            
@@ -79,7 +97,13 @@ compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec ) {
     while (index >= cache->_size){
         compApp_poly_init2(cache->_cache[cache->_size], compApp_poly_degree((cache->_cache)[0])+1);
         slong nprec = (0x1<<(cache->_size))*CCLUSTER_DEFAULT_PREC;
+        
+        if (cache->_from_poly==0){
             cache->_getApproximation( cache->_cache[cache->_size], nprec);
+        }
+        else {
+            compApp_poly_set_compRat_poly(cache->_cache[cache->_size], cache->_poly, nprec);
+        }
         
 #ifdef CCLUSTER_EXPERIMENTAL
         /* initialize cache->_cache_der[cache->_size] */
@@ -163,6 +187,10 @@ void cacheApp_clear ( cacheApp_t cache ) {
 #endif    
     cache->_size      = 0;
     cache->_allocsize = 0;
+    
+    if (cache->_from_poly==1) {
+        compRat_poly_clear(cache->_poly);
+    }
     
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_destroy( &(cache->_mutex) );

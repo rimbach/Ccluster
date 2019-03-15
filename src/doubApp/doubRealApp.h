@@ -26,6 +26,10 @@
 #include "numbers/realRat.h"
 #include "numbers/realApp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef double number;
 // typedef long double number;
 
@@ -124,5 +128,10 @@ DOUBAPP_INLINE void doubRealApp_div(doubRealApp_t z, const doubRealApp_t x, cons
 DOUBAPP_INLINE void doubRealApp_print (const doubRealApp_t x) { doubRealApp_fprint(stdout, x); }
 // DOUBAPP_INLINE void doubRealApp_printd(const doubRealApp_t x, slong digits)             { arb_printd(x, digits       ); }
 // DOUBAPP_INLINE void doubRealApp_printn(const doubRealApp_t x, slong digits, ulong flags){ arb_printn(x, digits, flags); }
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

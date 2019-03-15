@@ -15,6 +15,10 @@
 #include "geometry/compBox.h"
 #include "geometry/compDsk.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 slong compDsk_getDepth(const compDsk_t d, const compBox_t initialBox);
 
 void compBox_get_containing_dsk( compDsk_t d, const compBox_t b);
@@ -32,5 +36,9 @@ int compBox_intersection_has_non_empty_interior_compDsk ( const compBox_t b, con
 
 /* Precondition: b has non-nul width */
 int compBox_is_box_in_dsk ( const compBox_t b, const compDsk_t d);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

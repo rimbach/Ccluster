@@ -20,6 +20,10 @@
 
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     int _useNewton;
     int _useTstarOptim;
@@ -58,5 +62,9 @@ METADATAS_INLINE int strategies_useAnticipate     ( const strategies_t strat ) {
 METADATAS_INLINE int strategies_useNBThreads      ( const strategies_t strat ) { return strat->_useNBThreads      ; }
 
 METADATAS_INLINE int strategies_realCoeffs        ( const strategies_t strat ) { return strat->_realCoeffs      ; }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

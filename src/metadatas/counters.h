@@ -25,6 +25,10 @@
 #include <pthread.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     int nbDiscarded;
     int nbValidated;
@@ -131,4 +135,9 @@ int counters_getNbDouble                    ( const counters_t st );
 int counters_getNbOthers                    ( const counters_t st );
 
 void counters_add_Eval( counters_t st, int nbEvals, int depth );
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

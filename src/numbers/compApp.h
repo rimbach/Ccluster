@@ -23,6 +23,10 @@
 
 #include "flint/fmpq.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef acb_struct compApp;
 typedef compApp compApp_t[1];
 typedef compApp * compApp_ptr;
@@ -84,4 +88,9 @@ NUMBERS_INLINE int compApp_intersection(compApp_t z, const compApp_t x, const co
         return realApp_intersection( compApp_imagref(z), compApp_imagref(x), compApp_imagref(y), prec);
     else return 0; 
 }
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

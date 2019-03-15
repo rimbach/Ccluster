@@ -21,6 +21,10 @@
 #include "acb_poly.h"
 #include "numbers/compApp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef acb_poly_struct compApp_poly;
 typedef acb_poly_struct compApp_poly_t[1];
 typedef acb_poly_struct * compApp_poly_ptr;
@@ -111,6 +115,9 @@ void compApp_poly_oneGraeffeIteration_first_n_coeff( compApp_poly_t res, const c
 /* requires: f is initialized */
 void compApp_poly_oneGraeffeIteration_in_place( compApp_poly_t f, slong prec );
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

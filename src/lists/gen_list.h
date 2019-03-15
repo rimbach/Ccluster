@@ -23,6 +23,10 @@
 #include "base/base.h"
 // #include "flint/fmpq.h" /*for definition of FILE*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 struct gen_elmt {
     void            *_elmt;
     struct gen_elmt *_next;
@@ -82,6 +86,9 @@ LISTS_INLINE void * gen_list_elmt(gen_list_iterator it){
     return it->_elmt;
 }
  
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

@@ -30,6 +30,10 @@
 // #include <pthread.h>
 // #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct{
     compBox    initB;
     int        verbo;
@@ -154,5 +158,9 @@ METADATAS_INLINE void metadatas_add_time_Anticip(metadatas_t m, double d){
 /* printing */
 int metadatas_fprint(FILE * file, const metadatas_t meta, const realRat_t eps);
 int metadatas_print(const metadatas_t meta, const realRat_t eps);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

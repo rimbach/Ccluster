@@ -24,6 +24,10 @@
 #include "lists/compBox_list.h"
 #include "flint/fmpz.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     compBox_list boxes; /* a list of boxes                                */
     realRat      width; /* the width of boxes                             */
@@ -200,4 +204,9 @@ void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t
 /* DEPRECATED
 void connCmp_find_point_outside_connCmp_for_julia( realRat_t resRe, realRat_t resIm, const connCmp_t cc, const compBox_t initialBox );
 */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

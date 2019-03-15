@@ -20,6 +20,10 @@
 
 #include "numbers/realRat.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     realRat real;
     realRat imag;
@@ -98,4 +102,9 @@ void compRat_fprint(FILE * file, const compRat_t x);
 NUMBERS_INLINE void compRat_print(const compRat_t x) {
     compRat_fprint(stdout, x);
 }
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

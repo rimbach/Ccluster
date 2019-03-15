@@ -27,8 +27,11 @@
 #include "tstar/tstar.h"
 #include "newton/newton.h"
 
-#ifdef CCLUSTER_HAVE_PTHREAD
-#include <pthread.h>
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // typedef struct {
 //     int nbsol;
@@ -38,6 +41,8 @@
 //     metadatas_ptr meta;
 // } parallel_discard_arg_t;
 
+#ifdef CCLUSTER_HAVE_PTHREAD
+#include <pthread.h>
 typedef struct {
     slong prec;
     compBox_list_t boxes;
@@ -93,6 +98,8 @@ void connCmp_list_print_for_results(FILE * f, const connCmp_list_t c, metadatas_
 
 void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_t initialBox, const realRat_t eps, int st, int verb);
 
+void ccluster_interface_poly( const compRat_poly_t poly, const compBox_t initialBox, const realRat_t eps, int st, int verb);
+
 void ccluster_interface_forJulia( connCmp_list_t qResults, 
                                   void(*func)(compApp_poly_t, slong), 
                                   const compBox_t initialBox, 
@@ -107,5 +114,9 @@ void ccluster_interface_forJulia_draw( connCmp_list_t qResults, connCmp_list_t q
                                   const realRat_t eps, 
                                   int st, 
                                   int verb);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -21,6 +21,10 @@
 #include "geometry/compBox.h"
 #include "lists/gen_list.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 typedef struct gen_list compBox_list;
 typedef struct gen_list compBox_list_t[1];
 typedef struct gen_list * compBox_list_ptr;
@@ -103,5 +107,9 @@ LISTS_INLINE compBox_list_iterator compBox_list_end(){
 LISTS_INLINE compBox_ptr compBox_list_elmt(compBox_list_iterator it){
     return (compBox_ptr) gen_list_elmt(it);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

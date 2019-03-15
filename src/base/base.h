@@ -36,9 +36,17 @@
 #define BASE_INLINE static __inline__
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 BASE_INLINE void * ccluster_malloc(size_t size) { return flint_malloc(size); }
 BASE_INLINE void * ccluster_realloc(void * ptr, size_t size) { return flint_realloc(ptr, size); }
 BASE_INLINE void * ccluster_calloc(size_t num, size_t size) { return flint_calloc(num, size); }
 BASE_INLINE void ccluster_free(void * ptr) { flint_free(ptr); }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

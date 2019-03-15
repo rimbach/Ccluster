@@ -16,6 +16,14 @@
 #include "geometry/connCmp.h"
 #include "lists/connCmp_list.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 void connCmp_union_compBox( connCmp_list_t ccs, compBox_t b);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

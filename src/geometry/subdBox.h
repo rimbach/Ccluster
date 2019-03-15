@@ -21,6 +21,9 @@
 #include "flint/fmpz.h"
 #include "flint/fmpq.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void subdBox_quadrisect( compBox_list_t res, const compBox_t b );
 
@@ -30,5 +33,9 @@ void subdBox_quadrisect_with_compDsk( compBox_list_t res, const compBox_t b, con
 
 void subdBox_quadrisect_intersect_compDsk( compBox_list_t res, const compBox_t b, const compDsk_t d);
 */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

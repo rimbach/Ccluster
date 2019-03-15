@@ -32,6 +32,10 @@
 #include <pthread.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     int nbOfSol;   /* the number of solutions: -1: can not decide, >=0 otherwise */
     slong appPrec; /* the arithmetic precision that has been used to decide      */
@@ -112,5 +116,9 @@ int tstar_N1_test(cacheApp_t cache, compApp_poly_t shiftedPol,
 /* for julia: DEPRECATED*/
 /*int tstar_res_getNbOfSol_forJulia( tstar_res r);   */
 /*slong tstar_res_getAppPrec_forJulia( tstar_res r); */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

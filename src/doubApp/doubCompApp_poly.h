@@ -24,6 +24,10 @@
 #include "polynomials/compApp_poly.h"
 #include "doubCompApp.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 typedef struct
 {
     doubCompApp_ptr coeffs;
@@ -133,6 +137,8 @@ void doubCompApp_poly_oneGraeffeIteration_in_place( doubCompApp_poly_t f );
 /* DEPRECATED */
 void doubCompApp_poly_mul_block( doubCompApp_poly_t res, const doubCompApp_poly_t x, const doubCompApp_poly_t y);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -21,6 +21,10 @@
 #include "numbers/realRat.h"
 #include "numbers/compRat.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 typedef struct {
     compRat center;
     realRat bwidth;
@@ -206,5 +210,9 @@ void compBox_conjugate_inplace                  ( compBox_t b  );
 int compBox_is_point_in_box_forJulia            ( const realRat_t pre, const realRat_t pim,  const compBox_t b  );
 void compBox_closest_point_on_boundary_forJulia          (realRat_t resre, realRat_t resim, const realRat_t pre, const realRat_t pim, const compBox_t b  );
 */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -16,6 +16,10 @@
 #include "geometry/compDsk.h"
 #include "geometry/box_dsk.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*Precondition:                                                   */
 /*Specification: returns true if interior(cc \cap b)\neq \emptyset*/ 
 /*                       false otherwise                          */
@@ -26,5 +30,9 @@ int connCmp_intersection_has_non_empty_interior_compDsk( const connCmp_t cc, con
 /*                       false otherwise                   */
 /*               boxes of cc and b have not necessarily the same width */
 int connCmp_intersection_is_not_empty_compDsk( const connCmp_t cc, const compDsk_t d );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -22,6 +22,10 @@
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include <pthread.h>
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
     
 typedef struct {
     clock_t _clicks_Approxi;
@@ -179,5 +183,10 @@ METADATAS_INLINE void   chronos_toc_Test      ( chronos_t times, int discard ) {
     if (discard) times->_clicks_T0Tests_cumul += ((double) (clock() - times->_clicks_T0Tests))/ CLOCKS_PER_SEC;
     else         times->_clicks_TSTests_cumul += ((double) (clock() - times->_clicks_TSTests))/ CLOCKS_PER_SEC;
 }
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

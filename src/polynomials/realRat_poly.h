@@ -22,6 +22,10 @@
 #include "flint/arith.h"
 #include "numbers/realRat.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef fmpq_poly_struct realRat_poly;
 typedef realRat_poly realRat_poly_t[1];
 typedef realRat_poly * realRat_poly_ptr;
@@ -104,5 +108,9 @@ POLYNOMIALS_INLINE void bernoulli_polynomial( realRat_poly_t poly, slong deg) {
 }
 void mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize);
 void mignotte_generalized(realRat_poly_t poly, slong deg, ulong pow, slong bitsize);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

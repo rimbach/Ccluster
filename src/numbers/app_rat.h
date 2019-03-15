@@ -25,6 +25,10 @@
 
 #include "flint/fmpz.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* converting realRat to realApp */
 NUMBERS_INLINE void realApp_set_realRat( realApp_t x, const realRat_t y, slong prec ) { arb_set_fmpq (x, y, prec); }
 
@@ -64,5 +68,9 @@ void compApp_mul_realRat( compApp_t x, const compApp_t y, const realRat_t z, slo
 void compApp_mul_realRat_in_place( compApp_t x, const realRat_t y, slong prec );
 
 void compApp_mul_compRat( compApp_t x, const compApp_t y, const compRat_t z, slong prec );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
