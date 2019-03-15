@@ -117,7 +117,13 @@ install: library
 	$(AT)if [ "$(CCLUSTER_STATIC)" -eq "1" ]; then \
 		cp libccluster.a $(DESTDIR)$(PREFIX)/$(LIBDIR); \
 	fi
-	cp $(LIB_HEADERS) $(DESTDIR)$(PREFIX)/include
+	mkdir -p include
+	cp -r src/* include
+	rm include/*/*.o include/*/*.lo include/*/*.c
+	mkdir -p $(DESTDIR)$(PREFIX)/include/ccluster
+	cp -r include/* $(DESTDIR)$(PREFIX)/include/ccluster/
+	rm -r include
+# 	cp $(LIB_HEADERS) $(DESTDIR)$(PREFIX)/include
 # 	$(AT)if [ ! -z $(EXT_HEADERS) ]; then \
 # 		cp $(EXT_HEADERS) $(DESTDIR)$(PREFIX)/include; \
 # 	fi
