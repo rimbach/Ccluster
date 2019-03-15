@@ -87,7 +87,7 @@ void counters_adjust_table( counters_t st, int depth ){
     /* realocate size if needed */
     while (depth+1 > st->size_allocated) {
         st->size_allocated += INIT_SIZE_STATS;
-        st->table = (counters_by_depth_ptr) realloc ( (void *) st->table, (st->size_allocated)*sizeof(counters_by_depth) );
+        st->table = (counters_by_depth_ptr) ccluster_realloc ( (void *) st->table, (st->size_allocated)*sizeof(counters_by_depth) );
     }
     /* set to 0 intermediate cases if needed */
     while (depth+1 > st->size ){
