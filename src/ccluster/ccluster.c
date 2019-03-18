@@ -685,8 +685,7 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
 
 int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults, 
                              const compRat_poly_t poly, 
-//                              const compBox_t initialBox, 
-                             const realRat_t initialBox_cr, const realRat_t initialBox_ci, const realRat_t initialBox_wi,
+                             const compBox_t initialBox, 
                              const realRat_t eps, 
                              int st, 
                              int verb){
@@ -702,10 +701,6 @@ int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * m
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
-    
-    compBox_t initialBox;
-    compBox_init(initialBox);
-    compBox_set_3realRat(initialBox, initialBox_cr, initialBox_ci, initialBox_wi);
     
     metadatas_init(meta, initialBox, strat, verb);
     connCmp_list_init(qRes);
@@ -736,14 +731,67 @@ int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * m
         nbClus++;
     }
     compBox_clear(containingBox);
-    
-    compBox_clear(initialBox);
+       
     cacheApp_clear(cache);
     strategies_clear(strat);
     metadatas_clear(meta);
     connCmp_list_clear(qRes);
     
     return nbClus;
+}
+
+int ccluster_interface_poly_real( realRat_t * centerRe, realRat_t * centerIm, int * mults,
+                                  const realRat_poly_t poly, 
+                                  const realRat_t initialBox_cr, const realRat_t initialBox_ci, const realRat_t initialBox_wi,
+                                  const realRat_t eps, 
+                                  int st, 
+                                  int verb){
+    
+    /* initial Box */
+    compBox_t initialBox;
+    compBox_init(initialBox);
+    compBox_set_3realRat(initialBox, initialBox_cr, initialBox_ci, initialBox_wi);
+    /* polynomial */
+    compRat_poly_t p;
+    compRat_poly_init(p);
+    compRat_poly_set_realRat_poly(p,poly);
+    
+    /* call */
+    int nbClus = ccluster_interface_poly( centerRe, centerIm, mults, p, initialBox, eps, st, verb);
+    
+    /* clear */
+    compBox_clear(initialBox);
+    compRat_poly_clear(p);
+    
+    return nbClus;
+    
+}
+
+int ccluster_interface_poly_real_imag( realRat_t * centerRe, realRat_t * centerIm, int * mults,
+                                       const realRat_poly_t poly_real, const realRat_poly_t poly_imag, 
+                                       const realRat_t initialBox_cr, const realRat_t initialBox_ci, const realRat_t initialBox_wi,
+                                       const realRat_t eps, 
+                                       int st, 
+                                       int verb){
+    
+    /* initial Box */
+    compBox_t initialBox;
+    compBox_init(initialBox);
+    compBox_set_3realRat(initialBox, initialBox_cr, initialBox_ci, initialBox_wi);
+    /* polynomial */
+    compRat_poly_t p;
+    compRat_poly_init(p);
+    compRat_poly_set2_realRat_poly(p, poly_real, poly_imag);
+    
+    /* call */
+    int nbClus = ccluster_interface_poly( centerRe, centerIm, mults, p, initialBox, eps, st, verb);
+    
+    /* clear */
+    compBox_clear(initialBox);
+    compRat_poly_clear(p);
+    
+    return nbClus;
+    
 }
 
 void ccluster_refine_forJulia( connCmp_list_t qResults,

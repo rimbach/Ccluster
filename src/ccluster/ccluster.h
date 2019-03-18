@@ -100,11 +100,24 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
 
 int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults,
                              const compRat_poly_t poly, 
-//                              const compBox_t initialBox, 
-                             const realRat_t initialBox_cr, const realRat_t initialBox_ci, const realRat_t initialBox_wi,
+                             const compBox_t initialBox, 
                              const realRat_t eps, 
                              int st, 
                              int verb);
+
+int ccluster_interface_poly_real( realRat_t * centerRe, realRat_t * centerIm, int * mults,
+                                  const realRat_poly_t poly, 
+                                  const realRat_t initialBox_cr, const realRat_t initialBox_ci, const realRat_t initialBox_wi,
+                                  const realRat_t eps, 
+                                  int st, 
+                                  int verb);
+
+int ccluster_interface_poly_real_imag( realRat_t * centerRe, realRat_t * centerIm, int * mults,
+                                       const realRat_poly_t poly_real, const realRat_poly_t poly_imag,
+                                       const realRat_t initialBox_cr, const realRat_t initialBox_ci, const realRat_t initialBox_wi,
+                                       const realRat_t eps, 
+                                       int st, 
+                                       int verb);
 
 void ccluster_interface_forJulia( connCmp_list_t qResults, 
                                   void(*func)(compApp_poly_t, slong), 
