@@ -40,7 +40,7 @@ newton_res newton_first_condition( compApp_t fx, compApp_t fpx, cacheApp_t cache
 
 newton_res newton_iteration( compApp_t iteration, 
                              cacheApp_t cache, 
-                             const connCmp_t CC, 
+                             const connCmp_t CComp, 
                              const compRat_t c, 
                              compApp_t fcenter, 
                              compApp_t fpcenter,
@@ -58,7 +58,7 @@ newton_res newton_interval(  compDsk_t d,
 
 /*works in place in CC*/
 newton_res newton_newton_connCmp( connCmp_t nCC,
-                                  connCmp_t CC,
+                                  connCmp_t CComp,
                                   cacheApp_t cache, 
                                   const compRat_t c,
                                   slong prec, 
