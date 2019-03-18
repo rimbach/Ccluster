@@ -683,7 +683,13 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
     connCmp_list_clear(qRes);
 }
 
-void ccluster_interface_poly( const compRat_poly_t poly, const compBox_t initialBox, const realRat_t eps, int st, int verb){
+int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults, 
+                             const compRat_poly_t poly, 
+//                              const compBox_t initialBox, 
+                             const realRat_t initialBox_cr, const realRat_t initialBox_ci, const realRat_t initialBox_wi,
+                             const realRat_t eps, 
+                             int st, 
+                             int verb){
     
     cacheApp_t cache;
     strategies_t strat;
@@ -697,6 +703,10 @@ void ccluster_interface_poly( const compRat_poly_t poly, const compBox_t initial
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
     
+    compBox_t initialBox;
+    compBox_init(initialBox);
+    compBox_set_3realRat(initialBox, initialBox_cr, initialBox_ci, initialBox_wi);
+    
     metadatas_init(meta, initialBox, strat, verb);
     connCmp_list_init(qRes);
     
@@ -709,11 +719,31 @@ void ccluster_interface_poly( const compRat_poly_t poly, const compBox_t initial
 //         connCmp_list_print_for_results(stdout, qRes, 500, 40, meta);
     }
     
+    /* feed the results */
+//     int nbClus = connCmp_list_get_size(qRes);
+    int nbClus = 0;
+    compBox_t containingBox;
+    compBox_init(containingBox);
+    connCmp_list_iterator it = connCmp_list_begin(qRes);
+    while (it!=connCmp_list_end() ) {
+        
+        connCmp_componentBox( containingBox, connCmp_list_elmt(it), metadatas_initBref(meta));
+        realRat_set( centerRe[nbClus], compRat_realref(compBox_centerref(containingBox)) );
+        realRat_set( centerIm[nbClus], compRat_imagref(compBox_centerref(containingBox)) );
+        mults[nbClus] = connCmp_nSols(connCmp_list_elmt(it));
+        
+        it = connCmp_list_next(it);
+        nbClus++;
+    }
+    compBox_clear(containingBox);
+    
+    compBox_clear(initialBox);
     cacheApp_clear(cache);
     strategies_clear(strat);
     metadatas_clear(meta);
     connCmp_list_clear(qRes);
     
+    return nbClus;
 }
 
 void ccluster_refine_forJulia( connCmp_list_t qResults,

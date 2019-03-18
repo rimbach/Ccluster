@@ -98,7 +98,13 @@ void connCmp_list_print_for_results(FILE * f, const connCmp_list_t c, metadatas_
 
 void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_t initialBox, const realRat_t eps, int st, int verb);
 
-void ccluster_interface_poly( const compRat_poly_t poly, const compBox_t initialBox, const realRat_t eps, int st, int verb);
+int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults,
+                             const compRat_poly_t poly, 
+//                              const compBox_t initialBox, 
+                             const realRat_t initialBox_cr, const realRat_t initialBox_ci, const realRat_t initialBox_wi,
+                             const realRat_t eps, 
+                             int st, 
+                             int verb);
 
 void ccluster_interface_forJulia( connCmp_list_t qResults, 
                                   void(*func)(compApp_poly_t, slong), 
