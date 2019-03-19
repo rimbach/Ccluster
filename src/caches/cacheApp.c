@@ -40,6 +40,10 @@ void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly){
     compRat_poly_init(cache->_poly);
     compRat_poly_set(cache->_poly, poly);
     cache->_from_poly = 1;
+    
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_init ( &(cache->_mutex), NULL);
+#endif
 }
 
 //requires: prec is 2^n*CCLUSTER_DEFAULT_PREC

@@ -106,6 +106,8 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
     connCmp_list_init(ltemp);
     
     connCmp_ptr ccur;
+    
+    clock_t start=clock();
 //     connCmp_ptr ccurCopy;
     
     realRat_set_si(four, 4, 1);
@@ -160,6 +162,10 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && !widthFlag )
             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) ) {
             
+            if (metadatas_haveToCount(meta)){
+                start = clock();
+            }
+            
             if (connCmp_nSols(ccur)==1) 
                 compRat_set(initPoint, compBox_centerref(componentBox));
             else
@@ -169,7 +175,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
             nCC = (connCmp_ptr) malloc (sizeof(connCmp));
             connCmp_init(nCC);
             resNewton = newton_newton_connCmp( nCC, ccur, cache, initPoint, prec, meta);
-            metadatas_add_Newton   ( meta, depth, resNewton.nflag );
+//             metadatas_add_Newton   ( meta, depth, resNewton.nflag );
 //             printf("+++depth: %d, connCmp_nSolsref(ccur): %d, res_newton: %d \n", depth, connCmp_nSols(ccur), resNewton.nflag);
             if (resNewton.nflag) {
                 connCmp_clear(ccur);
@@ -192,6 +198,9 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
                 connCmp_newSuref(ccur) = 0;
                 connCmp_clear(nCC);
                 free(nCC);
+            }
+            if (metadatas_haveToCount(meta)){
+                metadatas_add_Newton   ( meta, depth, resNewton.nflag, (double) (clock() - start) );
             }
                 
         }

@@ -134,6 +134,17 @@ METADATAS_INLINE void   chronos_add_time_Anticip( chronos_t times, double d, int
 #endif
 }
 
+METADATAS_INLINE void   chronos_add_time_Newtons( chronos_t times, double d, int nbThreads ){
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (nbThreads>1)
+        times->_clicks_Newtons_cumul += d/(nbThreads*CLOCKS_PER_SEC);
+    else 
+        times->_clicks_Newtons_cumul += d/CLOCKS_PER_SEC;
+#else
+    times->_clicks_Newtons_cumul += d/CLOCKS_PER_SEC;
+#endif
+}
+
 METADATAS_INLINE void   chronos_tic_Approxi      ( chronos_t times ) { times->_clicks_Approxi = clock(); }
 METADATAS_INLINE void   chronos_toc_Approxi      ( chronos_t times ) { times->_clicks_Approxi_cumul += ((double) (clock() - times->_clicks_Approxi))/ CLOCKS_PER_SEC; }
 METADATAS_INLINE double chronos_get_time_Approxi ( const chronos_t times ) { return times->_clicks_Approxi_cumul; }

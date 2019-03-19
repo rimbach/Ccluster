@@ -67,7 +67,7 @@ char * realRat_sprint_for_stat(char * out, const realRat_t x){
     return out;
 }
 
-int metadatas_fprint(FILE * file, const metadatas_t meta, const realRat_t eps){
+int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     int r=1;
     int nbTaylorShifts  = metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsInTSTests(meta);
     int nbTaylorShiftsR = metadatas_getNbTaylorsRepetedInT0Tests(meta) + metadatas_getNbTaylorsRepetedInTSTests(meta);
@@ -97,6 +97,7 @@ int metadatas_fprint(FILE * file, const metadatas_t meta, const realRat_t eps){
     r = fprintf(file, "|strat:%-63s|\n", temp);
     
     if (metadatas_getVerbo(meta)>=2) {
+//         metadatas_count(meta);
     r = fprintf(file, " -------------------TSTest used to discard boxes----------------------\n");
     r = fprintf(file, "|%-39s %14d %14s|\n", "total number:",                       metadatas_getNbT0Tests(meta),        " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "number of tests without conclusion:", metadatas_getNbFailingT0Tests(meta), " " );
@@ -142,8 +143,10 @@ int metadatas_fprint(FILE * file, const metadatas_t meta, const realRat_t eps){
     r = fprintf(file, "|%-39s %14d %14s|\n", "number of clusters:",                 metadatas_getNbValidated(meta),      " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "number of solutions:",                metadatas_getNbSolutions(meta),      " " );
     r = fprintf(file, " -------------------Stats:    ----------------------------------------\n");
+    if (metadatas_getVerbo(meta)>=2) {
     r = fprintf(file, "|%-39s %14d %14s|\n", "tree depth:",                         metadatas_getDepth(meta),            " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "tree size:",                          metadatas_getNbT0Tests(meta),        " " );
+    }
     r = fprintf(file, "|%-39s %14f %14s|\n", "total time:",                         metadatas_get_time_CclusAl(meta),    " " );
     r = fprintf(file, " ---------------------------------------------------------------------\n");
     }

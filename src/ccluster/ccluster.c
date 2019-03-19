@@ -11,7 +11,7 @@
 
 #include "ccluster/ccluster.h"
 
-#include <pthread.h>
+// #include <pthread.h>
 
 slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
 //                                      int nbSols, 
@@ -49,13 +49,9 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
         res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);  
         if (res.nbOfSol==0) {
-#ifdef CCLUSTER_HAVE_PTHREAD
-            metadatas_lock(meta);
-#endif
-            metadatas_add_discarded( meta, depth);
-#ifdef CCLUSTER_HAVE_PTHREAD
-            metadatas_unlock(meta);
-#endif
+            if (metadatas_haveToCount(meta)){
+                metadatas_add_discarded( meta, depth);
+            }
             compBox_clear(btemp);
             ccluster_free(btemp);
         }
@@ -313,6 +309,8 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
     
     connCmp_ptr ccur;
     
+    clock_t start=clock();
+    
     /* Real Coeff */
     connCmp_ptr ccurConjClo, ccurConj;
     int pushConjugFlag = 0;
@@ -358,7 +356,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
         
 #ifdef CCLUSTER_HAVE_PTHREAD
-        if (!connCmp_list_is_empty(toBeBisected))
+        if ((metadatas_useNBThreads(meta) >1)&&(!connCmp_list_is_empty(toBeBisected)))
             separationFlag = separationFlag&&ccluster_compDsk_is_separated(fourCCDisk, toBeBisected, dummy);
 #endif        
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
@@ -391,6 +389,10 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && !widthFlag )
             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) ) {
         
+            if (metadatas_haveToCount(meta)){
+                start = clock();
+            }
+        
             if (connCmp_nSols(ccur)==1) 
                 compRat_set(initPoint, compBox_centerref(componentBox));
             else
@@ -400,7 +402,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
             nCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
             connCmp_init(nCC);
             resNewton = newton_newton_connCmp( nCC, ccur, cache, initPoint, prec, meta);
-            metadatas_add_Newton   ( meta, depth, resNewton.nflag );
+
 //             printf("+++depth: %d, connCmp_nSolsref(ccur): %d, res_newton: %d \n", depth, connCmp_nSols(ccur), resNewton.nflag);
             if (resNewton.nflag) {
                 connCmp_clear(ccur);
@@ -408,22 +410,17 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
                 ccur = nCC;
                 connCmp_increase_nwSpd(ccur);
                 connCmp_newSuref(ccur) = 1;
-//                 printf("newton: prec avant: %d prec apres: %d\n", prec, resNewton.appPrec);
                 connCmp_appPrref(nCC) = resNewton.appPrec;
-                /* adjust precision: try to make it lower */
-//                 if (prec == resNewton.appPrec) {
-// //                     printf("ICI\n");
-//                     connCmp_appPrref(ccur) = CCLUSTER_MAX(prec/2,CCLUSTER_DEFAULT_PREC);
-//                 }
-//                 else 
-//                     connCmp_appPrref(ccur) = resNewton.appPrec;
     
             }
             else {
                 connCmp_newSuref(ccur) = 0;
                 connCmp_clear(nCC);
                 ccluster_free(nCC);
-            }  
+            }
+            if (metadatas_haveToCount(meta)){
+                metadatas_add_Newton   ( meta, depth, resNewton.nflag, (double) (clock() - start) );
+            }
         }
         
         /* Real Coeff */
@@ -664,7 +661,6 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
-    
     metadatas_init(meta, initialBox, strat, verb);
     connCmp_list_init(qRes);
     
@@ -701,7 +697,6 @@ int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * m
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
-    
     metadatas_init(meta, initialBox, strat, verb);
     connCmp_list_init(qRes);
     

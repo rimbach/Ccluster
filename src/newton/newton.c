@@ -210,7 +210,7 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
                                   slong prec, 
                                   metadatas_t meta) {
     
-    chronos_tic_Newtons(metadatas_chronref(meta));
+//     chronos_tic_Newtons(metadatas_chronref(meta));
     /* printf("Newton: begin --------------------------- \n");*/
     newton_res res;
     if (metadatas_usePredictPrec(meta))
@@ -335,7 +335,7 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
     compApp_clear(fpcenter);
     compApp_clear(iteration);
     
-    chronos_toc_Newtons(metadatas_chronref(meta));
+//     chronos_toc_Newtons(metadatas_chronref(meta));
     
     return res;
 }
