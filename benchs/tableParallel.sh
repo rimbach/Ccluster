@@ -80,7 +80,7 @@ done
 
 #default values
 if [ -z "$DEGREES" ]; then
-   DEGREES="128 256"
+   DEGREES="128 256 512"
 fi
 
 if [ -z "$EPSILONCCL" ]; then
@@ -168,7 +168,7 @@ for DEG in $DEGREES; do
     (/usr/bin/time -p $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $STRATFLAG $VERBOFLAG > tempparall.txt ) &>> tempparall.txt
 #     cat tempparall.txt
     TIMEREF=$(grep "real" tempparall.txt| cut -f2 -d' '| tr -d ' ')
-    LINE_TAB=$LINE_TAB" & "`format_time $TIME`
+    LINE_TAB=$LINE_TAB" & "`format_time $TIMEREF`
         
     for NBT in $NBTHREADS; do
     
@@ -178,6 +178,7 @@ for DEG in $DEGREES; do
 #         cat tempparall.txt
         TIME=$(grep "real" tempparall.txt| cut -f2 -d' '| tr -d ' ')
         LINE_TAB=$LINE_TAB" & "`ratio_time $TIMEREF $TIME`
+        echo `ratio_time $TIMEREF $TIME`
     done
     LINE_TAB=$LINE_TAB" \\\\"
     
