@@ -23,6 +23,14 @@ format_time()
     fi
 }
 
+ratio_time()
+{
+    NUM=$1
+    DEN=$2
+    RATIO=`echo $NUM/$DEN|bc -l`
+    echo `format_time $RATIO`
+}
+
 ##########################getting arguments
 while [ "$1" != "" ]; do
    PARAM=`echo $1 | sed 's/=.*//'`
@@ -72,7 +80,7 @@ done
 
 #default values
 if [ -z "$DEGREES" ]; then
-   DEGREES="128 256 512"
+   DEGREES="128 256"
 fi
 
 if [ -z "$EPSILONCCL" ]; then
@@ -88,11 +96,11 @@ fi
 # fi
 
 if [ -z "$BGLOBAL" ]; then
-   BGLOBAL="0,1,0,1,50,1"
+   BGLOBAL="0,1,0,1,300,1"
 fi
 
 if [ -z "$NBTHREADS" ]; then
-   NBTHREADS="1 2 3 4"
+   NBTHREADS="2 4"
 fi
 
 # if [ -z "$MPSOLVE" ]; then
@@ -155,13 +163,21 @@ touch $TEMPTABFILE
 
 for DEG in $DEGREES; do
     LINE_TAB=$DEG
+    
+    echo  "Clustering roots for $POL_NAME, degree $DEG, global, 1 threads"
+    (/usr/bin/time -p $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $STRATFLAG $VERBOFLAG > tempparall.txt ) &>> tempparall.txt
+#     cat tempparall.txt
+    TIMEREF=$(grep "real" tempparall.txt| cut -f2 -d' '| tr -d ' ')
+    LINE_TAB=$LINE_TAB" & "`format_time $TIME`
+        
     for NBT in $NBTHREADS; do
     
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, $NBT threads"
         (/usr/bin/time -p $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $STRATFLAG $VERBOFLAG $NBT > tempparall.txt ) &>> tempparall.txt
-        cat tempparall.txt
+#         $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $STRATFLAG $VERBOFLAG $NBT
+#         cat tempparall.txt
         TIME=$(grep "real" tempparall.txt| cut -f2 -d' '| tr -d ' ')
-        LINE_TAB=$LINE_TAB" & "`format_time $TIME`
+        LINE_TAB=$LINE_TAB" & "`ratio_time $TIMEREF $TIME`
     done
     LINE_TAB=$LINE_TAB" \\\\"
     
