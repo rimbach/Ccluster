@@ -72,7 +72,7 @@ done
 
 #default values
 if [ -z "$DEGREES" ]; then
-   DEGREES="256"
+   DEGREES="128 256 512"
 fi
 
 if [ -z "$EPSILONCCL" ]; then
@@ -88,11 +88,11 @@ fi
 # fi
 
 if [ -z "$BGLOBAL" ]; then
-   BGLOBAL="0,1,0,1,300,1"
+   BGLOBAL="0,1,0,1,50,1"
 fi
 
 if [ -z "$NBTHREADS" ]; then
-   NBTHREADS="1 2 4"
+   NBTHREADS="1 2 3 4"
 fi
 
 # if [ -z "$MPSOLVE" ]; then
@@ -118,7 +118,7 @@ STRATFLAG=23
 # if [ $ANTICIPATE -eq 1 ]; then
 #     STRATFLAG=$(( $STRATFLAG + 16 ))
 # fi
-VERBOFLAG=1
+VERBOFLAG=0
 
 # REP="tableParallel"
 # 
