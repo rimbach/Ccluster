@@ -159,6 +159,14 @@ void connCmp_diameter( realRat_t diam, const connCmp_t cc);
 int connCmp_isless ( const connCmp_t cc1, const connCmp_t cc2 );
 int connCmp_isgreater ( const connCmp_t cc1, const connCmp_t cc2 );
 
+GEOMETRY_INLINE int connCmp_isless_b ( const connCmp_t cc1, const connCmp_t cc2 ){
+    return (connCmp_nb_boxes(cc1) < connCmp_nb_boxes(cc2));
+}
+
+GEOMETRY_INLINE int connCmp_isgreater_b ( const connCmp_t cc1, const connCmp_t cc2 ){
+    return (connCmp_nb_boxes(cc1) > connCmp_nb_boxes(cc2));
+}
+
 void connCmp_componentBox( compBox_t res, const connCmp_t cc, const compBox_t initialBox);
 
 /*Precondition:                                           */

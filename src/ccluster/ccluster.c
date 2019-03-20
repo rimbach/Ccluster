@@ -246,7 +246,9 @@ void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, con
 //                 ccluster_free(ctemp);
 //             }
 // #else
+//             printf("prep loop, nb boxes bisect: %d\n", 4*connCmp_nb_boxes(ctemp));
             ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
+            
 //             ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
@@ -503,6 +505,8 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
                  ( (connCmp_list_is_empty(qMainLoop))||
                    ( realRat_cmp(connCmp_widthref(connCmp_list_first(qMainLoop)), connCmp_widthref(connCmp_list_first(toBeBisected))) !=0 ) ) ) {
             
+//             printf("parallel bisect connCmp: size qMainLoop: %d, size toBeBisected: %d\n", connCmp_list_get_size(qMainLoop), connCmp_list_get_size(toBeBisected));
+        
             if (connCmp_list_get_size(toBeBisected)>1) {
                 ccluster_parallel_bisect_connCmp_list(qMainLoop, discardedCcs, toBeBisected, cache, meta);
             }
