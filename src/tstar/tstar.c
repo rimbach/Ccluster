@@ -15,14 +15,15 @@
 void tstar_getApproximation( compApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta){
         clock_t start = clock();
 
-#ifdef CCLUSTER_HAVE_PTHREAD
-        if (metadatas_useNBThreads(meta) >1)
-            cacheApp_lock(cache);
-#endif
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//         if (metadatas_useNBThreads(meta) >1)
+//             cacheApp_lock(cache);
+// #endif
         compApp_poly_set(res, cacheApp_getApproximation ( cache, prec ));
-#ifdef CCLUSTER_HAVE_PTHREAD
-        cacheApp_unlock(cache);
-#endif
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//         if (metadatas_useNBThreads(meta) >1)
+//             cacheApp_unlock(cache);
+// #endif
         if (metadatas_haveToCount(meta))
             metadatas_add_time_Approxi(meta, (double) (clock() - start) );
         

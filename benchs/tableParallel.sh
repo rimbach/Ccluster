@@ -80,7 +80,7 @@ done
 
 #default values
 if [ -z "$DEGREES" ]; then
-   DEGREES="128 256 512"
+   DEGREES="128 256"
 fi
 
 if [ -z "$EPSILONCCL" ]; then

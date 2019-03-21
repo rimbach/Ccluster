@@ -56,6 +56,10 @@ compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec ) {
     
     if (index < cache->_size)
         return (cache->_cache)[index];
+
+#ifdef CCLUSTER_HAVE_PTHREAD 
+    cacheApp_lock(cache);
+#endif
     
     if (index < cache->_allocsize) {
         while (index >= cache->_size){
@@ -86,6 +90,9 @@ compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec ) {
 #endif            
             cache->_size +=1;
         }
+#ifdef CCLUSTER_HAVE_PTHREAD 
+    cacheApp_unlock(cache);
+#endif
         return (cache->_cache)[index];
     }
     
@@ -121,6 +128,9 @@ compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec ) {
 #endif            
         cache->_size +=1;
     }
+#ifdef CCLUSTER_HAVE_PTHREAD 
+    cacheApp_unlock(cache);
+#endif
     return (cache->_cache)[index];
     
 }
