@@ -61,12 +61,12 @@ void ccluster_prep_loop_DAC( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop,
         if ( connCmp_is_confined(ctemp, metadatas_initBref(meta)) && (realRat_cmp(diam, halfwidth)<0) )
             connCmp_list_insert_sorted_inv(qMainLoop, ctemp);
         else {
-            ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
+            ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta, 1);
 //             ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ctemp);
-            free(ctemp);
+            ccluster_free(ctemp);
         }       
     }
     
@@ -108,17 +108,20 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
     connCmp_ptr ccur;
     
     clock_t start=clock();
-//     connCmp_ptr ccurCopy;
+    
+    /* Real Coeff */
+    connCmp_ptr ccurConjClo, ccurConj;
+    int pushConjugFlag = 0;
     
     realRat_set_si(four, 4, 1);
     realRat_set_si(three, 3, 1);
     
-#ifdef CCLUSTER_HAVE_PTHREAD
-    connCmp_list_t toBeBisected;
-    connCmp_list_init(toBeBisected);
-    connCmp_list_t dummy;
-    connCmp_list_init(dummy);
-#endif
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//     connCmp_list_t toBeBisected;
+//     connCmp_list_init(toBeBisected);
+//     connCmp_list_t dummy;
+//     connCmp_list_init(dummy);
+// #endif
     
     int nbSolsAlreadyFound = 0;
     while ((!connCmp_list_is_empty(qMainLoop))&&(nbSolsAlreadyFound<nbSols)) {
@@ -126,6 +129,22 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         resNewton.nflag = 0;
         
         ccur = connCmp_list_pop(qMainLoop); //pop the CC with smallest boxes
+        
+         /* Real Coeff */
+        pushConjugFlag = 0;
+        if (metadatas_realCoeffs(meta)){
+            /* test if the component contains the real line in its interior */
+            if (!connCmp_is_imaginary_positive(ccur)) {
+                ccurConjClo = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
+                connCmp_init( ccurConjClo );
+                connCmp_set_conjugate_closure(ccurConjClo, ccur);
+                
+                connCmp_clear(ccur);
+                ccluster_free(ccur);
+                ccur = ccurConjClo;
+            }
+        }
+        
         connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
         compBox_get_containing_dsk(ccDisk, componentBox);
         compDsk_inflate_realRat(fourCCDisk, ccDisk, four); //??? why four?
@@ -140,23 +159,22 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         }
         else
             separationFlag = 1;
-#ifdef CCLUSTER_HAVE_PTHREAD
-        if (!connCmp_list_is_empty(toBeBisected))
+        
+/*#ifdef CCLUSTER_HAVE_PTHREAD
+        if ((metadatas_useNBThreads(meta) >1)&&(!connCmp_list_is_empty(toBeBisected)))
             separationFlag = separationFlag&&ccluster_compDsk_is_separated(fourCCDisk, toBeBisected, dummy);
-#endif        
+#endif*/        
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
         
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
-//         if ((separationFlag)) {
-//             printf("depth: %d, connCmp_nSolsref(ccur): %d\n", depth, connCmp_nSolsref(ccur));
+            
             if (connCmp_nSolsref(ccur)==-1){
                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
                 prec = resTstar.appPrec;
             }
-//             printf("validate: prec avant: %d prec apres: %d\n", prec, resTstar.appPrec);
-//             prec = resTstar.appPrec;
+            
         }
         
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && !widthFlag )
@@ -172,32 +190,24 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
                 connCmp_find_point_outside_connCmp( initPoint, ccur, metadatas_initBref(meta) );
             
             connCmp_ptr nCC;
-            nCC = (connCmp_ptr) malloc (sizeof(connCmp));
+            nCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
             connCmp_init(nCC);
             resNewton = newton_newton_connCmp( nCC, ccur, cache, initPoint, prec, meta);
-//             metadatas_add_Newton   ( meta, depth, resNewton.nflag );
+            
 //             printf("+++depth: %d, connCmp_nSolsref(ccur): %d, res_newton: %d \n", depth, connCmp_nSols(ccur), resNewton.nflag);
             if (resNewton.nflag) {
                 connCmp_clear(ccur);
-                free(ccur);
+                ccluster_free(ccur);
                 ccur = nCC;
                 connCmp_increase_nwSpd(ccur);
                 connCmp_newSuref(ccur) = 1;
-//                 printf("newton: prec avant: %d prec apres: %d\n", prec, resNewton.appPrec);
                 connCmp_appPrref(nCC) = resNewton.appPrec;
-                /* adjust precision: try to make it lower */
-//                 if (prec == resNewton.appPrec) {
-// //                     printf("ICI\n");
-//                     connCmp_appPrref(ccur) = CCLUSTER_MAX(prec/2,CCLUSTER_DEFAULT_PREC);
-//                 }
-//                 else 
-//                     connCmp_appPrref(ccur) = resNewton.appPrec;
-    
+                
             }
             else {
                 connCmp_newSuref(ccur) = 0;
                 connCmp_clear(nCC);
-                free(nCC);
+                ccluster_free(nCC);
             }
             if (metadatas_haveToCount(meta)){
                 metadatas_add_Newton   ( meta, depth, resNewton.nflag, (double) (clock() - start) );
@@ -205,84 +215,104 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
                 
         }
         
+        /* Real Coeff */
+        if (metadatas_realCoeffs(meta)){
+            /* test if ccur is imaginary positive */
+            if (connCmp_is_imaginary_positive(ccur)) {
+                /* test if the containing disc is strictly imaginary positive */
+                connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
+                compBox_get_containing_dsk(ccDisk, componentBox);
+                if (compDsk_is_imaginary_positive_strict(ccDisk)){
+                    pushConjugFlag = 1;
+                }
+                else {
+                    separationFlag = 0;
+                }
+            }
+        }
+        
         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
-//         if (metadatas_useStopWhenCompact(meta) && compactFlag && separationFlag){
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
             nbSolsAlreadyFound += connCmp_nSols(ccur);
-            /*DEPRECATED*/
-            /* push a copied version in qAllResults */
-//             ccurCopy = connCmp_copy(ccur);
-//             connCmp_list_push(qAllResults, ccurCopy);
-            /*END DEPRECATED*/
-//             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
-//             printf("fourCCDisk: "); compDsk_print(fourCCDisk); printf("\n");  
+
+            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+                /*compute the complex conjugate*/
+                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
+                connCmp_init( ccurConj );
+                connCmp_set_conjugate(ccurConj, ccur);
+                metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
+                connCmp_list_push(qResults, ccurConj);
+                nbSolsAlreadyFound += connCmp_nSols(ccurConj);
+            }
+            
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
             nbSolsAlreadyFound += connCmp_nSols(ccur);
-            /*DEPRECATED*/
-            /* push a copied version in qAllResults */
-//             ccurCopy = connCmp_copy(ccur);
-//             connCmp_list_push(qAllResults, ccurCopy);
-            /*END DEPRECATED*/
-//             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
+            
+            /* Real Coeff */
+            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+                /*compute the complex conjugate*/
+                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
+                connCmp_init( ccurConj );
+                connCmp_set_conjugate(ccurConj, ccur);
+                metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
+                connCmp_list_push(qResults, ccurConj);
+                nbSolsAlreadyFound += connCmp_nSols(ccurConj);
+            }
+            
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
-//             connCmp_list_insert_sorted(qMainLoop, ccur);
             connCmp_list_insert_sorted_inv(qMainLoop, ccur);
         }
         
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && (resNewton.nflag==0) && (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)>0) ){
             connCmp_decrease_nwSpd(ccur);
-//             if (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)>0)
-//                 connCmp_decrease_nwSpd(ccur);
-//             connCmp_list_insert_sorted(qMainLoop, ccur);
             connCmp_list_insert_sorted_inv(qMainLoop, ccur);
         }
         else {
 //             if (connCmp_nSols(ccur)==0) 
 //                 printf("ici\n");
-#ifdef CCLUSTER_HAVE_PTHREAD
-            if (metadatas_useNBThreads(meta) >1)
-                connCmp_list_push(toBeBisected, ccur);
-            else {
-                ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
-                while (!connCmp_list_is_empty(ltemp))
-//                     connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
-                    connCmp_list_insert_sorted_inv(qMainLoop, connCmp_list_pop(ltemp));
-                connCmp_clear(ccur);
-                free(ccur);
-            }
-#else
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//             if (metadatas_useNBThreads(meta) >1)
+//                 connCmp_list_push(toBeBisected, ccur);
+//             else {
+//                 ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
+//                 while (!connCmp_list_is_empty(ltemp))
+// //                     connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
+//                     connCmp_list_insert_sorted_inv(qMainLoop, connCmp_list_pop(ltemp));
+//                 connCmp_clear(ccur);
+//                 ccluster_free(ccur);
+//             }
+// #else
             ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
-//                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
                 connCmp_list_insert_sorted_inv(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
-            free(ccur);
-#endif
+            ccluster_free(ccur);
+// #endif
         }
-#ifdef CCLUSTER_HAVE_PTHREAD
-        if ( (!connCmp_list_is_empty(toBeBisected))&&
-                 ( (connCmp_list_is_empty(qMainLoop))||
-                   ( realRat_cmp(connCmp_widthref(connCmp_list_first(qMainLoop)), connCmp_widthref(connCmp_list_first(toBeBisected))) !=0 ) ) ) {
-            
-            if (connCmp_list_get_size(toBeBisected)>1) {
-                ccluster_parallel_bisect_connCmp_list(qMainLoop, discardedCcs, toBeBisected, cache, meta);
-            }
-            else { /* toBeBisected has only one element */
-                ccur = connCmp_list_pop(toBeBisected);
-                ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
-                while (!connCmp_list_is_empty(ltemp))
-//                         connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
-                        connCmp_list_insert_sorted_inv(qMainLoop, connCmp_list_pop(ltemp));
-                connCmp_clear(ccur);
-                free(ccur);
-            }
-        }
-#endif
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//         if ( (!connCmp_list_is_empty(toBeBisected))&&
+//                  ( (connCmp_list_is_empty(qMainLoop))||
+//                    ( realRat_cmp(connCmp_widthref(connCmp_list_first(qMainLoop)), connCmp_widthref(connCmp_list_first(toBeBisected))) !=0 ) ) ) {
+//             
+//             if (connCmp_list_get_size(toBeBisected)>1) {
+//                 ccluster_parallel_bisect_connCmp_list(qMainLoop, discardedCcs, toBeBisected, cache, meta);
+//             }
+//             else { /* toBeBisected has only one element */
+//                 ccur = connCmp_list_pop(toBeBisected);
+//                 ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
+//                 while (!connCmp_list_is_empty(ltemp))
+// //                         connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
+//                         connCmp_list_insert_sorted_inv(qMainLoop, connCmp_list_pop(ltemp));
+//                 connCmp_clear(ccur);
+//                 ccluster_free(ccur);
+//             }
+//         }
+// #endif
         
     }
     
@@ -294,9 +324,9 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
     realRat_clear(threeWidth);
     compRat_clear(initPoint);
     connCmp_list_clear(ltemp);
-#ifdef CCLUSTER_HAVE_PTHREAD
-    connCmp_list_clear(toBeBisected);
-#endif
+// #ifdef CCLUSTER_HAVE_PTHREAD
+//     connCmp_list_clear(toBeBisected);
+// #endif
 }
 
 void ccluster_DAC_first( connCmp_list_t qResults, 
@@ -316,13 +346,13 @@ void ccluster_DAC_first( connCmp_list_t qResults,
     realRat_set_si(factor, 5, 4);
     
     compBox_ptr bEnlarged;
-    bEnlarged = (compBox_ptr) malloc (sizeof(compBox));
+    bEnlarged = (compBox_ptr) ccluster_malloc (sizeof(compBox));
     compBox_init(bEnlarged);
     compBox_inflate_realRat(bEnlarged, initialBox, factor);
     compBox_nbMSolref(bEnlarged) = cacheApp_getDegree ( cache );
     
     connCmp_ptr initialCC;
-    initialCC = (connCmp_ptr) malloc (sizeof(connCmp));
+    initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
     connCmp_init_compBox(initialCC, bEnlarged);
     
     connCmp_list_t qPrepLoop;
