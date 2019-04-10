@@ -1,8 +1,8 @@
 # Ccluster
 
-Ccluster is a C library implementing an algorithm for local clustering of the the complex roots
+Ccluster is a C library implementing an algorithm for local clustering of the complex roots
 of a univariate polynomial whose
-coefficients are complex numbers.
+coefficients are any complex numbers.
 
 It has a wrapper for Julia (https://github.com/rimbach/Ccluster.jl)
 and is available in Singular (https://github.com/Singular).
