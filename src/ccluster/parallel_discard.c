@@ -21,7 +21,8 @@ void * _parallel_bisect_worker( void * arg_ptr ){
     /* nb_thread_running has been incremented by caller; */
     
     parallel_bisect_arg_t * arg = (parallel_bisect_arg_t *) arg_ptr;
-    ccluster_bisect_connCmp( arg->res, arg->cc, arg->dis, arg->cache, arg->meta, arg->nbThreads);
+//     ccluster_bisect_connCmp( arg->res, arg->cc, arg->dis, arg->cache, arg->meta, arg->nbThreads);
+    ccluster_bisect_connCmp_without_quadrisect( arg->res, arg->cc, arg->dis, arg->cache, arg->meta, arg->nbThreads);
     flint_cleanup();
     
     /*actualize datas for the scheduler */
@@ -46,8 +47,23 @@ void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_
     slong nb_args = CCLUSTER_MIN(nb_threads,connCmp_list_get_size(toBeBisected));
     /* total number of boxes to be bisected */
     slong nb_boxes = 0;
+    
+    compBox_ptr btemp;
+    compBox_list_t subBoxes;
+    compBox_list_init(subBoxes);
+    
     connCmp_list_iterator it = connCmp_list_begin(toBeBisected);
     while (it!=connCmp_list_end() ) {
+        
+        /*quadrisect boxes in it*/
+        while (!connCmp_is_empty(connCmp_list_elmt(it))) {
+            btemp = connCmp_pop(connCmp_list_elmt(it));
+            subdBox_quadrisect( subBoxes, btemp );
+            compBox_clear(btemp);
+            ccluster_free(btemp);
+        }
+        compBox_list_swap(subBoxes, connCmp_boxesref(connCmp_list_elmt(it)));
+        
         nb_boxes += connCmp_nb_boxes(connCmp_list_elmt(it));
         it = connCmp_list_next(it);
     }
@@ -144,9 +160,92 @@ void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_
         connCmp_list_clear(args[i].dis);
     }
     
+    compBox_list_clear(subBoxes);
+    
     free(args);
     free(threads);
 }
+
+void ccluster_bisect_connCmp_without_quadrisect( connCmp_list_t dest, 
+                                                 connCmp_t cc, 
+                                                 connCmp_list_t discardedCcs, 
+                                                 cacheApp_t cache, 
+                                                 metadatas_t meta, 
+                                                 slong nbThreads){
+    
+    slong prec = connCmp_appPr(cc);
+    compBox_list_t subBoxes;
+    connCmp_list_t ltemp;
+    compBox_list_init(subBoxes);
+    connCmp_list_init(ltemp);
+    
+    compBox_ptr btemp;
+    connCmp_ptr ctemp;
+    
+//     while (!connCmp_is_empty(cc)) {
+//         btemp = connCmp_pop(cc);
+//         subdBox_quadrisect( subBoxes, btemp );
+//         compBox_clear(btemp);
+//         ccluster_free(btemp);
+//     }
+    compBox_list_swap(subBoxes, connCmp_boxesref(cc));
+
+// #ifdef CCLUSTER_HAVE_PTHREAD
+    if (nbThreads>1) {
+//         printf("--ccluster_parallel_bisect_connCmp: nb threads: %d \n", (int) nbThreads );
+        prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta, nbThreads);
+    }
+    else
+        prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
+// #else
+//     prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
+// #endif
+    
+    while (!compBox_list_is_empty(subBoxes)) {
+        btemp = compBox_list_pop(subBoxes);
+        connCmp_union_compBox( ltemp, btemp);
+    }
+    int specialFlag = 1;
+    if (connCmp_list_get_size(ltemp) == 1)
+        specialFlag = 0;
+    
+    slong nprec; 
+    if (prec == connCmp_appPrref(cc)) {
+        nprec = CCLUSTER_MAX(prec/2,CCLUSTER_DEFAULT_PREC);
+//         printf("decrease precision\n");
+    }
+    else 
+        nprec = prec;
+    
+    
+    while (!connCmp_list_is_empty(ltemp)){
+        ctemp = connCmp_list_pop(ltemp);
+        
+        if (connCmp_intersection_is_not_empty(ctemp, metadatas_initBref(meta))){
+            connCmp_appPrref(ctemp) = nprec;
+            if (specialFlag)
+                connCmp_initiali_nwSpd(ctemp);
+            else {
+                connCmp_initiali_nwSpd_connCmp(ctemp, cc);
+                connCmp_decrease_nwSpd(ctemp);
+                /* copy the number of sols */
+                connCmp_nSolsref(ctemp) = connCmp_nSolsref(cc);
+                /* test */
+                connCmp_isSep(ctemp) = connCmp_isSep(cc);
+                /*end test */
+            }
+            connCmp_list_push(dest, ctemp);
+        }
+        else {
+            connCmp_appPrref(ctemp) = prec;
+            connCmp_list_push(discardedCcs, ctemp);
+        }
+    }
+    
+    compBox_list_clear(subBoxes);
+    connCmp_list_clear(ltemp);
+}
+
 
 
 // void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_list_ptr discardedCcs,

@@ -12,7 +12,7 @@
 # PROJECT=geom
 CC=gcc
 # CCFLAGS = -Wall -ansi -O3  -fPIC
-CCFLAGS = -Wall -g -O3
+CCFLAGS = -Wall -g -O3 -fno-stack-protector
 
 SRC_PATH = ../src
 INC_PATH = ../src
@@ -42,6 +42,10 @@ clean :
 .c.o :
 	@echo "Building $@"
 	$(CC) $(CCFLAGS) -o $@ -c $< $(INCLUDE_PATH)
+	
+test_parallel: test_parallel.o
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lpthread
 	
 test_realRat: test_realRat.o
 	@echo "Building $@"

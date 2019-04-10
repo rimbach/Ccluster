@@ -137,20 +137,20 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
     }
     
 // #ifdef CCLUSTER_EXPERIMENTAL
-    if CCLUSTER_V5(meta) {
-        compBox_list_t subBoxes2;
-        compBox_list_init(subBoxes2);
-        
-        while (!compBox_list_is_empty(subBoxes)){
-            btemp = compBox_list_pop(subBoxes);
-            subdBox_quadrisect( subBoxes2, btemp );
-            compBox_clear(btemp);
-            ccluster_free(btemp);
-        }
-        
-        compBox_list_swap(subBoxes, subBoxes2);
-        compBox_list_clear(subBoxes2);
-    }
+//     if CCLUSTER_V5(meta) {
+//         compBox_list_t subBoxes2;
+//         compBox_list_init(subBoxes2);
+//         
+//         while (!compBox_list_is_empty(subBoxes)){
+//             btemp = compBox_list_pop(subBoxes);
+//             subdBox_quadrisect( subBoxes2, btemp );
+//             compBox_clear(btemp);
+//             ccluster_free(btemp);
+//         }
+//         
+//         compBox_list_swap(subBoxes, subBoxes2);
+//         compBox_list_clear(subBoxes2);
+//     }
 // #endif 
 
 #ifdef CCLUSTER_HAVE_PTHREAD

@@ -77,6 +77,14 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
 void * _parallel_bisect_worker( void * arg_ptr );
 void ccluster_parallel_bisect_connCmp_list( connCmp_list_ptr qMainLoop, connCmp_list_ptr discardedCcs,
                                             connCmp_list_ptr toBeBisected, cacheApp_t cache, metadatas_t meta);
+
+/* assume the boxes have already be quadrisected */
+void ccluster_bisect_connCmp_without_quadrisect( connCmp_list_t dest, 
+                                                 connCmp_t cc, 
+                                                 connCmp_list_t discardedCcs, 
+                                                 cacheApp_t cache, 
+                                                 metadatas_t meta, slong nbThreads);
+
 #endif
 
 slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
