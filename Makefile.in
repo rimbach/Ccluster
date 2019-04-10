@@ -119,7 +119,7 @@ install: library
 	fi
 	mkdir -p include
 	cp -r src/* include
-	rm include/*/*.o include/*/*.lo include/*/*.c
+	rm -f include/*/*.o include/*/*.lo include/*/*.c
 	mkdir -p $(DESTDIR)$(PREFIX)/include/ccluster
 	cp -r include/* $(DESTDIR)$(PREFIX)/include/ccluster/
 	rm -r include
