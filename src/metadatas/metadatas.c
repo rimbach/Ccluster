@@ -130,6 +130,9 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     r = fprintf(file, " -------------------Precision-----------------------------------------\n");
     r = fprintf(file, "|%-39s %14d %14s|\n", "boxes with 53:",           metadatas_getNbDouble(meta),    " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "boxes with 106:",           metadatas_getNbOthers(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "boxes with 212:",           metadatas_getNb212(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "boxes with 424:",           metadatas_getNb424(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "boxes with 848:",           metadatas_getNb848(meta),    " " );
 #ifdef CCLUSTER_EXPERIMENTAL    
     if (CCLUSTER_EXP_NUM_T0(meta)||CCLUSTER_EXP_NUM_T1(meta)||CCLUSTER_INC_TEST(meta)) {
     r = fprintf(file, "|%-39s %14f %14s|\n", "time in getDerivative:",              metadatas_get_time_Derivat(meta),    " " );

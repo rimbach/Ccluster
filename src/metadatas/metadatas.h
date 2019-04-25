@@ -164,6 +164,9 @@ METADATAS_INLINE int  metadatas_getNbFailingNewton             ( const metadatas
 METADATAS_INLINE int  metadatas_getNbEval             ( const metadatas_t m ){ return counters_getNbEval             (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbDouble             ( const metadatas_t m ){ return counters_getNbDouble             (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbOthers             ( const metadatas_t m ){ return counters_getNbOthers             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNb212             ( const metadatas_t m ){ return counters_getNb212             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNb424             ( const metadatas_t m ){ return counters_getNb424             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNb848             ( const metadatas_t m ){ return counters_getNb848             (metadatas_countref(m));}
 
 // 
 // /* chronos */

@@ -32,6 +32,9 @@ void counters_by_depth_init( counters_by_depth_t st) {
     st->nbEval                    = 0;
     st->nbDouble                    = 0;
     st->nbOthers                    = 0;
+    st->nb212                    = 0;
+    st->nb424                    = 0;
+    st->nb848                    = 0;
 }
 
 // void counters_by_depth_join( counters_by_depth_t c1, const counters_by_depth_t c2){
@@ -133,6 +136,12 @@ void counters_add_Test     ( counters_t st, int depth, int res, int discard,
         (st->table[depth]).nbDouble                           += 1;
     else if (prec==106)
         (st->table[depth]).nbOthers                           += 1;
+    else if (prec==212)
+        (st->table[depth]).nb212                           += 1;
+    else if (prec==424)
+        (st->table[depth]).nb424                           += 1;
+    else if (prec==848)
+        (st->table[depth]).nb848                           += 1;
         
 }
 
@@ -169,6 +178,9 @@ void counters_count ( counters_t st ) {
        st->total->nbEval                    += (st->table)[i].nbEval           ;
        st->total->nbDouble                    += (st->table)[i].nbDouble           ;
        st->total->nbOthers                   += (st->table)[i].nbOthers           ;
+       st->total->nb212                   += (st->table)[i].nb212           ;
+       st->total->nb424                   += (st->table)[i].nb424           ;
+       st->total->nb848                   += (st->table)[i].nb848           ;
     }
 
 }
@@ -195,6 +207,9 @@ int counters_getNbFailingNewton             ( const counters_t st ){ return st->
 int counters_getNbEval                      ( const counters_t st ){ return st->total->nbEval                    ;}
 int counters_getNbDouble                    ( const counters_t st ){ return st->total->nbDouble                  ;}
 int counters_getNbOthers                    ( const counters_t st ){ return st->total->nbOthers                  ;}
+int counters_getNb212                    ( const counters_t st ){ return st->total->nb212                  ;}
+int counters_getNb424                    ( const counters_t st ){ return st->total->nb424                  ;}
+int counters_getNb848                    ( const counters_t st ){ return st->total->nb848                  ;}
 
 /* DEPRECATED
 void counters_by_depth_get_lenghts_of_str( counters_by_depth_t res, counters_by_depth_t st){

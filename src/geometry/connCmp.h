@@ -167,6 +167,26 @@ GEOMETRY_INLINE int connCmp_isgreater_b ( const connCmp_t cc1, const connCmp_t c
     return (connCmp_nb_boxes(cc1) > connCmp_nb_boxes(cc2));
 }
 
+GEOMETRY_INLINE int connCmp_isless_bs ( const connCmp_t cc1, const connCmp_t cc2 ){
+    return (realRat_cmp( connCmp_widthref(cc1), connCmp_widthref(cc2) ) <= 0);
+}
+
+GEOMETRY_INLINE int connCmp_isgreater_bs ( const connCmp_t cc1, const connCmp_t cc2 ){
+    return (realRat_cmp( connCmp_widthref(cc1), connCmp_widthref(cc2) ) >= 0);
+}
+
+GEOMETRY_INLINE int connCmp_isless_infIm ( const connCmp_t cc1, const connCmp_t cc2 ){
+    return (realRat_cmp( connCmp_infImref(cc1), connCmp_infImref(cc2) ) <= 0);
+}
+
+GEOMETRY_INLINE int connCmp_isgreater_infIm ( const connCmp_t cc1, const connCmp_t cc2 ){
+    return (realRat_cmp( connCmp_infImref(cc1), connCmp_infImref(cc2) ) >= 0);
+}
+
+GEOMETRY_INLINE int connCmp_cmp_infIm ( const connCmp_t cc1, const connCmp_t cc2 ){
+    return realRat_cmp( connCmp_infImref(cc1), connCmp_infImref(cc2) );
+}
+
 void connCmp_componentBox( compBox_t res, const connCmp_t cc, const compBox_t initialBox);
 
 /*Precondition:                                           */

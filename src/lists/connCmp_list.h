@@ -30,6 +30,15 @@ LISTS_INLINE void connCmp_clear_for_list(void * b){
 }
 
 LISTS_INLINE int connCmp_isless_for_list(const void * b1, const void * b2){
+    
+//     int res = connCmp_cmp_infIm ( (connCmp_ptr) b1, (connCmp_ptr) b2 );
+//     
+//     if (res == 0)
+// //         return connCmp_isless_bs( (connCmp_ptr) b1, (connCmp_ptr) b2 );
+//         return connCmp_isless( (connCmp_ptr) b1, (connCmp_ptr) b2 );
+//     else
+//         return res > 0;
+    
     return connCmp_isless( (connCmp_ptr) b1, (connCmp_ptr) b2 );
 }
 

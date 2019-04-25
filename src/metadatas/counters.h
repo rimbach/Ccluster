@@ -54,6 +54,9 @@ typedef struct {
     int nbEval;
     int nbDouble;
     int nbOthers;
+    int nb212;
+    int nb424;
+    int nb848;
 } counters_by_depth;
 
 typedef counters_by_depth counters_by_depth_t[1];
@@ -133,6 +136,9 @@ int counters_getNbFailingNewton             ( const counters_t st );
 int counters_getNbEval                      ( const counters_t st );
 int counters_getNbDouble                    ( const counters_t st );
 int counters_getNbOthers                    ( const counters_t st );
+int counters_getNb212                    ( const counters_t st );
+int counters_getNb424                    ( const counters_t st );
+int counters_getNb848                    ( const counters_t st );
 
 void counters_add_Eval( counters_t st, int nbEvals, int depth );
 
