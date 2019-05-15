@@ -25,8 +25,10 @@ SRC_PATH = ../src
 INC_PATH = ../src
 SRC_DIRS= $(SRC_PATH)
 
-FLINT_INCLUDE_PATH = /usr/local/include/flint
-ARB_INCLUDE_PATH = /usr/local/include
+#FLINT_INCLUDE_PATH = /usr/local/include/flint
+#ARB_INCLUDE_PATH = /usr/local/include
+FLINT_INCLUDE_PATH = /home/imbach/Ccluster/build/include/
+ARB_INCLUDE_PATH = /home/imbach/libs/arb
 
 INCLUDE_PATH = -I$(FLINT_INCLUDE_PATH) -I$(ARB_INCLUDE_PATH) -I$(INC_PATH)
 #LIBRARY_PATH = -L /usr/local/lib -L ..
