@@ -126,6 +126,10 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
     int nbSolsAlreadyFound = 0;
     while ((!connCmp_list_is_empty(qMainLoop))&&(nbSolsAlreadyFound<nbSols)) {
         
+        //         if (metadatas_getVerbo(meta)>0) {
+//             printf("cclusterDAC.c, ccluster_main_loop_DAC, size of queue: %d \n", connCmp_list_get_size(qMainLoop) );
+//         }
+            
         resNewton.nflag = 0;
         
         ccur = connCmp_list_pop(qMainLoop); //pop the CC with smallest boxes

@@ -328,6 +328,10 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
 #endif
     
     while (!connCmp_list_is_empty(qMainLoop)) {
+        
+        //         if (metadatas_getVerbo(meta)>0) {
+//             printf("ccluster.c, ccluster_main_loop, size of queue: %d \n", connCmp_list_get_size(qMainLoop) );
+//         }
 
         resNewton.nflag = 0;
         
@@ -830,6 +834,9 @@ void ccluster_interface_forJulia( connCmp_list_t qResults,
                                   const realRat_t eps, 
                                   int st, 
                                   int verb){
+    
+//     printf("ccluster.c: ccluster_interface_forJulia: begin\n");
+    
     cacheApp_t cache;
     strategies_t strat;
     metadatas_t meta;
@@ -842,6 +849,7 @@ void ccluster_interface_forJulia( connCmp_list_t qResults,
     metadatas_init(meta, initialBox, strat, verb);
     
     ccluster_algo( qResults, initialBox, eps, cache, meta);
+    
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     if (verb>=3) {
@@ -852,6 +860,8 @@ void ccluster_interface_forJulia( connCmp_list_t qResults,
     cacheApp_clear(cache);
     strategies_clear(strat);
     metadatas_clear(meta);
+    
+//     printf("ccluster.c: ccluster_interface_forJulia: end\n");
 }
 
 
