@@ -190,3 +190,7 @@ test_doubCompApp_poly_TS: test_doubCompApp_poly_TS.c
 test_doubCompApp_poly_G: test_doubCompApp_poly_G.c
 	@echo "Building $@"
 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+testSpiralDac: testSpiralDac.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
