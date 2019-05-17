@@ -163,7 +163,7 @@ for DEG in $DEGREES; do
     $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
     if [ $MPSOLVE -eq 1 ]; then
         if [ ! -e $FILENAME_MPSOLVE_U_OUT ]; then
-            if [ $(( $DEG < 300 ? 0 : 1 )) -eq 0 ]; then
+            if [ $(( $DEG < 100 ? 0 : 1 )) -eq 0 ]; then
                 echo "Isolating roots in C with MPSOLVE UNISOLVE........." > /dev/stderr
                 (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_U_OUT) &>> $FILENAME_MPSOLVE_U_OUT
             else
