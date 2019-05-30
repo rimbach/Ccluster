@@ -12,17 +12,17 @@
 # PROJECT=geom
 CC=gcc
 # CCFLAGS = -Wall -ansi -O3  -fPIC
-CCFLAGS = -Wall -g -O3 -fno-stack-protector
+CCFLAGS = -Wall -g -std=c99 -O3 -fno-stack-protector
 
 SRC_PATH = ../src
 INC_PATH = ../src
 SRC_DIRS= $(SRC_PATH)
 
-FLINT_INCLUDE_PATH = /usr/local/include/flint
-ARB_INCLUDE_PATH = /usr/local/include
+FLINT_INCLUDE_PATH = /home/imbach/Ccluster/build/include
+ARB_INCLUDE_PATH = /home/imbach/libs/arb
 
 INCLUDE_PATH = -I$(FLINT_INCLUDE_PATH) -I$(ARB_INCLUDE_PATH) -I$(INC_PATH)
-LIBRARY_PATH = -L/usr/local/lib:..
+LIBRARY_PATH = -L/home/imbach/libs/flint2 -L/home/imbach/libs/arb -L/home/imbach/Ccluster
 LIBRARY_FLAG = -lflint -larb -lccluster
 
 

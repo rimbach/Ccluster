@@ -24,6 +24,15 @@
 // compRat_poly_t p_global;
 slong p_degree;
 
+int checkAccuracy( compApp_poly_t p, slong prec ){
+    for(int i=0; i<=p_degree; i++){
+//         printf("degree: %d, accuracy: %d, prec: %d \n", i, (int) acb_rel_error_bits( compApp_poly_getCoeff(p, i)), (int) prec );
+        if ( -acb_rel_error_bits( compApp_poly_getCoeff(p, i) ) < prec )
+            return 0;
+    }
+    return 1;
+}
+
 void getApprox(compApp_poly_t dest, slong prec){
     
     realRat_t modu;
@@ -61,6 +70,19 @@ void getApprox(compApp_poly_t dest, slong prec){
     compApp_clear(a_argu);
     compApp_clear(coeff);
     compApp_poly_clear(temp);
+}
+
+void getApprox2(compApp_poly_t dest, slong prec){
+    
+    slong prectemp = 2*prec;
+    getApprox( dest, prectemp );
+    
+    while (!checkAccuracy( dest, prec)){
+        prectemp = 2*prectemp;
+        getApprox( dest, prectemp );
+    }
+    
+    acb_poly_set_round( dest, dest, prec);
 }
 
 int main(int argc, char **argv){
@@ -110,7 +132,7 @@ int main(int argc, char **argv){
     clock_t tic = clock();
     
     if (parse==1)
-        ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
+        ccluster_interface_func( getApprox2, bInit, eps, st, verbosity);
     
     double ellapsedBFS = ((double) (clock() - tic))/ CLOCKS_PER_SEC;
     
@@ -129,11 +151,16 @@ int main(int argc, char **argv){
     tic = clock();
     
     ccluster_DAC_first_interface_forJulia( qResults, qAllResults, qMainLoop, discardedCcs,
-                                            getApprox, paquets, bInit, eps, st, verbosity);
+                                            getApprox2, paquets, bInit, eps, 23, verbosity);
+    while (!connCmp_list_is_empty(qResults) )
+        connCmp_list_push(qAllResults, connCmp_list_pop(qResults));
     
-    while (!connCmp_list_is_empty(qMainLoop) )
+    while (!connCmp_list_is_empty(qMainLoop) ) {
         ccluster_DAC_next_interface_forJulia( qResults, qAllResults, qMainLoop, discardedCcs,
-                                            getApprox, paquets, bInit, eps, st, verbosity);
+                                            getApprox2, paquets, bInit, eps, 23, verbosity);
+        while (!connCmp_list_is_empty(qResults) )
+            connCmp_list_push(qAllResults, connCmp_list_pop(qResults));
+    }
         
     double ellapsedDFS = ((double) (clock() - tic))/ CLOCKS_PER_SEC;
     printf("time BFS: %f\n", ellapsedBFS);
