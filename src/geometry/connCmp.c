@@ -494,9 +494,17 @@ void connCmp_set_conjugate                      ( connCmp_t res, const connCmp_t
     connCmp_nSolsref(res) = connCmp_nSolsref(cc);
 }
 
-void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc  ){
+void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc, const compBox_t initBox  ){
     connCmp_set( res, cc);
     compBox_ptr nBox;
+    
+    /* test if initBox is symetric with respect to the real line */
+    int is_sym = realRat_is_zero(compRat_imagref(compBox_centerref(initBox)));
+    realRat_t shift;
+    realRat_init(shift);
+    realRat_set(shift, connCmp_infImref(cc) );
+    realRat_abs(shift, shift);
+    realRat_mul_si(shift,shift,2);
     
     compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (cc) );
     while (it!=compBox_list_end()) {
@@ -504,7 +512,10 @@ void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t
         /* get the conjugate */
         nBox = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
         compBox_init(nBox);
+        
         compBox_set_conjugate(nBox, compBox_list_elmt(it));
+        if (!is_sym)
+            realRat_sub( compRat_imagref(compBox_centerref(nBox)), compRat_imagref(compBox_centerref(nBox)), shift );
 //         printf(" box: "); compBox_print(compBox_list_elmt(it)); printf("\n"); 
 //         printf(" conjugate: "); compBox_print(nBox); printf("\n");
         /* check if the conjugate is in the list */
@@ -526,6 +537,8 @@ void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t
         it = compBox_list_next(it);
         
     }
+    
+    realRat_clear(shift);
 }
 
 /* DEPRECATED

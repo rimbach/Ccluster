@@ -111,6 +111,8 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
     
     /* Real Coeff */
     connCmp_ptr ccurConjClo, ccurConj;
+    ccurConjClo = NULL;
+    ccurConj = NULL;
     int pushConjugFlag = 0;
     
     realRat_set_si(four, 4, 1);
@@ -141,7 +143,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
             if (!connCmp_is_imaginary_positive(ccur)) {
                 ccurConjClo = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
                 connCmp_init( ccurConjClo );
-                connCmp_set_conjugate_closure(ccurConjClo, ccur);
+                connCmp_set_conjugate_closure(ccurConjClo, ccur,metadatas_initBref(meta));
                 
                 connCmp_clear(ccur);
                 ccluster_free(ccur);
@@ -158,6 +160,15 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         
         if (connCmp_isSep(ccur)==0) {
             separationFlag = ccluster_compDsk_is_separated_DAC(fourCCDisk, qMainLoop, qResults, qAllResults, discardedCcs);
+            /* Real Coeff */
+            if ( (separationFlag)&&(metadatas_realCoeffs(meta)) ) {
+                if (connCmp_is_imaginary_positive(ccur)) {
+                    /* check if ccur is separated from its complex conjugate */
+                    realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
+                    separationFlag = separationFlag&&(!compBox_intersection_is_not_empty_compDsk ( componentBox, fourCCDisk));
+                    realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
+                }
+            }
             if (separationFlag)
                 connCmp_isSep(ccur)=1;
         }
@@ -221,16 +232,46 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         
         /* Real Coeff */
         if (metadatas_realCoeffs(meta)){
-            /* test if ccur is imaginary positive */
             if (connCmp_is_imaginary_positive(ccur)) {
-                /* test if the containing disc is strictly imaginary positive */
-                connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
-                compBox_get_containing_dsk(ccDisk, componentBox);
-                if (compDsk_is_imaginary_positive_strict(ccDisk)){
-                    pushConjugFlag = 1;
+                /*compute the complex conjugate*/
+                
+                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
+                connCmp_init( ccurConj );
+                connCmp_set_conjugate(ccurConj, ccur);
+                
+                /* test if initial box is symetric relatively to real axe */
+                if ( !realRat_is_zero(compRat_imagref(compBox_centerref(metadatas_initBref(meta)))) ) {
+                    /* test if the cc intersects initial box */
+                    if ( connCmp_intersection_is_not_empty(ccurConj, metadatas_initBref(meta)) ) {
+                        /* test if the cc is confined */
+                        if (connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
+                            pushConjugFlag = 1;
+                        }
+                        else {
+                            pushConjugFlag = 0;
+                            separationFlag = 0; 
+                          /* delete ccurConj*/
+                            connCmp_clear(ccurConj);
+                            ccluster_free(ccurConj);
+                        }
+                    }
+                    else {
+                        pushConjugFlag = 0;
+                        /* delete ccurConj*/
+                        connCmp_clear(ccurConj);
+                        ccluster_free(ccurConj);
+                    }
                 }
-                else {
-                    separationFlag = 0;
+            }
+            else {
+                /* test if initial box is symetric relatively to real axe */
+                if ( !realRat_is_zero(compRat_imagref(compBox_centerref(metadatas_initBref(meta)))) ) {
+                    /* test if the cc is confined and intersects initial box */
+                    if (! ( connCmp_is_confined(ccur, metadatas_initBref(meta)) 
+                         && connCmp_intersection_is_not_empty(ccur, metadatas_initBref(meta)) ) ){
+//                         /* bisect ccur until this hold */
+                        separationFlag = 0;
+                    }
                 }
             }
         }
@@ -242,9 +283,6 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
 
             if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
-                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
-                connCmp_init( ccurConj );
-                connCmp_set_conjugate(ccurConj, ccur);
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
                 connCmp_list_push(qResults, ccurConj);
                 nbSolsAlreadyFound += connCmp_nSols(ccurConj);
@@ -259,9 +297,6 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
             /* Real Coeff */
             if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
-                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
-                connCmp_init( ccurConj );
-                connCmp_set_conjugate(ccurConj, ccur);
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
                 connCmp_list_push(qResults, ccurConj);
                 nbSolsAlreadyFound += connCmp_nSols(ccurConj);

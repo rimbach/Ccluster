@@ -91,20 +91,59 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta);
 
-void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t discardedCcs, cacheApp_t cache, metadatas_t meta, slong nbThreads);  
+void ccluster_bisect_connCmp( connCmp_list_t dest, 
+                              connCmp_t cc, 
+                              connCmp_list_t discardedCcs, 
+                              cacheApp_t cache, 
+                              metadatas_t meta, 
+                              slong nbThreads);  
 
-void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, connCmp_list_t discardedCcs, cacheApp_t cache, metadatas_t meta);
+void ccluster_prep_loop( connCmp_list_t qMainLoop, 
+                         connCmp_list_t qPrepLoop, 
+                         connCmp_list_t discardedCcs, 
+                         cacheApp_t cache, 
+                         metadatas_t meta);
 
-int  ccluster_compDsk_is_separated( const compDsk_t d, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs );
+int  ccluster_compDsk_is_separated( const compDsk_t d, 
+                                    connCmp_list_t qMainLoop, 
+                                    connCmp_list_t discardedCcs );
 
-void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, const realRat_t eps, cacheApp_t cache, metadatas_t meta);
+void ccluster_main_loop( connCmp_list_t qResults,  
+                         connCmp_list_t qMainLoop, 
+                         connCmp_list_t discardedCcs, 
+                         const realRat_t eps, 
+                         cacheApp_t cache, 
+                         metadatas_t meta);
 
-void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta);
+void ccluster_algo( connCmp_list_t qResults, 
+                    const compBox_t initialBox, 
+                    const realRat_t eps, 
+                    cacheApp_t cache, 
+                    metadatas_t meta);
 
-void connCmp_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta);
-void connCmp_list_print_for_results(FILE * f, const connCmp_list_t c, metadatas_t meta);
+void ccluster_refine( connCmp_list_t qResults, 
+                      connCmp_list_t qMainLoop,
+                      const realRat_t eps, 
+                      cacheApp_t cache, 
+                      metadatas_t meta);
 
-void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_t initialBox, const realRat_t eps, int st, int verb);
+void connCmp_print_for_results(FILE * f, 
+                               const connCmp_t c, 
+                               metadatas_t meta);
+
+void connCmp_list_print_for_results(FILE * f, 
+                                    const connCmp_list_t c, 
+                                    metadatas_t meta);
+
+/* default interface */
+
+void ccluster_interface_func( void(*func)(compApp_poly_t, slong), 
+                              const compBox_t initialBox, 
+                              const realRat_t eps, 
+                              int st, 
+                              int verb);
+
+/* interfaces for Singular */
 
 int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults,
                              const compRat_poly_t poly, 
@@ -127,7 +166,31 @@ int ccluster_interface_poly_real_imag( realRat_t * centerRe, realRat_t * centerI
                                        int st, 
                                        int verb);
 
+/* interfaces for Julia */
+
 void ccluster_interface_forJulia( connCmp_list_t qResults, 
+                                  void(*func)(compApp_poly_t, slong), 
+                                  const compBox_t initialBox, 
+                                  const realRat_t eps, 
+                                  int st, 
+                                  int verb);
+
+void ccluster_interface_forJulia_realRat_poly( connCmp_list_t qResults, 
+                                              const realRat_poly_t poly, 
+                                              const compBox_t initialBox, 
+                                              const realRat_t eps, 
+                                              int st, 
+                                              int verb);
+
+void ccluster_interface_forJulia_compRat_poly( connCmp_list_t qResults, 
+                                              const compRat_poly_t poly,
+                                              const compBox_t initialBox, 
+                                              const realRat_t eps, 
+                                              int st, 
+                                              int verb);
+
+void ccluster_refine_forJulia( connCmp_list_t qResults,
+                               connCmp_list_t qMainLoop,
                                   void(*func)(compApp_poly_t, slong), 
                                   const compBox_t initialBox, 
                                   const realRat_t eps, 

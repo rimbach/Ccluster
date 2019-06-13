@@ -145,6 +145,10 @@ int main() {
     
     printf("\n--------------test Real coeff---------------\n");
     
+    compBox_t binit;
+    compBox_init(binit);
+    compBox_set_si( binit, 0,1,1,1,10,1);
+    
 //     connCmp_t cc1, cc2;
 //     compBox_t bb1, bb2, bb3, bb4;
     compBox_init(bb1);
@@ -196,7 +200,7 @@ int main() {
     
     connCmp_clear_for_tables(cc2);
     connCmp_init(cc2);
-    connCmp_set_conjugate_closure(cc2, cc1);
+    connCmp_set_conjugate_closure(cc2, cc1, binit);
     printf("conjugate closure of cc1: "); connCmp_print(cc2); printf("\n");
     bp = connCmp_compBox_at_index(cc2, 0);
     printf("0-th element of cc2: "); compBox_print(bp); printf("\n");
@@ -212,6 +216,8 @@ int main() {
     printf("5-th element of cc2: "); compBox_print(bp); printf("\n");
     bp = connCmp_compBox_at_index(cc2, 6);
     printf("6-th element of cc2: "); compBox_print(bp); printf("\n");
+    bp = connCmp_compBox_at_index(cc2, 7);
+    printf("7-th element of cc2: "); compBox_print(bp); printf("\n");
     
     compRat_clear(c1);
     realRat_clear(w1);

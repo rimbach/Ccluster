@@ -315,6 +315,8 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
     
     /* Real Coeff */
     connCmp_ptr ccurConjClo, ccurConj;
+    ccurConjClo = NULL;
+    ccurConj = NULL;
     int pushConjugFlag = 0;
     
     realRat_set_si(four, 4, 1);
@@ -341,14 +343,17 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         pushConjugFlag = 0;
         if (metadatas_realCoeffs(meta)){
             /* test if the component contains the real line in its interior */
+//             printf("number of boxes before conjugate closure: %d\n", connCmp_nb_boxes(ccur));
             if (!connCmp_is_imaginary_positive(ccur)) {
+//                 printf("number of boxes before conjugate closure: %d\n", connCmp_nb_boxes(ccur));
                 ccurConjClo = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
                 connCmp_init( ccurConjClo );
-                connCmp_set_conjugate_closure(ccurConjClo, ccur);
+                connCmp_set_conjugate_closure(ccurConjClo, ccur, metadatas_initBref(meta));
                 
                 connCmp_clear(ccur);
                 ccluster_free(ccur);
                 ccur = ccurConjClo;
+//                 printf("number of boxes after  conjugate closure: %d\n", connCmp_nb_boxes(ccur));
             }
         }
         
@@ -360,6 +365,16 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
+        
+        /* Real Coeff */
+        if ( (separationFlag)&&(metadatas_realCoeffs(meta)) ) {
+            if (connCmp_is_imaginary_positive(ccur)) {
+                /* check if ccur is separated from its complex conjugate */
+                realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
+                separationFlag = separationFlag&&(!compBox_intersection_is_not_empty_compDsk ( componentBox, fourCCDisk));
+                realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
+            }
+        }
         
 #ifdef CCLUSTER_HAVE_PTHREAD
         if ((metadatas_useNBThreads(meta) >1)&&(!connCmp_list_is_empty(toBeBisected)))
@@ -431,16 +446,46 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         
         /* Real Coeff */
         if (metadatas_realCoeffs(meta)){
-            /* test if ccur is imaginary positive */
             if (connCmp_is_imaginary_positive(ccur)) {
-                /* test if the containing disc is strictly imaginary positive */
-                connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
-                compBox_get_containing_dsk(ccDisk, componentBox);
-                if (compDsk_is_imaginary_positive_strict(ccDisk)){
-                    pushConjugFlag = 1;
+                /*compute the complex conjugate*/
+                
+                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
+                connCmp_init( ccurConj );
+                connCmp_set_conjugate(ccurConj, ccur);
+                
+                /* test if initial box is symetric relatively to real axe */
+                if ( !realRat_is_zero(compRat_imagref(compBox_centerref(metadatas_initBref(meta)))) ) {
+                    /* test if the cc intersects initial box */
+                    if ( connCmp_intersection_is_not_empty(ccurConj, metadatas_initBref(meta)) ) {
+                        /* test if the cc is confined */
+                        if (connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
+                            pushConjugFlag = 1;
+                        }
+                        else {
+                            pushConjugFlag = 0;
+                            separationFlag = 0; 
+                          /* delete ccurConj*/
+                            connCmp_clear(ccurConj);
+                            ccluster_free(ccurConj);
+                        }
+                    }
+                    else {
+                        pushConjugFlag = 0;
+                        /* delete ccurConj*/
+                        connCmp_clear(ccurConj);
+                        ccluster_free(ccurConj);
+                    }
                 }
-                else {
-                    separationFlag = 0;
+            }
+            else {
+                /* test if initial box is symetric relatively to real axe */
+                if ( !realRat_is_zero(compRat_imagref(compBox_centerref(metadatas_initBref(meta)))) ) {
+                    /* test if the cc is confined and intersects initial box */
+                    if (! ( connCmp_is_confined(ccur, metadatas_initBref(meta)) 
+                         && connCmp_intersection_is_not_empty(ccur, metadatas_initBref(meta)) ) ){
+//                         /* bisect ccur until this hold */
+                        separationFlag = 0;
+                    }
                 }
             }
         }
@@ -452,9 +497,6 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
             /* Real Coeff */
             if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
-                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
-                connCmp_init( ccurConj );
-                connCmp_set_conjugate(ccurConj, ccur);
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
                 connCmp_list_push(qResults, ccurConj);
             }
@@ -466,9 +508,6 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
             /* Real Coeff */
             if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
-                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
-                connCmp_init( ccurConj );
-                connCmp_set_conjugate(ccurConj, ccur);
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
                 connCmp_list_push(qResults, ccurConj);
             }
@@ -656,212 +695,6 @@ void connCmp_list_print_for_results(FILE * f, const connCmp_list_t l, metadatas_
     }
 }
 
-void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_t initialBox, const realRat_t eps, int st, int verb){
 
-    cacheApp_t cache;
-    strategies_t strat;
-    metadatas_t meta;
-    connCmp_list_t qRes;
-    
-    cacheApp_init(cache, func);
-    strategies_init(strat);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
-    metadatas_init(meta, initialBox, strat, verb);
-    connCmp_list_init(qRes);
-    
-    ccluster_algo( qRes, initialBox, eps, cache, meta);
-    metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
-    
-    if (verb>=3) {
-        connCmp_list_print_for_results(stdout, qRes, meta);
-//         connCmp_list_print_for_results(stdout, qRes, 500, 40, meta);
-    }
-    
-    cacheApp_clear(cache);
-    strategies_clear(strat);
-    metadatas_clear(meta);
-    connCmp_list_clear(qRes);
-}
-
-int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults, 
-                             const compRat_poly_t poly, 
-                             const compBox_t initialBox, 
-                             const realRat_t eps, 
-                             int st, 
-                             int verb){
-    
-    cacheApp_t cache;
-    strategies_t strat;
-    metadatas_t meta;
-    connCmp_list_t qRes;
-    
-    cacheApp_init_compRat_poly(cache, poly);
-    strategies_init(strat);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
-    metadatas_init(meta, initialBox, strat, verb);
-    connCmp_list_init(qRes);
-    
-    ccluster_algo( qRes, initialBox, eps, cache, meta);
-    metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
-    
-    if (verb>=3) {
-        connCmp_list_print_for_results(stdout, qRes, meta);
-//         connCmp_list_print_for_results(stdout, qRes, 500, 40, meta);
-    }
-    
-    /* feed the results */
-//     int nbClus = connCmp_list_get_size(qRes);
-    int nbClus = 0;
-    compBox_t containingBox;
-    compBox_init(containingBox);
-    connCmp_list_iterator it = connCmp_list_begin(qRes);
-    while (it!=connCmp_list_end() ) {
-        
-        connCmp_componentBox( containingBox, connCmp_list_elmt(it), metadatas_initBref(meta));
-        realRat_set( centerRe[nbClus], compRat_realref(compBox_centerref(containingBox)) );
-        realRat_set( centerIm[nbClus], compRat_imagref(compBox_centerref(containingBox)) );
-        mults[nbClus] = connCmp_nSols(connCmp_list_elmt(it));
-        
-        it = connCmp_list_next(it);
-        nbClus++;
-    }
-    compBox_clear(containingBox);
-       
-    cacheApp_clear(cache);
-    strategies_clear(strat);
-    metadatas_clear(meta);
-    connCmp_list_clear(qRes);
-    
-    return nbClus;
-}
-
-int ccluster_interface_poly_real( realRat_t * centerRe, realRat_t * centerIm, int * mults,
-                                  const realRat_poly_t poly, 
-                                  const realRat_t initialBox_cr, const realRat_t initialBox_ci, const realRat_t initialBox_wi,
-                                  const realRat_t eps, 
-                                  int st, 
-                                  int verb){
-    
-    /* initial Box */
-    compBox_t initialBox;
-    compBox_init(initialBox);
-    compBox_set_3realRat(initialBox, initialBox_cr, initialBox_ci, initialBox_wi);
-    /* polynomial */
-    compRat_poly_t p;
-    compRat_poly_init(p);
-    compRat_poly_set_realRat_poly(p,poly);
-    
-    /* call */
-    int nbClus = ccluster_interface_poly( centerRe, centerIm, mults, p, initialBox, eps, st, verb);
-    
-    /* clear */
-    compBox_clear(initialBox);
-    compRat_poly_clear(p);
-    
-    return nbClus;
-    
-}
-
-int ccluster_interface_poly_real_imag( realRat_t * centerRe, realRat_t * centerIm, int * mults,
-                                       const realRat_poly_t poly_real, const realRat_poly_t poly_imag, 
-                                       const realRat_t initialBox_cr, const realRat_t initialBox_ci, const realRat_t initialBox_wi,
-                                       const realRat_t eps, 
-                                       int st, 
-                                       int verb){
-    
-    /* initial Box */
-    compBox_t initialBox;
-    compBox_init(initialBox);
-    compBox_set_3realRat(initialBox, initialBox_cr, initialBox_ci, initialBox_wi);
-    /* polynomial */
-    compRat_poly_t p;
-    compRat_poly_init(p);
-    compRat_poly_set2_realRat_poly(p, poly_real, poly_imag);
-    
-    /* call */
-    int nbClus = ccluster_interface_poly( centerRe, centerIm, mults, p, initialBox, eps, st, verb);
-    
-    /* clear */
-    compBox_clear(initialBox);
-    compRat_poly_clear(p);
-    
-    return nbClus;
-    
-}
-
-void ccluster_refine_forJulia( connCmp_list_t qResults,
-                               connCmp_list_t qMainLoop,
-                                  void(*func)(compApp_poly_t, slong), 
-                                  const compBox_t initialBox, 
-                                  const realRat_t eps, 
-                                  int st, 
-                                  int verb){
-    cacheApp_t cache;
-    strategies_t strat;
-    metadatas_t meta;
-    
-    cacheApp_init(cache, func);
-    strategies_init(strat);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
-    
-    metadatas_init(meta, initialBox, strat, verb);
-    
-    ccluster_refine( qResults, qMainLoop, eps, cache, meta);
-    metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
-    if (verb>=3) {
-        connCmp_list_print_for_results(stdout, qResults, meta);
-//         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
-    }
-    
-    cacheApp_clear(cache);
-    strategies_clear(strat);
-    metadatas_clear(meta);
-}
-
-void ccluster_interface_forJulia( connCmp_list_t qResults, 
-                                  void(*func)(compApp_poly_t, slong), 
-                                  const compBox_t initialBox, 
-                                  const realRat_t eps, 
-                                  int st, 
-                                  int verb){
-    
-//     printf("ccluster.c: ccluster_interface_forJulia: begin\n");
-    
-    cacheApp_t cache;
-    strategies_t strat;
-    metadatas_t meta;
-    
-    cacheApp_init(cache, func);
-    strategies_init(strat);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
-    
-    metadatas_init(meta, initialBox, strat, verb);
-    
-    ccluster_algo( qResults, initialBox, eps, cache, meta);
-    
-    metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
-    if (verb>=3) {
-        connCmp_list_print_for_results(stdout, qResults, meta);
-//         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
-    }
-    
-    cacheApp_clear(cache);
-    strategies_clear(strat);
-    metadatas_clear(meta);
-    
-//     printf("ccluster.c: ccluster_interface_forJulia: end\n");
-}
 
 
