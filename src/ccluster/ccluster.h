@@ -182,6 +182,13 @@ void ccluster_interface_forJulia_realRat_poly( connCmp_list_t qResults,
                                               int st, 
                                               int verb);
 
+void ccluster_interface_forJulia_realRat_poly_real_imag( connCmp_list_t qResults, 
+                                                         const realRat_poly_t poly_real, const realRat_poly_t poly_imag, 
+                                                         const compBox_t initialBox, 
+                                                         const realRat_t eps, 
+                                                         int st, 
+                                                         int verb);
+
 void ccluster_interface_forJulia_compRat_poly( connCmp_list_t qResults, 
                                               const compRat_poly_t poly,
                                               const compBox_t initialBox, 

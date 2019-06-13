@@ -206,6 +206,24 @@ void ccluster_interface_forJulia_realRat_poly( connCmp_list_t qResults,
     compRat_poly_clear(p);
 }
 
+void ccluster_interface_forJulia_realRat_poly_real_imag( connCmp_list_t qResults, 
+                                                         const realRat_poly_t poly_real, const realRat_poly_t poly_imag, 
+                                                         const compBox_t initialBox, 
+                                                         const realRat_t eps, 
+                                                         int st, 
+                                                         int verb){
+    /* set the polynomial */
+    compRat_poly_t p;
+    compRat_poly_init(p);
+    compRat_poly_set2_realRat_poly(p, poly_real, poly_imag);
+    
+    /* call */
+    ccluster_interface_forJulia_compRat_poly( qResults, p, initialBox, eps, st, verb);
+    
+    /* clear */
+    compRat_poly_clear(p);
+}
+
 void ccluster_interface_forJulia_compRat_poly( connCmp_list_t qResults, 
                                               const compRat_poly_t poly,
                                               const compBox_t initialBox, 
