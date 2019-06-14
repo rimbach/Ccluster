@@ -26,10 +26,9 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
     
     /* automaticly set realCoeffs */
-//     printf("cacheApp_is_real(cache): %d\n", cacheApp_is_real(cache));
-    if (cacheApp_is_real(cache)==0)
+    if (cacheApp_is_real(cache)==0
+        || compBox_contains_real_line_in_interior(initialBox)==0 )
         strategies_set_realCoeffs(strat, 0);
-//     printf("strategies_realCoeffs(strat): %d\n", strategies_realCoeffs(strat));
     
     metadatas_init(meta, initialBox, strat, verb);
     connCmp_list_init(qRes);
@@ -67,6 +66,7 @@ int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * m
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
+     
     metadatas_init(meta, initialBox, strat, verb);
     connCmp_list_init(qRes);
     
@@ -177,11 +177,10 @@ void ccluster_interface_forJulia ( connCmp_list_t qResults,
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
     
-        /* automaticly set realCoeffs */
-//     printf("cacheApp_is_real(cache): %d\n", cacheApp_is_real(cache));
-    if (cacheApp_is_real(cache)==0)
+    /* automaticly set realCoeffs */
+    if (cacheApp_is_real(cache)==0
+        || compBox_contains_real_line_in_interior(initialBox)==0 )
         strategies_set_realCoeffs(strat, 0);
-//     printf("strategies_realCoeffs(strat): %d\n", strategies_realCoeffs(strat));
     
     metadatas_init(meta, initialBox, strat, verb);
     
@@ -253,6 +252,11 @@ void ccluster_interface_forJulia_compRat_poly( connCmp_list_t qResults,
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    
+    /* automaticly set realCoeffs */
+    if (cacheApp_is_real(cache)==0
+        || compBox_contains_real_line_in_interior(initialBox)==0 )
+        strategies_set_realCoeffs(strat, 0);
     
     metadatas_init(meta, initialBox, strat, verb);
     

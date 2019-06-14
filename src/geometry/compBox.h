@@ -153,6 +153,8 @@ GEOMETRY_INLINE int compBox_cmp( const compBox_t x, const compBox_t y ) {
     return compRat_cmp( compBox_centerref(x), compBox_centerref(y) );
 }
 
+int compBox_contains_real_line_in_interior(const compBox_t d);
+
 /* ordering */
 /* Precondition:  b1 and b2 have same width                                                   */
 /* Specification: returns 1 if b1<b2,                                                         */

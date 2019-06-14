@@ -36,6 +36,28 @@ slong compBox_getDepth(const compBox_t b, const compBox_t initialBox) {
     return res;
 }
 
+int compBox_contains_real_line_in_interior(const compBox_t d){
+    
+    realRat_t halfwidth, infIm, supIm;
+    realRat_init(halfwidth);
+    realRat_init(infIm);
+    realRat_init(supIm);
+    
+    realRat_set_si(halfwidth, 1,2);
+    realRat_mul(halfwidth, halfwidth, compBox_bwidthref(d));
+    realRat_add(supIm, compRat_imagref(compBox_centerref(d)), halfwidth );
+    realRat_sub(infIm, compRat_imagref(compBox_centerref(d)), halfwidth );
+    
+    int res = (realRat_sgn(infIm) < 0) && (realRat_sgn(supIm) > 0);
+    
+    realRat_clear(halfwidth);
+    realRat_clear(infIm);
+    realRat_clear(supIm);
+    
+    return res;
+    
+}
+
 /* Precondition:  b1 and b2 have disjoint centers and same width                               */
 /* Specification: returns 1 if b1 and b2 are connected (8 adjacency),                          */
 /*                        0 otherwise                                                          */

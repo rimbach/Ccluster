@@ -59,6 +59,7 @@ NUMBERS_INLINE void realRat_canonicalise(realRat_t dest)    { fmpq_canonicalise(
 NUMBERS_INLINE int  realRat_is_zero(const realRat_t x) { return fmpq_is_zero(x); }
 /* returns negative if x<y, 0 if x==y, positive if x>y */
 NUMBERS_INLINE int  realRat_cmp    (const realRat_t x, const realRat_t y) { return fmpq_cmp(x,y); }
+NUMBERS_INLINE int  realRat_sgn    (const realRat_t x) { return fmpq_sgn(x); }
 
 /* sets x to the min of x, y */
 NUMBERS_INLINE void realRat_min_2_realRat(realRat_t x, const realRat_t y) {
