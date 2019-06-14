@@ -234,7 +234,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         if (metadatas_realCoeffs(meta)){
             if (connCmp_is_imaginary_positive(ccur)) {
                 /*compute the complex conjugate*/
-                
+                pushConjugFlag = 1;
                 ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
                 connCmp_init( ccurConj );
                 connCmp_set_conjugate(ccurConj, ccur);

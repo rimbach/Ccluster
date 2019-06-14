@@ -445,10 +445,13 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
         }
         
         /* Real Coeff */
-        if (metadatas_realCoeffs(meta)){
+        if (metadatas_realCoeffs(meta)
+            && ( (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag)
+               ||( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) ) ) {
+            
             if (connCmp_is_imaginary_positive(ccur)) {
+                pushConjugFlag = 1;
                 /*compute the complex conjugate*/
-                
                 ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
                 connCmp_init( ccurConj );
                 connCmp_set_conjugate(ccurConj, ccur);
@@ -458,10 +461,11 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
                     /* test if the cc intersects initial box */
                     if ( connCmp_intersection_is_not_empty(ccurConj, metadatas_initBref(meta)) ) {
                         /* test if the cc is confined */
-                        if (connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
-                            pushConjugFlag = 1;
-                        }
-                        else {
+//                         if (connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
+//                             pushConjugFlag = 1;
+//                         }
+//                         else {
+                        if (!connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
                             pushConjugFlag = 0;
                             separationFlag = 0; 
                           /* delete ccurConj*/
@@ -475,7 +479,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
                         connCmp_clear(ccurConj);
                         ccluster_free(ccurConj);
                     }
-                }
+                } 
             }
             else {
                 /* test if initial box is symetric relatively to real axe */
@@ -505,6 +509,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
+//             printf("metadatas_realCoeffs(meta): %d, pushConjugFlag: %d\n", metadatas_realCoeffs(meta), pushConjugFlag);
             /* Real Coeff */
             if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/

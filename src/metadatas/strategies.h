@@ -62,6 +62,7 @@ METADATAS_INLINE int strategies_useAnticipate     ( const strategies_t strat ) {
 METADATAS_INLINE int strategies_useNBThreads      ( const strategies_t strat ) { return strat->_useNBThreads      ; }
 
 METADATAS_INLINE int strategies_realCoeffs        ( const strategies_t strat ) { return strat->_realCoeffs      ; }
+METADATAS_INLINE void strategies_set_realCoeffs   ( strategies_t strat, int flag ) { strat->_realCoeffs=flag      ; }
 
 #ifdef __cplusplus
 }

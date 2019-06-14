@@ -63,6 +63,10 @@ POLYNOMIALS_INLINE void compApp_poly_set2_fmpq_poly(compApp_poly_t poly, const f
     acb_poly_set2_fmpq_poly(poly, re, im, prec);
 }
 
+/* Comparisons */
+POLYNOMIALS_INLINE int compApp_poly_is_real( const compApp_poly_t poly ) {
+    return acb_poly_is_real(poly);
+}
 /* Arithmetic */
 POLYNOMIALS_INLINE void compApp_poly_mul( compApp_poly_t res, const compApp_poly_t poly1, const compApp_poly_t poly2, slong prec) {
     acb_poly_mul (res, poly1, poly2, prec);
