@@ -26,12 +26,8 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
     
     /* automaticly set realCoeffs */
-    compApp_poly_t poly;
-    compApp_poly_init(poly);
-    int isReal = compApp_poly_is_real(poly);
-    if (isReal==0)
+    if (cacheApp_is_real(cache)==0)
         strategies_set_realCoeffs(strat, 0);
-    compApp_poly_clear(poly);
     
     metadatas_init(meta, initialBox, strat, verb);
     connCmp_list_init(qRes);

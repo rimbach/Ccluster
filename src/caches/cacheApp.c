@@ -173,6 +173,12 @@ slong cacheApp_getDegree ( cacheApp_t cache ){
     return compApp_poly_degree((cache->_cache)[0]);
 }
 
+int cacheApp_is_real ( cacheApp_t cache ){
+    if (cache->_size == 0)
+        cacheApp_getApproximation (cache, CCLUSTER_DEFAULT_PREC);
+    return compApp_poly_is_real((cache->_cache)[0]);
+}
+
 void cacheApp_clear ( cacheApp_t cache ) {
 
 #ifdef CCLUSTER_EXPERIMENTAL    

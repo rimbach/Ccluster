@@ -80,6 +80,7 @@ void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly);
 
 compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec );
 slong cacheApp_getDegree ( cacheApp_t cache );
+int cacheApp_is_real ( cacheApp_t cache );
 
 #ifdef CCLUSTER_EXPERIMENTAL
 compApp_poly_ptr cacheApp_getDerivative ( cacheApp_t cache, slong prec, slong order );
