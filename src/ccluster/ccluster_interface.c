@@ -292,6 +292,9 @@ void ccluster_refine_forJulia( connCmp_list_t qResults,
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
     
+    /* automaticly set realCoeffs: realCoeffs not implemented for refine */
+    strategies_set_realCoeffs(strat, 0);
+    
     metadatas_init(meta, initialBox, strat, verb);
     
     ccluster_refine( qResults, qMainLoop, eps, cache, meta);
