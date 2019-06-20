@@ -127,6 +127,11 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     if (metadatas_useAnticipate(meta)){
     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Anticipate:",                 metadatas_get_time_Anticip(meta),    " " );
     }
+    if (metadatas_powerSums(meta)){
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of Ps counting tests:",  metadatas_getNbPsCountingTest(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Evaluation:",                 metadatas_get_time_Evaluat(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of evaluations:",        metadatas_getNbEval(meta),    " " );
+    }
     r = fprintf(file, " -------------------Precision-----------------------------------------\n");
     r = fprintf(file, "|%-39s %14d %14s|\n", "boxes with 53:",           metadatas_getNbDouble(meta),    " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "boxes with 106:",           metadatas_getNbOthers(meta),    " " );
@@ -148,7 +153,7 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     r = fprintf(file, " -------------------Stats:    ----------------------------------------\n");
     if (metadatas_getVerbo(meta)>=2) {
     r = fprintf(file, "|%-39s %14d %14s|\n", "tree depth:",                         metadatas_getDepth(meta),            " " );
-    r = fprintf(file, "|%-39s %14d %14s|\n", "tree size:",                          metadatas_getNbT0Tests(meta),        " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "tree size:",                          metadatas_getNbExplored(meta),       " " );
     }
     r = fprintf(file, "|%-39s %14f %14s|\n", "total time:",                         metadatas_get_time_CclusAl(meta),    " " );
     r = fprintf(file, " ---------------------------------------------------------------------\n");

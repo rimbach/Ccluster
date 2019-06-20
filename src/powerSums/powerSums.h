@@ -17,6 +17,9 @@
 #include "numbers/realApp.h"
 #include "numbers/app_rat.h"
 #include "caches/cacheApp.h"
+#include "metadatas/metadatas.h"
+
+#include "acb_poly.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +57,8 @@ void powerSums_computeS0_prec(     compApp_t s0,
                                    const realRat_t radius,
                                    cacheApp_t cache,
                                    slong nbPoints,
-                                   slong prec );
+                                   slong prec,
+                                   metadatas_t meta, int depth);
 
 typedef struct {
     int nbOfSol;   /* the number of solutions: -1: can not decide, >=0 otherwise */
@@ -64,8 +68,15 @@ typedef struct {
 powerSums_res powerSums_countingTest( const compRat_t center,
                                       const realRat_t radius,
                                       cacheApp_t cache,
-                                      const realRat_t isoRatio,
-                                      slong prec );
+                                      slong nbPoints,
+                                      slong prec,
+                                      metadatas_t meta, int depth);
+
+powerSums_res powerSums_countingTest_with_isoRatio( const compRat_t center,
+                                                    const realRat_t radius,
+                                                    cacheApp_t cache,
+                                                    const realRat_t isoRatio,
+                                                    slong prec );
 
 #ifdef __cplusplus
 }

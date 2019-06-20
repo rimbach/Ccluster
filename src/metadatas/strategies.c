@@ -94,6 +94,14 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_usePredictPrec        = 1;
         strat->_useAnticipate         = 1;
         strat->_realCoeffs            = 1;
+        return;
+    }
+    if (strcmp( stratName, STRAT_STR_V6 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_realCoeffs            = 1;
         strat->_powerSums             = 1;
         return;
     }

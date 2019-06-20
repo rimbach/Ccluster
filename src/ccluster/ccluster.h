@@ -26,6 +26,7 @@
 #include "lists/connCmp_list.h"
 #include "tstar/tstar.h"
 #include "newton/newton.h"
+#include "powerSums/powerSums.h"
 
 
 

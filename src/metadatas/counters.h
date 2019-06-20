@@ -30,9 +30,10 @@ extern "C" {
 #endif
 
 typedef struct {
-    int nbDiscarded;
-    int nbValidated;
+    int nbDiscarded; /*nb of boxes discarded*/
+    int nbValidated; /*nb of clusters validated*/
     int nbSolutions;
+    int nbExplored; /*nb of boxes explores*/
     /* T0Tests */
     int nbT0Tests;
     int nbFailingT0Tests;
@@ -52,6 +53,7 @@ typedef struct {
     int nbFailingNewton;
     /* Temp */
     int nbEval;
+    int nbPsCountingTest;
     int nbDouble;
     int nbOthers;
     int nb212;
@@ -103,6 +105,7 @@ METADATAS_INLINE void counters_unlock(counters_t t){
 
 void counters_add_discarded( counters_t st, int depth );
 void counters_add_validated( counters_t st, int depth, int nbSols );
+void counters_add_explored ( counters_t st, int depth );
 void counters_add_Test     ( counters_t st, int depth, int res, int discard, 
                              int nbTaylors, int nbTaylorsRepeted, 
                              int nbGraeffe, int nbGraeffeRepeted,
@@ -118,6 +121,7 @@ int counters_getDepth( const counters_t st);
 
 int counters_getNbDiscarded                 ( const counters_t st );
 int counters_getNbValidated                 ( const counters_t st );
+int counters_getNbExplored                  ( const counters_t st );
 int counters_getNbSolutions                 ( const counters_t st );
 int counters_getNbT0Tests                   ( const counters_t st );
 int counters_getNbFailingT0Tests            ( const counters_t st );
@@ -134,6 +138,7 @@ int counters_getNbTaylorsRepetedInTSTests   ( const counters_t st );
 int counters_getNbNewton                    ( const counters_t st );
 int counters_getNbFailingNewton             ( const counters_t st );
 int counters_getNbEval                      ( const counters_t st );
+int counters_getNbPsCountingTest            ( const counters_t st );
 int counters_getNbDouble                    ( const counters_t st );
 int counters_getNbOthers                    ( const counters_t st );
 int counters_getNb212                    ( const counters_t st );
@@ -141,6 +146,7 @@ int counters_getNb424                    ( const counters_t st );
 int counters_getNb848                    ( const counters_t st );
 
 void counters_add_Eval( counters_t st, int nbEvals, int depth );
+void counters_add_PsCountingTest( counters_t st, int depth );
 
 #ifdef __cplusplus
 }

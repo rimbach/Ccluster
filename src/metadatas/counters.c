@@ -15,6 +15,7 @@ void counters_by_depth_init( counters_by_depth_t st) {
     st->nbDiscarded               = 0;
     st->nbValidated               = 0;
     st->nbSolutions               = 0;
+    st->nbExplored                = 0;
     st->nbT0Tests                 = 0;
     st->nbFailingT0Tests          = 0;
     st->nbGraeffeInT0Tests        = 0;
@@ -30,6 +31,7 @@ void counters_by_depth_init( counters_by_depth_t st) {
     st->nbNewton                  = 0;
     st->nbFailingNewton           = 0;
     st->nbEval                    = 0;
+    st->nbPsCountingTest          = 0;
     st->nbDouble                    = 0;
     st->nbOthers                    = 0;
     st->nb212                    = 0;
@@ -110,6 +112,11 @@ void counters_add_validated( counters_t st, int depth, int nbSols ){
     (st->table[depth]).nbSolutions +=nbSols;
 }
 
+void counters_add_explored ( counters_t st, int depth ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbExplored +=1;
+}
+
 void counters_add_Test     ( counters_t st, int depth, int res, int discard, 
                              int nbTaylors, int nbTaylorsRepeted, 
                              int nbGraeffe, int nbGraeffeRepeted,
@@ -153,7 +160,12 @@ void counters_add_Newton   ( counters_t st, int depth, int res ){
 
 void counters_add_Eval( counters_t st, int nbEvals, int depth ){
     counters_adjust_table(st, depth);
-    (st->table[depth]).nbEval                  +=1;
+    (st->table[depth]).nbEval                  +=nbEvals;
+}
+
+void counters_add_PsCountingTest( counters_t st, int depth ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbPsCountingTest                  +=1;
 }
 
 void counters_count ( counters_t st ) {
@@ -161,6 +173,7 @@ void counters_count ( counters_t st ) {
        st->total->nbDiscarded               += (st->table)[i].nbDiscarded               ; 
        st->total->nbValidated               += (st->table)[i].nbValidated               ; 
        st->total->nbSolutions               += (st->table)[i].nbSolutions               ;
+       st->total->nbExplored                += (st->table)[i].nbExplored                ;
        st->total->nbT0Tests                 += (st->table)[i].nbT0Tests                 ; 
        st->total->nbFailingT0Tests          += (st->table)[i].nbFailingT0Tests          ; 
        st->total->nbGraeffeInT0Tests        += (st->table)[i].nbGraeffeInT0Tests        ; 
@@ -176,6 +189,7 @@ void counters_count ( counters_t st ) {
        st->total->nbNewton                  += (st->table)[i].nbNewton                  ; 
        st->total->nbFailingNewton           += (st->table)[i].nbFailingNewton           ; 
        st->total->nbEval                    += (st->table)[i].nbEval           ;
+       st->total->nbPsCountingTest          += (st->table)[i].nbPsCountingTest           ;
        st->total->nbDouble                    += (st->table)[i].nbDouble           ;
        st->total->nbOthers                   += (st->table)[i].nbOthers           ;
        st->total->nb212                   += (st->table)[i].nb212           ;
@@ -190,6 +204,7 @@ int counters_getDepth( const counters_t st) { return st->size;}
 int counters_getNbDiscarded                 ( const counters_t st ){ return st->total->nbDiscarded               ;}
 int counters_getNbValidated                 ( const counters_t st ){ return st->total->nbValidated               ;}
 int counters_getNbSolutions                 ( const counters_t st ){ return st->total->nbSolutions               ;}
+int counters_getNbExplored                  ( const counters_t st ){ return st->total->nbExplored                ;}
 int counters_getNbT0Tests                   ( const counters_t st ){ return st->total->nbT0Tests                 ;}
 int counters_getNbFailingT0Tests            ( const counters_t st ){ return st->total->nbFailingT0Tests          ;}
 int counters_getNbGraeffeInT0Tests          ( const counters_t st ){ return st->total->nbGraeffeInT0Tests        ;}
@@ -205,6 +220,7 @@ int counters_getNbTaylorsRepetedInTSTests   ( const counters_t st ){ return st->
 int counters_getNbNewton                    ( const counters_t st ){ return st->total->nbNewton                  ;}
 int counters_getNbFailingNewton             ( const counters_t st ){ return st->total->nbFailingNewton           ;}
 int counters_getNbEval                      ( const counters_t st ){ return st->total->nbEval                    ;}
+int counters_getNbPsCountingTest            ( const counters_t st ){ return st->total->nbPsCountingTest                    ;}
 int counters_getNbDouble                    ( const counters_t st ){ return st->total->nbDouble                  ;}
 int counters_getNbOthers                    ( const counters_t st ){ return st->total->nbOthers                  ;}
 int counters_getNb212                    ( const counters_t st ){ return st->total->nb212                  ;}

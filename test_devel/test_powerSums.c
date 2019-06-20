@@ -214,7 +214,7 @@ int main() {
     realRat_set_si(isoRatio, 2, 1);
     compRat_set_sisi(center, 0,1,1,1);
     realRat_set_si(radius, 1,1);
-    powerSums_res res = powerSums_countingTest(center, radius, cache, isoRatio, prec );
+    powerSums_res res = powerSums_countingTest_with_isoRatio(center, radius, cache, isoRatio, prec );
     printf("--- test for disk centered in "); compRat_print( center);
     printf(" with radius "); realRat_print( radius );
     printf(" isolation ratio "); realRat_print( isoRatio ); printf(":\n");
@@ -223,7 +223,7 @@ int main() {
     realRat_set_si(isoRatio, 5, 4);
     compRat_set_sisi(center, 0,1,0,1);
     realRat_set_si(radius, 18,1);
-    res = powerSums_countingTest(center, radius, cache, isoRatio, prec );
+    res = powerSums_countingTest_with_isoRatio(center, radius, cache, isoRatio, prec );
     printf("--- test for disk centered in "); compRat_print( center);
     printf(" with radius "); realRat_print( radius );
     printf(" isolation ratio "); realRat_print( isoRatio ); printf(":\n");
@@ -232,7 +232,7 @@ int main() {
     realRat_set_si(isoRatio, 2, 1);
     compRat_set_str(center, "-2437278117108061801009625","302231454903657293676544","303638123570424451456025","151115727451828646838272",10);
     realRat_set_str(radius, "525","604462909807314587353088",10);
-    res = powerSums_countingTest(center, radius, cache, isoRatio, prec );
+    res = powerSums_countingTest_with_isoRatio(center, radius, cache, isoRatio, prec );
     printf("--- test for disk centered in "); compRat_print( center);
     printf(" with radius "); realRat_print( radius );
     printf(" isolation ratio "); realRat_print( isoRatio ); printf(":\n");
