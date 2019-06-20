@@ -5,7 +5,7 @@ degree=64
 bitsize=14
 box=0,1,0,1,20,1 		# (x,y), width
 epsilon=1,200			# 1/100
-strategy=55
+strategy=default
 verbosity=2
 
 #==================================================
@@ -13,7 +13,7 @@ verbosity=2
 #==================================================
 
 testMignotte1 tM1:
-	./mignotte${EXEEXT} 64 14 0,1,0,1,20,1 1,2000 55 2 
+	./mignotte${EXEEXT} 64 14 0,1,0,1,20,1 1,2000 default 2 
 
 testMignotte tM:
 	./mignotte${EXEEXT} \
@@ -40,7 +40,7 @@ testBernoulli tB:
 		${verbosity} \
 
 testBernoulli1 tB1:
-	./bernoulli${EXEEXT} 64 0,1,0,1,20,1  1,2000 55 2 
+	./bernoulli${EXEEXT} 64 0,1,0,1,20,1  1,2000 default 2 
 
 testWilkinson tW:
 	./wilkinson${EXEEXT} \
@@ -51,4 +51,4 @@ testWilkinson tW:
 		${verbosity} \
 
 testWilkinson1 tW1:
-	./wilkinson${EXEEXT} 64 0,1,0,1,20,1  1,2000 55 2 
+	./wilkinson${EXEEXT} 64 0,1,0,1,20,1  1,2000 default 2 

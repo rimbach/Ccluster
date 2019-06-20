@@ -45,4 +45,58 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
     strat->_useNBThreads          = strat2->_useNBThreads      ;
     strat->_additionalFlags       = strat2->_additionalFlags   ;
     strat->_realCoeffs            = strat2->_realCoeffs   ;
+    strat->_powerSums             = strat2->_powerSums   ;
+}
+
+void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
+    
+    strat->_useNewton             = 0;
+    strat->_useTstarOptim         = 0;
+    strat->_usePredictPrec        = 0;
+    strat->_useStopWhenCompact    = 0;
+    strat->_useAnticipate         = 0;
+    strat->_useNBThreads          = 0;
+    strat->_additionalFlags       = 0;
+    strat->_realCoeffs            = 0;
+    strat->_powerSums             = 0;
+    
+    strat->_useNBThreads          = nbThreads;
+    
+    if (strcmp( stratName, STRAT_STR_DEFAULT ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_realCoeffs            = 1;
+        return;
+    }
+    if (strcmp( stratName, STRAT_STR_V1 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_usePredictPrec        = 1;
+        return;
+    }
+    if (strcmp( stratName, STRAT_STR_V3 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        return;
+    }
+    if (strcmp( stratName, STRAT_STR_V4 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        return;
+    }
+    if (strcmp( stratName, STRAT_STR_V5 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_realCoeffs            = 1;
+        strat->_powerSums             = 1;
+        return;
+    }
+    /* otherwise set strategy to default */
+    strategies_set_str ( strat, STRAT_STR_DEFAULT, nbThreads);
 }

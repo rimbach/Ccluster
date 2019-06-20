@@ -18,7 +18,10 @@
 #define NUMBERS_INLINE static __inline__
 #endif
 
+#include <math.h>
+#include "arf.h"
 #include "arb.h"
+#include "flint/fmpz.h"
 #include "flint/fmpq.h"
 
 #ifdef __cplusplus
@@ -52,6 +55,20 @@ NUMBERS_INLINE int realApp_ge(const realApp_t x, const realApp_t y) { return arb
 NUMBERS_INLINE int  realApp_is_finite(const realApp_t x) { return arb_is_finite( x ); }
 NUMBERS_INLINE void realApp_get_rad_realApp(realApp_t z, const realApp_t x) { arb_get_rad_arb( z, x ); }
 NUMBERS_INLINE void realApp_get_mid_realApp(realApp_t z, const realApp_t x) { arb_get_mid_arb( z, x ); }
+
+NUMBERS_INLINE int  realApp_get_unique_si(slong * z, const realApp_t x) {
+    fmpz_t zf;
+    fmpz_init(zf);
+    int res = arb_get_unique_fmpz( zf, x);
+    res = res && fmpz_fits_si(zf);
+    if (res)
+        *z = fmpz_get_si(zf);
+    fmpz_clear(zf);
+    return res;
+}
+
+/* performed inplace */
+NUMBERS_INLINE void realApp_add_error(realApp_t z, const realApp_t x) { arb_add_error( z, x ); }
 /* interval operations */
 NUMBERS_INLINE int  realApp_intersection(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { 
     return arb_intersection( z, x, y, prec ); 
@@ -59,15 +76,32 @@ NUMBERS_INLINE int  realApp_intersection(realApp_t z, const realApp_t x, const r
 NUMBERS_INLINE int realApp_contains (const realApp_t x, const realApp_t y) {
     return arb_contains(x,y);
 }
+NUMBERS_INLINE int realApp_contains_zero (const realApp_t x) {
+    return arb_contains_zero(x);
+}
 
 /* arithmetic operations */
 NUMBERS_INLINE void realApp_add(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_add(z, x, y, prec); }
+NUMBERS_INLINE void realApp_add_si(realApp_t z, const realApp_t x, slong y, slong prec) { arb_add_si(z, x, y, prec); }
 NUMBERS_INLINE void realApp_sub(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_sub(z, x, y, prec); }
 NUMBERS_INLINE void realApp_mul(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_mul(z, x, y, prec); }
 NUMBERS_INLINE void realApp_neg(realApp_t z, const realApp_t x) { arb_neg(z, x); }
 NUMBERS_INLINE void realApp_div(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_div(z, x, y, prec); }
 NUMBERS_INLINE void realApp_pow_ui(realApp_t y, const realApp_t x, ulong e, slong prec) { arb_pow_ui(y, x, e, prec); }
 NUMBERS_INLINE void realApp_root_ui(realApp_t y, const realApp_t x, ulong e, slong prec) { arb_root_ui(y, x, e, prec); }
+
+/* logarithm */
+NUMBERS_INLINE void realApp_log(realApp_t z, const realApp_t x, slong prec) { arb_log(z, x, prec); }
+/* other */
+NUMBERS_INLINE slong realApp_ceil_si(const realApp_t x, slong prec){
+    slong res;
+    arf_t ubound;
+    arf_init(ubound);
+    arb_get_ubound_arf(ubound, x, prec);
+    res = (slong) ceil(arf_get_d(ubound,  ARF_RND_CEIL));
+    arf_clear(ubound);
+    return res;
+}
 
 /* printing */
 NUMBERS_INLINE void realApp_fprint (FILE * file, const realApp_t x)                           { arb_fprint (file, x               ); }

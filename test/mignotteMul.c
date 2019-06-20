@@ -43,7 +43,7 @@ int main(int argc, char **argv){
     int degree;
     int bitsize;
     int power;
-    int st;
+    char * st;
     int verbosity;
     
     compBox_t bInit;
@@ -57,7 +57,8 @@ int main(int argc, char **argv){
     parse = parse*scan_power( argv[3], &power);
     parse = parse*scan_initialBox( argv[4], bInit );
     parse = parse*scan_epsilon( argv[5], eps );
-    parse = parse*scan_strategy(argv[6], &st );
+//     parse = parse*scan_strategy(argv[6], &st );
+    st = argv[6];
     parse = parse*scan_verbosity(argv[7], &verbosity );
     
     
@@ -70,7 +71,8 @@ int main(int argc, char **argv){
         realRat_poly_pow(pmign, pmign, (ulong) power);
         compRat_poly_set_realRat_poly(p_global,pmign);
     
-        ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
+//         ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
+        ccluster_interface_func( getApprox, bInit, eps, st, 1, verbosity);
     }
     
     realRat_poly_clear(pmign);

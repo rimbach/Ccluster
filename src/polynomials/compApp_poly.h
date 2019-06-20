@@ -98,6 +98,14 @@ POLYNOMIALS_INLINE  void compApp_poly_evaluate2(compApp_t y, compApp_t z, const 
     acb_poly_evaluate2_rectangular(y, z, f, x, prec);
 }
 
+POLYNOMIALS_INLINE  void compApp_poly_evaluate2_rectangular(compApp_t y, compApp_t z, const compApp_poly_t f, const compApp_t x, slong prec){
+    acb_poly_evaluate2_rectangular(y, z, f, x, prec);
+}
+
+POLYNOMIALS_INLINE  void compApp_poly_evaluate2_horner(compApp_t y, compApp_t z, const compApp_poly_t f, const compApp_t x, slong prec){
+    acb_poly_evaluate2_horner(y, z, f, x, prec);
+}
+
 /* derivation */
 POLYNOMIALS_INLINE  void compApp_poly_derivative(compApp_poly_t fp, const compApp_poly_t f, slong prec){
     acb_poly_derivative(fp, f, prec);

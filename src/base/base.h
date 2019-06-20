@@ -23,9 +23,9 @@
 /* flags for experiments */
 #define CCLUSTER_EXP_NUM_T0(A) ( ((&(A)->strat)->_additionalFlags)&(0x1<<0) ) /* strat + 64 */
 #define CCLUSTER_EXP_NUM_T1(A) ( ((&(A)->strat)->_additionalFlags)&(0x1<<1) ) /* strat + 128 */
-#define CCLUSTER_INC_TEST(A) ( ((&(A)->strat)->_additionalFlags)&(0x1<<2) )   /* strat + 256 */
-#define CCLUSTER_V2(A) ( ((&(A)->strat)->_additionalFlags)&(0x1<<3) )         /* strat + 512 */
-#define CCLUSTER_V5(A) ( ((&(A)->strat)->_additionalFlags)&(0x1<<4) )         /* strat + 1024 */
+#define CCLUSTER_INC_TEST(A)   ( ((&(A)->strat)->_additionalFlags)&(0x1<<2) )   /* strat + 256 */
+#define CCLUSTER_V2(A)         ( ((&(A)->strat)->_additionalFlags)&(0x1<<3) )         /* strat + 512 */
+#define CCLUSTER_V5(A)         ( ((&(A)->strat)->_additionalFlags)&(0x1<<4) )         /* strat + 1024 */
 
 #include <stdlib.h> /* for size_t */
 #include "flint/flint.h" /* for memory managment */ 

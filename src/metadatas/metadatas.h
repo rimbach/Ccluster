@@ -43,6 +43,8 @@ typedef struct{
 // #ifdef CCLUSTER_HAVE_PTHREAD
 //     pthread_mutex_t _mutex;
 // #endif
+    /* for power sums */
+    slong      nbEvalPoints;
 } metadatas;
 
 typedef metadatas metadatas_t[1];
@@ -74,6 +76,9 @@ METADATAS_INLINE void metadatas_unlock(metadatas_t m){
 METADATAS_INLINE int  metadatas_getVerbo(const metadatas_t m) { return m->verbo; }
 METADATAS_INLINE int  metadatas_haveToCount(const metadatas_t m) { return (m->verbo > 1); }
 
+METADATAS_INLINE slong  metadatas_getNbEvalPoints(const metadatas_t m) { return m->nbEvalPoints; }
+METADATAS_INLINE void   metadatas_setNbEvalPoints(metadatas_t m, slong nbEvalPoints) { m->nbEvalPoints = nbEvalPoints; }
+
 // /* strategies */
 METADATAS_INLINE int metadatas_useNewton         ( const metadatas_t m ) { return strategies_useNewton         (metadatas_stratref(m)); } 
 METADATAS_INLINE int metadatas_useTstarOptim     ( const metadatas_t m ) { return strategies_useTstarOptim     (metadatas_stratref(m)); }
@@ -83,6 +88,7 @@ METADATAS_INLINE int metadatas_useAnticipate     ( const metadatas_t m ) { retur
 // METADATAS_INLINE int metadatas_useCountSols      ( const metadatas_t m ) { return strategies_useCountSols      (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useNBThreads      ( const metadatas_t m ) { return strategies_useNBThreads      (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_realCoeffs        ( const metadatas_t m ) { return strategies_realCoeffs        (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_powerSums         ( const metadatas_t m ) { return strategies_powerSums         (metadatas_stratref(m)); }
 // /* counters */
 METADATAS_INLINE void metadatas_add_discarded( metadatas_t m, int depth ) { 
 #ifdef CCLUSTER_HAVE_PTHREAD

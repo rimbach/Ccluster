@@ -77,6 +77,7 @@ CACHE_INLINE void cacheApp_unlock(cacheApp_t cache) {
 void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, slong) );
 
 void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly);
+void cacheApp_init_realRat_poly ( cacheApp_t cache, const realRat_poly_t poly);
 
 compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec );
 slong cacheApp_getDegree ( cacheApp_t cache );

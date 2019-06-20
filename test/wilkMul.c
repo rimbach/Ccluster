@@ -45,7 +45,8 @@ int main(int argc, char **argv){
     
     int parse = 1;
     int degree;
-    int st;
+//     int st;
+    char * st;
     int verbosity;
     int nbthreads = 1;
     
@@ -58,16 +59,17 @@ int main(int argc, char **argv){
     parse = parse*scan_degree( argv[1], &degree);
     parse = parse*scan_initialBox( argv[2], bInit );
     parse = parse*scan_epsilon( argv[3], eps );
-    parse = parse*scan_strategy(argv[4], &st );
+//     parse = parse*scan_strategy(argv[4], &st );
+    st = argv[4];
     parse = parse*scan_verbosity(argv[5], &verbosity );
     
     if (argc>=7) {
         parse = parse*scan_nbthreads(argv[6], &nbthreads );
     }
-    nbthreads = (nbthreads<<6);
-    int add_temp = (st>>7)<<17;
-    st = st&((0x1<<7)-1);
-    st = st + nbthreads + add_temp;
+//     nbthreads = (nbthreads<<6);
+//     int add_temp = (st>>7)<<17;
+//     st = st&((0x1<<7)-1);
+//     st = st + nbthreads + add_temp;
     
     realRat_poly_t pwilk, ptemp;
     realRat_poly_init(pwilk);
@@ -93,8 +95,9 @@ int main(int argc, char **argv){
         
         compRat_poly_set_realRat_poly(p_global,pwilk);
         
-        ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
+//         ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
     //     ccluster_interface_func( getApprox, bInit, sepBound, st, 2);
+        ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
     }
     
     realRat_poly_clear(pwilk);
