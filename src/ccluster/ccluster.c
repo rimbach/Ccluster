@@ -129,6 +129,13 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
     compBox_ptr btemp;
     connCmp_ptr ctemp;
     
+    /* RealCoeffs */
+    int cc_contains_real_line = 0;
+    /* Check if cc contains the real line */
+    if ( (metadatas_realCoeffs(meta)) && (!connCmp_is_imaginary_positive(cc)) )
+        cc_contains_real_line = 1;
+    /* end RealCoeffs */
+    
     while (!connCmp_is_empty(cc)) {
         btemp = connCmp_pop(cc);
         subdBox_quadrisect( subBoxes, btemp );
@@ -171,6 +178,16 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
     int specialFlag = 1;
     if (connCmp_list_get_size(ltemp) == 1)
         specialFlag = 0;
+    
+    /* RealCoeffs */
+    if ( (metadatas_realCoeffs(meta)) && (connCmp_list_get_size(ltemp) == 1) && (cc_contains_real_line == 1) ){
+        ctemp = connCmp_list_first(ltemp);
+        /* test if cc has been separated from real case;
+         in which case reset everything*/
+        if ( connCmp_is_imaginary_positive(ctemp) )
+            specialFlag = 1;
+    }
+    /* end RealCoeffs */
     
     slong nprec; 
     if (prec == connCmp_appPrref(cc)) {
