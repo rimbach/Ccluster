@@ -31,8 +31,8 @@ int main(int argc, char **argv){
         printf("initial_box epsilon strategy verbosity\n");
         printf("initial_box: for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
         printf("eps:         for instance1,100 (1/100) or -53 (1/2^(-53))\n");  
-        printf("strategy:    7: newton iterations, prediction of precision, optimized counting and discarding tests\n");
-        printf("             15: same as 7 + eps is used only as an escape bound\n");
+        printf("strategy:    default for default strategy\n");
+        printf("             test for testing mode\n");
         printf("verbosity:   0: nothing\n");
         printf("             1: abstract of input and output\n");
         printf("             2: detailed reports concerning algorithm\n");

@@ -35,9 +35,9 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
 //     compBox_list_init(ltempDetermined);
     /* End For test */
     
-    /* for powerSums */
-    powerSums_res resp;
-    resp.appPrec = CCLUSTER_DEFAULT_PREC;
+//     /* for powerSums */
+//     powerSums_res resp;
+//     resp.appPrec = CCLUSTER_DEFAULT_PREC;
     
     while (!compBox_list_is_empty(boxes)){
         
@@ -54,7 +54,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
         }
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
         
-        if ( metadatas_powerSums(meta) ){
+/*        if ( metadatas_forTests(meta) ){
 //             printf("--- power sums counting test: \n");
 //             printf("------ test for disk centered in "); compRat_print(compDsk_centerref(bdisk)); printf("\n");
 //             printf("------ with radius "); realRat_print( compDsk_radiusref(bdisk) ); printf("\n");
@@ -72,7 +72,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
             else
                 res.nbOfSol = -1;
         }
-        else    
+        else*/    
             res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);  
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
@@ -137,8 +137,6 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
     compBox_list_clear(ltemp);
     compDsk_clear(bdisk);
     
-//     if (metadatas_powerSums(meta))
-//         metadatas_setAppPrec(meta, resp.appPrec);
     /* For test */
 //     compBox_list_clear(ltempDetermined);
     /* End For test */

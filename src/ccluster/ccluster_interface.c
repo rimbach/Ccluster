@@ -40,19 +40,19 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
     
     metadatas_init(meta, initialBox, strat, verb);
     
-    /* initialize power sums */
-    if ( metadatas_powerSums(meta) ) {
-        realRat_t isoRatio, wantedPrec;
-        realRat_init(isoRatio);
-        realRat_init(wantedPrec);
-        realRat_set_si(isoRatio, 2, 1);
-        realRat_set_si(wantedPrec, 1, 4);
-        slong nbP = powerSums_getNbOfPointsForCounting( wantedPrec, cacheApp_getDegree(cache), isoRatio );
-        metadatas_setNbEvalPoints(meta, nbP);
-        printf("nb points for eval: %d\n", (int) metadatas_getNbEvalPoints(meta) );
-        realRat_clear(isoRatio);
-        realRat_clear(wantedPrec);
-    }
+//     /* initialize power sums */
+//     if ( metadatas_forTests(meta) ) {
+//         realRat_t isoRatio, wantedPrec;
+//         realRat_init(isoRatio);
+//         realRat_init(wantedPrec);
+//         realRat_set_si(isoRatio, 2, 1);
+//         realRat_set_si(wantedPrec, 1, 4);
+//         slong nbP = powerSums_getNbOfPointsForCounting( wantedPrec, cacheApp_getDegree(cache), isoRatio );
+//         metadatas_setNbEvalPoints(meta, nbP);
+//         printf("nb points for eval: %d\n", (int) metadatas_getNbEvalPoints(meta) );
+//         realRat_clear(isoRatio);
+//         realRat_clear(wantedPrec);
+//     }
     
     connCmp_list_init(qRes);
     

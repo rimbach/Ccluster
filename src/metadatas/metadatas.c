@@ -127,11 +127,11 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     if (metadatas_useAnticipate(meta)){
     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Anticipate:",                 metadatas_get_time_Anticip(meta),    " " );
     }
-    if (metadatas_powerSums(meta)){
-    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of Ps counting tests:",  metadatas_getNbPsCountingTest(meta),    " " );
-    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Evaluation:",                 metadatas_get_time_Evaluat(meta),    " " );
-    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of evaluations:",        metadatas_getNbEval(meta),    " " );
-    }
+//     if (metadatas_forTests(meta)){
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of Ps counting tests:",  metadatas_getNbPsCountingTest(meta),    " " );
+//     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Evaluation:",                 metadatas_get_time_Evaluat(meta),    " " );
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of evaluations:",        metadatas_getNbEval(meta),    " " );
+//     }
     r = fprintf(file, " -------------------Precision-----------------------------------------\n");
     r = metadatas_boxes_by_prec_fprint ( file, meta );
     
