@@ -35,10 +35,6 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
 //     compBox_list_init(ltempDetermined);
     /* End For test */
     
-//     /* for powerSums */
-//     powerSums_res resp;
-//     resp.appPrec = CCLUSTER_DEFAULT_PREC;
-    
     while (!compBox_list_is_empty(boxes)){
         
         btemp = compBox_list_pop(boxes);
@@ -53,26 +49,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
             continue;
         }
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
-        
-/*        if ( metadatas_forTests(meta) ){
-//             printf("--- power sums counting test: \n");
-//             printf("------ test for disk centered in "); compRat_print(compDsk_centerref(bdisk)); printf("\n");
-//             printf("------ with radius "); realRat_print( compDsk_radiusref(bdisk) ); printf("\n");
-            resp = powerSums_countingTest( compDsk_centerref(bdisk), compDsk_radiusref(bdisk),
-                                                        cache,
-                                                        metadatas_getNbEvalPoints(meta),
-                                                        resp.appPrec, meta, depth );
-//             printf("--- power sums counting test: nbSols: %d, prec: %d \n", (int) resp.nbOfSol, (int) resp.appPrec );
-            metadatas_add_PsCountingTest (meta, depth);
-            if (resp.nbOfSol==0) {
-                res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta); 
-//                 if (resp.nbOfSol==-1)
-//                     printf("------ tstar result: %d\n", (int) res.nbOfSol );
-            }
-            else
-                res.nbOfSol = -1;
-        }
-        else*/    
+           
             res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);  
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
@@ -185,8 +162,6 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
 //         compBox_list_clear(subBoxes2);
 //     }
 // #endif 
-//     if (metadatas_powerSums(meta))
-//         metadatas_setAppPrec(meta, CCLUSTER_DEFAULT_PREC);
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (nbThreads>1) {
 //         printf("--ccluster_parallel_bisect_connCmp: nb threads: %d \n", (int) nbThreads );
