@@ -88,11 +88,11 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     if (metadatas_usePredictPrec(meta)) len += sprintf( temp + len, " predPrec");
     if (metadatas_useStopWhenCompact(meta)) len += sprintf( temp + len, " stopWhenCompact");
     if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
+    if (metadatas_realCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
+    if (metadatas_forTests(meta)) len += sprintf( temp + len, " test");
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));
 #endif
-    if (metadatas_realCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
-    if (metadatas_forTests(meta)) len += sprintf( temp + len, " test");
     if (metadatas_stratref(meta)->_additionalFlags !=0) 
         len += sprintf(temp +len, " %d", metadatas_stratref(meta)->_additionalFlags);
     r = fprintf(file, "|strat:%-63s|\n", temp);
