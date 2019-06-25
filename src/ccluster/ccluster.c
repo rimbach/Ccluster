@@ -164,11 +164,25 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
 // #endif 
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (nbThreads>1) {
-//         printf("--ccluster_parallel_bisect_connCmp: nb threads: %d \n", (int) nbThreads );
+        if (metadatas_getVerbo(meta)>1) {
+            slong depth = compBox_getDepth(compBox_list_first(subBoxes), metadatas_initBref( meta));
+            printf("--ccluster_parallel_bisect_connCmp: depth: %d, nb threads: %d, nbboxes: %d\n", (int) depth, (int) nbThreads, compBox_list_get_size(subBoxes) );
+        }
+        clock_t start=clock();
         prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta, nbThreads);
+        if (metadatas_getVerbo(meta)>1)
+            printf(" nb of clicks multithread: %f\n", ((double) (clock() - start))/(CLOCKS_PER_SEC*nbThreads) );
     }
-    else
+    else {
+        if (metadatas_getVerbo(meta)>1) {
+            slong depth = compBox_getDepth(compBox_list_first(subBoxes), metadatas_initBref( meta));
+            printf("--ccluster_parallel_bisect_connCmp: depth: %d, nb threads: %d, nbboxes: %d\n", (int) depth, (int) nbThreads, compBox_list_get_size(subBoxes) );
+        }
+        clock_t start=clock();
         prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
+        if (metadatas_getVerbo(meta)>1)
+            printf(" nb of clicks            : %f\n", (double) (clock() - start)/CLOCKS_PER_SEC );
+    }
 #else
     prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
 #endif
