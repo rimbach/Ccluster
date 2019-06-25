@@ -31,8 +31,8 @@ int main(int argc, char **argv){
         printf("initial_box epsilon strategy verbosity\n");
         printf("initial_box: for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
         printf("eps:         for instance 1,100 (1/100) or -53 (1/2^(-53))\n");  
-        printf("strategy:    23: default strategy\n");
-        printf("             31: same as 27 + eps is used only as an escape bound\n");
+        printf("strategy:    default for default strategy\n");
+        printf("             test for testing mode\n");
         printf("verbosity:   0: nothing\n");
         printf("             1: abstract of input and output\n");
         printf("             2: detailed reports concerning algorithm\n");
@@ -42,7 +42,7 @@ int main(int argc, char **argv){
     
     int parse = 1;
     int degree;
-    int st;
+    char * st;
     int verbosity;
     int nbthreads = 1;
     
@@ -55,16 +55,17 @@ int main(int argc, char **argv){
     parse = parse*scan_degree( argv[1], &degree);
     parse = parse*scan_initialBox( argv[2], bInit );
     parse = parse*scan_epsilon( argv[3], eps );
-    parse = parse*scan_strategy(argv[4], &st );
+//     parse = parse*scan_strategy(argv[4], &st );
+    st = argv[4];
     parse = parse*scan_verbosity(argv[5], &verbosity );
     
     if (argc>=7) {
         parse = parse*scan_nbthreads(argv[6], &nbthreads );
     }
-    nbthreads = (nbthreads<<6);
-    int add_temp = (st>>7)<<17;
-    st = st&((0x1<<7)-1);
-    st = st + nbthreads + add_temp;
+//     nbthreads = (nbthreads<<6);
+//     int add_temp = (st>>7)<<17;
+//     st = st&((0x1<<7)-1);
+//     st = st + nbthreads + add_temp;
     
     realRat_poly_t plag, pone, pzero, ptemp;
     realRat_poly_init(plag);
@@ -100,7 +101,8 @@ int main(int argc, char **argv){
         
         compRat_poly_set_realRat_poly(p_global,plag);
         
-        ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
+//         ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
+        ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
     }
     
     realRat_poly_clear(plag);

@@ -16,8 +16,8 @@
 #include <pthread.h>
 
 
-#define CCLUSTER_MAX(a,b) (a>b ? a : b)
-#define CCLUSTER_MIN(a,b) (a<b ? a : b)
+// #define CCLUSTER_MAX(a,b) (a>b ? a : b)
+// #define CCLUSTER_MIN(a,b) (a<b ? a : b)
 
 typedef struct {
     slong size;

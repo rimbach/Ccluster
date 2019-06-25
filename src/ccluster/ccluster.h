@@ -26,6 +26,7 @@
 #include "lists/connCmp_list.h"
 #include "tstar/tstar.h"
 #include "newton/newton.h"
+#include "powerSums/powerSums.h"
 
 
 
@@ -137,10 +138,17 @@ void connCmp_list_print_for_results(FILE * f,
 
 /* default interface */
 
+// void ccluster_interface_func( void(*func)(compApp_poly_t, slong), 
+//                               const compBox_t initialBox, 
+//                               const realRat_t eps, 
+//                               int st, 
+//                               int verb);
 void ccluster_interface_func( void(*func)(compApp_poly_t, slong), 
                               const compBox_t initialBox, 
                               const realRat_t eps, 
-                              int st, 
+//                               int st,
+                              char * stratstr,
+                              int nbThreads,
                               int verb);
 
 /* interfaces for Singular */

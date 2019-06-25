@@ -19,10 +19,38 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+/* strategies names */
+#define STRAT_NEWTON   1
+#define STRAT_TSTAROPT 2
+#define STRAT_PREDPREC 4
+#define STRAT_STOPWHCO 8
+#define STRAT_ANTICIPA 16
+#define STRAT_REALCOEF 32
+#define STRAT_FORTESTS 64
+
+#define STRAT_INT_DEFAULT 55
+#define STRAT_STR_DEFAULT "default"
+
+#define STRAT_INT_V1 5
+#define STRAT_STR_V1 "V1"
+
+#define STRAT_INT_V3 7
+#define STRAT_STR_V3 "V3"
+
+#define STRAT_INT_V4 23
+#define STRAT_STR_V4 "V4"
+
+#define STRAT_INT_V5 55
+#define STRAT_STR_V5 "V5"
+
+#define STRAT_INT_FORTESTS 119
+#define STRAT_STR_FORTESTS "test"
 
 typedef struct {
     int _useNewton;
@@ -34,6 +62,7 @@ typedef struct {
     int _useNBThreads;
     int _additionalFlags;
     int _realCoeffs;
+    int _forTests;
 } strategies;
 
 typedef strategies strategies_t[1];
@@ -52,6 +81,8 @@ void strategies_set_int ( strategies_t strat, int useNewton,
                         );
 void strategies_set( strategies_t strat, const strategies_t strat2);
 void strategies_clear(strategies_t strat);
+
+void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads);
     
 METADATAS_INLINE int strategies_useNewton         ( const strategies_t strat ) { return strat->_useNewton         ; } 
 METADATAS_INLINE int strategies_useTstarOptim     ( const strategies_t strat ) { return strat->_useTstarOptim     ; }
@@ -63,6 +94,9 @@ METADATAS_INLINE int strategies_useNBThreads      ( const strategies_t strat ) {
 
 METADATAS_INLINE int strategies_realCoeffs        ( const strategies_t strat ) { return strat->_realCoeffs      ; }
 METADATAS_INLINE void strategies_set_realCoeffs   ( strategies_t strat, int flag ) { strat->_realCoeffs=flag      ; }
+
+METADATAS_INLINE int strategies_forTests        ( const strategies_t strat ) { return strat->_forTests      ; }
+METADATAS_INLINE void strategies_set_forTests   ( strategies_t strat, int flag ) { strat->_forTests=flag      ; }
 
 #ifdef __cplusplus
 }

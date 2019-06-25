@@ -11,6 +11,36 @@
 
 #include "compApp_poly.h"
 
+int compApp_poly_checkAccuracy( const compApp_poly_t poly, slong prec) {
+    int result = 1;
+    slong i = 0;
+    while ( ( i<=compApp_poly_degree(poly) ) && result ) {
+        result = result && compApp_checkAccuracy( compApp_poly_getCoeff( poly, i) , prec );
+        i++;
+    }
+    return result;
+}
+
+slong compApp_poly_getAccuracy_min( const compApp_poly_t poly){
+    slong i = 0;
+    slong res = compApp_getAccuracy( compApp_poly_getCoeff( poly, i) );
+    while ( i<=compApp_poly_degree(poly) ) {
+        res = CCLUSTER_MIN(res, compApp_getAccuracy( compApp_poly_getCoeff( poly, i) ) );
+        i++;
+    }
+    return res;
+}
+
+slong compApp_poly_getAccuracy_max( const compApp_poly_t poly){
+    slong i = 0;
+    slong res = compApp_getAccuracy( compApp_poly_getCoeff( poly, i) );
+    while ( i<=compApp_poly_degree(poly) ) {
+        res = CCLUSTER_MAX(res, compApp_getAccuracy( compApp_poly_getCoeff( poly, i) ) );
+        i++;
+    }
+    return res;
+}
+
 void compApp_poly_sum_abs_coeffs( realApp_t res, const compApp_poly_t f, slong prec ) {
     
     compApp_srcptr fptr = f->coeffs;

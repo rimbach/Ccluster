@@ -345,7 +345,6 @@ tstar_res tstar_optimized( cacheApp_t cache,
 //         printf(" prec for discarding test: %d\n", (int) res.appPrec );
 //     else
 //         printf(" --- prec for validating test: %d\n", (int) res.appPrec );
-    
     return res;
     
 }

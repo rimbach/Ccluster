@@ -31,8 +31,8 @@ int main(int argc, char **argv){
         printf("initial_box epsilon strategy verbosity\n");
         printf("initial_box: for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
         printf("eps:         for instance1,100 (1/100) or -53 (1/2^(-53))\n");  
-        printf("strategy:    7: newton iterations, prediction of precision, optimized counting and discarding tests\n");
-        printf("             15: same as 7 + eps is used only as an escape bound\n");
+        printf("strategy:    default for default strategy\n");
+        printf("             test for testing mode\n");
         printf("verbosity:   0: nothing\n");
         printf("             1: abstract of input and output\n");
         printf("             2: detailed reports concerning algorithm\n");
@@ -42,7 +42,8 @@ int main(int argc, char **argv){
     int parse = 1;
     int degree;
     int bitsize;
-    int st;
+//     int st;
+    char * st;
     int verbosity;
     int nbthreads = 1;
     
@@ -56,16 +57,17 @@ int main(int argc, char **argv){
     parse = parse*scan_bitsize( argv[2], &bitsize);
     parse = parse*scan_initialBox( argv[3], bInit );
     parse = parse*scan_epsilon( argv[4], eps );
-    parse = parse*scan_strategy(argv[5], &st );
+//     parse = parse*scan_strategy(argv[5], &st );
+    st = argv[5];
     parse = parse*scan_verbosity(argv[6], &verbosity );
     
     if (argc>=8) {
         parse = parse*scan_nbthreads(argv[7], &nbthreads );
     }
-    nbthreads = (nbthreads<<6);
-    int add_temp = (st>>7)<<17;
-    st = st&((0x1<<7)-1);
-    st = st + nbthreads + add_temp;
+//     nbthreads = (nbthreads<<6);
+//     int add_temp = (st>>7)<<17;
+//     st = st&((0x1<<7)-1);
+//     st = st + nbthreads + add_temp;
     
     realRat_poly_t pmign;
     realRat_poly_init(pmign);
@@ -75,7 +77,8 @@ int main(int argc, char **argv){
         mignotte_polynomial(pmign, degree, bitsize);
         compRat_poly_set_realRat_poly(p_global,pmign);
     
-        ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
+//         ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
+        ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
     }
     
     realRat_poly_clear(pmign);

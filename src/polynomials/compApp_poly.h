@@ -19,6 +19,7 @@
 #endif
 
 #include "acb_poly.h"
+#include "base/base.h"
 #include "numbers/compApp.h"
 
 #ifdef __cplusplus
@@ -49,6 +50,12 @@ POLYNOMIALS_INLINE void compApp_poly_printd(const compApp_poly_t poly, slong dig
     acb_poly_printd(poly, digits);
 }
 
+/* accuracy */
+int compApp_poly_checkAccuracy( const compApp_poly_t poly, slong prec);
+
+slong compApp_poly_getAccuracy_min( const compApp_poly_t poly);
+slong compApp_poly_getAccuracy_max( const compApp_poly_t poly);
+
 /* setting */
 POLYNOMIALS_INLINE void compApp_poly_zero(compApp_poly_t poly) { acb_poly_zero(poly); }
 POLYNOMIALS_INLINE void compApp_poly_one (compApp_poly_t poly) { acb_poly_one (poly); }
@@ -62,6 +69,9 @@ POLYNOMIALS_INLINE void compApp_poly_set_fmpq_poly(compApp_poly_t poly, const fm
 POLYNOMIALS_INLINE void compApp_poly_set2_fmpq_poly(compApp_poly_t poly, const fmpq_poly_t re, const fmpq_poly_t im, slong prec) {
     acb_poly_set2_fmpq_poly(poly, re, im, prec);
 }
+
+/* rounding */
+POLYNOMIALS_INLINE void compApp_poly_set_round(compApp_poly_t dest, const compApp_poly_t src, slong prec) { acb_poly_set_round( dest, src, prec); }
 
 /* Comparisons */
 POLYNOMIALS_INLINE int compApp_poly_is_real( const compApp_poly_t poly ) {
@@ -96,6 +106,14 @@ POLYNOMIALS_INLINE  void compApp_poly_evaluate_horner(compApp_t y, const compApp
 }
 POLYNOMIALS_INLINE  void compApp_poly_evaluate2(compApp_t y, compApp_t z, const compApp_poly_t f, const compApp_t x, slong prec){
     acb_poly_evaluate2_rectangular(y, z, f, x, prec);
+}
+
+POLYNOMIALS_INLINE  void compApp_poly_evaluate2_rectangular(compApp_t y, compApp_t z, const compApp_poly_t f, const compApp_t x, slong prec){
+    acb_poly_evaluate2_rectangular(y, z, f, x, prec);
+}
+
+POLYNOMIALS_INLINE  void compApp_poly_evaluate2_horner(compApp_t y, compApp_t z, const compApp_poly_t f, const compApp_t x, slong prec){
+    acb_poly_evaluate2_horner(y, z, f, x, prec);
 }
 
 /* derivation */

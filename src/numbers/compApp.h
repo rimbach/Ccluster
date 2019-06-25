@@ -83,10 +83,23 @@ NUMBERS_INLINE int compApp_contains_zero (const compApp_t ball) {
 NUMBERS_INLINE int compApp_contains (const compApp_t x, const compApp_t y) {
     return acb_contains(x,y);
 }
+NUMBERS_INLINE int compApp_is_finite (const compApp_t z) {
+    return acb_is_finite(z);
+}
+
 NUMBERS_INLINE int compApp_intersection(compApp_t z, const compApp_t x, const compApp_t y, slong prec) { 
     if (realApp_intersection( compApp_realref(z), compApp_realref(x), compApp_realref(y), prec) !=0)
         return realApp_intersection( compApp_imagref(z), compApp_imagref(x), compApp_imagref(y), prec);
     else return 0; 
+}
+
+/* accuracy */
+NUMBERS_INLINE int compApp_checkAccuracy( const compApp_t z, slong prec) {
+    return ( (-acb_rel_error_bits(z)) >= prec );
+}
+
+NUMBERS_INLINE slong compApp_getAccuracy( const compApp_t z) {
+    return -acb_rel_error_bits(z);
 }
 
 #ifdef __cplusplus

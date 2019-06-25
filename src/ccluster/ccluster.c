@@ -35,19 +35,45 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
 //     compBox_list_init(ltempDetermined);
     /* End For test */
     
+//     /* for powerSums */
+//     powerSums_res resp;
+//     resp.appPrec = CCLUSTER_DEFAULT_PREC;
+    
     while (!compBox_list_is_empty(boxes)){
         
         btemp = compBox_list_pop(boxes);
+        compBox_get_containing_dsk(bdisk, btemp);
+        depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
+        metadatas_add_explored( meta, depth);
+        
         /* Real Coeffs */
         if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
             compBox_clear(btemp);
             ccluster_free(btemp);
             continue;
         }
-        compBox_get_containing_dsk(bdisk, btemp);
-        depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
-        res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);  
+        
+/*        if ( metadatas_forTests(meta) ){
+//             printf("--- power sums counting test: \n");
+//             printf("------ test for disk centered in "); compRat_print(compDsk_centerref(bdisk)); printf("\n");
+//             printf("------ with radius "); realRat_print( compDsk_radiusref(bdisk) ); printf("\n");
+            resp = powerSums_countingTest( compDsk_centerref(bdisk), compDsk_radiusref(bdisk),
+                                                        cache,
+                                                        metadatas_getNbEvalPoints(meta),
+                                                        resp.appPrec, meta, depth );
+//             printf("--- power sums counting test: nbSols: %d, prec: %d \n", (int) resp.nbOfSol, (int) resp.appPrec );
+            metadatas_add_PsCountingTest (meta, depth);
+            if (resp.nbOfSol==0) {
+                res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta); 
+//                 if (resp.nbOfSol==-1)
+//                     printf("------ tstar result: %d\n", (int) res.nbOfSol );
+            }
+            else
+                res.nbOfSol = -1;
+        }
+        else*/    
+            res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);  
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
                 metadatas_add_discarded( meta, depth);
@@ -159,7 +185,8 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
 //         compBox_list_clear(subBoxes2);
 //     }
 // #endif 
-
+//     if (metadatas_powerSums(meta))
+//         metadatas_setAppPrec(meta, CCLUSTER_DEFAULT_PREC);
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (nbThreads>1) {
 //         printf("--ccluster_parallel_bisect_connCmp: nb threads: %d \n", (int) nbThreads );
@@ -602,7 +629,8 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
 
 void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
     
-    chronos_tic_CclusAl(metadatas_chronref(meta));
+//     chronos_tic_CclusAl(metadatas_chronref(meta));
+    clock_t start = clock();
     
     realRat_t factor;
     realRat_init(factor);
@@ -635,7 +663,8 @@ void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const r
     connCmp_list_clear(qPrepLoop);
     connCmp_list_clear(discardedCcs);
     
-    chronos_toc_CclusAl(metadatas_chronref(meta));
+//     chronos_toc_CclusAl(metadatas_chronref(meta));
+    metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
 void ccluster_refine( connCmp_list_t qResults, 
@@ -647,7 +676,8 @@ void ccluster_refine( connCmp_list_t qResults,
     
 //     printf("ccluster_refine: begin, eps = "); realRat_print(eps); printf("\n");
     
-    chronos_tic_CclusAl(metadatas_chronref(meta));
+//     chronos_tic_CclusAl(metadatas_chronref(meta));
+    clock_t start = clock();
     
     
     connCmp_list_t discardedCcs;
@@ -657,7 +687,8 @@ void ccluster_refine( connCmp_list_t qResults,
     
     connCmp_list_clear(discardedCcs);
     
-    chronos_toc_CclusAl(metadatas_chronref(meta));
+//     chronos_toc_CclusAl(metadatas_chronref(meta));
+    metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 //     printf("ccluster_refine: end \n");
 }
 
