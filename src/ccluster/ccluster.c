@@ -36,8 +36,8 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
     /* End For test */
     
 //     /* for powerSums */
-//     powerSums_res resp;
-//     resp.appPrec = CCLUSTER_DEFAULT_PREC;
+    powerSums_res resp;
+    resp.appPrec = CCLUSTER_DEFAULT_PREC;
     
     while (!compBox_list_is_empty(boxes)){
         
@@ -54,7 +54,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
         }
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
         
-/*        if ( metadatas_forTests(meta) ){
+        if ( metadatas_forTests(meta) ){
 //             printf("--- power sums counting test: \n");
 //             printf("------ test for disk centered in "); compRat_print(compDsk_centerref(bdisk)); printf("\n");
 //             printf("------ with radius "); realRat_print( compDsk_radiusref(bdisk) ); printf("\n");
@@ -72,7 +72,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
             else
                 res.nbOfSol = -1;
         }
-        else*/    
+        else    
             res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);  
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
@@ -185,8 +185,6 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
 //         compBox_list_clear(subBoxes2);
 //     }
 // #endif 
-//     if (metadatas_powerSums(meta))
-//         metadatas_setAppPrec(meta, CCLUSTER_DEFAULT_PREC);
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (nbThreads>1) {
 //         printf("--ccluster_parallel_bisect_connCmp: nb threads: %d \n", (int) nbThreads );
