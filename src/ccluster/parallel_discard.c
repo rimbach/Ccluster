@@ -9,11 +9,11 @@
 /*  (at your option) any later version.  See <http://www.gnu.org/licenses/>.  */
 /* ************************************************************************** */
 
+
 #include "ccluster/ccluster.h"
+#include "ccluster/parallel_discard.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
-
-#include <pthread.h>
 
 void * _parallel_bisect_worker( void * arg_ptr ){
     
