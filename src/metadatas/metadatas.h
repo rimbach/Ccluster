@@ -210,11 +210,10 @@ METADATAS_INLINE int  metadatas_getNbNewton                    ( const metadatas
 METADATAS_INLINE int  metadatas_getNbFailingNewton             ( const metadatas_t m ){ return counters_getNbFailingNewton             (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbEval             ( const metadatas_t m ){ return counters_getNbEval             (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbPsCountingTest            ( const metadatas_t m ){ return counters_getNbPsCountingTest(metadatas_countref(m));}
-METADATAS_INLINE int  metadatas_getNbDouble             ( const metadatas_t m ){ return counters_getNbDouble             (metadatas_countref(m));}
-METADATAS_INLINE int  metadatas_getNbOthers             ( const metadatas_t m ){ return counters_getNbOthers             (metadatas_countref(m));}
-METADATAS_INLINE int  metadatas_getNb212             ( const metadatas_t m ){ return counters_getNb212             (metadatas_countref(m));}
-METADATAS_INLINE int  metadatas_getNb424             ( const metadatas_t m ){ return counters_getNb424             (metadatas_countref(m));}
-METADATAS_INLINE int  metadatas_getNb848             ( const metadatas_t m ){ return counters_getNb848             (metadatas_countref(m));}
+
+METADATAS_INLINE int metadatas_boxes_by_prec_fprint ( FILE * file, const metadatas_t m ) {
+    return counters_boxes_by_prec_fprint ( file, metadatas_countref(m) );
+}
 
 // 
 // /* chronos */
@@ -283,6 +282,18 @@ METADATAS_INLINE void metadatas_add_time_Anticip(metadatas_t m, double d){
                     metadatas_lock(m);
 #endif
     chronos_add_time_Anticip( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE void metadatas_add_time_CclusAl(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CclusAl( metadatas_chronref(m), d, metadatas_useNBThreads(m));
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_unlock(m);

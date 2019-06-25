@@ -98,6 +98,10 @@ NUMBERS_INLINE int compApp_checkAccuracy( const compApp_t z, slong prec) {
     return ( (-acb_rel_error_bits(z)) >= prec );
 }
 
+NUMBERS_INLINE slong compApp_getAccuracy( const compApp_t z) {
+    return -acb_rel_error_bits(z);
+}
+
 #ifdef __cplusplus
 }
 #endif

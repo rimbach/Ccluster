@@ -22,7 +22,7 @@
 // compRat_poly_t p_global;
 slong p_degree;
 
-void getApprox(compApp_poly_t dest, slong prec){
+void getApprox_temp(compApp_poly_t dest, slong prec){
     
     realRat_t modu;
     realRat_t argu;
@@ -59,6 +59,19 @@ void getApprox(compApp_poly_t dest, slong prec){
     compApp_clear(a_argu);
     compApp_clear(coeff);
     compApp_poly_clear(temp);
+}
+
+void getApprox(compApp_poly_t dest, slong prec){
+    
+    slong prectemp = 2*prec;
+    getApprox_temp( dest, prectemp );
+    
+    while (!compApp_poly_checkAccuracy( dest, prec)){
+        prectemp = 2*prectemp;
+        getApprox_temp( dest, prectemp );
+    }
+    
+    compApp_poly_set_round( dest, dest, prec);
 }
 
 int main(int argc, char **argv){

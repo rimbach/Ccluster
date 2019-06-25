@@ -378,7 +378,8 @@ void ccluster_DAC_first( connCmp_list_t qResults,
                          cacheApp_t cache, 
                          metadatas_t meta){
     
-    chronos_tic_CclusAl(metadatas_chronref(meta));
+//     chronos_tic_CclusAl(metadatas_chronref(meta));
+    clock_t start = clock();
     
     realRat_t factor;
     realRat_init(factor);
@@ -411,7 +412,8 @@ void ccluster_DAC_first( connCmp_list_t qResults,
     connCmp_list_clear(qPrepLoop);
 //     connCmp_list_clear(discardedCcs);
     
-    chronos_toc_CclusAl(metadatas_chronref(meta));
+//     chronos_toc_CclusAl(metadatas_chronref(meta));
+    metadatas_add_time_CclusAl(meta, (double) (clock() - start));
     
 }
 
@@ -425,9 +427,11 @@ void ccluster_DAC_next( connCmp_list_t qResults,
                          cacheApp_t cache, 
                          metadatas_t meta){
     
-    chronos_tic_CclusAl(metadatas_chronref(meta)); 
+//     chronos_tic_CclusAl(metadatas_chronref(meta)); 
+    clock_t start = clock();
     ccluster_main_loop_DAC( qResults, qAllResults, qMainLoop, discardedCcs, nbSols, eps, cache, meta);
-    chronos_toc_CclusAl(metadatas_chronref(meta));
+//     chronos_toc_CclusAl(metadatas_chronref(meta));
+    metadatas_add_time_CclusAl(meta, (double) (clock() - start));
     
 }
 

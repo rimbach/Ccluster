@@ -453,7 +453,8 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
 
 void ccluster_algo_draw( connCmp_list_t qResults, compBox_list_t discarded, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
     
-    chronos_tic_CclusAl(metadatas_chronref(meta));
+//     chronos_tic_CclusAl(metadatas_chronref(meta));
+    clock_t start = clock();
     
     realRat_t factor;
     realRat_init(factor);
@@ -486,7 +487,8 @@ void ccluster_algo_draw( connCmp_list_t qResults, compBox_list_t discarded, cons
     connCmp_list_clear(qPrepLoop);
     connCmp_list_clear(discardedCcs);
     
-    chronos_toc_CclusAl(metadatas_chronref(meta));
+//     chronos_toc_CclusAl(metadatas_chronref(meta));
+    metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
 // void connCmp_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta){

@@ -11,6 +11,64 @@
 
 #include "metadatas/counters.h"
 
+void boxes_by_prec_init( boxes_by_prec_t bt ){
+    bt->size = 0;
+    bt->size_allocated = INIT_SIZE_STATS;
+    bt->table = (int *) ccluster_malloc (INIT_SIZE_STATS*sizeof(int));
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_init ( &(bt->_mutex), NULL);
+#endif 
+}
+
+void boxes_by_prec_clear( boxes_by_prec_t bt ){
+    ccluster_free(bt->table);
+#ifdef CCLUSTER_HAVE_PTHREAD
+    pthread_mutex_destroy( &(bt->_mutex) );
+#endif
+}
+
+void boxes_by_prec_adjust_table( boxes_by_prec_t bt, int index ){
+    
+    /* realocate size if needed */
+    while (index+1 > bt->size_allocated) {
+        bt->size_allocated += INIT_SIZE_STATS;
+        bt->table = (int *) ccluster_realloc ( (void *) bt->table, (bt->size_allocated)*sizeof(int) );
+    }
+    /* set to 0 intermediate cases if needed */
+    while (index+1 > bt->size ){
+        bt->table[bt->size] = 0;
+        bt->size += 1;
+    }
+}
+
+void boxes_by_prec_add_int( boxes_by_prec_t bt, slong prec, int nbBoxes ){
+    int indexpow2 = ((int) prec/CCLUSTER_DEFAULT_PREC);
+    int index=0;
+    while (0x1<<index < indexpow2) index+=1;
+    boxes_by_prec_adjust_table(bt, index);
+    bt->table[index] +=nbBoxes;
+}
+
+void boxes_by_prec_add_boxes_by_prec( boxes_by_prec_t bt, boxes_by_prec_t t ){
+    
+    for (int index = 0; index < t->size; index ++ ){
+        boxes_by_prec_adjust_table(bt, index);
+        bt->table[index] += t->table[index];
+    }
+}
+
+int  boxes_by_prec_fprint( FILE * file, const boxes_by_prec_t bt ){
+    int r = 0;
+    for (int index = 0; index < bt->size; index ++ ){
+        char buffer[50];
+        r = sprintf (buffer, "boxes with %d:", ( 0x1<<(index) )*CCLUSTER_DEFAULT_PREC);
+        r = fprintf(file, "|%-39s %14d %14s|\n", buffer,           bt->table[index],    " " );
+    }
+    return r;
+}
+
+
+
 void counters_by_depth_init( counters_by_depth_t st) {
     st->nbDiscarded               = 0;
     st->nbValidated               = 0;
@@ -32,11 +90,8 @@ void counters_by_depth_init( counters_by_depth_t st) {
     st->nbFailingNewton           = 0;
     st->nbEval                    = 0;
     st->nbPsCountingTest          = 0;
-    st->nbDouble                    = 0;
-    st->nbOthers                    = 0;
-    st->nb212                    = 0;
-    st->nb424                    = 0;
-    st->nb848                    = 0;
+
+    boxes_by_prec_init( st->bpc );
 }
 
 // void counters_by_depth_join( counters_by_depth_t c1, const counters_by_depth_t c2){
@@ -120,7 +175,7 @@ void counters_add_explored ( counters_t st, int depth ){
 void counters_add_Test     ( counters_t st, int depth, int res, int discard, 
                              int nbTaylors, int nbTaylorsRepeted, 
                              int nbGraeffe, int nbGraeffeRepeted,
-                             int prec
+                             slong prec
                            ){
     counters_adjust_table(st, depth);
     if (discard) {
@@ -139,17 +194,7 @@ void counters_add_Test     ( counters_t st, int depth, int res, int discard,
         (st->table[depth]).nbTaylorsInTSTests                           += nbTaylors;
         (st->table[depth]).nbTaylorsRepetedInTSTests           += nbTaylorsRepeted;
     }
-    if (prec==53)
-        (st->table[depth]).nbDouble                           += 1;
-    else if (prec==106)
-        (st->table[depth]).nbOthers                           += 1;
-    else if (prec==212)
-        (st->table[depth]).nb212                           += 1;
-    else if (prec==424)
-        (st->table[depth]).nb424                           += 1;
-    else if (prec==848)
-        (st->table[depth]).nb848                           += 1;
-        
+    boxes_by_prec_add_int( (st->table[depth]).bpc, prec, 1);    
 }
 
 void counters_add_Newton   ( counters_t st, int depth, int res ){
@@ -190,11 +235,7 @@ void counters_count ( counters_t st ) {
        st->total->nbFailingNewton           += (st->table)[i].nbFailingNewton           ; 
        st->total->nbEval                    += (st->table)[i].nbEval           ;
        st->total->nbPsCountingTest          += (st->table)[i].nbPsCountingTest           ;
-       st->total->nbDouble                    += (st->table)[i].nbDouble           ;
-       st->total->nbOthers                   += (st->table)[i].nbOthers           ;
-       st->total->nb212                   += (st->table)[i].nb212           ;
-       st->total->nb424                   += (st->table)[i].nb424           ;
-       st->total->nb848                   += (st->table)[i].nb848           ;
+       boxes_by_prec_add_boxes_by_prec( st->total->bpc, (st->table)[i].bpc ); 
     }
 
 }
@@ -221,11 +262,6 @@ int counters_getNbNewton                    ( const counters_t st ){ return st->
 int counters_getNbFailingNewton             ( const counters_t st ){ return st->total->nbFailingNewton           ;}
 int counters_getNbEval                      ( const counters_t st ){ return st->total->nbEval                    ;}
 int counters_getNbPsCountingTest            ( const counters_t st ){ return st->total->nbPsCountingTest                    ;}
-int counters_getNbDouble                    ( const counters_t st ){ return st->total->nbDouble                  ;}
-int counters_getNbOthers                    ( const counters_t st ){ return st->total->nbOthers                  ;}
-int counters_getNb212                    ( const counters_t st ){ return st->total->nb212                  ;}
-int counters_getNb424                    ( const counters_t st ){ return st->total->nb424                  ;}
-int counters_getNb848                    ( const counters_t st ){ return st->total->nb848                  ;}
 
 /* DEPRECATED
 void counters_by_depth_get_lenghts_of_str( counters_by_depth_t res, counters_by_depth_t st){
