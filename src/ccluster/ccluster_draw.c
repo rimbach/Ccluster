@@ -200,11 +200,6 @@ void ccluster_prep_loop_draw( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop
     
     connCmp_ptr ctemp;
     
-// #ifdef CCLUSTER_HAVE_PTHREAD
-//     connCmp_list_t toBeBisected;
-//     connCmp_list_init(toBeBisected);
-// #endif
-    
     while (!connCmp_list_is_empty(qPrepLoop)) {
         
         ctemp = connCmp_list_pop(qPrepLoop);
@@ -213,38 +208,18 @@ void ccluster_prep_loop_draw( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop
         if ( connCmp_is_confined(ctemp, metadatas_initBref(meta)) && (realRat_cmp(diam, halfwidth)<0) )
             connCmp_list_insert_sorted(qMainLoop, ctemp);
         else {
-// #ifdef CCLUSTER_HAVE_PTHREAD
-//             if (metadatas_useNBThreads(meta) >1)
-//                 connCmp_list_push(toBeBisected, ctemp);
-//             else {            
-//                 ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta,1);
-//                 while (!connCmp_list_is_empty(ltemp))
-//                     connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
-//                 connCmp_clear(ctemp);
-//                 free(ctemp);
-//             }
-// #else
             ccluster_bisect_connCmp_draw( ltemp, ctemp, discardedCcs, discarded, cache, meta, metadatas_useNBThreads(meta));
 //             ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ctemp);
             free(ctemp);
-// #endif
-        }
-/*#ifdef CCLUSTER_HAVE_PTHREAD
-        if (metadatas_useNBThreads(meta) >1)
-            if (connCmp_list_is_empty(qPrepLoop))
-                ccluster_parallel_bisect_connCmp_list(qPrepLoop, discardedCcs, toBeBisected, cache, meta);
-#endif*/        
+        }      
     }
     
     connCmp_list_clear(ltemp);
     realRat_clear(halfwidth);
     realRat_clear(diam);
-// #ifdef CCLUSTER_HAVE_PTHREAD
-//     connCmp_list_clear(toBeBisected);
-// #endif
 }
 
 // int  ccluster_compDsk_is_separated( const compDsk_t d, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs ){
@@ -292,13 +267,6 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
     realRat_set_si(four, 4, 1);
     realRat_set_si(three, 3, 1);
     
-#ifdef CCLUSTER_HAVE_PTHREAD
-    connCmp_list_t toBeBisected;
-    connCmp_list_init(toBeBisected);
-    connCmp_list_t dummy;
-    connCmp_list_init(dummy);
-#endif
-    
     while (!connCmp_list_is_empty(qMainLoop)) {
         
         resNewton.nflag = 0;
@@ -312,10 +280,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
-#ifdef CCLUSTER_HAVE_PTHREAD
-        if (!connCmp_list_is_empty(toBeBisected))
-            separationFlag = separationFlag&&ccluster_compDsk_is_separated(fourCCDisk, toBeBisected, dummy);
-#endif        
+        
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
         
@@ -400,15 +365,11 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
 //             if (connCmp_nSols(ccur)==0) 
 //                 printf("ici\n");
 #ifdef CCLUSTER_HAVE_PTHREAD
-            if (metadatas_useNBThreads(meta) >1)
-                connCmp_list_push(toBeBisected, ccur);
-            else {
-                ccluster_bisect_connCmp_draw( ltemp, ccur, discardedCcs, discarded, cache, meta,1);
+                ccluster_bisect_connCmp_draw( ltemp, ccur, discardedCcs, discarded, cache, meta,metadatas_useNBThreads(meta));
                 while (!connCmp_list_is_empty(ltemp))
                     connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
                 connCmp_clear(ccur);
                 free(ccur);
-            }
 #else
             ccluster_bisect_connCmp_draw( ltemp, ccur, discardedCcs, discarded, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
@@ -417,24 +378,6 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
             free(ccur);
 #endif
         }
-#ifdef CCLUSTER_HAVE_PTHREAD
-        if ( (!connCmp_list_is_empty(toBeBisected))&&
-                 ( (connCmp_list_is_empty(qMainLoop))||
-                   ( realRat_cmp(connCmp_widthref(connCmp_list_first(qMainLoop)), connCmp_widthref(connCmp_list_first(toBeBisected))) !=0 ) ) ) {
-            
-            if (connCmp_list_get_size(toBeBisected)>1) {
-                ccluster_parallel_bisect_connCmp_list(qMainLoop, discardedCcs, toBeBisected, cache, meta);
-            }
-            else { /* toBeBisected has only one element */
-                ccur = connCmp_list_pop(toBeBisected);
-                ccluster_bisect_connCmp_draw( ltemp, ccur, discardedCcs, discarded, cache, meta, metadatas_useNBThreads(meta));
-                while (!connCmp_list_is_empty(ltemp))
-                        connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
-                connCmp_clear(ccur);
-                free(ccur);
-            }
-        }
-#endif
         
     }
     
@@ -446,9 +389,6 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
     realRat_clear(threeWidth);
     compRat_clear(initPoint);
     connCmp_list_clear(ltemp);
-#ifdef CCLUSTER_HAVE_PTHREAD
-    connCmp_list_clear(toBeBisected);
-#endif
 }
 
 void ccluster_algo_draw( connCmp_list_t qResults, compBox_list_t discarded, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
