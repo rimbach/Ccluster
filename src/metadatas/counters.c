@@ -126,6 +126,9 @@ void counters_init( counters * st) {
 }
 
 void counters_clear( counters * st) {
+    
+    for (int i = 0; i<st->size; i++)
+        counters_by_depth_clear( (st->table + i) );
     ccluster_free(st->table);
     counters_by_depth_clear( st->total );
 #ifdef CCLUSTER_HAVE_PTHREAD
