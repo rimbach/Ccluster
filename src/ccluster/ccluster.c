@@ -65,9 +65,14 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
 //             printf("--- power sums counting test: nbSols: %d, prec: %d \n", (int) resp.nbOfSol, (int) resp.appPrec );
             metadatas_add_PsCountingTest (meta, depth);
             if (resp.nbOfSol==0) {
-                res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta); 
+                
+//                 res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta); 
+                
 //                 if (resp.nbOfSol==-1)
 //                     printf("------ tstar result: %d\n", (int) res.nbOfSol );
+                
+                res.nbOfSol = 0;
+                res.appPrec = resp.appPrec;
             }
             else
                 res.nbOfSol = -1;
