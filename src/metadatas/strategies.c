@@ -24,6 +24,16 @@ void strategies_set_int( strategies_t strat, int useNewton,
                                              int useNBThreads,
                                              int additionalFlags
                                              ){
+    strat->_useNewton             = 0;
+    strat->_useTstarOptim         = 0;
+    strat->_usePredictPrec        = 0;
+    strat->_useStopWhenCompact    = 0;
+    strat->_useAnticipate         = 0;
+    strat->_useNBThreads          = 0;
+    strat->_additionalFlags       = 0;
+    strat->_realCoeffs            = 0;
+    strat->_forTests             = 0;
+    
     strat->_useNewton             = useNewton;
     strat->_useTstarOptim         = useTstarOptim;
     strat->_usePredictPrec        = usePredictPrec;
