@@ -69,6 +69,8 @@ void connCmp_set(connCmp_t dest, const connCmp_t src);
 /* allocate memory + deep copy; if called from C, need to deallocate the result */
 connCmp_ptr connCmp_copy(connCmp_t src);
 
+GEOMETRY_INLINE void connCmp_set_appPr(connCmp_t dest, slong nAppPr) { dest->appPr = nAppPr; }
+
 /* properties */
 GEOMETRY_INLINE int connCmp_is_empty(const connCmp_t x){
     return compBox_list_is_empty(connCmp_boxesref(x));
