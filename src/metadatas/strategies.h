@@ -52,6 +52,9 @@ extern "C" {
 #define STRAT_INT_FORTESTS 119
 #define STRAT_STR_FORTESTS "test"
 
+#define STRAT_INT_FORTESTSV4 87
+#define STRAT_STR_FORTESTSV4 "testV4"
+
 typedef struct {
     int _useNewton;
     int _useTstarOptim;

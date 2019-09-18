@@ -115,6 +115,16 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_forTests             = 1;
         return;
     }
+    if (strcmp( stratName, STRAT_STR_FORTESTSV4 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_realCoeffs            = 0;
+        strat->_forTests             = 1;
+        return;
+    }
+    
     /* otherwise set strategy to default */
     strategies_set_str ( strat, STRAT_STR_DEFAULT, nbThreads);
 }

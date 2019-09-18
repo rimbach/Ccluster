@@ -41,7 +41,7 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
         btemp = compBox_list_pop(boxes);
         compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
-        res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);    
+        res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1,0, res.appPrec, depth, meta);    
         if (res.nbOfSol==0) {
 #ifdef CCLUSTER_HAVE_PTHREAD
             metadatas_lock(meta);
@@ -288,7 +288,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
 //         if ((separationFlag)) {
 //             printf("depth: %d, connCmp_nSolsref(ccur): %d\n", depth, connCmp_nSolsref(ccur));
             if (connCmp_nSolsref(ccur)==-1){
-                resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, prec, depth, meta);
+                resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0,0, prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
             }
 //             printf("validate: prec avant: %d prec apres: %d\n", prec, resTstar.appPrec);

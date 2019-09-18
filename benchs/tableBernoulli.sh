@@ -85,7 +85,7 @@ if [ -z "$BLOCAL" ]; then
 fi
 
 if [ -z "$BGLOBAL" ]; then
-   BGLOBAL="0,1,0,1,300,1"
+   BGLOBAL="0,1,0,1,1000,1"
 fi
 
 if [ -z "$MPSOLVE" ]; then

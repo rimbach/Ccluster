@@ -73,8 +73,14 @@ typedef struct {
     int nbNewton;
     int nbFailingNewton;
     /* Power Sums */
-    int nbEval;
     int nbPsCountingTest;
+#ifdef CCLUSTER_STATS_PS
+    int nbEval;
+    int nbM2;
+    int nbM1;
+    int nbEr;
+#endif
+    
     boxes_by_prec_t bpc;
 } counters_by_depth;
 
@@ -146,11 +152,19 @@ int counters_getNbTaylorsInTSTests          ( const counters_t st );
 int counters_getNbTaylorsRepetedInTSTests   ( const counters_t st );
 int counters_getNbNewton                    ( const counters_t st );
 int counters_getNbFailingNewton             ( const counters_t st );
-int counters_getNbEval                      ( const counters_t st );
 int counters_getNbPsCountingTest            ( const counters_t st );
-
+#ifdef CCLUSTER_STATS_PS
+int counters_getNbEval                      ( const counters_t st );
+int counters_getNbM1            ( const counters_t st );
+int counters_getNbM2            ( const counters_t st );
+int counters_getNbEr            ( const counters_t st );
+#endif
 void counters_add_Eval( counters_t st, int nbEvals, int depth );
-void counters_add_PsCountingTest( counters_t st, int depth );
+void counters_add_PsCountingTest( counters_t st, int depth
+#ifdef CCLUSTER_STATS_PS
+, int res, int er 
+#endif    
+                                                            );
 
 METADATAS_INLINE int counters_boxes_by_prec_fprint ( FILE * file, const counters_t st ) {
     return boxes_by_prec_fprint( file, st->total->bpc);

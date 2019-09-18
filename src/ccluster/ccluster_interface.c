@@ -42,11 +42,76 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
     
     /* initialize power sums */
     if ( metadatas_forTests(meta) ) {
+        meta->evalPoly = NULL;
         realRat_t isoRatio, wantedPrec;
         realRat_init(isoRatio);
         realRat_init(wantedPrec);
-//         realRat_set_si(isoRatio, 2, 1);
-        realRat_set_si(isoRatio, 11, 10);
+        realRat_set_si(isoRatio, 2, 1);
+//         realRat_set_si(isoRatio, 11, 10);
+        realRat_set_si(wantedPrec, 1, 4);
+        slong nbP = powerSums_getNbOfPointsForCounting( wantedPrec, cacheApp_getDegree(cache), isoRatio );
+        metadatas_setNbEvalPoints(meta, nbP);
+        printf("iso ratio used for tests: "); realRat_print( isoRatio ); printf("\n");
+        printf("nb points for eval: %d\n", (int) metadatas_getNbEvalPoints(meta) );
+        realRat_clear(isoRatio);
+        realRat_clear(wantedPrec);
+    }
+    
+    connCmp_list_init(qRes);
+    
+    ccluster_algo( qRes, initialBox, eps, cache, meta);
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    
+    if (verb>=3) {
+        connCmp_list_print_for_results(stdout, qRes, meta);
+//         connCmp_list_print_for_results(stdout, qRes, 500, 40, meta);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
+    connCmp_list_clear(qRes);
+}
+
+void ccluster_interface_funcPS( void(*func)(compApp_poly_t, slong),
+                                void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
+                                const compBox_t initialBox, 
+                                const realRat_t eps, 
+//                                 int st,
+                                char * stratstr,
+                                int nbThreads,
+                                int verb){
+
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    connCmp_list_t qRes;
+    
+    cacheApp_init(cache, func);
+    strategies_init(strat);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
+    
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
+    
+    strategies_set_str( strat, stratstr, nbThreads );
+    /* automaticly set realCoeffs */
+    if (cacheApp_is_real(cache)==0
+        || compBox_contains_real_line_in_interior(initialBox)==0 )
+        strategies_set_realCoeffs(strat, 0);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    meta->evalPoly = evalFast;
+    
+    /* initialize power sums */
+    if ( metadatas_forTests(meta) ) {
+        realRat_t isoRatio, wantedPrec;
+        realRat_init(isoRatio);
+        realRat_init(wantedPrec);
+        realRat_set_si(isoRatio, 2, 1);
+//         realRat_set_si(isoRatio, 11, 10);
         realRat_set_si(wantedPrec, 1, 4);
         slong nbP = powerSums_getNbOfPointsForCounting( wantedPrec, cacheApp_getDegree(cache), isoRatio );
         metadatas_setNbEvalPoints(meta, nbP);

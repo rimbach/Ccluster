@@ -100,6 +100,15 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
                               int nbThreads,
                               int verb);
 
+void ccluster_interface_funcPS( void(*func)(compApp_poly_t, slong),
+                                void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
+                                const compBox_t initialBox, 
+                                const realRat_t eps, 
+//                                 int st,
+                                char * stratstr,
+                                int nbThreads,
+                                int verb);
+
 /* interfaces for Singular */
 
 int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults,

@@ -39,7 +39,8 @@ void powerSums_evaluateAtPoints( compApp_ptr f_val,
                                  const compApp_ptr points,
                                  slong nbPoints,
                                  cacheApp_t cache,
-                                 slong prec );
+                                 slong prec,
+                                 metadatas_t meta);
 
 void powerSums_computeS0_fromVals( compApp_t s0, 
                                    compApp_ptr points,
@@ -69,6 +70,7 @@ powerSums_res powerSums_countingTest( const compRat_t center,
                                       const realRat_t radius,
                                       cacheApp_t cache,
                                       slong nbPoints,
+                                      int isIsolated,
                                       slong prec,
                                       metadatas_t meta, int depth);
 
