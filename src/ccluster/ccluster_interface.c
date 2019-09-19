@@ -216,6 +216,9 @@ void ccluster_interface_forJulia_draw( connCmp_list_t qResults,
                                   const realRat_t eps, 
                                   int st, 
                                   int verb){
+    
+    printf("ccluster_interface.c: ccluster_interface_forJulia_draw \n");
+    
     cacheApp_t cache;
     strategies_t strat;
     metadatas_t meta;

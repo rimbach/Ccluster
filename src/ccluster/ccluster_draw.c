@@ -400,6 +400,8 @@ void ccluster_algo_draw( connCmp_list_t qResults,
 //     chronos_tic_CclusAl(metadatas_chronref(meta));
     clock_t start = clock();
     
+    printf("ccluster_draw.c: ccluster_algo_draw \n");
+    
     realRat_t factor;
     realRat_init(factor);
     realRat_set_si(factor, 5, 4);
