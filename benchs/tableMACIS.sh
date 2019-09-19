@@ -23,6 +23,14 @@ format_time()
     fi
 }
 
+ratio_time()
+{
+    NUM=$1
+    DEN=$2
+    RATIO=`echo $NUM/$DEN|bc -l`
+    echo `format_time $RATIO`
+}
+
 ##########################getting arguments
 while [ "$1" != "" ]; do
    PARAM=`echo $1 | sed 's/=.*//'`
@@ -76,6 +84,14 @@ if [ -z "$DEGREES" ]; then
    DEGREES="64 128 191 256 383"
 fi
 
+if [ -z "$DEGMAND" ]; then
+   DEGMAND="6 7 8 9"
+fi
+
+if [ -z "$DEGRUNN" ]; then
+   DEGRUNN="7 8 9 10"
+fi
+
 if [ -z "$BITSIZE" ]; then
    BITSIZE="14"
 #    DEGREES="64 128 191 256 383"
@@ -122,7 +138,8 @@ if [ $ANTICIPATE -eq 1 ]; then
 fi
 
 VFLAGV4="V4"
-VFLAGT="test"
+VFLAGV5="default"
+VFLAGV6="test"
 
 REP="tableMACIS"
 
@@ -151,18 +168,24 @@ TAIL_TAB="\end{tabular}"
 TEMPTABFILE="temptabMACIS.txt"
 touch $TEMPTABFILE
 
+TEMPTABFILE2="temptabMACIS2.txt"
+touch $TEMPTABFILE2
+
 ##########################naming
 POL_NAME="Bernoulli"
 CCLUSTER_CALL="../test/bernoulli"
 GENPOLFILE_CALL="./genPolFile "$POL_NAME
 
 for DEG in $DEGREES; do
-    LINE_TAB=$DEG
+    LINE_TAB=$POL_NAME", \$d="$DEG"\$"
+    LINE_TAB2=$POL_NAME", \$d="$DEG"\$"
     
     FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
     FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
-    FILENAME_CCLUSTER_L_T_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_test.out"
-    FILENAME_CCLUSTER_G_T_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_test.out"
+    FILENAME_CCLUSTER_L_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V5.out"
+    FILENAME_CCLUSTER_G_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V5.out"
+    FILENAME_CCLUSTER_L_V6_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_test.out"
+    FILENAME_CCLUSTER_G_V6_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_test.out"
     FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
     FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
     
@@ -174,13 +197,22 @@ for DEG in $DEGREES; do
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V4_OUT > /dev/stderr
         $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_G_V4_OUT
     fi
-    if [ ! -e $FILENAME_CCLUSTER_L_T_OUT ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_T_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGT "3" > $FILENAME_CCLUSTER_L_T_OUT
+    if [ ! -e $FILENAME_CCLUSTER_L_V5_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V5_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_L_V5_OUT
     fi
-    if [ ! -e $FILENAME_CCLUSTER_G_T_OUT ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_T_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGT "3" > $FILENAME_CCLUSTER_G_T_OUT
+    if [ ! -e $FILENAME_CCLUSTER_G_V5_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V5_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_G_V5_OUT
+    fi
+    
+    if [ ! -e $FILENAME_CCLUSTER_L_V6_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V6_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_L_V6_OUT
+    fi
+    if [ ! -e $FILENAME_CCLUSTER_G_V6_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V6_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_G_V6_OUT
     fi
     
     $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
@@ -191,40 +223,62 @@ for DEG in $DEGREES; do
         fi
     fi
     
-    TCCLUSTER_L_V4=$(grep "time:" $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-#     TDCCLUSTER_L=$(grep "tree depth:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     TSCCLUSTER_L=$(grep "tree size:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBCLUSTERS_L_V4=$(grep "number of clusters:" $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     NBSOLUTION_L=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TCCLUSTER_L_V4=$(grep "time:"                 $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V4=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V4=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V4=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V4=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
     
-    TCCLUSTER_G_V4=$(grep "time:" $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-#     TDCCLUSTER_G=$(grep "tree depth:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     TSCCLUSTER_G=$(grep "tree size:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBCLUSTERS_G_V4=$(grep "number of clusters:" $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     NBSOLUTION_G=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TCCLUSTER_G_V4=$(grep "time:"                 $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V4=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V4=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V4=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V4=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
 
-    TCCLUSTER_L_T=$(grep "time:" $FILENAME_CCLUSTER_L_T_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-#     TDCCLUSTER_L=$(grep "tree depth:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     TSCCLUSTER_L=$(grep "tree size:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBCLUSTERS_L_T=$(grep "number of clusters:" $FILENAME_CCLUSTER_L_T_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     NBSOLUTION_L=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TCCLUSTER_L_V5=$(grep "time:"                 $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V5=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V5=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V5=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V5=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
 
-    TCCLUSTER_G_T=$(grep "time:" $FILENAME_CCLUSTER_G_T_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-#     TDCCLUSTER_G=$(grep "tree depth:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     TSCCLUSTER_G=$(grep "tree size:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBCLUSTERS_G_T=$(grep "number of clusters:" $FILENAME_CCLUSTER_G_T_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     NBSOLUTION_G=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TCCLUSTER_G_V5=$(grep "time:"                 $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V5=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V5=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V5=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V5=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_L_V6=$(grep "time:"                 $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V6=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V6=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V6=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V6=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_G_V6=$(grep "time:"                 $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V6=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V6=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V6=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V6=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
     
     TMPSOLVE=$(grep "real" $FILENAME_MPSOLVE_S_OUT| cut -f2 -d'l' | tr -d ' ')
     
-    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_L_T"&`format_time $TCCLUSTER_L_V4`"
-    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_L_T`"
-    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_G_T"&`format_time $TCCLUSTER_G_V4`" 
-    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_G_T`"
+    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_L_V6"&`format_time $TCCLUSTER_L_V4`"
+    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_L_V6`"
+    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_G_V6"&`format_time $TCCLUSTER_G_V4`" 
+    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_G_V6`"
     LINE_TAB=$LINE_TAB"&"$TMPSOLVE
     LINE_TAB=$LINE_TAB"\\\\\\hline"
     
+    LINE_TAB2=$LINE_TAB2"&("$NBCLUSTERS_G_V4", "$NBSOLUTION_G_V4")"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V4", "$TSCCLUSTER_G_V4")&`format_time $TCCLUSTER_G_V4`"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V5", "$TSCCLUSTER_G_V5")&`format_time $TCCLUSTER_G_V5`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V5`"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V6", "$TSCCLUSTER_G_V6")&`format_time $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V5 $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"\\\\\\hline"
+    
     echo $LINE_TAB >> $TEMPTABFILE
+    echo $LINE_TAB2 >> $TEMPTABFILE2
     
 done
 
@@ -234,12 +288,15 @@ CCLUSTER_CALL="../test/mignottePS"
 GENPOLFILE_CALL="./genPolFile "$POL_NAME
 
 for DEG in $DEGREES; do
-    LINE_TAB=$DEG
+    LINE_TAB=$POL_NAME", \$a="$BITSIZE"\$, \$d="$DEG"\$"
+    LINE_TAB2=$POL_NAME", \$a="$BITSIZE"\$, \$d="$DEG"\$"
     
     FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
     FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
-    FILENAME_CCLUSTER_L_T_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_test.out"
-    FILENAME_CCLUSTER_G_T_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_test.out"
+    FILENAME_CCLUSTER_L_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V5.out"
+    FILENAME_CCLUSTER_G_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V5.out"
+    FILENAME_CCLUSTER_L_V6_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_test.out"
+    FILENAME_CCLUSTER_G_V6_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_test.out"
     FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
     FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
     
@@ -251,16 +308,25 @@ for DEG in $DEGREES; do
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V4_OUT > /dev/stderr
         $CCLUSTER_CALL $DEG $BITSIZE $BGLOBAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_G_V4_OUT
     fi
-    if [ ! -e $FILENAME_CCLUSTER_L_T_OUT ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_T_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BITSIZE $BLOCAL $EPSILONCCL $VFLAGT "3" > $FILENAME_CCLUSTER_L_T_OUT
+    if [ ! -e $FILENAME_CCLUSTER_L_V5_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V5_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BITSIZE $BLOCAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_L_V5_OUT
     fi
-    if [ ! -e $FILENAME_CCLUSTER_G_T_OUT ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_T_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BITSIZE $BGLOBAL $EPSILONCCL $VFLAGT "3" > $FILENAME_CCLUSTER_G_T_OUT
+    if [ ! -e $FILENAME_CCLUSTER_G_V5_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V5_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BITSIZE $BGLOBAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_G_V5_OUT
     fi
     
-    $GENPOLFILE_CALL $DEG $BITSIZE > $FILENAME_MPSOLVE_IN
+    if [ ! -e $FILENAME_CCLUSTER_L_V6_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V6_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BITSIZE $BLOCAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_L_V6_OUT
+    fi
+    if [ ! -e $FILENAME_CCLUSTER_G_V6_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V6_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BITSIZE $BGLOBAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_G_V6_OUT
+    fi
+    
+    $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
     if [ $MPSOLVE -eq 1 ]; then
         if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
             echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
@@ -268,40 +334,284 @@ for DEG in $DEGREES; do
         fi
     fi
     
-    TCCLUSTER_L_V4=$(grep "time:" $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-#     TDCCLUSTER_L=$(grep "tree depth:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     TSCCLUSTER_L=$(grep "tree size:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBCLUSTERS_L_V4=$(grep "number of clusters:" $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     NBSOLUTION_L=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TCCLUSTER_L_V4=$(grep "time:"                 $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V4=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V4=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V4=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V4=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
     
-    TCCLUSTER_G_V4=$(grep "time:" $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-#     TDCCLUSTER_G=$(grep "tree depth:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     TSCCLUSTER_G=$(grep "tree size:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBCLUSTERS_G_V4=$(grep "number of clusters:" $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     NBSOLUTION_G=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TCCLUSTER_G_V4=$(grep "time:"                 $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V4=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V4=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V4=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V4=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
 
-    TCCLUSTER_L_T=$(grep "time:" $FILENAME_CCLUSTER_L_T_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-#     TDCCLUSTER_L=$(grep "tree depth:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     TSCCLUSTER_L=$(grep "tree size:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBCLUSTERS_L_T=$(grep "number of clusters:" $FILENAME_CCLUSTER_L_T_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     NBSOLUTION_L=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TCCLUSTER_L_V5=$(grep "time:"                 $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V5=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V5=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V5=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V5=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
 
-    TCCLUSTER_G_T=$(grep "time:" $FILENAME_CCLUSTER_G_T_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-#     TDCCLUSTER_G=$(grep "tree depth:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     TSCCLUSTER_G=$(grep "tree size:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBCLUSTERS_G_T=$(grep "number of clusters:" $FILENAME_CCLUSTER_G_T_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     NBSOLUTION_G=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TCCLUSTER_G_V5=$(grep "time:"                 $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V5=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V5=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V5=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V5=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_L_V6=$(grep "time:"                 $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V6=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V6=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V6=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V6=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_G_V6=$(grep "time:"                 $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V6=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V6=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V6=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V6=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
     
     TMPSOLVE=$(grep "real" $FILENAME_MPSOLVE_S_OUT| cut -f2 -d'l' | tr -d ' ')
     
-    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_L_T"&`format_time $TCCLUSTER_L_V4`"
-    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_L_T`"
-    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_G_T"&`format_time $TCCLUSTER_G_V4`" 
-    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_G_T`"
+    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_L_V6"&`format_time $TCCLUSTER_L_V4`"
+    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_L_V6`"
+    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_G_V6"&`format_time $TCCLUSTER_G_V4`" 
+    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_G_V6`"
     LINE_TAB=$LINE_TAB"&"$TMPSOLVE
     LINE_TAB=$LINE_TAB"\\\\\\hline"
     
+    LINE_TAB2=$LINE_TAB2"&("$NBCLUSTERS_G_V4", "$NBSOLUTION_G_V4")"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V4", "$TSCCLUSTER_G_V4")&`format_time $TCCLUSTER_G_V4`"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V5", "$TSCCLUSTER_G_V5")&`format_time $TCCLUSTER_G_V5`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V5`"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V6", "$TSCCLUSTER_G_V6")&`format_time $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V5 $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"\\\\\\hline"
+    
     echo $LINE_TAB >> $TEMPTABFILE
+    echo $LINE_TAB2 >> $TEMPTABFILE2
+    
+done
+
+##########################naming
+POL_NAME="Mandelbrot"
+CCLUSTER_CALL="../test/mandelbrotPS"
+GENPOLFILE_CALL="./genPolFile "$POL_NAME
+
+for DEG in $DEGMAND; do
+    LINE_TAB=$POL_NAME", \$d="$DEG"\$"
+    LINE_TAB2=$POL_NAME", \$d="$DEG"\$"
+    
+    FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
+    FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
+    FILENAME_CCLUSTER_L_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V5.out"
+    FILENAME_CCLUSTER_G_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V5.out"
+    FILENAME_CCLUSTER_L_V6_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_test.out"
+    FILENAME_CCLUSTER_G_V6_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_test.out"
+    FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
+    FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
+    
+    if [ ! -e $FILENAME_CCLUSTER_L_V4_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V4_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_L_V4_OUT
+    fi
+    if [ ! -e $FILENAME_CCLUSTER_G_V4_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V4_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_G_V4_OUT
+    fi
+    if [ ! -e $FILENAME_CCLUSTER_L_V5_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V5_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_L_V5_OUT
+    fi
+    if [ ! -e $FILENAME_CCLUSTER_G_V5_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V5_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_G_V5_OUT
+    fi
+    
+    if [ ! -e $FILENAME_CCLUSTER_L_V6_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V6_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_L_V6_OUT
+    fi
+    if [ ! -e $FILENAME_CCLUSTER_G_V6_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V6_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_G_V6_OUT
+    fi
+    
+    $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
+    if [ $MPSOLVE -eq 1 ]; then
+        if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
+            echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
+            (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL_S $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_S_OUT) &>> $FILENAME_MPSOLVE_S_OUT
+        fi
+    fi
+    
+    TCCLUSTER_L_V4=$(grep "time:"                 $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V4=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V4=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V4=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V4=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    
+    TCCLUSTER_G_V4=$(grep "time:"                 $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V4=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V4=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V4=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V4=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_L_V5=$(grep "time:"                 $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V5=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V5=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V5=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V5=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_G_V5=$(grep "time:"                 $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V5=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V5=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V5=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V5=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_L_V6=$(grep "time:"                 $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V6=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V6=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V6=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V6=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_G_V6=$(grep "time:"                 $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V6=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V6=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V6=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V6=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    
+    TMPSOLVE=$(grep "real" $FILENAME_MPSOLVE_S_OUT| cut -f2 -d'l' | tr -d ' ')
+    
+    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_L_V6"&`format_time $TCCLUSTER_L_V4`"
+    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_L_V6`"
+    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_G_V6"&`format_time $TCCLUSTER_G_V4`" 
+    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_G_V6`"
+    LINE_TAB=$LINE_TAB"&"$TMPSOLVE
+    LINE_TAB=$LINE_TAB"\\\\\\hline"
+    
+    LINE_TAB2=$LINE_TAB2"&("$NBCLUSTERS_G_V4", "$NBSOLUTION_G_V4")"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V4", "$TSCCLUSTER_G_V4")&`format_time $TCCLUSTER_G_V4`"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V5", "$TSCCLUSTER_G_V5")&`format_time $TCCLUSTER_G_V5`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V5`"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V6", "$TSCCLUSTER_G_V6")&`format_time $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V5 $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"\\\\\\hline"
+    
+    echo $LINE_TAB >> $TEMPTABFILE
+    echo $LINE_TAB2 >> $TEMPTABFILE2
+    
+done
+
+##########################naming
+POL_NAME="Runnels"
+CCLUSTER_CALL="../test/runnelsPS"
+GENPOLFILE_CALL="./genPolFile "$POL_NAME
+
+for DEG in $DEGRUNN; do
+    LINE_TAB=$POL_NAME", \$d="$DEG"\$"
+    LINE_TAB2=$POL_NAME", \$d="$DEG"\$"
+    
+    FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
+    FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
+    FILENAME_CCLUSTER_L_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V5.out"
+    FILENAME_CCLUSTER_G_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V5.out"
+    FILENAME_CCLUSTER_L_V6_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_test.out"
+    FILENAME_CCLUSTER_G_V6_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_test.out"
+    FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
+    FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
+    
+    if [ ! -e $FILENAME_CCLUSTER_L_V4_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V4_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_L_V4_OUT
+    fi
+    if [ ! -e $FILENAME_CCLUSTER_G_V4_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V4_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_G_V4_OUT
+    fi
+    if [ ! -e $FILENAME_CCLUSTER_L_V5_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V5_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_L_V5_OUT
+    fi
+    if [ ! -e $FILENAME_CCLUSTER_G_V5_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V5_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_G_V5_OUT
+    fi
+    
+    if [ ! -e $FILENAME_CCLUSTER_L_V6_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V6_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_L_V6_OUT
+    fi
+    if [ ! -e $FILENAME_CCLUSTER_G_V6_OUT ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V6_OUT > /dev/stderr
+        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_G_V6_OUT
+    fi
+    
+    $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
+    if [ $MPSOLVE -eq 1 ]; then
+        if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
+            echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
+            (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL_S $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_S_OUT) &>> $FILENAME_MPSOLVE_S_OUT
+        fi
+    fi
+    
+    TCCLUSTER_L_V4=$(grep "time:"                 $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V4=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V4=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V4=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V4=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    
+    TCCLUSTER_G_V4=$(grep "time:"                 $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V4=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V4=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V4=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V4=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V4_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_L_V5=$(grep "time:"                 $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V5=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V5=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V5=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V5=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_G_V5=$(grep "time:"                 $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V5=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V5=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V5=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V5=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V5_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_L_V6=$(grep "time:"                 $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_L_V6=$(grep "tree depth:"          $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_L_V6=$(grep "tree size:"           $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_L_V6=$(grep "number of clusters:"  $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_L_V6=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+    TCCLUSTER_G_V6=$(grep "time:"                 $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDCCLUSTER_G_V6=$(grep "tree depth:"          $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    TSCCLUSTER_G_V6=$(grep "tree size:"           $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBCLUSTERS_G_V6=$(grep "number of clusters:"  $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    NBSOLUTION_G_V6=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_V6_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+    
+    TMPSOLVE=$(grep "real" $FILENAME_MPSOLVE_S_OUT| cut -f2 -d'l' | tr -d ' ')
+    
+    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_L_V6"&`format_time $TCCLUSTER_L_V4`"
+    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_L_V6`"
+    LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_G_V6"&`format_time $TCCLUSTER_G_V4`" 
+    LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_G_V6`"
+    LINE_TAB=$LINE_TAB"&"$TMPSOLVE
+    LINE_TAB=$LINE_TAB"\\\\\\hline"
+    
+    LINE_TAB2=$LINE_TAB2"&("$NBCLUSTERS_G_V4", "$NBSOLUTION_G_V4")"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V4", "$TSCCLUSTER_G_V4")&`format_time $TCCLUSTER_G_V4`"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V5", "$TSCCLUSTER_G_V5")&`format_time $TCCLUSTER_G_V5`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V5`"
+    LINE_TAB2=$LINE_TAB2"&("$TDCCLUSTER_G_V6", "$TSCCLUSTER_G_V6")&`format_time $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V5 $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V6`"
+    LINE_TAB2=$LINE_TAB2"\\\\\\hline"
+    
+    echo $LINE_TAB >> $TEMPTABFILE
+    echo $LINE_TAB2 >> $TEMPTABFILE2
     
 done
 
@@ -310,5 +620,7 @@ done
 # echo $SECOND_LINE
 cat $TEMPTABFILE
 # echo $TAIL_TAB
+
+cat $TEMPTABFILE2
 
 rm -rf $TEMPTABFILE

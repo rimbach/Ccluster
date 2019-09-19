@@ -28,6 +28,7 @@ void genSpiralPolFile( FILE * file, slong degree, slong prec);
 void clustersIterate( compApp_poly_ptr tabres, compApp_poly_ptr tabprec, int i, slong prec);
 void genClusterPolFile( FILE * file, int iterations, slong prec);
 void genMandelbrotPolFile( FILE * file, int iterations);
+void genRunnelsPolFile( FILE * file, int iterations);
 void genLaguerrePolFile( FILE * file, int degree);
 
 
@@ -47,6 +48,7 @@ int main(int argc, char **argv){
         printf("usage: %s Spiral      degree prec\n", argv[0]);
         printf("usage: %s NestedClusters     iterations prec\n", argv[0]);
         printf("usage: %s Mandelbrot  iterations \n", argv[0]);
+        printf("usage: %s Runnels     iterations \n", argv[0]);
         printf("usage: %s Laguerre    degree \n", argv[0]);
         return -1;
     }
@@ -63,6 +65,7 @@ int main(int argc, char **argv){
     char spiral[] = "Spiral\0";
     char cluster[] = "NestedClusters\0";
     char mandelbrot[] = "Mandelbrot\0";
+    char runnels[] = "Runnels\0";
     char laguerre[] = "Laguerre\0";
     int degree = 0;
     int thirdArg = 0;
@@ -137,6 +140,13 @@ int main(int argc, char **argv){
             printf("usage: %s Mandelbrot iterations \n", argv[0]);
         else{
             genMandelbrotPolFile(stdout, degree);
+        }
+    }
+    if (strcmp(poly, runnels)==0) {
+        if (argc<3)
+            printf("usage: %s Runnels iterations \n", argv[0]);
+        else{
+            genRunnelsPolFile(stdout, degree);
         }
     }
     if (strcmp(poly, laguerre)==0) {
@@ -608,6 +618,58 @@ void genMandelbrotPolFile( FILE * file, int iterations){
         fprintf(file, "\n");
     }
     realRat_poly_clear(pmand);
+    realRat_poly_clear(pone);
+    realRat_poly_clear(px);
+    realRat_clear(coeff);
+}
+
+void genRunnelsPolFile( FILE * file, int iterations){
+    
+    realRat_poly_t prun, prunm1, prunm2, pone, px;
+    realRat_poly_init(prun);
+    realRat_poly_init(prunm1);
+    realRat_poly_init(prunm2);
+    realRat_poly_init(pone);
+    realRat_poly_init(px);
+    realRat_t coeff;
+    realRat_init(coeff);
+    
+    
+    realRat_poly_zero(px);
+    realRat_poly_set_coeff_si_ui(px, 1, 1, 1);
+    
+    realRat_poly_one(prunm2);
+        realRat_poly_set(prunm1, px);
+        realRat_poly_one(prun);
+    
+    
+    for (int i = 2; i<=iterations; i++) {
+        realRat_poly_pow(prunm2, prunm2, 4);
+            realRat_poly_mul(prunm2, prunm2, px);
+            
+            realRat_poly_pow(prun, prunm1, 2);
+            realRat_poly_add(prun, prun, prunm2);
+            
+            realRat_poly_set(prunm2, prunm1);
+            realRat_poly_set(prunm1, prun);
+    }
+        
+    slong truedeg = realRat_poly_degree(prun); 
+    
+    fprintf(file, "Monomial;\n");
+    fprintf(file, "Real;\n");
+    fprintf(file, "Integer;\n");
+    fprintf(file, "Degree = %d;\n", (int) truedeg);
+    fprintf(file, "\n");
+    
+    for(int i = 0; i<=truedeg; i++){
+        realRat_poly_get_coeff_realRat(coeff, prun, i);
+        realRat_fprint(file, coeff);
+        fprintf(file, "\n");
+    }
+    realRat_poly_clear(prun);
+    realRat_poly_clear(prunm1);
+    realRat_poly_clear(prunm2);
     realRat_poly_clear(pone);
     realRat_poly_clear(px);
     realRat_clear(coeff);

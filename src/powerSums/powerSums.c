@@ -87,6 +87,8 @@ void powerSums_evaluateAtPoints( compApp_ptr f_val,
         for (slong i=0; i<nbPoints; i++)
             meta->evalPoly( f_val+i, fder_val + i, points+i, prec);
     }
+    
+    
 //     compApp_ptr fvals2;
 //     compApp_ptr fdervals2;
 //     fvals2 =         (compApp_ptr) ccluster_malloc( nbPoints*sizeof(compApp) );
@@ -95,30 +97,31 @@ void powerSums_evaluateAtPoints( compApp_ptr f_val,
 //         compApp_init( fvals2 +i );
 //         compApp_init( fdervals2 +i );
 //     }
-    
-// //     compApp_poly_ptr app = cacheApp_getApproximation ( cache, prec );
+//     
+//     compApp_poly_ptr app = cacheApp_getApproximation ( cache, prec );
 //     for (slong i=0; i<nbPoints; i++) {
-// //         compApp_poly_evaluate2_horner(f_val + i, fder_val + i, app, points + i, prec);
+//         compApp_poly_evaluate2_horner(f_val + i, fder_val + i, app, points + i, prec);
 // //         compApp_poly_evaluate2_rectangular(f_val + i, fder_val + i, app, points + i, prec);
-//         meta->evalPoly( f_val+i, fder_val + i, points+i, prec);
-// //         meta->evalPoly( fvals2+i, fdervals2+i, points+i, prec);
-// //         printf("point %ld: ", i);
-// //         compApp_print(points+i);
-// //         printf("\n           ");
-// //         compApp_print(f_val + i);
-// //         printf("\n           ");
-// //         compApp_print(fvals2 + i);
-// //         printf("\n           first contains second?   %d (0:NO, <>0: YES)", acb_contains(f_val + i, fvals2 + i));
-// //         printf("\n           first intersects second? %d (0:NO, <>0: YES)", acb_overlaps(f_val + i, fvals2 + i));
-// //         printf("\n           ");
-// //         compApp_print(fder_val + i);
-// //         printf("\n           ");
-// //         compApp_print(fdervals2 + i);
-// //         printf("\n           first contains second?   %d (0:NO, <>0: YES)", acb_contains(fder_val + i, fdervals2 + i));
-// //         printf("\n           first intersects second? %d (0:NO, <>0: YES)", acb_overlaps(fder_val + i, fdervals2 + i));
-// //         printf("\n\n");
+//         meta->evalPoly( fvals2+i, fdervals2+i, points+i, prec);
+//         printf("point %ld: ", i);
+//         compApp_print(points+i);
+//         printf("\n           ");
+//         compApp_print(f_val + i);
+//         printf("\n           ");
+//         compApp_print(fvals2 + i);
+//         printf("\n           first contains second?   %d (0:NO, <>0: YES)", acb_contains(f_val + i, fvals2 + i));
+//         printf("\n           second contains first?   %d (0:NO, <>0: YES)", acb_contains(fvals2 + i, f_val + i));
+//         printf("\n           first intersects second? %d (0:NO, <>0: YES)", acb_overlaps(f_val + i, fvals2 + i));
+//         printf("\n           ");
+//         compApp_print(fder_val + i);
+//         printf("\n           ");
+//         compApp_print(fdervals2 + i);
+//         printf("\n           first contains second?   %d (0:NO, <>0: YES)", acb_contains(fder_val + i, fdervals2 + i));
+//         printf("\n           second contains first?   %d (0:NO, <>0: YES)", acb_contains(fdervals2 + i, fder_val + i));
+//         printf("\n           first intersects second? %d (0:NO, <>0: YES)", acb_overlaps(fder_val + i, fdervals2 + i));
+//         printf("\n\n");
 //     }
-    
+//     
 //     for (int i=0; i<nbPoints; i++){
 //         compApp_clear( fvals2 +i );
 //         compApp_clear( fdervals2 +i );
