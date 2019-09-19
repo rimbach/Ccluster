@@ -420,9 +420,9 @@ void ccluster_algo_draw( connCmp_list_t qResults,
     connCmp_list_init(discardedCcs);
     
     connCmp_list_push(qPrepLoop, initialCC);
-//     printf("preploop: \n");
+    printf("preploop: \n");
     ccluster_prep_loop_draw( qMainLoop, qPrepLoop, discardedCcs, discarded, cache, meta);
-//     printf("mainloop: \n");
+    printf("mainloop: \n");
     ccluster_main_loop_draw( qResults,  qMainLoop, discardedCcs, discarded, eps, cache, meta);
     
     
