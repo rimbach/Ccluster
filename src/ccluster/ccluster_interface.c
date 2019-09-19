@@ -209,6 +209,42 @@ void ccluster_interface_forJulia ( connCmp_list_t qResults,
 //     printf("ccluster.c: ccluster_interface_forJulia_func: end\n");
 }
 
+void ccluster_interface_forJulia_draw( connCmp_list_t qResults, 
+                                       compBox_list_t qDiscarded, 
+                                  void(*func)(compApp_poly_t, slong), 
+                                  const compBox_t initialBox, 
+                                  const realRat_t eps, 
+                                  int st, 
+                                  int verb){
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    
+    cacheApp_init(cache, func);
+    strategies_init(strat);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    
+    /* automaticly set realCoeffs */
+    if (cacheApp_is_real(cache)==0
+        || compBox_contains_real_line_in_interior(initialBox)==0 )
+        strategies_set_realCoeffs(strat, 0);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    
+    ccluster_algo_draw( qResults, qDiscarded, initialBox, eps, cache, meta);
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    if (verb>=3) {
+        connCmp_list_print_for_results(stdout, qResults, meta);
+//         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
+}
+
 void ccluster_interface_forJulia_realRat_poly( connCmp_list_t qResults, 
                                               const realRat_poly_t poly, 
                                               const compBox_t initialBox, 

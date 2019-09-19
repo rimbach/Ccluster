@@ -391,7 +391,11 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
     connCmp_list_clear(ltemp);
 }
 
-void ccluster_algo_draw( connCmp_list_t qResults, compBox_list_t discarded, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+void ccluster_algo_draw( connCmp_list_t qResults, 
+                         compBox_list_t discarded, 
+                         const compBox_t initialBox, 
+                         const realRat_t eps, 
+                         cacheApp_t cache, metadatas_t meta){
     
 //     chronos_tic_CclusAl(metadatas_chronref(meta));
     clock_t start = clock();
@@ -431,120 +435,6 @@ void ccluster_algo_draw( connCmp_list_t qResults, compBox_list_t discarded, cons
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
-// void connCmp_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta){
-//     
-//     compBox_t containingBox;
-//     compBox_init(containingBox);
-//     compDsk_t containingDisk;
-//     compDsk_init(containingDisk);
-//     
-// //     int lensols = (int) log10(metadatas_getNbSolutions(meta)) +1;
-// //     int lens = (int) log10(connCmp_nSols(c)) +1;
-// //     char temp[100], temp2[100];
-// //     sprintf(temp, "%d", connCmp_nSols(c));
-// //     for (int i = lens; i<=lensols; i++) sprintf(temp2, " ");
-// //     fprintf(f, "--cluster with %s sols: ", temp);
-//     fprintf(f, "--cluster with %5d sols: ", connCmp_nSols(c));
-//     
-//     connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
-//     compBox_get_containing_dsk( containingDisk, containingBox);
-//     
-//     slong d = fmpz_clog_ui(realRat_denref(compDsk_radiusref(containingDisk)),10) - fmpz_clog_ui(realRat_numref(compDsk_radiusref(containingDisk)),10); 
-//     slong p = fmpz_clog_ui(realRat_denref(compDsk_radiusref(containingDisk)),2) - fmpz_clog_ui(realRat_numref(compDsk_radiusref(containingDisk)),2)+50; 
-//     
-//     realApp_t cRe, cIm, rad;
-//     realApp_init(cRe);
-//     realApp_init(cIm);
-//     realApp_init(rad);
-//     
-//     realApp_set_realRat(cRe, compRat_realref(compDsk_centerref(containingDisk)), p);
-//     realApp_set_realRat(cIm, compRat_imagref(compDsk_centerref(containingDisk)), p);
-//     realApp_set_realRat(rad, compDsk_radiusref(containingDisk), p);
-//     
-//     
-// //     printf("d: %d, prec: %d\n", (int) d, (int) p);
-//     fprintf(f, "center: ");
-//     realApp_fprintn(f, cRe, d, ARB_STR_NO_RADIUS);
-//     fprintf(f, " + ");
-//     realApp_fprintn(f, cIm, d, ARB_STR_NO_RADIUS);
-//     fprintf(f, "j, radius: ");
-//     realApp_fprintn(f, rad, 5, ARB_STR_NO_RADIUS);
-//     
-//     compBox_init(containingBox);
-//     compDsk_init(containingDisk);
-//     realApp_clear(cRe);
-//     realApp_clear(cIm);
-//     realApp_clear(rad);
-// }
-// 
-// void connCmp_list_print_for_results(FILE * f, const connCmp_list_t l, metadatas_t meta){
-//     connCmp_list_iterator it = connCmp_list_begin(l);
-//     
-//     while (it!=connCmp_list_end() ) {
-//         connCmp_print_for_results(f, connCmp_list_elmt(it), meta);
-//         it = connCmp_list_next(it);
-//         fprintf(f, "\n");
-//     }
-// }
 
-// void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_t initialBox, const realRat_t eps, int st, int verb){
-// 
-//     cacheApp_t cache;
-//     strategies_t strat;
-//     metadatas_t meta;
-//     connCmp_list_t qRes;
-//     
-//     cacheApp_init(cache, func);
-//     strategies_init(strat);
-// //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-//     
-//     metadatas_init(meta, initialBox, strat, verb);
-//     connCmp_list_init(qRes);
-//     
-//     ccluster_algo( qRes, initialBox, eps, cache, meta);
-//     metadatas_count(meta);
-//     metadatas_fprint(stdout, meta, eps);
-//     
-//     if (verb>=3) {
-//         connCmp_list_print_for_results(stdout, qRes, meta);
-// //         connCmp_list_print_for_results(stdout, qRes, 500, 40, meta);
-//     }
-//     
-//     cacheApp_clear(cache);
-//     strategies_clear(strat);
-//     metadatas_clear(meta);
-//     connCmp_list_clear(qRes);
-// }
-
-void ccluster_interface_forJulia_draw( connCmp_list_t qResults, connCmp_list_t qDiscarded, 
-                                  void(*func)(compApp_poly_t, slong), 
-                                  const compBox_t initialBox, 
-                                  const realRat_t eps, 
-                                  int st, 
-                                  int verb){
-    cacheApp_t cache;
-    strategies_t strat;
-    metadatas_t meta;
-    
-    cacheApp_init(cache, func);
-    strategies_init(strat);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
-    
-    metadatas_init(meta, initialBox, strat, verb);
-    
-    ccluster_algo_draw( qResults, qDiscarded, initialBox, eps, cache, meta);
-    metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
-    if (verb>=3) {
-        connCmp_list_print_for_results(stdout, qResults, meta);
-//         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
-    }
-    
-    cacheApp_clear(cache);
-    strategies_clear(strat);
-    metadatas_clear(meta);
-}
 
 

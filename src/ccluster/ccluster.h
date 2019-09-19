@@ -162,7 +162,8 @@ void ccluster_refine_forJulia( connCmp_list_t qResults,
                                   int verb);
 
 ///implemented in ccluster_draw.c
-void ccluster_interface_forJulia_draw( connCmp_list_t qResults, connCmp_list_t qDiscarded, 
+void ccluster_interface_forJulia_draw( connCmp_list_t qResults, 
+                                       compBox_list_t qDiscarded, 
                                   void(*func)(compApp_poly_t, slong), 
                                   const compBox_t initialBox, 
                                   const realRat_t eps, 
