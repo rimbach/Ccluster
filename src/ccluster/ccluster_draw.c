@@ -132,6 +132,8 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
     compBox_ptr btemp;
     connCmp_ptr ctemp;
     
+    printf("ccluster_draw.c: init OK: \n");
+    
     /* RealCoeffs */
     int cc_contains_real_line = 0;
     /* Check if cc contains the real line */
@@ -145,6 +147,8 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
         compBox_clear(btemp);
         ccluster_free(btemp);
     }
+    
+    printf("ccluster_draw.c: quadrisect OK: \n");
     
     prec = ccluster_discard_compBox_list_draw( subBoxes, discarded, cache, prec, meta);
     
