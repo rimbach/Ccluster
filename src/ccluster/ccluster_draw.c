@@ -18,6 +18,8 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta){
     
+    printf("ccluster_draw.c: ccluster_discard_compBox_list_draw: \n");
+    
     tstar_res res;
     res.appPrec = prec;
     
@@ -130,22 +132,21 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
     compBox_ptr btemp;
     connCmp_ptr ctemp;
     
+    /* RealCoeffs */
+    int cc_contains_real_line = 0;
+    /* Check if cc contains the real line */
+    if ( (metadatas_realCoeffs(meta)) && (!connCmp_is_imaginary_positive(cc)) )
+        cc_contains_real_line = 1;
+    /* end RealCoeffs */
+    
     while (!connCmp_is_empty(cc)) {
         btemp = connCmp_pop(cc);
         subdBox_quadrisect( subBoxes, btemp );
         compBox_clear(btemp);
         ccluster_free(btemp);
     }
-#ifdef CCLUSTER_HAVE_PTHREAD
-    if (nbThreads>1) {
-//         printf("--ccluster_parallel_bisect_connCmp: nb threads: %d \n", (int) nbThreads );
-        prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta, nbThreads);
-    }
-    else
-        prec = ccluster_discard_compBox_list_draw( subBoxes, discarded, cache, prec, meta);
-#else
+    
     prec = ccluster_discard_compBox_list_draw( subBoxes, discarded, cache, prec, meta);
-#endif
     
     while (!compBox_list_is_empty(subBoxes)) {
         btemp = compBox_list_pop(subBoxes);
@@ -154,6 +155,16 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
     int specialFlag = 1;
     if (connCmp_list_get_size(ltemp) == 1)
         specialFlag = 0;
+    
+    /* RealCoeffs */
+    if ( (metadatas_realCoeffs(meta)) && (connCmp_list_get_size(ltemp) == 1) && (cc_contains_real_line == 1) ){
+        ctemp = connCmp_list_first(ltemp);
+        /* test if cc has been separated from real case;
+         in which case reset everything*/
+        if ( connCmp_is_imaginary_positive(ctemp) )
+            specialFlag = 1;
+    }
+    /* end RealCoeffs */
     
     slong nprec; 
     if (prec == connCmp_appPrref(cc)) {
@@ -176,6 +187,9 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
                 connCmp_decrease_nwSpd(ctemp);
                 /* copy the number of sols */
                 connCmp_nSolsref(ctemp) = connCmp_nSolsref(cc);
+                /* test */
+                connCmp_isSep(ctemp) = connCmp_isSep(cc);
+                /*end test */
             }
             connCmp_list_push(dest, ctemp);
         }
