@@ -52,7 +52,7 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
 #endif
             compBox_list_push(discarded, btemp);
             compBox_clear(btemp);
-            free(btemp);
+            ccluster_free(btemp);
         }
         
         else{
@@ -119,6 +119,8 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
 
 void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_list_t discardedCcs, compBox_list_t discarded, cacheApp_t cache, metadatas_t meta, slong nbThreads){
     
+    printf("ccluster_draw.c: ccluster_bisect_connCmp_draw: \n");
+    
     slong prec = connCmp_appPr(cc);
     compBox_list_t subBoxes;
     connCmp_list_t ltemp;
@@ -132,7 +134,7 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
         btemp = connCmp_pop(cc);
         subdBox_quadrisect( subBoxes, btemp );
         compBox_clear(btemp);
-        free(btemp);
+        ccluster_free(btemp);
     }
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (nbThreads>1) {
@@ -189,6 +191,8 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
 
 void ccluster_prep_loop_draw( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, connCmp_list_t discardedCcs, compBox_list_t discarded, cacheApp_t cache, metadatas_t meta) {
     
+    printf("ccluster_draw.c: ccluster_prep_loop_draw: \n");
+    
     connCmp_list_t ltemp;
     realRat_t halfwidth, diam;
     connCmp_list_init(ltemp);
@@ -213,7 +217,7 @@ void ccluster_prep_loop_draw( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ctemp);
-            free(ctemp);
+            ccluster_free(ctemp);
         }      
     }
     
@@ -315,7 +319,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
 //             printf("+++depth: %d, connCmp_nSolsref(ccur): %d, res_newton: %d \n", depth, connCmp_nSols(ccur), resNewton.nflag);
             if (resNewton.nflag) {
                 connCmp_clear(ccur);
-                free(ccur);
+                ccluster_free(ccur);
                 ccur = nCC;
                 connCmp_increase_nwSpd(ccur);
                 connCmp_newSuref(ccur) = 1;
@@ -333,7 +337,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
             else {
                 connCmp_newSuref(ccur) = 0;
                 connCmp_clear(nCC);
-                free(nCC);
+                ccluster_free(nCC);
             }
             if (metadatas_haveToCount(meta)){
                 metadatas_add_Newton   ( meta, depth, resNewton.nflag, (double) (clock() - start) );
@@ -369,13 +373,13 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
                 while (!connCmp_list_is_empty(ltemp))
                     connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
                 connCmp_clear(ccur);
-                free(ccur);
+                ccluster_free(ccur);
 #else
             ccluster_bisect_connCmp_draw( ltemp, ccur, discardedCcs, discarded, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
-            free(ccur);
+            ccluster_free(ccur);
 #endif
         }
         
@@ -422,9 +426,9 @@ void ccluster_algo_draw( connCmp_list_t qResults,
     connCmp_list_init(discardedCcs);
     
     connCmp_list_push(qPrepLoop, initialCC);
-    printf("preploop: \n");
+    printf("ccluster_draw.c: ccluster_algo_draw, preploop: \n");
     ccluster_prep_loop_draw( qMainLoop, qPrepLoop, discardedCcs, discarded, cache, meta);
-    printf("mainloop: \n");
+    printf("ccluster_draw.c: ccluster_algo_draw, mainloop: \n");
     ccluster_main_loop_draw( qResults,  qMainLoop, discardedCcs, discarded, eps, cache, meta);
     
     
