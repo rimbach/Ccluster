@@ -170,6 +170,12 @@ void ccluster_interface_forJulia_draw( connCmp_list_t qResults,
                                   int st, 
                                   int verb);
 
+void ccluster_algo_draw( connCmp_list_t qResults, 
+                         compBox_list_t discarded, 
+                         const compBox_t initialBox, 
+                         const realRat_t eps, 
+                         cacheApp_t cache, metadatas_t meta);
+
 #ifdef __cplusplus
 }
 #endif
