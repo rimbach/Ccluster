@@ -48,8 +48,8 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
         /* Real Coeffs */
         if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
             compBox_list_push(discarded, btemp);
-            compBox_clear(btemp);
-            ccluster_free(btemp);
+//             compBox_clear(btemp);
+//             ccluster_free(btemp);
             continue;
         }
         
@@ -59,8 +59,8 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
                 metadatas_add_discarded( meta, depth);
             }
             compBox_list_push(discarded, btemp);
-            compBox_clear(btemp);
-            ccluster_free(btemp);
+//             compBox_clear(btemp);
+//             ccluster_free(btemp);
         }
         
         else{
