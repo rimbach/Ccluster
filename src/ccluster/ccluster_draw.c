@@ -18,6 +18,8 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta){
     
+//     printf("ccluster_draw.c: ccluster_discard_compBox_list_draw: \n");
+    
     tstar_res res;
     res.appPrec = prec;
     
@@ -41,18 +43,24 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
         btemp = compBox_list_pop(boxes);
         compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
-        res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1,0, res.appPrec, depth, meta);    
-        if (res.nbOfSol==0) {
-#ifdef CCLUSTER_HAVE_PTHREAD
-            metadatas_lock(meta);
-#endif
-            metadatas_add_discarded( meta, depth);
-#ifdef CCLUSTER_HAVE_PTHREAD
-            metadatas_unlock(meta);
-#endif
+        metadatas_add_explored( meta, depth);
+        
+        /* Real Coeffs */
+        if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
             compBox_list_push(discarded, btemp);
-            compBox_clear(btemp);
-            free(btemp);
+//             compBox_clear(btemp);
+//             ccluster_free(btemp);
+            continue;
+        }
+        
+        res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);    
+        if (res.nbOfSol==0) {
+            if (metadatas_haveToCount(meta)){
+                metadatas_add_discarded( meta, depth);
+            }
+            compBox_list_push(discarded, btemp);
+//             compBox_clear(btemp);
+//             ccluster_free(btemp);
         }
         
         else{
@@ -119,6 +127,8 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
 
 void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_list_t discardedCcs, compBox_list_t discarded, cacheApp_t cache, metadatas_t meta, slong nbThreads){
     
+//     printf("ccluster_draw.c: ccluster_bisect_connCmp_draw: \n");
+    
     slong prec = connCmp_appPr(cc);
     compBox_list_t subBoxes;
     connCmp_list_t ltemp;
@@ -128,22 +138,21 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
     compBox_ptr btemp;
     connCmp_ptr ctemp;
     
+    /* RealCoeffs */
+    int cc_contains_real_line = 0;
+    /* Check if cc contains the real line */
+    if ( (metadatas_realCoeffs(meta)) && (!connCmp_is_imaginary_positive(cc)) )
+        cc_contains_real_line = 1;
+    /* end RealCoeffs */
+    
     while (!connCmp_is_empty(cc)) {
         btemp = connCmp_pop(cc);
         subdBox_quadrisect( subBoxes, btemp );
         compBox_clear(btemp);
-        free(btemp);
+        ccluster_free(btemp);
     }
-#ifdef CCLUSTER_HAVE_PTHREAD
-    if (nbThreads>1) {
-//         printf("--ccluster_parallel_bisect_connCmp: nb threads: %d \n", (int) nbThreads );
-        prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta, nbThreads);
-    }
-    else
-        prec = ccluster_discard_compBox_list_draw( subBoxes, discarded, cache, prec, meta);
-#else
+    
     prec = ccluster_discard_compBox_list_draw( subBoxes, discarded, cache, prec, meta);
-#endif
     
     while (!compBox_list_is_empty(subBoxes)) {
         btemp = compBox_list_pop(subBoxes);
@@ -152,6 +161,16 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
     int specialFlag = 1;
     if (connCmp_list_get_size(ltemp) == 1)
         specialFlag = 0;
+    
+    /* RealCoeffs */
+    if ( (metadatas_realCoeffs(meta)) && (connCmp_list_get_size(ltemp) == 1) && (cc_contains_real_line == 1) ){
+        ctemp = connCmp_list_first(ltemp);
+        /* test if cc has been separated from real case;
+         in which case reset everything*/
+        if ( connCmp_is_imaginary_positive(ctemp) )
+            specialFlag = 1;
+    }
+    /* end RealCoeffs */
     
     slong nprec; 
     if (prec == connCmp_appPrref(cc)) {
@@ -174,6 +193,9 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
                 connCmp_decrease_nwSpd(ctemp);
                 /* copy the number of sols */
                 connCmp_nSolsref(ctemp) = connCmp_nSolsref(cc);
+                /* test */
+                connCmp_isSep(ctemp) = connCmp_isSep(cc);
+                /*end test */
             }
             connCmp_list_push(dest, ctemp);
         }
@@ -188,6 +210,8 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
 }
 
 void ccluster_prep_loop_draw( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, connCmp_list_t discardedCcs, compBox_list_t discarded, cacheApp_t cache, metadatas_t meta) {
+    
+//     printf("ccluster_draw.c: ccluster_prep_loop_draw: \n");
     
     connCmp_list_t ltemp;
     realRat_t halfwidth, diam;
@@ -213,7 +237,7 @@ void ccluster_prep_loop_draw( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ctemp);
-            free(ctemp);
+            ccluster_free(ctemp);
         }      
     }
     
@@ -264,6 +288,12 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
     
     clock_t start=clock();
     
+    /* Real Coeff */
+    connCmp_ptr ccurConjClo, ccurConj;
+    ccurConjClo = NULL;
+    ccurConj = NULL;
+    int pushConjugFlag = 0;
+    
     realRat_set_si(four, 4, 1);
     realRat_set_si(three, 3, 1);
     
@@ -272,6 +302,25 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
         resNewton.nflag = 0;
         
         ccur = connCmp_list_pop(qMainLoop);
+        
+        /* Real Coeff */
+        pushConjugFlag = 0;
+        if (metadatas_realCoeffs(meta)){
+            /* test if the component contains the real line in its interior */
+//             printf("number of boxes before conjugate closure: %d\n", connCmp_nb_boxes(ccur));
+            if (!connCmp_is_imaginary_positive(ccur)) {
+//                 printf("number of boxes before conjugate closure: %d\n", connCmp_nb_boxes(ccur));
+                ccurConjClo = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
+                connCmp_init( ccurConjClo );
+                connCmp_set_conjugate_closure(ccurConjClo, ccur, metadatas_initBref(meta));
+                
+                connCmp_clear(ccur);
+                ccluster_free(ccur);
+                ccur = ccurConjClo;
+//                 printf("number of boxes after  conjugate closure: %d\n", connCmp_nb_boxes(ccur));
+            }
+        }
+        
         connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
         compBox_get_containing_dsk(ccDisk, componentBox);
         compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
@@ -281,6 +330,16 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
         
         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
         
+        /* Real Coeff */
+        if ( (separationFlag)&&(metadatas_realCoeffs(meta)) ) {
+            if (connCmp_is_imaginary_positive(ccur)) {
+                /* check if ccur is separated from its complex conjugate */
+                realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
+                separationFlag = separationFlag&&(!compBox_intersection_is_not_empty_compDsk ( componentBox, fourCCDisk));
+                realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
+            }
+        }
+        
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
         
@@ -288,7 +347,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
 //         if ((separationFlag)) {
 //             printf("depth: %d, connCmp_nSolsref(ccur): %d\n", depth, connCmp_nSolsref(ccur));
             if (connCmp_nSolsref(ccur)==-1){
-                resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0,0, prec, depth, meta);
+                resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
             }
 //             printf("validate: prec avant: %d prec apres: %d\n", prec, resTstar.appPrec);
@@ -308,48 +367,102 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
                 connCmp_find_point_outside_connCmp( initPoint, ccur, metadatas_initBref(meta) );
             
             connCmp_ptr nCC;
-            nCC = (connCmp_ptr) malloc (sizeof(connCmp));
+            nCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
             connCmp_init(nCC);
             resNewton = newton_newton_connCmp( nCC, ccur, cache, initPoint, prec, meta);
 //             metadatas_add_Newton   ( meta, depth, resNewton.nflag );
 //             printf("+++depth: %d, connCmp_nSolsref(ccur): %d, res_newton: %d \n", depth, connCmp_nSols(ccur), resNewton.nflag);
             if (resNewton.nflag) {
                 connCmp_clear(ccur);
-                free(ccur);
+                ccluster_free(ccur);
                 ccur = nCC;
                 connCmp_increase_nwSpd(ccur);
                 connCmp_newSuref(ccur) = 1;
-//                 printf("newton: prec avant: %d prec apres: %d\n", prec, resNewton.appPrec);
                 connCmp_appPrref(nCC) = resNewton.appPrec;
-                /* adjust precision: try to make it lower */
-//                 if (prec == resNewton.appPrec) {
-// //                     printf("ICI\n");
-//                     connCmp_appPrref(ccur) = CCLUSTER_MAX(prec/2,CCLUSTER_DEFAULT_PREC);
-//                 }
-//                 else 
-//                     connCmp_appPrref(ccur) = resNewton.appPrec;
     
             }
             else {
                 connCmp_newSuref(ccur) = 0;
                 connCmp_clear(nCC);
-                free(nCC);
+                ccluster_free(nCC);
             }
             if (metadatas_haveToCount(meta)){
                 metadatas_add_Newton   ( meta, depth, resNewton.nflag, (double) (clock() - start) );
             }
+        }
+        
+        /* Real Coeff */
+        if (metadatas_realCoeffs(meta)
+            && ( (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag)
+               ||( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) ) ) {
+            
+            if (connCmp_is_imaginary_positive(ccur)) {
+                pushConjugFlag = 1;
+                /*compute the complex conjugate*/
+                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
+                connCmp_init( ccurConj );
+                connCmp_set_conjugate(ccurConj, ccur);
                 
+                /* test if initial box is symetric relatively to real axe */
+                if ( !realRat_is_zero(compRat_imagref(compBox_centerref(metadatas_initBref(meta)))) ) {
+                    /* test if the cc intersects initial box */
+                    if ( connCmp_intersection_is_not_empty(ccurConj, metadatas_initBref(meta)) ) {
+                        /* test if the cc is confined */
+//                         if (connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
+//                             pushConjugFlag = 1;
+//                         }
+//                         else {
+                        if (!connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
+                            pushConjugFlag = 0;
+                            separationFlag = 0; 
+                          /* delete ccurConj*/
+                            connCmp_clear(ccurConj);
+                            ccluster_free(ccurConj);
+                        }
+                    }
+                    else {
+                        pushConjugFlag = 0;
+                        /* delete ccurConj*/
+                        connCmp_clear(ccurConj);
+                        ccluster_free(ccurConj);
+                    }
+                } 
+            }
+            else {
+                /* test if initial box is symetric relatively to real axe */
+                if ( !realRat_is_zero(compRat_imagref(compBox_centerref(metadatas_initBref(meta)))) ) {
+                    /* test if the cc is confined and intersects initial box */
+                    if (! ( connCmp_is_confined(ccur, metadatas_initBref(meta)) 
+                         && connCmp_intersection_is_not_empty(ccur, metadatas_initBref(meta)) ) ){
+//                         /* bisect ccur until this hold */
+                        separationFlag = 0;
+                    }
+                }
+            }
         }
         
         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
+            /* Real Coeff */
+            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+                /*compute the complex conjugate*/
+                metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
+                connCmp_list_push(qResults, ccurConj);
+            }
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
+            /* Real Coeff */
+            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+                /*compute the complex conjugate*/
+                metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
+                connCmp_list_push(qResults, ccurConj);
+            }
+            
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
             connCmp_list_insert_sorted(qMainLoop, ccur);
@@ -369,13 +482,13 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
                 while (!connCmp_list_is_empty(ltemp))
                     connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
                 connCmp_clear(ccur);
-                free(ccur);
+                ccluster_free(ccur);
 #else
             ccluster_bisect_connCmp_draw( ltemp, ccur, discardedCcs, discarded, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
-            free(ccur);
+            ccluster_free(ccur);
 #endif
         }
         
@@ -391,23 +504,29 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
     connCmp_list_clear(ltemp);
 }
 
-void ccluster_algo_draw( connCmp_list_t qResults, compBox_list_t discarded, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+void ccluster_algo_draw( connCmp_list_t qResults, 
+                         compBox_list_t discarded, 
+                         const compBox_t initialBox, 
+                         const realRat_t eps, 
+                         cacheApp_t cache, metadatas_t meta){
     
 //     chronos_tic_CclusAl(metadatas_chronref(meta));
     clock_t start = clock();
+    
+//     printf("ccluster_draw.c: ccluster_algo_draw \n");
     
     realRat_t factor;
     realRat_init(factor);
     realRat_set_si(factor, 5, 4);
     
     compBox_ptr bEnlarged;
-    bEnlarged = (compBox_ptr) malloc (sizeof(compBox));
+    bEnlarged = (compBox_ptr) ccluster_malloc (sizeof(compBox));
     compBox_init(bEnlarged);
     compBox_inflate_realRat(bEnlarged, initialBox, factor);
     compBox_nbMSolref(bEnlarged) = cacheApp_getDegree ( cache );
     
     connCmp_ptr initialCC;
-    initialCC = (connCmp_ptr) malloc (sizeof(connCmp));
+    initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
     connCmp_init_compBox(initialCC, bEnlarged);
     
     connCmp_list_t qMainLoop, qPrepLoop, discardedCcs;
@@ -416,9 +535,9 @@ void ccluster_algo_draw( connCmp_list_t qResults, compBox_list_t discarded, cons
     connCmp_list_init(discardedCcs);
     
     connCmp_list_push(qPrepLoop, initialCC);
-//     printf("preploop: \n");
+//     printf("ccluster_draw.c: ccluster_algo_draw, preploop: \n");
     ccluster_prep_loop_draw( qMainLoop, qPrepLoop, discardedCcs, discarded, cache, meta);
-//     printf("mainloop: \n");
+//     printf("ccluster_draw.c: ccluster_algo_draw, mainloop: \n");
     ccluster_main_loop_draw( qResults,  qMainLoop, discardedCcs, discarded, eps, cache, meta);
     
     
@@ -431,120 +550,6 @@ void ccluster_algo_draw( connCmp_list_t qResults, compBox_list_t discarded, cons
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
-// void connCmp_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta){
-//     
-//     compBox_t containingBox;
-//     compBox_init(containingBox);
-//     compDsk_t containingDisk;
-//     compDsk_init(containingDisk);
-//     
-// //     int lensols = (int) log10(metadatas_getNbSolutions(meta)) +1;
-// //     int lens = (int) log10(connCmp_nSols(c)) +1;
-// //     char temp[100], temp2[100];
-// //     sprintf(temp, "%d", connCmp_nSols(c));
-// //     for (int i = lens; i<=lensols; i++) sprintf(temp2, " ");
-// //     fprintf(f, "--cluster with %s sols: ", temp);
-//     fprintf(f, "--cluster with %5d sols: ", connCmp_nSols(c));
-//     
-//     connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
-//     compBox_get_containing_dsk( containingDisk, containingBox);
-//     
-//     slong d = fmpz_clog_ui(realRat_denref(compDsk_radiusref(containingDisk)),10) - fmpz_clog_ui(realRat_numref(compDsk_radiusref(containingDisk)),10); 
-//     slong p = fmpz_clog_ui(realRat_denref(compDsk_radiusref(containingDisk)),2) - fmpz_clog_ui(realRat_numref(compDsk_radiusref(containingDisk)),2)+50; 
-//     
-//     realApp_t cRe, cIm, rad;
-//     realApp_init(cRe);
-//     realApp_init(cIm);
-//     realApp_init(rad);
-//     
-//     realApp_set_realRat(cRe, compRat_realref(compDsk_centerref(containingDisk)), p);
-//     realApp_set_realRat(cIm, compRat_imagref(compDsk_centerref(containingDisk)), p);
-//     realApp_set_realRat(rad, compDsk_radiusref(containingDisk), p);
-//     
-//     
-// //     printf("d: %d, prec: %d\n", (int) d, (int) p);
-//     fprintf(f, "center: ");
-//     realApp_fprintn(f, cRe, d, ARB_STR_NO_RADIUS);
-//     fprintf(f, " + ");
-//     realApp_fprintn(f, cIm, d, ARB_STR_NO_RADIUS);
-//     fprintf(f, "j, radius: ");
-//     realApp_fprintn(f, rad, 5, ARB_STR_NO_RADIUS);
-//     
-//     compBox_init(containingBox);
-//     compDsk_init(containingDisk);
-//     realApp_clear(cRe);
-//     realApp_clear(cIm);
-//     realApp_clear(rad);
-// }
-// 
-// void connCmp_list_print_for_results(FILE * f, const connCmp_list_t l, metadatas_t meta){
-//     connCmp_list_iterator it = connCmp_list_begin(l);
-//     
-//     while (it!=connCmp_list_end() ) {
-//         connCmp_print_for_results(f, connCmp_list_elmt(it), meta);
-//         it = connCmp_list_next(it);
-//         fprintf(f, "\n");
-//     }
-// }
 
-// void ccluster_interface_func( void(*func)(compApp_poly_t, slong), const compBox_t initialBox, const realRat_t eps, int st, int verb){
-// 
-//     cacheApp_t cache;
-//     strategies_t strat;
-//     metadatas_t meta;
-//     connCmp_list_t qRes;
-//     
-//     cacheApp_init(cache, func);
-//     strategies_init(strat);
-// //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-//     
-//     metadatas_init(meta, initialBox, strat, verb);
-//     connCmp_list_init(qRes);
-//     
-//     ccluster_algo( qRes, initialBox, eps, cache, meta);
-//     metadatas_count(meta);
-//     metadatas_fprint(stdout, meta, eps);
-//     
-//     if (verb>=3) {
-//         connCmp_list_print_for_results(stdout, qRes, meta);
-// //         connCmp_list_print_for_results(stdout, qRes, 500, 40, meta);
-//     }
-//     
-//     cacheApp_clear(cache);
-//     strategies_clear(strat);
-//     metadatas_clear(meta);
-//     connCmp_list_clear(qRes);
-// }
-
-void ccluster_interface_forJulia_draw( connCmp_list_t qResults, connCmp_list_t qDiscarded, 
-                                  void(*func)(compApp_poly_t, slong), 
-                                  const compBox_t initialBox, 
-                                  const realRat_t eps, 
-                                  int st, 
-                                  int verb){
-    cacheApp_t cache;
-    strategies_t strat;
-    metadatas_t meta;
-    
-    cacheApp_init(cache, func);
-    strategies_init(strat);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
-    
-    metadatas_init(meta, initialBox, strat, verb);
-    
-    ccluster_algo_draw( qResults, qDiscarded, initialBox, eps, cache, meta);
-    metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
-    if (verb>=3) {
-        connCmp_list_print_for_results(stdout, qResults, meta);
-//         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
-    }
-    
-    cacheApp_clear(cache);
-    strategies_clear(strat);
-    metadatas_clear(meta);
-}
 
 
