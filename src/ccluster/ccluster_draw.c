@@ -330,7 +330,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
                 connCmp_find_point_outside_connCmp( initPoint, ccur, metadatas_initBref(meta) );
             
             connCmp_ptr nCC;
-            nCC = (connCmp_ptr) malloc (sizeof(connCmp));
+            nCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
             connCmp_init(nCC);
             resNewton = newton_newton_connCmp( nCC, ccur, cache, initPoint, prec, meta);
 //             metadatas_add_Newton   ( meta, depth, resNewton.nflag );
@@ -429,13 +429,13 @@ void ccluster_algo_draw( connCmp_list_t qResults,
     realRat_set_si(factor, 5, 4);
     
     compBox_ptr bEnlarged;
-    bEnlarged = (compBox_ptr) malloc (sizeof(compBox));
+    bEnlarged = (compBox_ptr) ccluster_malloc (sizeof(compBox));
     compBox_init(bEnlarged);
     compBox_inflate_realRat(bEnlarged, initialBox, factor);
     compBox_nbMSolref(bEnlarged) = cacheApp_getDegree ( cache );
     
     connCmp_ptr initialCC;
-    initialCC = (connCmp_ptr) malloc (sizeof(connCmp));
+    initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
     connCmp_init_compBox(initialCC, bEnlarged);
     
     connCmp_list_t qMainLoop, qPrepLoop, discardedCcs;
