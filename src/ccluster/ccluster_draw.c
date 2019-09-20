@@ -18,7 +18,7 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta){
     
-    printf("ccluster_draw.c: ccluster_discard_compBox_list_draw: \n");
+//     printf("ccluster_draw.c: ccluster_discard_compBox_list_draw: \n");
     
     tstar_res res;
     res.appPrec = prec;
@@ -43,15 +43,21 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
         btemp = compBox_list_pop(boxes);
         compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
+        metadatas_add_explored( meta, depth);
+        
+        /* Real Coeffs */
+        if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
+            compBox_list_push(discarded, btemp);
+            compBox_clear(btemp);
+            ccluster_free(btemp);
+            continue;
+        }
+        
         res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta);    
         if (res.nbOfSol==0) {
-#ifdef CCLUSTER_HAVE_PTHREAD
-            metadatas_lock(meta);
-#endif
-            metadatas_add_discarded( meta, depth);
-#ifdef CCLUSTER_HAVE_PTHREAD
-            metadatas_unlock(meta);
-#endif
+            if (metadatas_haveToCount(meta)){
+                metadatas_add_discarded( meta, depth);
+            }
             compBox_list_push(discarded, btemp);
             compBox_clear(btemp);
             ccluster_free(btemp);
@@ -121,7 +127,7 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
 
 void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_list_t discardedCcs, compBox_list_t discarded, cacheApp_t cache, metadatas_t meta, slong nbThreads){
     
-    printf("ccluster_draw.c: ccluster_bisect_connCmp_draw: \n");
+//     printf("ccluster_draw.c: ccluster_bisect_connCmp_draw: \n");
     
     slong prec = connCmp_appPr(cc);
     compBox_list_t subBoxes;
@@ -131,8 +137,6 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
     
     compBox_ptr btemp;
     connCmp_ptr ctemp;
-    
-    printf("ccluster_draw.c: init OK: \n");
     
     /* RealCoeffs */
     int cc_contains_real_line = 0;
@@ -147,8 +151,6 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
         compBox_clear(btemp);
         ccluster_free(btemp);
     }
-    
-    printf("ccluster_draw.c: quadrisect OK: \n");
     
     prec = ccluster_discard_compBox_list_draw( subBoxes, discarded, cache, prec, meta);
     
@@ -209,7 +211,7 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
 
 void ccluster_prep_loop_draw( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, connCmp_list_t discardedCcs, compBox_list_t discarded, cacheApp_t cache, metadatas_t meta) {
     
-    printf("ccluster_draw.c: ccluster_prep_loop_draw: \n");
+//     printf("ccluster_draw.c: ccluster_prep_loop_draw: \n");
     
     connCmp_list_t ltemp;
     realRat_t halfwidth, diam;
@@ -286,6 +288,12 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
     
     clock_t start=clock();
     
+    /* Real Coeff */
+    connCmp_ptr ccurConjClo, ccurConj;
+    ccurConjClo = NULL;
+    ccurConj = NULL;
+    int pushConjugFlag = 0;
+    
     realRat_set_si(four, 4, 1);
     realRat_set_si(three, 3, 1);
     
@@ -294,6 +302,25 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
         resNewton.nflag = 0;
         
         ccur = connCmp_list_pop(qMainLoop);
+        
+        /* Real Coeff */
+        pushConjugFlag = 0;
+        if (metadatas_realCoeffs(meta)){
+            /* test if the component contains the real line in its interior */
+//             printf("number of boxes before conjugate closure: %d\n", connCmp_nb_boxes(ccur));
+            if (!connCmp_is_imaginary_positive(ccur)) {
+//                 printf("number of boxes before conjugate closure: %d\n", connCmp_nb_boxes(ccur));
+                ccurConjClo = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
+                connCmp_init( ccurConjClo );
+                connCmp_set_conjugate_closure(ccurConjClo, ccur, metadatas_initBref(meta));
+                
+                connCmp_clear(ccur);
+                ccluster_free(ccur);
+                ccur = ccurConjClo;
+//                 printf("number of boxes after  conjugate closure: %d\n", connCmp_nb_boxes(ccur));
+            }
+        }
+        
         connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
         compBox_get_containing_dsk(ccDisk, componentBox);
         compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
@@ -302,6 +329,16 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
+        
+        /* Real Coeff */
+        if ( (separationFlag)&&(metadatas_realCoeffs(meta)) ) {
+            if (connCmp_is_imaginary_positive(ccur)) {
+                /* check if ccur is separated from its complex conjugate */
+                realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
+                separationFlag = separationFlag&&(!compBox_intersection_is_not_empty_compDsk ( componentBox, fourCCDisk));
+                realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
+            }
+        }
         
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
@@ -341,15 +378,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
                 ccur = nCC;
                 connCmp_increase_nwSpd(ccur);
                 connCmp_newSuref(ccur) = 1;
-//                 printf("newton: prec avant: %d prec apres: %d\n", prec, resNewton.appPrec);
                 connCmp_appPrref(nCC) = resNewton.appPrec;
-                /* adjust precision: try to make it lower */
-//                 if (prec == resNewton.appPrec) {
-// //                     printf("ICI\n");
-//                     connCmp_appPrref(ccur) = CCLUSTER_MAX(prec/2,CCLUSTER_DEFAULT_PREC);
-//                 }
-//                 else 
-//                     connCmp_appPrref(ccur) = resNewton.appPrec;
     
             }
             else {
@@ -360,18 +389,80 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
             if (metadatas_haveToCount(meta)){
                 metadatas_add_Newton   ( meta, depth, resNewton.nflag, (double) (clock() - start) );
             }
+        }
+        
+        /* Real Coeff */
+        if (metadatas_realCoeffs(meta)
+            && ( (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag)
+               ||( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) ) ) {
+            
+            if (connCmp_is_imaginary_positive(ccur)) {
+                pushConjugFlag = 1;
+                /*compute the complex conjugate*/
+                ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
+                connCmp_init( ccurConj );
+                connCmp_set_conjugate(ccurConj, ccur);
                 
+                /* test if initial box is symetric relatively to real axe */
+                if ( !realRat_is_zero(compRat_imagref(compBox_centerref(metadatas_initBref(meta)))) ) {
+                    /* test if the cc intersects initial box */
+                    if ( connCmp_intersection_is_not_empty(ccurConj, metadatas_initBref(meta)) ) {
+                        /* test if the cc is confined */
+//                         if (connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
+//                             pushConjugFlag = 1;
+//                         }
+//                         else {
+                        if (!connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
+                            pushConjugFlag = 0;
+                            separationFlag = 0; 
+                          /* delete ccurConj*/
+                            connCmp_clear(ccurConj);
+                            ccluster_free(ccurConj);
+                        }
+                    }
+                    else {
+                        pushConjugFlag = 0;
+                        /* delete ccurConj*/
+                        connCmp_clear(ccurConj);
+                        ccluster_free(ccurConj);
+                    }
+                } 
+            }
+            else {
+                /* test if initial box is symetric relatively to real axe */
+                if ( !realRat_is_zero(compRat_imagref(compBox_centerref(metadatas_initBref(meta)))) ) {
+                    /* test if the cc is confined and intersects initial box */
+                    if (! ( connCmp_is_confined(ccur, metadatas_initBref(meta)) 
+                         && connCmp_intersection_is_not_empty(ccur, metadatas_initBref(meta)) ) ){
+//                         /* bisect ccur until this hold */
+                        separationFlag = 0;
+                    }
+                }
+            }
         }
         
         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
+            /* Real Coeff */
+            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+                /*compute the complex conjugate*/
+                metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
+                connCmp_list_push(qResults, ccurConj);
+            }
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
+            /* Real Coeff */
+            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+                /*compute the complex conjugate*/
+                metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
+                connCmp_list_push(qResults, ccurConj);
+            }
+            
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
             connCmp_list_insert_sorted(qMainLoop, ccur);
@@ -422,7 +513,7 @@ void ccluster_algo_draw( connCmp_list_t qResults,
 //     chronos_tic_CclusAl(metadatas_chronref(meta));
     clock_t start = clock();
     
-    printf("ccluster_draw.c: ccluster_algo_draw \n");
+//     printf("ccluster_draw.c: ccluster_algo_draw \n");
     
     realRat_t factor;
     realRat_init(factor);
@@ -444,9 +535,9 @@ void ccluster_algo_draw( connCmp_list_t qResults,
     connCmp_list_init(discardedCcs);
     
     connCmp_list_push(qPrepLoop, initialCC);
-    printf("ccluster_draw.c: ccluster_algo_draw, preploop: \n");
+//     printf("ccluster_draw.c: ccluster_algo_draw, preploop: \n");
     ccluster_prep_loop_draw( qMainLoop, qPrepLoop, discardedCcs, discarded, cache, meta);
-    printf("ccluster_draw.c: ccluster_algo_draw, mainloop: \n");
+//     printf("ccluster_draw.c: ccluster_algo_draw, mainloop: \n");
     ccluster_main_loop_draw( qResults,  qMainLoop, discardedCcs, discarded, eps, cache, meta);
     
     
