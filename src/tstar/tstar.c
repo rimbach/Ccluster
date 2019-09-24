@@ -77,7 +77,9 @@ tstar_res tstar_interface( cacheApp_t cache,
                            const compDsk_t d,
                            int max_nb_sols,    /*the maximum number of sols in the disk          */
                            int discard,        /*a flag saying if it is a discarding test or not */
+#ifdef CCLUSTER_STATS_PS
                            int inNewton,      /*a flag saying if it is for newton refinement     */
+#endif
                            slong prec,         /*the "default" arithmetic precision              */
                            int depth,          /*the depth for counter                           */
                            metadatas_t meta){
@@ -88,16 +90,32 @@ tstar_res tstar_interface( cacheApp_t cache,
     
     if (metadatas_useTstarOptim(meta)) {
         if (discard&&CCLUSTER_V2(meta)){
-            return tstar_optimized( cache, d, 0,           discard, inNewton, nprec, depth, meta);
+            return tstar_optimized( cache, d, 0,           discard, 
+#ifdef CCLUSTER_STATS_PS
+                                                                    inNewton, 
+#endif
+                                                                    nprec, depth, meta);
         }
         else {
-            return tstar_optimized( cache, d, max_nb_sols, discard, inNewton, nprec, depth, meta);
+            return tstar_optimized( cache, d, max_nb_sols, discard, 
+#ifdef CCLUSTER_STATS_PS
+                                                                    inNewton,
+#endif
+                                                                    nprec, depth, meta);
         }
     }
     if (discard)
-        return tstar_asInPaper( cache, d, 0, discard, inNewton, nprec, depth, meta);
+        return tstar_asInPaper( cache, d, 0, discard, 
+#ifdef CCLUSTER_STATS_PS
+                                                      inNewton, 
+#endif
+                                                      nprec, depth, meta);
     
-    return tstar_asInPaper( cache, d, max_nb_sols, discard, inNewton, nprec, depth, meta);
+    return tstar_asInPaper( cache, d, max_nb_sols, discard, 
+#ifdef CCLUSTER_STATS_PS
+                                                            inNewton, 
+#endif
+                                                            nprec, depth, meta);
     
 }
 
@@ -105,7 +123,9 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
                            const compDsk_t d,
                            int max_nb_sols,    /*the maximum number of sols in the disk,         */
                            int discard,        /*a flag saying if it is a discarding test or not */
+#ifdef CCLUSTER_STATS_PS
                            int inNewton,      /*a flag saying if it is for newton refinement     */
+#endif
                            slong prec,         /*the "default" arithmetic precision              */
                            int depth,          /*the depth for counter                           */
                            metadatas_t meta){
@@ -165,7 +185,9 @@ tstar_res tstar_optimized( cacheApp_t cache,
                            const compDsk_t d,
                            int max_nb_sols,   /*the maximum number of sols in the disk          */
                            int discard,       /*a flag saying if it is a discarding test or not */
+#ifdef CCLUSTER_STATS_PS
                            int inNewton,      /*a flag saying if it is for newton refinement     */
+#endif
                            slong prec,        /*the "default" arithmetic precision              */
                            int depth,         /*the depth for counter                           */
                            metadatas_t meta){

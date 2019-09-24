@@ -11,6 +11,31 @@
 
 #include "ccluster/ccluster.h"
 
+void ccluster_initialize_pwSuTest( void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
+                                   metadatas_t meta,
+                                   cacheApp_t cache,
+                                   int verb) {
+    
+    realRat_t isoRatio, wantedPrec;
+    
+    realRat_init(isoRatio);
+    realRat_init(wantedPrec);
+    
+    meta->evalPoly = evalFast;
+        
+    realRat_set_si(isoRatio, 2, 1);
+    realRat_set_si(wantedPrec, 1, 4);
+    slong nbP = powerSums_getNbOfPointsForCounting( wantedPrec, cacheApp_getDegree(cache), isoRatio );
+    metadatas_setNbEvalPoints(meta, nbP);
+    if (verb>=3) {
+        printf("iso ratio used for tests: "); realRat_print( isoRatio ); printf("\n");
+        printf("nb points for eval: %d\n", (int) metadatas_getNbEvalPoints(meta) );
+    }
+        
+    realRat_clear(isoRatio);
+    realRat_clear(wantedPrec);
+}
+    
 void ccluster_interface_func( void(*func)(compApp_poly_t, slong), 
                               const compBox_t initialBox, 
                               const realRat_t eps, 
@@ -26,11 +51,6 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
     
     cacheApp_init(cache, func);
     strategies_init(strat);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-    
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
     
     strategies_set_str( strat, stratstr, nbThreads );
     /* automaticly set realCoeffs */
@@ -41,21 +61,8 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
     metadatas_init(meta, initialBox, strat, verb);
     
     /* initialize power sums */
-    if ( metadatas_forTests(meta) ) {
-        meta->evalPoly = NULL;
-        realRat_t isoRatio, wantedPrec;
-        realRat_init(isoRatio);
-        realRat_init(wantedPrec);
-        realRat_set_si(isoRatio, 2, 1);
-//         realRat_set_si(isoRatio, 11, 10);
-        realRat_set_si(wantedPrec, 1, 4);
-        slong nbP = powerSums_getNbOfPointsForCounting( wantedPrec, cacheApp_getDegree(cache), isoRatio );
-        metadatas_setNbEvalPoints(meta, nbP);
-        printf("iso ratio used for tests: "); realRat_print( isoRatio ); printf("\n");
-        printf("nb points for eval: %d\n", (int) metadatas_getNbEvalPoints(meta) );
-        realRat_clear(isoRatio);
-        realRat_clear(wantedPrec);
-    }
+    if ( metadatas_pwSuTest(meta) )
+        ccluster_initialize_pwSuTest(NULL, meta, cache, verb);
     
     connCmp_list_init(qRes);
     
@@ -90,12 +97,6 @@ void ccluster_interface_funcPS( void(*func)(compApp_poly_t, slong),
     
     cacheApp_init(cache, func);
     strategies_init(strat);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-    
-//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
-    
     strategies_set_str( strat, stratstr, nbThreads );
     /* automaticly set realCoeffs */
     if (cacheApp_is_real(cache)==0
@@ -103,23 +104,10 @@ void ccluster_interface_funcPS( void(*func)(compApp_poly_t, slong),
         strategies_set_realCoeffs(strat, 0);
     
     metadatas_init(meta, initialBox, strat, verb);
-    meta->evalPoly = evalFast;
     
     /* initialize power sums */
-    if ( metadatas_forTests(meta) ) {
-        realRat_t isoRatio, wantedPrec;
-        realRat_init(isoRatio);
-        realRat_init(wantedPrec);
-        realRat_set_si(isoRatio, 2, 1);
-//         realRat_set_si(isoRatio, 11, 10);
-        realRat_set_si(wantedPrec, 1, 4);
-        slong nbP = powerSums_getNbOfPointsForCounting( wantedPrec, cacheApp_getDegree(cache), isoRatio );
-        metadatas_setNbEvalPoints(meta, nbP);
-        printf("iso ratio used for tests: "); realRat_print( isoRatio ); printf("\n");
-        printf("nb points for eval: %d\n", (int) metadatas_getNbEvalPoints(meta) );
-        realRat_clear(isoRatio);
-        realRat_clear(wantedPrec);
-    }
+    if ( metadatas_pwSuTest(meta) )
+        ccluster_initialize_pwSuTest(evalFast, meta, cache, verb);
     
     connCmp_list_init(qRes);
     
@@ -155,7 +143,8 @@ int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * m
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4),0, (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), (st&( ((0x1<<10)-1)<<6 ))>>6, st>>17);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), (st&( ((0x1<<10)-1)<<7 ))>>7, st>>18);
      
     metadatas_init(meta, initialBox, strat, verb);
     connCmp_list_init(qRes);
@@ -265,7 +254,8 @@ void ccluster_interface_forJulia ( connCmp_list_t qResults,
     cacheApp_init(cache, func);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     
     /* automaticly set realCoeffs */
     if (cacheApp_is_real(cache)==0
@@ -307,7 +297,8 @@ void ccluster_interface_forJulia_draw( connCmp_list_t qResults,
     cacheApp_init(cache, func);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     
     /* automaticly set realCoeffs */
     if (cacheApp_is_real(cache)==0
@@ -380,7 +371,8 @@ void ccluster_interface_forJulia_compRat_poly( connCmp_list_t qResults,
     cacheApp_init_compRat_poly(cache, poly);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     
     /* automaticly set realCoeffs */
     if (cacheApp_is_real(cache)==0
@@ -419,7 +411,8 @@ void ccluster_refine_forJulia( connCmp_list_t qResults,
     cacheApp_init(cache, func);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     
     /* automaticly set realCoeffs: realCoeffs not implemented for refine */
     strategies_set_realCoeffs(strat, 0);

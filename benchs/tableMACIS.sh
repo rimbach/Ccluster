@@ -143,7 +143,7 @@ fi
 
 VFLAGV4="V4"
 VFLAGV5="default"
-VFLAGV6="test"
+VFLAGV6="V6"
 
 REP="tableMACIS"
 

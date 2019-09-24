@@ -32,7 +32,8 @@ extern "C" {
 #define STRAT_STOPWHCO 8
 #define STRAT_ANTICIPA 16
 #define STRAT_REALCOEF 32
-#define STRAT_FORTESTS 64
+#define STRAT_PWSUTEST 64
+#define STRAT_FORTESTS 128
 
 #define STRAT_INT_DEFAULT 55
 #define STRAT_STR_DEFAULT "default"
@@ -49,11 +50,14 @@ extern "C" {
 #define STRAT_INT_V5 55
 #define STRAT_STR_V5 "V5"
 
-#define STRAT_INT_FORTESTS 119
-#define STRAT_STR_FORTESTS "test"
+#define STRAT_INT_PWSUTESTV4 87
+#define STRAT_STR_PWSUTESTV4 "psV4"
 
-#define STRAT_INT_FORTESTSV4 87
-#define STRAT_STR_FORTESTSV4 "testV4"
+#define STRAT_INT_V6 119
+#define STRAT_STR_V6 "V6"
+
+#define STRAT_INT_FORTESTS 247
+#define STRAT_STR_FORTESTS "test"
 
 typedef struct {
     int _useNewton;
@@ -65,6 +69,7 @@ typedef struct {
     int _useNBThreads;
     int _additionalFlags;
     int _realCoeffs;
+    int _pwSuTest;
     int _forTests;
 } strategies;
 
@@ -78,6 +83,7 @@ void strategies_set_int ( strategies_t strat, int useNewton,
                                               int useStopWhenCompact, 
                                               int useAnticipate, 
                                               int realCoeffs,
+                                              int pwSuTest,
 //                                               int useCountSols,
                                               int useNBThreads,
                                               int additionalFlags
@@ -100,6 +106,9 @@ METADATAS_INLINE void strategies_set_realCoeffs   ( strategies_t strat, int flag
 
 METADATAS_INLINE int strategies_forTests        ( const strategies_t strat ) { return strat->_forTests      ; }
 METADATAS_INLINE void strategies_set_forTests   ( strategies_t strat, int flag ) { strat->_forTests=flag      ; }
+
+METADATAS_INLINE int strategies_pwSuTest        ( const strategies_t strat ) { return strat->_pwSuTest      ; }
+METADATAS_INLINE void strategies_set_pwSuTest   ( strategies_t strat, int flag ) { strat->_pwSuTest=flag      ; }
 
 #ifdef __cplusplus
 }
