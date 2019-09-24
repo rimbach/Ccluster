@@ -109,6 +109,10 @@ if [ -z "$BLOCAL" ]; then
    BLOCAL="0,1,0,1,1,1"
 fi
 
+if [ -z "$BLOCALM" ]; then
+   BLOCALM="-1,1,0,1,1,2"
+fi
+
 if [ -z "$BGLOBAL" ]; then
    BGLOBAL="0,1,0,1,1000,1"
 fi
@@ -177,8 +181,10 @@ CCLUSTER_CALL="../test/bernoulli"
 GENPOLFILE_CALL="./genPolFile "$POL_NAME
 
 for DEG in $DEGREES; do
-    LINE_TAB=$POL_NAME", \$d="$DEG"\$"
-    LINE_TAB2=$POL_NAME", \$d="$DEG"\$"
+#     LINE_TAB=$POL_NAME", \$d="$DEG"\$"
+#     LINE_TAB2=$POL_NAME", \$d="$DEG"\$"
+    LINE_TAB="\$\Ber{"$DEG"}\$"
+    LINE_TAB2="\$\Ber{"$DEG"}\$"
     
     FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
     FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
@@ -263,8 +269,10 @@ for DEG in $DEGREES; do
     
     LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_L_V6"&`format_time $TCCLUSTER_L_V4`"
     LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_L_V6`"
+    LINE_TAB=$LINE_TAB"&`ratio_time $TCCLUSTER_L_V4 $TCCLUSTER_L_V6`"
     LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_G_V6"&`format_time $TCCLUSTER_G_V4`" 
     LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_G_V6`"
+    LINE_TAB=$LINE_TAB"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V6`"
     LINE_TAB=$LINE_TAB"&"$TMPSOLVE
     LINE_TAB=$LINE_TAB"\\\\\\hline"
     
@@ -288,8 +296,10 @@ CCLUSTER_CALL="../test/mignottePS"
 GENPOLFILE_CALL="./genPolFile "$POL_NAME
 
 for DEG in $DEGREES; do
-    LINE_TAB=$POL_NAME", \$a="$BITSIZE"\$, \$d="$DEG"\$"
-    LINE_TAB2=$POL_NAME", \$a="$BITSIZE"\$, \$d="$DEG"\$"
+#     LINE_TAB=$POL_NAME", \$a="$BITSIZE"\$, \$d="$DEG"\$"
+#     LINE_TAB2=$POL_NAME", \$a="$BITSIZE"\$, \$d="$DEG"\$"
+    LINE_TAB="\$\Mig{"$BITSIZE"}{"$DEG"}\$"
+    LINE_TAB2="\$\Mig{"$BITSIZE"}{"$DEG"}\$"
     
     FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
     FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
@@ -374,8 +384,10 @@ for DEG in $DEGREES; do
     
     LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_L_V6"&`format_time $TCCLUSTER_L_V4`"
     LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_L_V6`"
+    LINE_TAB=$LINE_TAB"&`ratio_time $TCCLUSTER_L_V4 $TCCLUSTER_L_V6`"
     LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_G_V6"&`format_time $TCCLUSTER_G_V4`" 
     LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_G_V6`"
+    LINE_TAB=$LINE_TAB"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V6`"
     LINE_TAB=$LINE_TAB"&"$TMPSOLVE
     LINE_TAB=$LINE_TAB"\\\\\\hline"
     
@@ -399,8 +411,10 @@ CCLUSTER_CALL="../test/mandelbrotPS"
 GENPOLFILE_CALL="./genPolFile "$POL_NAME
 
 for DEG in $DEGMAND; do
-    LINE_TAB=$POL_NAME", \$d="$DEG"\$"
-    LINE_TAB2=$POL_NAME", \$d="$DEG"\$"
+#     LINE_TAB=$POL_NAME", \$d="$DEG"\$"
+#     LINE_TAB2=$POL_NAME", \$d="$DEG"\$"
+    LINE_TAB="\$\Man{"$DEG"}\$"
+    LINE_TAB2="\$\Man{"$DEG"}\$"
     
     FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
     FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
@@ -413,7 +427,7 @@ for DEG in $DEGMAND; do
     
     if [ ! -e $FILENAME_CCLUSTER_L_V4_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V4_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_L_V4_OUT
+        $CCLUSTER_CALL $DEG $BLOCALM $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_L_V4_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V4_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V4_OUT > /dev/stderr
@@ -421,7 +435,7 @@ for DEG in $DEGMAND; do
     fi
     if [ ! -e $FILENAME_CCLUSTER_L_V5_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V5_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_L_V5_OUT
+        $CCLUSTER_CALL $DEG $BLOCALM $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_L_V5_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V5_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V5_OUT > /dev/stderr
@@ -430,7 +444,7 @@ for DEG in $DEGMAND; do
     
     if [ ! -e $FILENAME_CCLUSTER_L_V6_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V6_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_L_V6_OUT
+        $CCLUSTER_CALL $DEG $BLOCALM $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_L_V6_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V6_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V6_OUT > /dev/stderr
@@ -485,8 +499,10 @@ for DEG in $DEGMAND; do
     
     LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_L_V6"&`format_time $TCCLUSTER_L_V4`"
     LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_L_V6`"
+    LINE_TAB=$LINE_TAB"&`ratio_time $TCCLUSTER_L_V4 $TCCLUSTER_L_V6`"
     LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_G_V6"&`format_time $TCCLUSTER_G_V4`" 
     LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_G_V6`"
+    LINE_TAB=$LINE_TAB"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V6`"
     LINE_TAB=$LINE_TAB"&"$TMPSOLVE
     LINE_TAB=$LINE_TAB"\\\\\\hline"
     
@@ -510,8 +526,10 @@ CCLUSTER_CALL="../test/runnelsPS"
 GENPOLFILE_CALL="./genPolFile "$POL_NAME
 
 for DEG in $DEGRUNN; do
-    LINE_TAB=$POL_NAME", \$d="$DEG"\$"
-    LINE_TAB2=$POL_NAME", \$d="$DEG"\$"
+#     LINE_TAB=$POL_NAME", \$d="$DEG"\$"
+#     LINE_TAB2=$POL_NAME", \$d="$DEG"\$"
+    LINE_TAB="\$\Run{"$DEG"}\$"
+    LINE_TAB2="\$\Run{"$DEG"}\$"
     
     FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
     FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
@@ -596,8 +614,10 @@ for DEG in $DEGRUNN; do
     
     LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_L_V6"&`format_time $TCCLUSTER_L_V4`"
     LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_L_V6`"
+    LINE_TAB=$LINE_TAB"&`ratio_time $TCCLUSTER_L_V4 $TCCLUSTER_L_V6`"
     LINE_TAB=$LINE_TAB"&"$NBCLUSTERS_G_V6"&`format_time $TCCLUSTER_G_V4`" 
     LINE_TAB=$LINE_TAB"&`format_time $TCCLUSTER_G_V6`"
+    LINE_TAB=$LINE_TAB"&`ratio_time $TCCLUSTER_G_V4 $TCCLUSTER_G_V6`"
     LINE_TAB=$LINE_TAB"&"$TMPSOLVE
     LINE_TAB=$LINE_TAB"\\\\\\hline"
     
@@ -624,3 +644,4 @@ cat $TEMPTABFILE
 cat $TEMPTABFILE2
 
 rm -rf $TEMPTABFILE
+rm -rf $TEMPTABFILE2
