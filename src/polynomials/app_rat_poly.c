@@ -11,6 +11,14 @@
 
 #include "app_rat_poly.h"
 
+void compApp_poly_root_bound_fujiwara(realRat_t bound, compApp_poly_t poly){
+    mag_t b;
+    mag_init(b);
+    acb_poly_root_bound_fujiwara(b, poly);
+    mag_get_fmpq(bound, b);
+    mag_clear(b);
+}
+
 void compApp_poly_scale_realRat_in_place( compApp_ptr fptr, const realRat_t r, slong len, slong prec ){
     
     slong i;

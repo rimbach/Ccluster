@@ -676,6 +676,45 @@ void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const r
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
+void ccluster_algo_global( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+    
+    clock_t start = clock();
+    
+//     realRat_t factor;
+//     realRat_init(factor);
+//     realRat_set_si(factor, 5, 4);
+    
+    compBox_ptr box;
+    box = (compBox_ptr) ccluster_malloc (sizeof(compBox));
+    compBox_init(box);
+    compBox_set(box, initialBox);
+    compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
+    
+    connCmp_ptr initialCC;
+    initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
+    connCmp_init_compBox(initialCC, box);
+    
+    connCmp_list_t qMainLoop, discardedCcs;
+    connCmp_list_init(qMainLoop);
+//     connCmp_list_init(qPrepLoop);
+    connCmp_list_init(discardedCcs);
+    
+    connCmp_list_push(qMainLoop, initialCC);
+//     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
+//     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
+//     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
+    ccluster_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    
+    
+//     realRat_clear(factor);
+    connCmp_list_clear(qMainLoop);
+//     connCmp_list_clear(qPrepLoop);
+    connCmp_list_clear(discardedCcs);
+    
+//     chronos_toc_CclusAl(metadatas_chronref(meta));
+    metadatas_add_time_CclusAl(meta, (double) (clock() - start));
+}
+
 void ccluster_refine( connCmp_list_t qResults, 
                       connCmp_list_t qMainLoop,
 //                       const compBox_t initialBox, 

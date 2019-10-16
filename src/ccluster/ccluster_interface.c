@@ -39,7 +39,6 @@ void ccluster_initialize_pwSuTest( void(*evalFast)(compApp_t, compApp_t, const c
 void ccluster_interface_func( void(*func)(compApp_poly_t, slong), 
                               const compBox_t initialBox, 
                               const realRat_t eps, 
-//                               int st,
                               char * stratstr,
                               int nbThreads,
                               int verb){
@@ -53,7 +52,7 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
     strategies_init(strat);
     
     strategies_set_str( strat, stratstr, nbThreads );
-    /* automaticly set realCoeffs */
+    /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
         strategies_set_realCoeffs(strat, 0);
@@ -72,7 +71,6 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
     
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qRes, meta);
-//         connCmp_list_print_for_results(stdout, qRes, 500, 40, meta);
     }
     
     cacheApp_clear(cache);
@@ -85,7 +83,6 @@ void ccluster_interface_funcPS( void(*func)(compApp_poly_t, slong),
                                 void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
                                 const compBox_t initialBox, 
                                 const realRat_t eps, 
-//                                 int st,
                                 char * stratstr,
                                 int nbThreads,
                                 int verb){
@@ -102,28 +99,166 @@ void ccluster_interface_funcPS( void(*func)(compApp_poly_t, slong),
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
         strategies_set_realCoeffs(strat, 0);
-    
+ 
+    connCmp_list_init(qRes);
     metadatas_init(meta, initialBox, strat, verb);
-    
+  
     /* initialize power sums */
     if ( metadatas_pwSuTest(meta) )
         ccluster_initialize_pwSuTest(evalFast, meta, cache, verb);
     
-    connCmp_list_init(qRes);
-    
     ccluster_algo( qRes, initialBox, eps, cache, meta);
+    
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qRes, meta);
-//         connCmp_list_print_for_results(stdout, qRes, 500, 40, meta);
     }
     
     cacheApp_clear(cache);
     strategies_clear(strat);
     metadatas_clear(meta);
     connCmp_list_clear(qRes);
+}
+
+void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong), 
+                                     const realRat_t eps, 
+                                     char * stratstr,
+                                     int nbThreads,
+                                     int verb){
+
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    connCmp_list_t qRes;
+    
+    cacheApp_init(cache, func);
+    strategies_init(strat);
+    
+    /* automaticly set initialBox */
+    compBox_t initialBox;
+    compBox_init(initialBox);
+    compBox_set_si(initialBox, 0,1,0,1,0,1);
+    cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
+    if (verb>=3) {
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+    }
+    realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
+    
+    strategies_set_str( strat, stratstr, nbThreads );
+    /* automaticly set realCoeffs */
+    if (cacheApp_is_real(cache)==0
+        || compBox_contains_real_line_in_interior(initialBox)==0 )
+        strategies_set_realCoeffs(strat, 0);
+    
+    connCmp_list_init(qRes);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    ccluster_algo_global( qRes, initialBox, eps, cache, meta);
+    
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    
+    if (verb>=3) {
+        connCmp_list_print_for_results(stdout, qRes, meta);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
+    connCmp_list_clear(qRes);
+    compBox_clear(initialBox);
+}
+
+void ccluster_forJulia_func( connCmp_list_t qResults, 
+                             void(*func)(compApp_poly_t, slong), 
+                             const compBox_t initialBox, 
+                             const realRat_t eps, 
+                             char * stratstr,
+                             int nbThreads,
+                             int verb){
+    
+//     printf("ccluster.c: ccluster_interface_forJulia_func: begin\n");
+    
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    
+    cacheApp_init(cache, func);
+    strategies_init(strat);
+    
+    strategies_set_str( strat, stratstr, nbThreads );
+    /* automatically set realCoeffs */
+    if (cacheApp_is_real(cache)==0
+        || compBox_contains_real_line_in_interior(initialBox)==0 )
+        strategies_set_realCoeffs(strat, 0);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    
+    ccluster_algo( qResults, initialBox, eps, cache, meta);
+    
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    if (verb>=3) {
+        connCmp_list_print_for_results(stdout, qResults, meta);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
+    
+//     printf("ccluster.c: ccluster_interface_forJulia_func: end\n");
+}
+
+void ccluster_global_forJulia_func( connCmp_list_t qResults, 
+                                    void(*func)(compApp_poly_t, slong),  
+                                    const realRat_t eps, 
+                                    char * stratstr,
+                                    int nbThreads,
+                                    int verb){
+    
+//     printf("ccluster.c: ccluster_interface_forJulia_func: begin\n");
+    
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    
+    cacheApp_init(cache, func);
+    strategies_init(strat);
+    
+    /* automaticly set initialBox */
+    compBox_t initialBox;
+    compBox_init(initialBox);
+    compBox_set_si(initialBox, 0,1,0,1,0,1);
+    cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
+    if (verb>=3) {
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+    }
+    realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
+    
+    strategies_set_str( strat, stratstr, nbThreads );
+    /* automatically set realCoeffs */
+    if (cacheApp_is_real(cache)==0
+        || compBox_contains_real_line_in_interior(initialBox)==0 )
+        strategies_set_realCoeffs(strat, 0);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    
+    ccluster_algo_global( qResults, initialBox, eps, cache, meta);
+    
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    if (verb>=3) {
+        connCmp_list_print_for_results(stdout, qResults, meta);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
+    compBox_clear(initialBox);
+    
+//     printf("ccluster.c: ccluster_interface_forJulia_func: end\n");
 }
 
 int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults, 
@@ -257,7 +392,7 @@ void ccluster_interface_forJulia ( connCmp_list_t qResults,
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     
-    /* automaticly set realCoeffs */
+    /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
         strategies_set_realCoeffs(strat, 0);

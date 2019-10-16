@@ -71,6 +71,12 @@ void ccluster_algo( connCmp_list_t qResults,
                     cacheApp_t cache, 
                     metadatas_t meta);
 
+void ccluster_algo_global( connCmp_list_t qResults, 
+                           const compBox_t initialBox, 
+                           const realRat_t eps, 
+                           cacheApp_t cache, 
+                           metadatas_t meta);
+
 void ccluster_refine( connCmp_list_t qResults, 
                       connCmp_list_t qMainLoop,
                       const realRat_t eps, 
@@ -85,20 +91,40 @@ void connCmp_list_print_for_results(FILE * f,
                                     const connCmp_list_t c, 
                                     metadatas_t meta);
 
-/* default interface */
+/* INTERFACES */
 
-// void ccluster_interface_func( void(*func)(compApp_poly_t, slong), 
-//                               const compBox_t initialBox, 
-//                               const realRat_t eps, 
-//                               int st, 
-//                               int verb);
+/* default interfaces */
+
 void ccluster_interface_func( void(*func)(compApp_poly_t, slong), 
                               const compBox_t initialBox, 
                               const realRat_t eps, 
-//                               int st,
                               char * stratstr,
                               int nbThreads,
                               int verb);
+
+
+void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong), 
+                                     const realRat_t eps, 
+                                     char * stratstr,
+                                     int nbThreads,
+                                     int verb);
+
+/* interfaces for Julia */
+
+void ccluster_forJulia_func( connCmp_list_t qResults, 
+                             void(*func)(compApp_poly_t, slong), 
+                             const compBox_t initialBox, 
+                             const realRat_t eps, 
+                             char * stratstr,
+                             int nbThreads,
+                             int verb);
+
+void ccluster_global_forJulia_func( connCmp_list_t qResults, 
+                                    void(*func)(compApp_poly_t, slong),  
+                                    const realRat_t eps, 
+                                    char * stratstr,
+                                    int nbThreads,
+                                    int verb);
 
 void ccluster_interface_funcPS( void(*func)(compApp_poly_t, slong),
                                 void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
