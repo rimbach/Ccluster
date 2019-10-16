@@ -185,7 +185,11 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
             
             if (connCmp_nSolsref(ccur)==-1){
-                resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, prec, depth, meta);
+                resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 
+#ifdef CCLUSTER_STATS_PS
+                                                                                         0, 
+#endif
+                                                                                         prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
                 prec = resTstar.appPrec;
             }
@@ -452,7 +456,8 @@ void ccluster_DAC_first_interface_forJulia( connCmp_list_t qResults,
     cacheApp_init(cache, func);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     metadatas_init(meta, initialBox, strat, verb);
     
 //     ccluster_algo( qResults, initialBox, eps, cache, meta);
@@ -487,7 +492,8 @@ void ccluster_DAC_next_interface_forJulia( connCmp_list_t qResults,
     cacheApp_init(cache, func);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     metadatas_init(meta, initialBox, strat, verb);
     
 //     ccluster_algo( qResults, initialBox, eps, cache, meta);

@@ -262,14 +262,18 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
         newton_res nres;
         nres.nflag = 0;
         if (connCmp_nSolsref(CC)==1) {
-//             printf("the CC contains one solution: try to validate with interval newton\n");
+//             printf("---the CC contains one solution: try to validate with interval newton\n");
             nres = newton_interval( ndisk, cache, res.appPrec, meta);
         }
         
         if (nres.nflag==0) {
-        
+//             printf("failed...\n");
             slong depth = connCmp_getDepth(CC, metadatas_initBref(meta));
-            tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, depth, meta);
+            tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0,
+#ifdef CCLUSTER_STATS_PS
+                                                                                     1, 
+#endif
+                                                                                     res.appPrec, depth, meta);
             res.appPrec = tres.appPrec;
             res.nflag = (tres.nbOfSol == connCmp_nSolsref(CC));
         
