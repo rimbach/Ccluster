@@ -29,7 +29,8 @@ int main(int argc, char **argv){
     if (argc<7){
         printf("usage: %s degree bitsize ", argv[0]);
         printf("initial_box epsilon strategy verbosity\n");
-        printf("initial_box: for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
+        printf("initial_box: global of a box,\n");
+        printf("             for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
         printf("eps:         for instance1,100 (1/100) or -53 (1/2^(-53))\n");  
         printf("strategy:    default for default strategy\n");
         printf("             test for testing mode\n");
@@ -42,10 +43,10 @@ int main(int argc, char **argv){
     int parse = 1;
     int degree;
     int bitsize;
-//     int st;
     char * st;
     int verbosity;
     int nbthreads = 1;
+    int global = 0;
     
     compBox_t bInit;
     realRat_t eps;
@@ -55,7 +56,8 @@ int main(int argc, char **argv){
     
     parse = parse*scan_degree( argv[1], &degree);
     parse = parse*scan_bitsize( argv[2], &bitsize);
-    parse = parse*scan_initialBox( argv[3], bInit );
+    global = scan_initialBox( argv[3], bInit );
+    parse = parse*global;
     parse = parse*scan_epsilon( argv[4], eps );
 //     parse = parse*scan_strategy(argv[5], &st );
     st = argv[5];
@@ -73,12 +75,14 @@ int main(int argc, char **argv){
     realRat_poly_init(pmign);
     compRat_poly_init(p_global);
     
-    if (parse==1) {
+    if (parse) {
         mignotte_polynomial(pmign, degree, bitsize);
         compRat_poly_set_realRat_poly(p_global,pmign);
     
-//         ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
-        ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
+        if (global==2)
+            ccluster_global_interface_func( getApprox, eps, st, nbthreads, verbosity);
+        else
+            ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
     }
     
     realRat_poly_clear(pmign);

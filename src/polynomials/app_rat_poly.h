@@ -18,6 +18,7 @@
 #define POLYNOMIALS_INLINE static __inline__
 #endif
 
+#include "mag.h"
 #include "numbers/app_rat.h"
 #include "polynomials/realRat_poly.h"
 #include "polynomials/compRat_poly.h"
@@ -36,6 +37,9 @@ POLYNOMIALS_INLINE void compApp_poly_set_realRat_poly(compApp_poly_t poly, const
 POLYNOMIALS_INLINE void compApp_poly_set_compRat_poly(compApp_poly_t poly, const compRat_poly_t pRat, slong prec) {
     compApp_poly_set2_fmpq_poly(poly, compRat_poly_realref(pRat), compRat_poly_imagref(pRat), prec);
 }
+
+/* root bound */
+void compApp_poly_root_bound_fujiwara(realRat_t bound, compApp_poly_t poly);
 
 /* scaling in place */
 /* requires: r is canonical */ 

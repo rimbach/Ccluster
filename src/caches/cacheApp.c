@@ -194,6 +194,21 @@ int cacheApp_is_real ( cacheApp_t cache ){
     return compApp_poly_is_real((cache->_cache)[0]);
 }
 
+void cacheApp_root_bound ( realRat_t bound, cacheApp_t cache ){
+    
+    compApp_poly_ptr p;
+    slong deg = cacheApp_getDegree(cache);
+    slong prec = CCLUSTER_DEFAULT_PREC;
+    p = cacheApp_getApproximation (cache, prec);
+    
+    while ( compApp_contains_zero( compApp_poly_getCoeff(p, deg) ) ) {
+        prec = 2*prec;
+        p = cacheApp_getApproximation (cache, prec);
+    }
+    
+    compApp_poly_root_bound_fujiwara( bound, p);
+}
+
 void cacheApp_clear ( cacheApp_t cache ) {
 
 #ifdef CCLUSTER_EXPERIMENTAL    

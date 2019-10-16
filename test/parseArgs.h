@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include "geometry/compBox.h"
 #include "numbers/realRat.h"
+#define GLOBAL_STR_NAME "global"
 
 int scan_degree( char * argv, int * target) {
     return sscanf(argv, "%d", target);
@@ -27,6 +28,10 @@ int scan_power( char * argv, int * target) {
 }
 
 int scan_initialBox( char * argv, compBox_t target ){
+    
+    if (strcmp( argv, GLOBAL_STR_NAME ) == 0)
+        return 2;
+    
     char * tok=NULL;
     char temp[1000];
     char cReN[100]= "0", cImN[100]= "0", widN[100]= "100";
