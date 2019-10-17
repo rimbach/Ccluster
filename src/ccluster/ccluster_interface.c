@@ -140,7 +140,8 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
 }
 
 void ccluster_global_forJulia_func( connCmp_list_t qResults, 
-                                    void(*func)(compApp_poly_t, slong),  
+                                    void(*func)(compApp_poly_t, slong), 
+                                    compBox_t initialBox,
                                     const realRat_t eps, 
                                     char * stratstr,
                                     int nbThreads,
@@ -156,8 +157,8 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
     strategies_init(strat);
     
     /* automaticly set initialBox */
-    compBox_t initialBox;
-    compBox_init(initialBox);
+//     compBox_t initialBox;
+//     compBox_init(initialBox);
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
@@ -184,7 +185,7 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
     cacheApp_clear(cache);
     strategies_clear(strat);
     metadatas_clear(meta);
-    compBox_clear(initialBox);
+//     compBox_clear(initialBox);
     
 //     printf("ccluster.c: ccluster_interface_forJulia_func: end\n");
 }

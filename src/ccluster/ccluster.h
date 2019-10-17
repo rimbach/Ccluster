@@ -120,6 +120,7 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
 
 void ccluster_global_forJulia_func( connCmp_list_t qResults, 
                                     void(*func)(compApp_poly_t, slong),  
+                                    compBox_t initialBox,
                                     const realRat_t eps, 
                                     char * stratstr,
                                     int nbThreads,
