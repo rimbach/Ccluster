@@ -126,6 +126,38 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
                                     int nbThreads,
                                     int verb);
 
+void ccluster_forJulia_realRat_poly( connCmp_list_t qResults, 
+                                    const realRat_poly_t poly, 
+                                    const compBox_t initialBox, 
+                                    const realRat_t eps, 
+                                    char * stratstr,
+                                    int nbThreads,
+                                    int verb);
+
+void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults, 
+                                            const realRat_poly_t poly,  
+                                            compBox_t initialBox,
+                                            const realRat_t eps, 
+                                            char * stratstr,
+                                            int nbThreads,
+                                            int verb);
+
+void ccluster_forJulia_realRat_poly_real_imag( connCmp_list_t qResults, 
+                                               const realRat_poly_t poly_real, const realRat_poly_t poly_imag, 
+                                               const compBox_t initialBox, 
+                                               const realRat_t eps, 
+                                               char * stratstr,
+                                               int nbThreads,
+                                               int verb);
+
+void ccluster_global_forJulia_realRat_poly_real_imag( connCmp_list_t qResults, 
+                                                      const realRat_poly_t poly_real, const realRat_poly_t poly_imag, 
+                                                      compBox_t initialBox,
+                                                      const realRat_t eps, 
+                                                      char * stratstr,
+                                                      int nbThreads,
+                                                      int verb);
+
 /* interfaces for Singular */
 
 int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults,
