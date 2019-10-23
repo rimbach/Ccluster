@@ -158,6 +158,15 @@ void ccluster_global_forJulia_realRat_poly_real_imag( connCmp_list_t qResults,
                                                       int nbThreads,
                                                       int verb);
 
+void ccluster_forJulia_refine( connCmp_list_t qResults,
+                               connCmp_list_t qMainLoop,
+                               void(*func)(compApp_poly_t, slong), 
+                               const compBox_t initialBox, 
+                               const realRat_t eps, 
+                               char * stratstr,
+                               int nbThreads,
+                               int verb);
+
 /* interfaces for Singular */
 
 int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults,

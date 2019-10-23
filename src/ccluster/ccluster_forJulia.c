@@ -261,6 +261,39 @@ void ccluster_global_forJulia_realRat_poly_real_imag( connCmp_list_t qResults,
     compRat_poly_clear(p);
 }
 
+void ccluster_forJulia_refine( connCmp_list_t qResults,
+                               connCmp_list_t qMainLoop,
+                               void(*func)(compApp_poly_t, slong), 
+                               const compBox_t initialBox, 
+                               const realRat_t eps, 
+                               char * stratstr,
+                               int nbThreads,
+                               int verb){
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    
+    cacheApp_init(cache, func);
+    strategies_init(strat);
+    strategies_set_str( strat, stratstr, nbThreads );
+    
+    /* automaticly set realCoeffs: realCoeffs not implemented for refine */
+    strategies_set_realCoeffs(strat, 0);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    
+    ccluster_refine( qResults, qMainLoop, eps, cache, meta);
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    if (verb>=3) {
+        connCmp_list_print_for_results(stdout, qResults, meta);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
+}
+
 /*DEPRECATED:*/
 
 void ccluster_interface_forJulia ( connCmp_list_t qResults, 
