@@ -91,6 +91,12 @@ void connCmp_list_print_for_results(FILE * f,
                                     const connCmp_list_t c, 
                                     metadatas_t meta);
 
+void ccluster_algo_draw( connCmp_list_t qResults, 
+                         compBox_list_t discarded, 
+                         const compBox_t initialBox, 
+                         const realRat_t eps, 
+                         cacheApp_t cache, metadatas_t meta);
+
 /* INTERFACES */
 
 /* default interfaces */
@@ -167,6 +173,15 @@ void ccluster_forJulia_refine( connCmp_list_t qResults,
                                int nbThreads,
                                int verb);
 
+void ccluster_forJulia_draw( connCmp_list_t qResults, 
+                            compBox_list_t qDiscarded, 
+                            void(*func)(compApp_poly_t, slong), 
+                            const compBox_t initialBox, 
+                            const realRat_t eps, 
+                            char * stratstr,
+                            int nbThreads,
+                            int verb);
+
 /* interfaces for Singular */
 
 int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * mults,
@@ -191,7 +206,7 @@ int ccluster_interface_poly_real_imag( realRat_t * centerRe, realRat_t * centerI
                                        int verb);
 
 /* interfaces for Julia */
-
+/* DEPRECATED */
 void ccluster_interface_forJulia( connCmp_list_t qResults, 
                                   void(*func)(compApp_poly_t, slong), 
                                   const compBox_t initialBox, 
@@ -236,12 +251,6 @@ void ccluster_interface_forJulia_draw( connCmp_list_t qResults,
                                   const realRat_t eps, 
                                   int st, 
                                   int verb);
-
-void ccluster_algo_draw( connCmp_list_t qResults, 
-                         compBox_list_t discarded, 
-                         const compBox_t initialBox, 
-                         const realRat_t eps, 
-                         cacheApp_t cache, metadatas_t meta);
 
 #ifdef __cplusplus
 }
