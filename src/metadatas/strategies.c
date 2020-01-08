@@ -35,6 +35,7 @@ void strategies_set_int( strategies_t strat, int useNewton,
     strat->_realCoeffs            = 0;
     strat->_pwSuTest              = 0;
     strat->_forTests              = 0;
+    strat->_nbPowerSums           = 0;
     
     strat->_useNewton             = useNewton;
     strat->_useTstarOptim         = useTstarOptim;
@@ -60,6 +61,7 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
     strat->_realCoeffs            = strat2->_realCoeffs   ;
     strat->_pwSuTest              = strat2->_pwSuTest   ;
     strat->_forTests              = strat2->_forTests   ;
+    strat->_nbPowerSums           = strat2->_nbPowerSums;
 }
 
 void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
@@ -74,6 +76,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
     strat->_realCoeffs            = 0;
     strat->_pwSuTest             = 0;
     strat->_forTests             = 0;
+    strat->_nbPowerSums          = 0;
     
     strat->_useNBThreads          = nbThreads;
     
@@ -141,6 +144,29 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_realCoeffs            = 1;
         strat->_pwSuTest              = 1;
         strat->_forTests              = 1;
+        strat->_nbPowerSums           = 1;
+        return;
+    }
+    if (strcmp( stratName, STRAT_STR_FORTESTS1 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_realCoeffs            = 1;
+        strat->_pwSuTest              = 1;
+        strat->_forTests              = 1;
+        strat->_nbPowerSums           = 2;
+        return;
+    }
+    if (strcmp( stratName, STRAT_STR_FORTESTS2 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_realCoeffs            = 1;
+        strat->_pwSuTest              = 1;
+        strat->_forTests              = 1;
+        strat->_nbPowerSums           = 3;
         return;
     }
     

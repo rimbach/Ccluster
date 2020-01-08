@@ -55,7 +55,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
         
         if ( metadatas_pwSuTest(meta) ){
-#ifdef CCLUSTER_STATS_PS
+#ifdef CCLUSTER_STATS_PS_MACIS
             resp = powerSums_countingTest( compDsk_centerref(bdisk), compDsk_radiusref(bdisk),
                                                         cache,
                                                         metadatas_getNbEvalPoints(meta),
@@ -67,6 +67,34 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
             int err = 0;
             err = ( ((resp.nbOfSol==0)&&(res.nbOfSol>=1)) || ((res.nbOfSol>=0)&&(resp.nbOfSol>=0)&&(res.nbOfSol!=resp.nbOfSol)) );
             metadatas_add_PsCountingTest (meta, depth, res.nbOfSol, err);
+            
+            if ((resp.nbOfSol==0)&&(res.nbOfSol>=1)) {
+                
+                printf("--- power sums counting test: \n");
+                printf("------ test for disk centered in "); compRat_print(compDsk_centerref(bdisk)); printf("\n");
+                printf("------ with radius "); realRat_print( compDsk_radiusref(bdisk) ); printf("\n");
+                printf("--- power sums counting test: nbSols: %d, prec: %d \n", (int) resp.nbOfSol, (int) resp.appPrec );
+                printf("--- tstar counting test: nbSols: %d, prec: %d \n", (int) res.nbOfSol, (int) res.appPrec );
+                
+                resp = powerSums_discardingTest( compDsk_centerref(bdisk), compDsk_radiusref(bdisk),
+                                                        cache,
+                                                        metadatas_getNbEvalPoints(meta),
+                                                        3,
+                                                        resp.appPrec, meta, depth );
+                
+                printf("------------------------------\n");
+                
+            }
+#endif
+#ifdef CCLUSTER_STATS_PS
+            resp = powerSums_discardingTest( compDsk_centerref(bdisk), compDsk_radiusref(bdisk),
+                                                        cache,
+                                                        metadatas_getNbEvalPoints(meta),
+                                                        metadatas_getNbPowerSums(meta),
+                                                        resp.appPrec, meta, depth );
+            
+            res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1,0, res.appPrec, depth, meta);
+            metadatas_add_PsCountingTest (meta, depth, resp.nbOfSol, res.nbOfSol);
 #else
             resp = powerSums_countingTest( compDsk_centerref(bdisk), compDsk_radiusref(bdisk),
                                                         cache,
@@ -442,7 +470,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
 //                     printf("--- disk: "); compDsk_print(ccDisk); printf("\n");
 //                     printf("--- temp: "); realRat_print(temp); printf("\n");
                     
-#ifdef CCLUSTER_STATS_PS   
+#ifdef CCLUSTER_STATS_PS_MACIS   
                     clock_t start = clock();
                     resp = powerSums_countingTest( compDsk_centerref(ccDisk), temp,
                                                         cache,
@@ -456,6 +484,21 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
                     connCmp_nSolsref(ccur) = resTstar.nbOfSol;
                     prec = resTstar.appPrec;
                     metadatas_add_PsCountingTest (meta, depth, resp.nbOfSol, 0);
+#endif
+#ifdef CCLUSTER_STATS_PS   
+                    clock_t start = clock();
+                    resp = powerSums_countingTest( compDsk_centerref(ccDisk), temp,
+                                                        cache,
+                                                        metadatas_getNbEvalPoints(meta), 
+                                                        1,
+                                                        prec, meta, depth );
+                    
+                    metadatas_add_time_PSTestV(meta, (double) (clock() - start));
+                    
+                    resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0,0, prec, depth, meta);
+                    connCmp_nSolsref(ccur) = resTstar.nbOfSol;
+                    prec = resTstar.appPrec;
+                    metadatas_add_PsCountingTest (meta, depth, resp.nbOfSol, resTstar.nbOfSol);
 #else
                     resp = powerSums_countingTest( compDsk_centerref(ccDisk), temp,
                                                         cache,

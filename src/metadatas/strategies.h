@@ -58,6 +58,8 @@ extern "C" {
 
 #define STRAT_INT_FORTESTS 247
 #define STRAT_STR_FORTESTS "test"
+#define STRAT_STR_FORTESTS1 "test1"
+#define STRAT_STR_FORTESTS2 "test2"
 
 typedef struct {
     int _useNewton;
@@ -71,6 +73,7 @@ typedef struct {
     int _realCoeffs;
     int _pwSuTest;
     int _forTests;
+    int _nbPowerSums;
 } strategies;
 
 typedef strategies strategies_t[1];
@@ -109,6 +112,9 @@ METADATAS_INLINE void strategies_set_forTests   ( strategies_t strat, int flag )
 
 METADATAS_INLINE int strategies_pwSuTest        ( const strategies_t strat ) { return strat->_pwSuTest      ; }
 METADATAS_INLINE void strategies_set_pwSuTest   ( strategies_t strat, int flag ) { strat->_pwSuTest=flag      ; }
+
+METADATAS_INLINE int strategies_nbPowerSums       ( const strategies_t strat ) { return strat->_nbPowerSums      ; }
+METADATAS_INLINE void strategies_set_nbPowerSums   ( strategies_t strat, int nb ) { strat->_nbPowerSums=nb      ; }
 
 #ifdef __cplusplus
 }

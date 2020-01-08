@@ -46,6 +46,8 @@ typedef struct{
 // #endif
     /* for power sums */
     slong      nbEvalPoints;
+    slong      nbPowerSums; /* >=1, how many power sums, 
+                               including 0-th, are computed in the discarding test*/
     void(*evalPoly)(compApp_t, compApp_t, const compApp_t, slong);
 //     slong      appPrec;
 } metadatas;
@@ -81,6 +83,9 @@ METADATAS_INLINE int  metadatas_haveToCount(const metadatas_t m) { return (m->ve
 
 METADATAS_INLINE slong  metadatas_getNbEvalPoints(const metadatas_t m) { return m->nbEvalPoints; }
 METADATAS_INLINE void   metadatas_setNbEvalPoints(metadatas_t m, slong nbEvalPoints) { m->nbEvalPoints = nbEvalPoints; }
+METADATAS_INLINE slong  metadatas_getNbPowerSums(const metadatas_t m) { return (slong) strategies_nbPowerSums(metadatas_stratref(m)); }
+METADATAS_INLINE void   metadatas_setNbPowerSums(metadatas_t m, slong nbPowerSums) { strategies_set_nbPowerSums(metadatas_stratref(m), (slong) nbPowerSums); }
+
 // METADATAS_INLINE slong  metadatas_getAppPrec(const metadatas_t m) { return m->appPrec; }
 // METADATAS_INLINE void   metadatas_setAppPrec(metadatas_t m, slong appPrec) { m->appPrec = appPrec; }
 
@@ -133,18 +138,26 @@ METADATAS_INLINE void metadatas_add_explored ( metadatas_t m, int depth ) {
 }
 
 METADATAS_INLINE void metadatas_add_PsCountingTest ( metadatas_t m, int depth
-#ifdef CCLUSTER_STATS_PS
+#ifdef CCLUSTER_STATS_PS_MACIS
 , int res, int er 
-#endif    
+#endif 
+#ifdef CCLUSTER_STATS_PS
+, int resPS, int resTS
+// , int resPS, int resPS1, int resPS2, int resTS 
+#endif
                                                    ) {
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
     counters_add_PsCountingTest(metadatas_countref(m), depth
-#ifdef CCLUSTER_STATS_PS    
+#ifdef CCLUSTER_STATS_PS_MACIS    
     , res, er
-#endif        
+#endif
+#ifdef CCLUSTER_STATS_PS
+    , resPS, resTS 
+//     , resPS, resPS1, resPS2, resTS
+#endif
     );
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
@@ -224,11 +237,20 @@ METADATAS_INLINE int  metadatas_getNbFailingNewton             ( const metadatas
 
 METADATAS_INLINE int  metadatas_getNbPsCountingTest            ( const metadatas_t m ){ return counters_getNbPsCountingTest(metadatas_countref(m));}
 
-#ifdef CCLUSTER_STATS_PS
+#ifdef CCLUSTER_STATS_PS_MACIS
 METADATAS_INLINE int  metadatas_getNbEval             ( const metadatas_t m ){ return counters_getNbEval             (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbM1            ( const metadatas_t m ){ return counters_getNbM1(metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbM2            ( const metadatas_t m ){ return counters_getNbM2(metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbEr            ( const metadatas_t m ){ return counters_getNbEr(metadatas_countref(m));}
+#endif
+#ifdef CCLUSTER_STATS_PS
+METADATAS_INLINE int  metadatas_getNbEval             ( const metadatas_t m ){ return counters_getNbEval             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbTN            ( const metadatas_t m ){ return counters_getNbTN(metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbFP            ( const metadatas_t m ){ return counters_getNbFP(metadatas_countref(m));}
+// METADATAS_INLINE int  metadatas_getNbTN1            ( const metadatas_t m ){ return counters_getNbTN1(metadatas_countref(m));}
+// METADATAS_INLINE int  metadatas_getNbFP1            ( const metadatas_t m ){ return counters_getNbFP1(metadatas_countref(m));}
+// METADATAS_INLINE int  metadatas_getNbTN2            ( const metadatas_t m ){ return counters_getNbTN2(metadatas_countref(m));}
+// METADATAS_INLINE int  metadatas_getNbFP2            ( const metadatas_t m ){ return counters_getNbFP2(metadatas_countref(m));}
 #endif
 
 METADATAS_INLINE int metadatas_boxes_by_prec_fprint ( FILE * file, const metadatas_t m ) {

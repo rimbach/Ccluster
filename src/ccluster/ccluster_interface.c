@@ -25,11 +25,32 @@ void ccluster_initialize_pwSuTest( void(*evalFast)(compApp_t, compApp_t, const c
         
     realRat_set_si(isoRatio, 2, 1);
     realRat_set_si(wantedPrec, 1, 4);
-    slong nbP = powerSums_getNbOfPointsForCounting( wantedPrec, cacheApp_getDegree(cache), isoRatio );
+    slong nbP = powerSums_getNbOfPointsForCounting( wantedPrec, cacheApp_getDegree(cache), isoRatio )
+                + metadatas_getNbPowerSums(meta) -1;
+                
     metadatas_setNbEvalPoints(meta, nbP);
-    if (verb>=3) {
-        printf("iso ratio used for tests: "); realRat_print( isoRatio ); printf("\n");
-        printf("nb points for eval: %d\n", (int) metadatas_getNbEvalPoints(meta) );
+    if (verb>=2) {
+        
+        printf("nb of power sums computed: %d\n", (int) metadatas_getNbPowerSums(meta) );
+        printf("iso ratio used for tests:  "); realRat_print( isoRatio ); printf("\n");
+        printf("nb points for eval:        %d\n", (int) metadatas_getNbEvalPoints(meta) );
+        
+//         realRat_t errorNum, errorDen;
+//         realRat_init(errorNum);
+//         realRat_init(errorDen);
+//         realRat_inv(errorDen, isoRatio);
+//         realRat_pow_si(errorDen, errorDen, nbP);
+//         realRat_add_si(errorDen, errorDen, -1);
+//         realRat_neg(errorDen, errorDen);
+//         for (int h = 0; h<nbP/2; h++){
+//             realRat_inv(errorNum, isoRatio);
+//             realRat_pow_si(errorNum, errorNum, nbP-h);
+//             realRat_mul_si(errorNum, errorNum, cacheApp_getDegree(cache));
+//             realRat_div( errorNum, errorNum, errorDen );
+//             printf("error for h=%d: ", h); realRat_print( errorNum ); printf("\n");
+//         }
+//         realRat_clear(errorNum);
+//         realRat_clear(errorDen);
     }
         
     realRat_clear(isoRatio);
@@ -153,8 +174,12 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
         strategies_set_realCoeffs(strat, 0);
     
     connCmp_list_init(qRes);
-    
     metadatas_init(meta, initialBox, strat, verb);
+    
+    /* initialize power sums */
+    if ( metadatas_pwSuTest(meta) )
+        ccluster_initialize_pwSuTest(NULL, meta, cache, verb);
+    
     ccluster_algo_global( qRes, initialBox, eps, cache, meta);
     
     metadatas_count(meta);

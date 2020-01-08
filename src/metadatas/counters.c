@@ -89,11 +89,20 @@ void counters_by_depth_init( counters_by_depth_t st) {
     st->nbNewton                  = 0;
     st->nbFailingNewton           = 0;
     st->nbPsCountingTest          = 0;
-#ifdef CCLUSTER_STATS_PS    
+#ifdef CCLUSTER_STATS_PS_MACIS    
     st->nbEval                    = 0;
     st->nbM2          = 0;
     st->nbM1          = 0;
     st->nbEr          = 0;
+#endif
+#ifdef CCLUSTER_STATS_PS    
+    st->nbEval                    = 0;
+    st->nbTN          = 0;
+    st->nbFP          = 0;
+//     st->nbTN1          = 0;
+//     st->nbFP1          = 0;
+//     st->nbTN2          = 0;
+//     st->nbFP2          = 0;
 #endif
     boxes_by_prec_init( st->bpc );
 }
@@ -218,19 +227,39 @@ void counters_add_Eval( counters_t st, int nbEvals, int depth ){
 #endif
 
 void counters_add_PsCountingTest( counters_t st, int depth
-#ifdef CCLUSTER_STATS_PS
+#ifdef CCLUSTER_STATS_PS_MACIS
 , int res, int er 
-#endif    
+#endif
+#ifdef CCLUSTER_STATS_PS
+, int resPS, int resTS
+// , int resPS, int resPS1, int resPS2, int resTS 
+#endif
                                 ){
     counters_adjust_table(st, depth);
     (st->table[depth]).nbPsCountingTest                  +=1;
-#ifdef CCLUSTER_STATS_PS
+#ifdef CCLUSTER_STATS_PS_MACIS
     if (res==-2)
         (st->table[depth]).nbM2                  +=1;
     if (res==-1)
         (st->table[depth]).nbM1                  +=1;
     if (er==1)
         (st->table[depth]).nbEr                  +=1;
+#endif
+#ifdef CCLUSTER_STATS_PS
+    if ((resPS==-1)&&(resTS==0))
+        (st->table[depth]).nbTN                  +=1;
+    if ((resPS==0)&&((resTS==-1)||(resTS>0)))
+        (st->table[depth]).nbFP                  +=1;
+//     
+//     if ((resPS1==-1)&&(resTS==0))
+//         (st->table[depth]).nbTN1                  +=1;
+//     if ((resPS1==0)&&((resTS==-1)||(resTS>0)))
+//         (st->table[depth]).nbFP1                  +=1;
+//     
+//     if ((resPS2==-1)&&(resTS==0))
+//         (st->table[depth]).nbTN2                  +=1;
+//     if ((resPS2==0)&&((resTS==-1)||(resTS>0)))
+//         (st->table[depth]).nbFP2                  +=1;
 #endif
 }
 
@@ -255,11 +284,20 @@ void counters_count ( counters_t st ) {
        st->total->nbNewton                  += (st->table)[i].nbNewton                  ; 
        st->total->nbFailingNewton           += (st->table)[i].nbFailingNewton           ; 
        st->total->nbPsCountingTest          += (st->table)[i].nbPsCountingTest           ;
-#ifdef CCLUSTER_STATS_PS       
+#ifdef CCLUSTER_STATS_PS_MACIS       
        st->total->nbEval        += (st->table)[i].nbEval           ;
        st->total->nbM1          += (st->table)[i].nbM1           ;
        st->total->nbM2          += (st->table)[i].nbM2           ;
        st->total->nbEr          += (st->table)[i].nbEr           ;
+#endif
+#ifdef CCLUSTER_STATS_PS       
+       st->total->nbEval        += (st->table)[i].nbEval           ;
+       st->total->nbTN          += (st->table)[i].nbTN           ;
+       st->total->nbFP          += (st->table)[i].nbFP           ;
+//        st->total->nbTN1          += (st->table)[i].nbTN1           ;
+//        st->total->nbFP1          += (st->table)[i].nbFP1           ;
+//        st->total->nbTN2          += (st->table)[i].nbTN2           ;
+//        st->total->nbFP2          += (st->table)[i].nbFP2           ;
 #endif       
        boxes_by_prec_add_boxes_by_prec( st->total->bpc, (st->table)[i].bpc ); 
     }
@@ -287,11 +325,20 @@ int counters_getNbTaylorsRepetedInTSTests   ( const counters_t st ){ return st->
 int counters_getNbNewton                    ( const counters_t st ){ return st->total->nbNewton                  ;}
 int counters_getNbFailingNewton             ( const counters_t st ){ return st->total->nbFailingNewton           ;}
 int counters_getNbPsCountingTest            ( const counters_t st ){ return st->total->nbPsCountingTest          ;}
-#ifdef CCLUSTER_STATS_PS
+#ifdef CCLUSTER_STATS_PS_MACIS
 int counters_getNbEval                      ( const counters_t st ){ return st->total->nbEval                    ;}
 int counters_getNbM1            ( const counters_t st ){ return st->total->nbM1          ;}
 int counters_getNbM2            ( const counters_t st ){ return st->total->nbM2          ;}
 int counters_getNbEr            ( const counters_t st ){ return st->total->nbEr          ;}
+#endif
+#ifdef CCLUSTER_STATS_PS
+int counters_getNbEval                      ( const counters_t st ){ return st->total->nbEval                    ;}
+int counters_getNbTN            ( const counters_t st ){ return st->total->nbTN          ;}
+int counters_getNbFP            ( const counters_t st ){ return st->total->nbFP          ;}
+// int counters_getNbTN1            ( const counters_t st ){ return st->total->nbTN1          ;}
+// int counters_getNbFP1            ( const counters_t st ){ return st->total->nbFP1          ;}
+// int counters_getNbTN2            ( const counters_t st ){ return st->total->nbTN2          ;}
+// int counters_getNbFP2            ( const counters_t st ){ return st->total->nbFP2          ;}
 #endif
 /* DEPRECATED
 void counters_by_depth_get_lenghts_of_str( counters_by_depth_t res, counters_by_depth_t st){

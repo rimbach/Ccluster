@@ -95,6 +95,10 @@ POLYNOMIALS_INLINE int realRat_poly_print_pretty(const realRat_poly_t poly, cons
     return fmpq_poly_print_pretty(poly, var);
 }
 
+/* reading */
+POLYNOMIALS_INLINE int realRat_poly_fread       (FILE * file, realRat_poly_t poly) { return fmpq_poly_fread(file, poly);}
+POLYNOMIALS_INLINE int realRat_poly_read       (realRat_poly_t poly) { return fmpq_poly_read(poly); }
+
 /*separation bound for integer polynomials*/
 /* here we assume that the coefficients of the pol are interger! */
 void realRat_poly_separationBound (realRat_t sep, const realRat_poly_t pol);

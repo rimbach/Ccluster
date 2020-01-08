@@ -66,6 +66,14 @@ typedef struct {
     slong appPrec; /* the arithmetic precision that has been used to decide      */
 } powerSums_res;
 
+powerSums_res powerSums_discardingTest( const compRat_t center,
+                                        const realRat_t radius,
+                                        cacheApp_t cache,
+                                        slong nbPoints,
+                                        slong nbPowerSums,
+                                        slong prec,
+                                        metadatas_t meta, int depth);
+
 powerSums_res powerSums_countingTest( const compRat_t center,
                                       const realRat_t radius,
                                       cacheApp_t cache,
