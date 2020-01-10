@@ -23,7 +23,8 @@ void ccluster_initialize_pwSuTest( void(*evalFast)(compApp_t, compApp_t, const c
     
     meta->evalPoly = evalFast;
         
-    realRat_set_si(isoRatio, 2, 1);
+//     realRat_set_si(isoRatio, 2, 1);
+    realRat_set_si(isoRatio, 4, 3);
     realRat_set_si(wantedPrec, 1, 4);
     slong nbP = powerSums_getNbOfPointsForCounting( wantedPrec, cacheApp_getDegree(cache), isoRatio )
                 + metadatas_getNbPowerSums(meta) -1;
