@@ -103,7 +103,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
                                                         resp.appPrec, meta, depth );
             metadatas_add_PsCountingTest (meta, depth);
             if ((resp.nbOfSol==0)||(resp.nbOfSol==-2)) {
-                res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, res.appPrec, depth, meta); 
+                res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1,0, res.appPrec, depth, meta); 
             }
             else
                 res.nbOfSol = -1;
@@ -115,11 +115,7 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
 #endif 
         }
         else    
-            res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1,
-#ifdef CCLUSTER_STATS_PS
-                                                                               0,
-#endif
-                                                                               res.appPrec, depth, meta);  
+            res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
                 metadatas_add_discarded( meta, depth);
@@ -512,11 +508,7 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
                     realRat_clear(temp);
                 }    
                 else {
-                    resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0,
-#ifdef CCLUSTER_STATS_PS
-                                                                                             0, 
-#endif
-                                                                                             prec, depth, meta);
+                    resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                     connCmp_nSolsref(ccur) = resTstar.nbOfSol;
 //                     if (metadatas_getVerbo(meta)>3)
 //                         printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));

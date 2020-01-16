@@ -106,17 +106,20 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in tests DT:",       metadatas_get_time_T0Tests(meta),    " " );
     r = fprintf(file, " -------------------TSTest used to validate clusters------------------\n");
     r = fprintf(file, "|%-39s %14d %14s|\n", "total number VT:",                    metadatas_getNbTSTests(meta),        " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbTSTestsInNewton(meta), " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "number of tests without conclusion:", metadatas_getNbFailingTSTests(meta), " " );
     r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in tests VT:",       metadatas_get_time_TSTests(meta),    " " );
     r = fprintf(file, " -------------------Taylor shifts-------------------------------------\n");
     r = fprintf(file, "|%-39s %14d |%13d|\n", "total number TS:",                    nbTaylorShifts + nbTaylorShiftsR, nbTaylorShiftsR );
     r = fprintf(file, "|%-39s %14d |%13d|\n", "number in discarding TSTests TS:",    metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsRepetedInT0Tests(meta), metadatas_getNbTaylorsRepetedInT0Tests(meta) );
     r = fprintf(file, "|%-39s %14d |%13d|\n", "number in validating TSTests TS:",    metadatas_getNbTaylorsInTSTests(meta) + metadatas_getNbTaylorsRepetedInTSTests(meta), metadatas_getNbTaylorsRepetedInTSTests(meta) );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbTaylorsInNewton(meta), " " );
     r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in Taylor shifts:",  metadatas_get_time_Taylors(meta),    " " );
     r = fprintf(file, " -------------------Graeffe Iterations--------------------------------\n");
     r = fprintf(file, "|%-39s %14d |%13d|\n", "total number GR:",                       nbGraeffe + nbGraeffeR, nbGraeffeR );
     r = fprintf(file, "|%-39s %14d |%13d|\n", "number in discarding TSTests GR:",       metadatas_getNbGraeffeInT0Tests(meta) + metadatas_getNbGraeffeRepetedInT0Tests(meta), metadatas_getNbGraeffeRepetedInT0Tests(meta) );
     r = fprintf(file, "|%-39s %14d |%13d|\n", "number in validating TSTests GR:",       metadatas_getNbGraeffeInTSTests(meta) + metadatas_getNbGraeffeRepetedInTSTests(meta), metadatas_getNbGraeffeRepetedInTSTests(meta) );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbGraeffeInNewton(meta), " " );
     r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in Graeffe Iterations:", metadatas_get_time_Graeffe(meta),    " " );
     if (metadatas_useNewton(meta)){
     r = fprintf(file, " -------------------Newton Iterations---------------------------------\n");

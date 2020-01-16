@@ -56,9 +56,7 @@ tstar_res tstar_interface( cacheApp_t cache,  /*                                
                            const compDsk_t d, /*                                               */
                            int max_nb_sols,   /*the maximum number of sols in the disk         */
                            int discard,       /*a flag saying if it is a discarding test or not*/
-#ifdef CCLUSTER_STATS_PS
                            int inNewton,      /*a flag saying if it is for newton refinement   */
-#endif
                            slong prec,        /*the "default" arithmetic precision             */
                            int depth,         /*the depth for counter                          */
                            metadatas_t meta);
@@ -67,9 +65,7 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
                            const compDsk_t d,
                            int max_nb_sols,   /*the maximum number of sols in the disk          */
                            int discard,       /*a flag saying if it is a discarding test or not */
-#ifdef CCLUSTER_STATS_PS
                            int inNewton,      /*a flag saying if it is for newton refinement   */
-#endif
                            slong prec,        /*the "default" arithmetic precision              */
                            int depth,         /*the depth for counter                           */
                            metadatas_t meta);
@@ -78,9 +74,7 @@ tstar_res tstar_optimized( cacheApp_t cache,
                            const compDsk_t d,
                            int max_nb_sols,   /*the maximum number of sols in the disk           */
                            int discard,       /*a flag saying if it is a discarding test or not  */
-#ifdef CCLUSTER_STATS_PS
                            int inNewton,      /*a flag saying if it is for newton refinement   */
-#endif
                            slong prec,        /*the "default" arithmetic precision               */
                            int depth,         /*the depth for counter                            */
                            metadatas_t meta);

@@ -11,8 +11,12 @@
 
 #include "metadatas/strategies.h"
 
-void strategies_init( strategies_t strat ){}
-void strategies_clear(strategies_t strat) {}
+void strategies_init( strategies_t strat ){
+    realRat_init(strategies_isoRatioRef(strat));
+}
+void strategies_clear(strategies_t strat) {
+    realRat_clear(strategies_isoRatioRef(strat));
+}
 
 void strategies_set_int( strategies_t strat, int useNewton, 
                                              int useTstarOptim, 
@@ -33,9 +37,9 @@ void strategies_set_int( strategies_t strat, int useNewton,
     strat->_useNBThreads          = 0;
     strat->_additionalFlags       = 0;
     strat->_realCoeffs            = 0;
-    strat->_pwSuTest              = 0;
     strat->_forTests              = 0;
-    strat->_nbPowerSums           = 0;
+    strat->_pwSuTest              = 0;
+    strat->_pwSuNbPs              = 0;
     
     strat->_useNewton             = useNewton;
     strat->_useTstarOptim         = useTstarOptim;
@@ -59,9 +63,10 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
     strat->_useNBThreads          = strat2->_useNBThreads      ;
     strat->_additionalFlags       = strat2->_additionalFlags   ;
     strat->_realCoeffs            = strat2->_realCoeffs   ;
-    strat->_pwSuTest              = strat2->_pwSuTest   ;
     strat->_forTests              = strat2->_forTests   ;
-    strat->_nbPowerSums           = strat2->_nbPowerSums;
+    strat->_pwSuTest              = strat2->_pwSuTest   ;
+    strat->_pwSuNbPs           = strat2->_pwSuNbPs;
+    realRat_set(strategies_isoRatioRef(strat), strategies_isoRatioRef(strat2));
 }
 
 void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
@@ -76,7 +81,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
     strat->_realCoeffs            = 0;
     strat->_pwSuTest             = 0;
     strat->_forTests             = 0;
-    strat->_nbPowerSums          = 0;
+    strat->_pwSuNbPs          = 0;
     
     strat->_useNBThreads          = nbThreads;
     
@@ -144,7 +149,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_realCoeffs            = 1;
         strat->_pwSuTest              = 1;
         strat->_forTests              = 1;
-        strat->_nbPowerSums           = 1;
+        strat->_pwSuNbPs              = 1;
         return;
     }
     if (strcmp( stratName, STRAT_STR_FORTESTS1 ) == 0) {
@@ -155,7 +160,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_realCoeffs            = 1;
         strat->_pwSuTest              = 1;
         strat->_forTests              = 1;
-        strat->_nbPowerSums           = 2;
+        strat->_pwSuNbPs              = 2;
         return;
     }
     if (strcmp( stratName, STRAT_STR_FORTESTS2 ) == 0) {
@@ -166,7 +171,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_realCoeffs            = 1;
         strat->_pwSuTest              = 1;
         strat->_forTests              = 1;
-        strat->_nbPowerSums           = 3;
+        strat->_pwSuNbPs              = 3;
         return;
     }
     

@@ -72,6 +72,9 @@ typedef struct {
     /* Newton steps */
     int nbNewton;
     int nbFailingNewton;
+    int nbTSTestsInNewton;
+    int nbTaylorsInNewton;
+    int nbGraeffeInNewton;
     /* Power Sums */
     int nbPsCountingTest;
 #ifdef CCLUSTER_STATS_PS_MACIS
@@ -132,7 +135,7 @@ METADATAS_INLINE void counters_unlock(counters_t t){
 void counters_add_discarded( counters_t st, int depth );
 void counters_add_validated( counters_t st, int depth, int nbSols );
 void counters_add_explored ( counters_t st, int depth );
-void counters_add_Test     ( counters_t st, int depth, int res, int discard, 
+void counters_add_Test     ( counters_t st, int depth, int res, int discard, int inNewton, 
                              int nbTaylors, int nbTaylorsRepeted, 
                              int nbGraeffe, int nbGraeffeRepeted,
                              slong prec
@@ -161,6 +164,9 @@ int counters_getNbTaylorsInTSTests          ( const counters_t st );
 int counters_getNbTaylorsRepetedInTSTests   ( const counters_t st );
 int counters_getNbNewton                    ( const counters_t st );
 int counters_getNbFailingNewton             ( const counters_t st );
+int counters_getNbTSTestsInNewton           ( const counters_t st );
+int counters_getNbTaylorsInNewton           ( const counters_t st );
+int counters_getNbGraeffeInNewton           ( const counters_t st );
 int counters_getNbPsCountingTest            ( const counters_t st );
 #ifdef CCLUSTER_STATS_PS_MACIS
 int counters_getNbEval                      ( const counters_t st );

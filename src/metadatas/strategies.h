@@ -21,6 +21,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*for isoRatio*/
+#include "numbers/realRat.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -71,9 +74,10 @@ typedef struct {
     int _useNBThreads;
     int _additionalFlags;
     int _realCoeffs;
-    int _pwSuTest;
     int _forTests;
-    int _nbPowerSums;
+    int _pwSuTest;
+    int _pwSuNbPs;
+    realRat _pwSuIsoRatio;
 } strategies;
 
 typedef strategies strategies_t[1];
@@ -113,8 +117,16 @@ METADATAS_INLINE void strategies_set_forTests   ( strategies_t strat, int flag )
 METADATAS_INLINE int strategies_pwSuTest        ( const strategies_t strat ) { return strat->_pwSuTest      ; }
 METADATAS_INLINE void strategies_set_pwSuTest   ( strategies_t strat, int flag ) { strat->_pwSuTest=flag      ; }
 
-METADATAS_INLINE int strategies_nbPowerSums       ( const strategies_t strat ) { return strat->_nbPowerSums      ; }
-METADATAS_INLINE void strategies_set_nbPowerSums   ( strategies_t strat, int nb ) { strat->_nbPowerSums=nb      ; }
+METADATAS_INLINE int strategies_pwSuNbPs       ( const strategies_t strat ) { return strat->_pwSuNbPs      ; }
+METADATAS_INLINE void strategies_set_pwSuNbPs   ( strategies_t strat, int nb ) { strat->_pwSuNbPs=nb      ; }
+
+#define strategies_isoRatioRef(x) (&(x)->_pwSuIsoRatio)
+METADATAS_INLINE void strategies_set_pwSuIsoRatio   ( strategies_t strat, realRat_t isoRatio ) { 
+    realRat_set(strategies_isoRatioRef(strat), isoRatio); 
+}
+METADATAS_INLINE void strategies_set_pwSuIsoRatio_si   ( strategies_t strat, slong num, ulong den ) { 
+    realRat_set_si(strategies_isoRatioRef(strat), num, den); 
+}
 
 #ifdef __cplusplus
 }

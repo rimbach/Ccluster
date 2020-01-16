@@ -46,8 +46,8 @@ typedef struct{
 // #endif
     /* for power sums */
     slong      nbEvalPoints;
-    slong      nbPowerSums; /* >=1, how many power sums, 
-                               including 0-th, are computed in the discarding test*/
+//     slong      nbPowerSums; /* >=1, how many power sums, 
+//                                including 0-th, are computed in the discarding test*/
     void(*evalPoly)(compApp_t, compApp_t, const compApp_t, slong);
 //     slong      appPrec;
 } metadatas;
@@ -79,12 +79,16 @@ METADATAS_INLINE void metadatas_unlock(metadatas_t m){
 }  
 
 METADATAS_INLINE int  metadatas_getVerbo(const metadatas_t m) { return m->verbo; }
+METADATAS_INLINE void  metadatas_setVerbo(metadatas_t m, int v) { m->verbo=v; }
 METADATAS_INLINE int  metadatas_haveToCount(const metadatas_t m) { return (m->verbo > 1); }
 
 METADATAS_INLINE slong  metadatas_getNbEvalPoints(const metadatas_t m) { return m->nbEvalPoints; }
 METADATAS_INLINE void   metadatas_setNbEvalPoints(metadatas_t m, slong nbEvalPoints) { m->nbEvalPoints = nbEvalPoints; }
-METADATAS_INLINE slong  metadatas_getNbPowerSums(const metadatas_t m) { return (slong) strategies_nbPowerSums(metadatas_stratref(m)); }
-METADATAS_INLINE void   metadatas_setNbPowerSums(metadatas_t m, slong nbPowerSums) { strategies_set_nbPowerSums(metadatas_stratref(m), (slong) nbPowerSums); }
+METADATAS_INLINE slong  metadatas_getNbPowerSums(const metadatas_t m) { return (slong) strategies_pwSuNbPs(metadatas_stratref(m)); }
+METADATAS_INLINE void   metadatas_setNbPowerSums(metadatas_t m, slong nbPowerSums) { strategies_set_pwSuNbPs(metadatas_stratref(m), (slong) nbPowerSums); }
+METADATAS_INLINE void   metadatas_setIsoRatio(metadatas_t m, realRat_t isoRatio) { strategies_set_pwSuIsoRatio(metadatas_stratref(m), isoRatio); }
+METADATAS_INLINE void   metadatas_setIsoRatio_si(metadatas_t m, slong num, ulong den) { strategies_set_pwSuIsoRatio_si(metadatas_stratref(m), num, den); }
+METADATAS_INLINE realRat_ptr metadatas_getIsoRatio(metadatas_t m) { return strategies_isoRatioRef(metadatas_stratref(m)); }
 
 // METADATAS_INLINE slong  metadatas_getAppPrec(const metadatas_t m) { return m->appPrec; }
 // METADATAS_INLINE void   metadatas_setAppPrec(metadatas_t m, slong appPrec) { m->appPrec = appPrec; }
@@ -165,12 +169,14 @@ METADATAS_INLINE void metadatas_add_PsCountingTest ( metadatas_t m, int depth
 #endif
 }
 
-METADATAS_INLINE void metadatas_add_Test     ( metadatas_t m, int depth, int res, int discard, int nbTaylors, int nbTaylorsRepeted, int nbGraeffe, int nbGraeffeRepeted, int prec, double d) {
+METADATAS_INLINE void metadatas_add_Test     ( metadatas_t m, int depth, int res, int discard, int inNewton, 
+                                               int nbTaylors, int nbTaylorsRepeted, int nbGraeffe, int nbGraeffeRepeted, int prec, 
+                                               double d) {
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
-    counters_add_Test( metadatas_countref(m), depth, res, discard, nbTaylors, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted, prec);
+    counters_add_Test( metadatas_countref(m), depth, res, discard, inNewton, nbTaylors, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted, prec);
     if (discard)
         chronos_add_time_T0Tests( metadatas_chronref(m), d, metadatas_useNBThreads(m));
     else
@@ -234,6 +240,9 @@ METADATAS_INLINE int  metadatas_getNbTaylorsInTSTests          ( const metadatas
 METADATAS_INLINE int  metadatas_getNbTaylorsRepetedInTSTests   ( const metadatas_t m ){ return counters_getNbTaylorsRepetedInTSTests   (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbNewton                    ( const metadatas_t m ){ return counters_getNbNewton                    (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbFailingNewton             ( const metadatas_t m ){ return counters_getNbFailingNewton             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbTSTestsInNewton           ( const metadatas_t m ){ return counters_getNbTSTestsInNewton             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbTaylorsInNewton           ( const metadatas_t m ){ return counters_getNbTaylorsInNewton             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbGraeffeInNewton           ( const metadatas_t m ){ return counters_getNbGraeffeInNewton             (metadatas_countref(m));}
 
 METADATAS_INLINE int  metadatas_getNbPsCountingTest            ( const metadatas_t m ){ return counters_getNbPsCountingTest(metadatas_countref(m));}
 

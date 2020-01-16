@@ -88,6 +88,9 @@ void counters_by_depth_init( counters_by_depth_t st) {
     st->nbTaylorsRepetedInTSTests = 0;
     st->nbNewton                  = 0;
     st->nbFailingNewton           = 0;
+    st->nbTSTestsInNewton                  = 0;
+    st->nbTaylorsInNewton          = 0;
+    st->nbGraeffeInNewton          = 0;
     st->nbPsCountingTest          = 0;
 #ifdef CCLUSTER_STATS_PS_MACIS    
     st->nbEval                    = 0;
@@ -188,7 +191,7 @@ void counters_add_explored ( counters_t st, int depth ){
     (st->table[depth]).nbExplored +=1;
 }
 
-void counters_add_Test     ( counters_t st, int depth, int res, int discard, 
+void counters_add_Test     ( counters_t st, int depth, int res, int discard, int inNewton, 
                              int nbTaylors, int nbTaylorsRepeted, 
                              int nbGraeffe, int nbGraeffeRepeted,
                              slong prec
@@ -209,6 +212,12 @@ void counters_add_Test     ( counters_t st, int depth, int res, int discard,
         (st->table[depth]).nbGraeffeRepetedInTSTests           += nbGraeffeRepeted;
         (st->table[depth]).nbTaylorsInTSTests                           += nbTaylors;
         (st->table[depth]).nbTaylorsRepetedInTSTests           += nbTaylorsRepeted;
+        
+        if (inNewton) {
+            (st->table[depth]).nbTSTestsInNewton                           += 1;
+            (st->table[depth]).nbTaylorsInNewton                           += 1;
+            (st->table[depth]).nbGraeffeInNewton                           += nbGraeffe;
+        }
     }
     boxes_by_prec_add_int( (st->table[depth]).bpc, prec, 1);    
 }
@@ -283,7 +292,10 @@ void counters_count ( counters_t st ) {
        st->total->nbTaylorsRepetedInTSTests += (st->table)[i].nbTaylorsRepetedInTSTests ; 
        st->total->nbNewton                  += (st->table)[i].nbNewton                  ; 
        st->total->nbFailingNewton           += (st->table)[i].nbFailingNewton           ; 
-       st->total->nbPsCountingTest          += (st->table)[i].nbPsCountingTest           ;
+       st->total->nbTSTestsInNewton         += (st->table)[i].nbTSTestsInNewton         ; 
+       st->total->nbTaylorsInNewton         += (st->table)[i].nbTaylorsInNewton         ; 
+       st->total->nbGraeffeInNewton         += (st->table)[i].nbGraeffeInNewton         ;
+       st->total->nbPsCountingTest          += (st->table)[i].nbPsCountingTest          ;
 #ifdef CCLUSTER_STATS_PS_MACIS       
        st->total->nbEval        += (st->table)[i].nbEval           ;
        st->total->nbM1          += (st->table)[i].nbM1           ;
@@ -324,6 +336,9 @@ int counters_getNbTaylorsInTSTests          ( const counters_t st ){ return st->
 int counters_getNbTaylorsRepetedInTSTests   ( const counters_t st ){ return st->total->nbTaylorsRepetedInTSTests ;}
 int counters_getNbNewton                    ( const counters_t st ){ return st->total->nbNewton                  ;}
 int counters_getNbFailingNewton             ( const counters_t st ){ return st->total->nbFailingNewton           ;}
+int counters_getNbTSTestsInNewton           ( const counters_t st ){ return st->total->nbTSTestsInNewton          ;}
+int counters_getNbTaylorsInNewton           ( const counters_t st ){ return st->total->nbTaylorsInNewton         ;}
+int counters_getNbGraeffeInNewton           ( const counters_t st ){ return st->total->nbGraeffeInNewton         ;}
 int counters_getNbPsCountingTest            ( const counters_t st ){ return st->total->nbPsCountingTest          ;}
 #ifdef CCLUSTER_STATS_PS_MACIS
 int counters_getNbEval                      ( const counters_t st ){ return st->total->nbEval                    ;}

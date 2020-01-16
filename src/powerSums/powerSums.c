@@ -87,47 +87,6 @@ void powerSums_evaluateAtPoints( compApp_ptr f_val,
         for (slong i=0; i<nbPoints; i++)
             meta->evalPoly( f_val+i, fder_val + i, points+i, prec);
     }
-    
-    
-//     compApp_ptr fvals2;
-//     compApp_ptr fdervals2;
-//     fvals2 =         (compApp_ptr) ccluster_malloc( nbPoints*sizeof(compApp) );
-//     fdervals2 =      (compApp_ptr) ccluster_malloc( nbPoints*sizeof(compApp) );
-//     for (int i=0; i<nbPoints; i++){
-//         compApp_init( fvals2 +i );
-//         compApp_init( fdervals2 +i );
-//     }
-//     
-//     compApp_poly_ptr app = cacheApp_getApproximation ( cache, prec );
-//     for (slong i=0; i<nbPoints; i++) {
-//         compApp_poly_evaluate2_horner(f_val + i, fder_val + i, app, points + i, prec);
-// //         compApp_poly_evaluate2_rectangular(f_val + i, fder_val + i, app, points + i, prec);
-//         meta->evalPoly( fvals2+i, fdervals2+i, points+i, prec);
-//         printf("point %ld: ", i);
-//         compApp_print(points+i);
-//         printf("\n           ");
-//         compApp_print(f_val + i);
-//         printf("\n           ");
-//         compApp_print(fvals2 + i);
-//         printf("\n           first contains second?   %d (0:NO, <>0: YES)", acb_contains(f_val + i, fvals2 + i));
-//         printf("\n           second contains first?   %d (0:NO, <>0: YES)", acb_contains(fvals2 + i, f_val + i));
-//         printf("\n           first intersects second? %d (0:NO, <>0: YES)", acb_overlaps(f_val + i, fvals2 + i));
-//         printf("\n           ");
-//         compApp_print(fder_val + i);
-//         printf("\n           ");
-//         compApp_print(fdervals2 + i);
-//         printf("\n           first contains second?   %d (0:NO, <>0: YES)", acb_contains(fder_val + i, fdervals2 + i));
-//         printf("\n           second contains first?   %d (0:NO, <>0: YES)", acb_contains(fdervals2 + i, fder_val + i));
-//         printf("\n           first intersects second? %d (0:NO, <>0: YES)", acb_overlaps(fder_val + i, fdervals2 + i));
-//         printf("\n\n");
-//     }
-//     
-//     for (int i=0; i<nbPoints; i++){
-//         compApp_clear( fvals2 +i );
-//         compApp_clear( fdervals2 +i );
-//     }
-//     ccluster_free(fvals2);
-//     ccluster_free(fdervals2);
 }
 
 void powerSums_evaluateAtPoints_fast( compApp_ptr f_val,
@@ -230,6 +189,152 @@ void powerSums_computeS0_prec(     compApp_t s0,
     powerSums_computeS0_fromVals( s0, points, f_val, fder_val, nbPoints, prec );
 }
 
+/* returns -1: should increase precision
+ *         -2: disk is has not expected isolation ratio; should stop
+ *          1: OK! */
+int powerSums_computePsApprox_fromVals(compApp_ptr ps,
+                                        const compRat_t center,
+                                        const realRat_t radius,
+                                        const realRat_t lowerBound,
+                                        compApp_ptr points,
+//                                         compApp_ptr pointsShifted,
+                                        compApp_ptr fvals,
+                                        compApp_ptr fdervals,
+                                        compApp_ptr fdivs,
+                                        slong nbPoints,
+                                        slong nbPowerSums,
+//                                         cacheApp_t cache,
+                                        slong prec,
+                                        metadatas_t meta){
+    
+    int res=1;
+    
+    realApp_t lb, modulus;
+    realApp_init(lb);
+    realApp_init(modulus);
+    realApp_set_realRat(lb, lowerBound, prec);
+    
+    /* compute fdivs; check if fvals contains zero and 
+     *                has modulus less than lower bound*/
+    for (slong i = 0; (i<nbPoints) && (res==1) ; i++) {
+        compApp_abs(modulus, fvals +i, prec);
+        if (compApp_contains_zero( fvals +i )){
+            /* compute modulus of fvals +i */
+            if (realApp_lt( modulus, lb )){
+//                 if (metadatas_getVerbo(meta)>3){
+//                     printf("---------------------------------------\n");
+//                     printf("---test for disk centered in "); compRat_print(center); printf("\n");
+//                     printf("---with radius "); realRat_print(radius); printf("\n");
+//                     printf("---fvals + %d contains zero:", (int) i);
+//                     compApp_printd(fvals + i, 10); printf("\n");
+//                     printf("---lower bound on fvals + %d, assuming f is monic: ", (int) i);
+//                     realApp_printd(lb, 10); printf("\n");
+//                     printf("---|fvals + %d| is less that lower bound:", (int) i);
+//                     printf("%d\n",realApp_lt( modulus, lb ));
+//                     printf("---------------------------------------\n");
+//                 }
+                res=-2;
+            }
+            else {
+//                 if (metadatas_getVerbo(meta)>3) {
+//                     printf("---------------------------------------\n");
+//                     printf("---test for disk centered in "); compRat_print(center); printf("\n");
+//                     printf("---with radius "); realRat_print(radius); printf("\n");
+//                     printf("---fvals + %d contains zero:", (int) i);
+//                     compApp_printd(fvals + i, 10); printf("\n");
+//                     printf("---lower bound on fvals + %d, assuming f is monic: ", (int) i);
+//                     realApp_printd(lb, 10); printf("\n");
+//                     printf("---|fvals + %d| is less that lower bound:", (int) i);
+//                     printf("%d\n",realApp_lt( modulus, lb ));
+//                     printf("---------------------------------------\n");
+//                 }
+                res=-1;
+            }
+        }
+        else if (realApp_lt( modulus, lb )) {
+//             if (metadatas_getVerbo(meta)>3) {
+//                 printf("---------------------------------------\n");
+//                 printf("---test for disk centered in "); compRat_print(center); printf("\n");
+//                 printf("---with radius "); realRat_print(radius); printf("\n");
+//                 printf("---fvals + %d:", (int) i);
+//                 compApp_printd(fvals + i, 10); printf("\n");
+//                 printf("---lower bound on fvals + %d, assuming f is monic: ", (int) i);
+//                 realApp_printd(lb, 10); printf("\n");
+//                 printf("---Disk can not have isolation ratio >="); 
+//                 realRat_print( metadatas_getIsoRatio(meta) ); printf("\n");
+//                 printf("---------------------------------------\n");
+//             }
+            res = -2;
+        }
+        else if (!realApp_ge( modulus, lb )){
+//             if (metadatas_getVerbo(meta)>3) {
+//                 printf("---------------------------------------\n");
+//                 printf("---test for disk centered in "); compRat_print(center); printf("\n");
+//                 printf("---with radius "); realRat_print(radius); printf("\n");
+//                 printf("---prec: %ld\n ", prec);
+//                 printf("---fvals + %d:", (int) i);
+//                 compApp_printd(fvals + i, 10); printf("\n");
+//                 printf("---lower bound on fvals + %d, assuming f is monic: ", (int) i);
+//                 realApp_printd(lb, 10); printf("\n");
+//                 printf("---Disk may have isolation ratio <"); 
+//                 realRat_print( metadatas_getIsoRatio(meta) ); printf("\n");
+//                 printf("---------------------------------------\n");
+//             }
+            res = -1;
+        }
+        compApp_div(fdivs +i, fdervals + i, fvals + i, prec);
+    }
+    
+    if (res==1){
+        
+        realApp_t radRe, radIm, wP;
+        realRat_t wantedPrec;
+        realRat_init(wantedPrec);
+        realApp_init(radRe);
+        realApp_init(radIm);
+        realApp_init(wP);
+        realRat_set_si(wantedPrec, 1, 4);
+        realApp_set_realRat( wP, wantedPrec, CCLUSTER_DEFAULT_PREC);
+        
+        /* compute powerSums */
+        for (slong j = 0; j<nbPowerSums; j++)
+            compApp_mul(ps+j, fdivs + 0, points + 0, prec);
+        for (slong i = 1; i<nbPoints; i++)
+            for (slong j = 0; j<nbPowerSums; j++)
+                compApp_addmul(ps+j , fdivs + i, points + ((j+1)*i)%nbPoints, prec);  
+        for (slong j = 0; j<nbPowerSums; j++)
+            compApp_div_si(ps+j, ps+j, nbPoints, prec);
+        /* check if precision is OK */
+        
+        for (slong j = 0; j<nbPowerSums; j++){
+            realApp_get_rad_realApp( radRe, compApp_realref(ps+j) );
+            realApp_get_rad_realApp( radIm, compApp_imagref(ps+j) );
+            res = res && (realApp_lt( radRe, wP )) && (realApp_lt( radIm, wP ));
+            res = ((res==1)? 1:-1);
+            
+//             if (metadatas_getVerbo(meta)>3){
+//                 printf("--- %d-th power sum approximation: ", (int) j);
+//                 compApp_printd( ps+j, 10 ); printf("\n");
+//                 printf("--- errors: ");
+//                 realApp_printd(radRe, 5); printf(", "); realApp_printd(radIm, 5); printf("\n");
+//                 printf("--- comparaison: %d\n", realApp_lt( radRe, wP ) && realApp_lt( radIm, wP ) );
+//                 printf("--- res: %d\n", res );
+//             }
+        }
+        
+        realRat_clear(wantedPrec);
+        realApp_clear(wP);
+        realApp_clear(radRe);
+        realApp_clear(radIm);
+        
+    }
+    
+    realApp_clear(lb);
+    realApp_clear(modulus);
+    
+    return res;
+}
+
 powerSums_res powerSums_computePsApprox(compApp_ptr ps,
                                         const compRat_t center,
                                         const realRat_t radius,
@@ -246,11 +351,16 @@ powerSums_res powerSums_computePsApprox(compApp_ptr ps,
     powerSums_res res;
     res.appPrec = prec;
     
-    realApp_t radRe, radIm, wP;
-    realRat_t wantedPrec;
+    /* compute lower bound: (radius^d*(isoRatio-1)^d/isoRatio^d */
+    realRat_t lb;
+    realRat_init(lb);
+    realRat_add_si(lb, metadatas_getIsoRatio(meta), -1);
+    realRat_mul(lb, lb, radius);
+    realRat_div(lb, lb, metadatas_getIsoRatio(meta));
+    realRat_pow_si(lb, lb, cacheApp_getDegree(cache));
     
+    /* compute points and evals at prec res.appPrec*/
     powerSums_getEvaluationPoints( points, pointsShifted, center, radius, nbPoints, res.appPrec);
-    
 #ifdef CCLUSTER_STATS_PS
     clock_t start = clock();
 #endif    
@@ -260,84 +370,30 @@ powerSums_res powerSums_computePsApprox(compApp_ptr ps,
             metadatas_add_Evals( meta, depth, nbPoints, (double) (clock() - start) );
 #endif     
 
-    /* compute fdivs; check if fvals contains zero */
-    for (slong i = 0; i<nbPoints; i++) {
-        if (compApp_contains_zero( fvals +i )){
-            res.nbOfSol = -2;
-            return res;
-        }
-        compApp_div(fdivs +i, fdervals + i, fvals + i, res.appPrec);
-    }
+    /* compute approximation of Power sums */
+    res.nbOfSol = powerSums_computePsApprox_fromVals(ps, center, radius, lb, points, fvals, fdervals, fdivs, nbPoints, nbPowerSums, res.appPrec, meta);
     
-    realRat_init(wantedPrec);
-    realApp_init(radRe);
-    realApp_init(radIm);
-    realApp_init(wP);
-    realRat_set_si(wantedPrec, 1, 4);
-    realApp_set_realRat( wP, wantedPrec, CCLUSTER_DEFAULT_PREC);
-    
-    /* compute powerSums */
-    for (slong j = 0; j<nbPowerSums; j++)
-        compApp_mul(ps+j, fdivs + 0, points + 0, res.appPrec);
-    for (slong i = 1; i<nbPoints; i++)
-        for (slong j = 0; j<nbPowerSums; j++)
-            compApp_addmul(ps+j , fdivs + i, points + ((j+1)*i)%nbPoints, res.appPrec);  
-    for (slong j = 0; j<nbPowerSums; j++)
-        compApp_div_si(ps+j, ps+j, nbPoints, prec);
-    /* check if precision is OK */
-    int precOK = 1;
-    
-    for (slong j = 0; j<nbPowerSums; j++){
-        realApp_get_rad_realApp( radRe, compApp_realref(ps+j) );
-        realApp_get_rad_realApp( radIm, compApp_imagref(ps+j) );
-        precOK = precOK && (realApp_lt( radRe, wP )) && (realApp_lt( radIm, wP ));
-    }
-    
-    while (!precOK) { /* has to terminate because cache is an oracle */
+    while ( res.nbOfSol ==-1 ) {
         res.appPrec = 2*res.appPrec;
         
         powerSums_getEvaluationPoints( points, pointsShifted, center, radius, nbPoints, res.appPrec);
-        
 #ifdef CCLUSTER_STATS_PS
         clock_t start2 = clock();
 #endif        
         powerSums_evaluateAtPoints( fvals, fdervals, pointsShifted, nbPoints, cache, res.appPrec, meta);
 #ifdef CCLUSTER_STATS_PS
-    if (metadatas_haveToCount(meta))
+        if (metadatas_haveToCount(meta))
             metadatas_add_Evals( meta, depth, nbPoints, (double) (clock() - start2) );
-#endif        
-        
-        /* compute fdivs*/
-        for (slong i = 0; i<nbPoints; i++)
-            compApp_div(fdivs +i, fdervals + i, fvals + i, res.appPrec);
-        /* compute powerSums */
-        for (slong j = 0; j<nbPowerSums; j++)
-            compApp_mul(ps+j, fdivs + 0, points + 0, res.appPrec);
-        for (slong i = 1; i<nbPoints; i++)
-            for (slong j = 0; j<nbPowerSums; j++)
-                compApp_addmul(ps+j , fdivs + i, points + ((j+1)*i)%nbPoints, res.appPrec);  
-        for (slong j = 0; j<nbPowerSums; j++)
-            compApp_div_si(ps+j, ps+j, nbPoints, prec);
-        /* check if precision is OK */
-        precOK = 1;
-        for (slong j = 0; j<nbPowerSums; j++){
-            realApp_get_rad_realApp( radRe, compApp_realref(ps+j) );
-            realApp_get_rad_realApp( radIm, compApp_imagref(ps+j) );
-            precOK = precOK && (realApp_lt( radRe, wP )) && (realApp_lt( radIm, wP ));
-        }
-    
+#endif
+        /* compute approximation of Power sums */
+        res.nbOfSol = powerSums_computePsApprox_fromVals(ps, center, radius, lb, points, fvals, fdervals, fdivs, nbPoints, nbPowerSums, res.appPrec, meta);
     }
     
-    realRat_clear(wantedPrec);
-    realApp_clear(wP);
-    realApp_clear(radRe);
-    realApp_clear(radIm);
-    
-    res.nbOfSol = 1; /*just to say comp was OK*/
+    realRat_clear(lb);
     return res;
 }
-                                        
-
+    
+                                
 powerSums_res powerSums_discardingTest( const compRat_t center,
                                         const realRat_t radius,
                                         cacheApp_t cache,
@@ -402,14 +458,18 @@ powerSums_res powerSums_discardingTest( const compRat_t center,
         /* assume it is (1/4)*2^{ -((nbPowerSums - 1) - j)} */
         realApp_set_realRat( wP, wantedPrec, CCLUSTER_DEFAULT_PREC);
         realApp_mul_2exp_si(wP, wP, j+1-nbPowerSums);
-//         printf("%d-th power sum, error: ", j); realApp_printd(wP, 20); printf("\n");
+//         if (metadatas_getVerbo(meta)>3) {
+//             printf("%d-th power sum, error: ", j); realApp_printd(wP, 20); printf("\n"); }
         /* add error to j-th power sum */
-//         printf("%d-th power sum approx, prec %d: ", j, (int) res.appPrec); compApp_printd(ps+j, 20); printf("\n");
+//         if (metadatas_getVerbo(meta)>3) {
+//             printf("%d-th power sum approx, prec %d: ", j, (int) res.appPrec); compApp_printd(ps+j, 20); printf("\n"); }
         realApp_add_error( compApp_realref(ps+j), wP );
         realApp_add_error( compApp_imagref(ps+j), wP );
-//         printf("%d-th power sum approx, prec %d: ", j, (int) res.appPrec); compApp_printd(ps+j, 20); printf("\n");
+//         if (metadatas_getVerbo(meta)>3) {
+//             printf("%d-th power sum approx, prec %d: ", j, (int) res.appPrec); compApp_printd(ps+j, 20); printf("\n"); }
         res.nbOfSol = compApp_contains_zero( ps + j ); /* contains at most one integer */
-//         printf("%d-th power sum contains zero: %d\n", j, res.nbOfSol);
+//         if (metadatas_getVerbo(meta)>3) {
+//             printf("%d-th power sum contains zero: %d\n", j, res.nbOfSol);  }
         res.nbOfSol = ( (res.nbOfSol==0) ? -1:1 );
         j++;
     }
