@@ -29,12 +29,15 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
     strategies_init(strat);
     
     strategies_set_str( strat, stratstr, nbThreads );
+    
     /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
         strategies_set_realCoeffs(strat, 0);
-    
     metadatas_init(meta, initialBox, strat, verb);
+    /* initialize power sums */
+    if (metadatas_usePowerSums(meta))
+        metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
     ccluster_algo( qResults, initialBox, eps, cache, meta);
     
@@ -83,6 +86,9 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
         strategies_set_realCoeffs(strat, 0);
     
     metadatas_init(meta, initialBox, strat, verb);
+    /* initialize power sums */
+    if (metadatas_usePowerSums(meta))
+        metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
     ccluster_algo_global( qResults, initialBox, eps, cache, meta);
     
@@ -122,6 +128,9 @@ void ccluster_forJulia_compRat_poly( connCmp_list_t qResults,
         strategies_set_realCoeffs(strat, 0);
     
     metadatas_init(meta, initialBox, strat, verb);
+    /* initialize power sums */
+    if (metadatas_usePowerSums(meta))
+        metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
     ccluster_algo( qResults, initialBox, eps, cache, meta);
     
@@ -163,10 +172,15 @@ void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults,
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
     strategies_set_str( strat, stratstr, nbThreads );
-    /* automatically set realCoeffs */
+/* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
         strategies_set_realCoeffs(strat, 0);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    /* initialize power sums */
+    if (metadatas_usePowerSums(meta))
+        metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
     metadatas_init(meta, initialBox, strat, verb);
     
@@ -278,6 +292,7 @@ void ccluster_forJulia_refine( connCmp_list_t qResults,
     strategies_set_str( strat, stratstr, nbThreads );
     
     /* automaticly set realCoeffs: realCoeffs not implemented for refine */
+    strategies_set_powerSums(strat, 0);
     strategies_set_realCoeffs(strat, 0);
     
     metadatas_init(meta, initialBox, strat, verb);
@@ -313,10 +328,15 @@ void ccluster_forJulia_draw( connCmp_list_t qResults,
     strategies_init(strat);
     strategies_set_str( strat, stratstr, nbThreads );
     
-    /* automaticly set realCoeffs */
+    /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
         strategies_set_realCoeffs(strat, 0);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    /* initialize power sums */
+    if (metadatas_usePowerSums(meta))
+        metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
     metadatas_init(meta, initialBox, strat, verb);
     
@@ -351,7 +371,8 @@ void ccluster_interface_forJulia ( connCmp_list_t qResults,
     cacheApp_init(cache, func);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     
     /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
@@ -393,7 +414,8 @@ void ccluster_interface_forJulia_draw( connCmp_list_t qResults,
     cacheApp_init(cache, func);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     
     /* automaticly set realCoeffs */
     if (cacheApp_is_real(cache)==0
@@ -466,7 +488,8 @@ void ccluster_interface_forJulia_compRat_poly( connCmp_list_t qResults,
     cacheApp_init_compRat_poly(cache, poly);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     
     /* automaticly set realCoeffs */
     if (cacheApp_is_real(cache)==0
@@ -505,7 +528,8 @@ void ccluster_refine_forJulia( connCmp_list_t qResults,
     cacheApp_init(cache, func);
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     
     /* automaticly set realCoeffs: realCoeffs not implemented for refine */
     strategies_set_realCoeffs(strat, 0);

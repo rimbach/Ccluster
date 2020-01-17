@@ -215,44 +215,6 @@ int ccluster_interface_poly_real_imag( realRat_t * centerRe, realRat_t * centerI
                                        int st, 
                                        int verb);
 
-/* interfaces for Julia */
-/* DEPRECATED */
-void ccluster_interface_forJulia( connCmp_list_t qResults, 
-                                  void(*func)(compApp_poly_t, slong), 
-                                  const compBox_t initialBox, 
-                                  const realRat_t eps, 
-                                  int st, 
-                                  int verb);
-
-void ccluster_interface_forJulia_realRat_poly( connCmp_list_t qResults, 
-                                              const realRat_poly_t poly, 
-                                              const compBox_t initialBox, 
-                                              const realRat_t eps, 
-                                              int st, 
-                                              int verb);
-
-void ccluster_interface_forJulia_realRat_poly_real_imag( connCmp_list_t qResults, 
-                                                         const realRat_poly_t poly_real, const realRat_poly_t poly_imag, 
-                                                         const compBox_t initialBox, 
-                                                         const realRat_t eps, 
-                                                         int st, 
-                                                         int verb);
-
-void ccluster_interface_forJulia_compRat_poly( connCmp_list_t qResults, 
-                                              const compRat_poly_t poly,
-                                              const compBox_t initialBox, 
-                                              const realRat_t eps, 
-                                              int st, 
-                                              int verb);
-
-void ccluster_refine_forJulia( connCmp_list_t qResults,
-                               connCmp_list_t qMainLoop,
-                                  void(*func)(compApp_poly_t, slong), 
-                                  const compBox_t initialBox, 
-                                  const realRat_t eps, 
-                                  int st, 
-                                  int verb);
-
 /* experimental version */
 /* implemented in ccluster_interface.c */
 void ccluster_expe_global_interface_func( void(*func)(compApp_poly_t, slong), 
@@ -299,6 +261,43 @@ void ccluster_algo_draw( connCmp_list_t qResults,
                          const realRat_t eps, 
                          cacheApp_t cache, metadatas_t meta);
 
+/* old interfaces for Julia */
+/* DEPRECATED */
+void ccluster_interface_forJulia( connCmp_list_t qResults, 
+                                  void(*func)(compApp_poly_t, slong), 
+                                  const compBox_t initialBox, 
+                                  const realRat_t eps, 
+                                  int st, 
+                                  int verb);
+
+void ccluster_interface_forJulia_realRat_poly( connCmp_list_t qResults, 
+                                              const realRat_poly_t poly, 
+                                              const compBox_t initialBox, 
+                                              const realRat_t eps, 
+                                              int st, 
+                                              int verb);
+
+void ccluster_interface_forJulia_realRat_poly_real_imag( connCmp_list_t qResults, 
+                                                         const realRat_poly_t poly_real, const realRat_poly_t poly_imag, 
+                                                         const compBox_t initialBox, 
+                                                         const realRat_t eps, 
+                                                         int st, 
+                                                         int verb);
+
+void ccluster_interface_forJulia_compRat_poly( connCmp_list_t qResults, 
+                                              const compRat_poly_t poly,
+                                              const compBox_t initialBox, 
+                                              const realRat_t eps, 
+                                              int st, 
+                                              int verb);
+
+void ccluster_refine_forJulia( connCmp_list_t qResults,
+                               connCmp_list_t qMainLoop,
+                                  void(*func)(compApp_poly_t, slong), 
+                                  const compBox_t initialBox, 
+                                  const realRat_t eps, 
+                                  int st, 
+                                  int verb);
 
 #ifdef __cplusplus
 }
