@@ -77,6 +77,7 @@ tstar_res tstar_interface( cacheApp_t cache,
                            const compDsk_t d,
                            int max_nb_sols,    /*the maximum number of sols in the disk          */
                            int discard,        /*a flag saying if it is a discarding test or not */
+                           int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,         /*the "default" arithmetic precision              */
                            int depth,          /*the depth for counter                           */
                            metadatas_t meta){
@@ -87,16 +88,16 @@ tstar_res tstar_interface( cacheApp_t cache,
     
     if (metadatas_useTstarOptim(meta)) {
         if (discard&&CCLUSTER_V2(meta)){
-            return tstar_optimized( cache, d, 0,           discard, nprec, depth, meta);
+            return tstar_optimized( cache, d, 0, discard, inNewton, nprec, depth, meta);
         }
         else {
-            return tstar_optimized( cache, d, max_nb_sols, discard, nprec, depth, meta);
+            return tstar_optimized( cache, d, max_nb_sols, discard, inNewton, nprec, depth, meta);
         }
     }
     if (discard)
-        return tstar_asInPaper( cache, d, 0, discard, nprec, depth, meta);
+        return tstar_asInPaper( cache, d, 0, discard, inNewton, nprec, depth, meta);
     
-    return tstar_asInPaper( cache, d, max_nb_sols, discard, nprec, depth, meta);
+    return tstar_asInPaper( cache, d, max_nb_sols, discard, inNewton, nprec, depth, meta);
     
 }
 
@@ -104,6 +105,7 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
                            const compDsk_t d,
                            int max_nb_sols,    /*the maximum number of sols in the disk,         */
                            int discard,        /*a flag saying if it is a discarding test or not */
+                           int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,         /*the "default" arithmetic precision              */
                            int depth,          /*the depth for counter                           */
                            metadatas_t meta){
@@ -154,7 +156,7 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
     if (restemp==0) res.nbOfSol = -1;
 
     if (metadatas_haveToCount(meta))
-        metadatas_add_Test( meta, depth, (restemp==1), discard, 1, nbTaylorsRepeted, N, 
+        metadatas_add_Test( meta, depth, (restemp==1), discard, inNewton, 1, nbTaylorsRepeted, N, 
                             nbGraeffeRepeted, (int) res.appPrec, (double) (clock() - start) );
     return res;
 }
@@ -163,6 +165,7 @@ tstar_res tstar_optimized( cacheApp_t cache,
                            const compDsk_t d,
                            int max_nb_sols,   /*the maximum number of sols in the disk          */
                            int discard,       /*a flag saying if it is a discarding test or not */
+                           int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,        /*the "default" arithmetic precision              */
                            int depth,         /*the depth for counter                           */
                            metadatas_t meta){
@@ -196,7 +199,7 @@ tstar_res tstar_optimized( cacheApp_t cache,
             compApp_poly_clear(pApprox);
             realApp_clear(sum);
             res.nbOfSol = -1;
-            metadatas_add_Test( meta, depth, 0, discard, 0, 0, 0, 0, (double) (clock() - start));
+            metadatas_add_Test( meta, depth, 0, discard, inNewton, 0, 0, 0, 0, (double) (clock() - start));
             return res;
         }
         restemp = 0;
@@ -210,7 +213,7 @@ tstar_res tstar_optimized( cacheApp_t cache,
             compApp_poly_clear(pApprox);
             realApp_clear(sum);
             res.nbOfSol = 0;
-            metadatas_add_Test( meta, depth, 1, discard, 0, 0, 0, 0, (double) (clock() - start));
+            metadatas_add_Test( meta, depth, 1, discard, inNewton, 0, 0, 0, 0, (double) (clock() - start));
 //             printf("&&depth: %d, success of D0 discarding predicate\n", depth);
             return res;
         }
@@ -219,7 +222,7 @@ tstar_res tstar_optimized( cacheApp_t cache,
             compApp_poly_clear(pApprox);
             realApp_clear(sum);
             res.nbOfSol = 1;
-            metadatas_add_Test( meta, depth, 1, discard, 0, 0, 0, 0, (double) (clock() - start));
+            metadatas_add_Test( meta, depth, 1, discard, inNewton, 0, 0, 0, 0, (double) (clock() - start));
 //             printf("&&depth: %d, success of N1 non-discarding discarding predicate\n", depth);
             return res;
         }
@@ -336,9 +339,8 @@ tstar_res tstar_optimized( cacheApp_t cache,
     realApp_clear(sum);
     
     if ((restemp==0)||(restemp==-1)) res.nbOfSol = -1;
-
     if (metadatas_haveToCount(meta))
-        metadatas_add_Test( meta, depth, (restemp==1), discard, 1, nbTaylorsRepeted, nbGraeffe, 
+        metadatas_add_Test( meta, depth, (restemp==1), discard, inNewton, 1, nbTaylorsRepeted, nbGraeffe, 
                             nbGraeffeRepeted, (int) res.appPrec, (double) (clock() - start) );
         
 //     if (discard)

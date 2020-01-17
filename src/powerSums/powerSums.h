@@ -12,6 +12,7 @@
 #ifndef POWERSUMS_H
 #define POWERSUMS_H
 
+
 #include "base/base.h"
 #include "numbers/realRat.h"
 #include "numbers/realApp.h"
@@ -25,6 +26,21 @@
 extern "C" {
 #endif
     
+void pwSuDatas_set( pwSuDatas_t p, 
+                    void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
+                    slong degree,
+                    slong iRnum, slong iRden,
+                    slong nbPws,
+                    int verb );
+
+void metadatas_set_pwSuDatas( metadatas_t meta, 
+                              void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
+                              slong degree,
+                              slong iRnum, slong iRden,
+                              slong nbPws,
+                              int verb );
+                              
+
 slong powerSums_getNbOfPointsForCounting( const realRat_t wantedPrec, slong degree, const realRat_t isoRatio );
 
 void powerSums_getEvaluationPoints( compApp_ptr points, 
@@ -39,7 +55,8 @@ void powerSums_evaluateAtPoints( compApp_ptr f_val,
                                  const compApp_ptr points,
                                  slong nbPoints,
                                  cacheApp_t cache,
-                                 slong prec );
+                                 slong prec,
+                                 metadatas_t meta);
 
 void powerSums_computeS0_fromVals( compApp_t s0, 
                                    compApp_ptr points,
@@ -65,10 +82,19 @@ typedef struct {
     slong appPrec; /* the arithmetic precision that has been used to decide      */
 } powerSums_res;
 
+powerSums_res powerSums_discardingTest( const compRat_t center,
+                                        const realRat_t radius,
+                                        cacheApp_t cache,
+                                        slong nbPoints,
+                                        slong nbPowerSums,
+                                        slong prec,
+                                        metadatas_t meta, int depth);
+
 powerSums_res powerSums_countingTest( const compRat_t center,
                                       const realRat_t radius,
                                       cacheApp_t cache,
                                       slong nbPoints,
+                                      int isIsolated,
                                       slong prec,
                                       metadatas_t meta, int depth);
 

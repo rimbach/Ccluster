@@ -17,6 +17,8 @@ build: mignotte mignotteMul mignotteGen \
     wilkRat spiral \
     cluster wilkMul \
     mandelbrot laguerre\
+    mandelbrotPS mignottePS\
+    runnels runnelsPS\
 
 #==================================================
 # HOUSEKEEPING 
@@ -88,8 +90,26 @@ mandelbrot: mandelbrot.o
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
 	    	
+mandelbrotPS: mandelbrotPS.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+	    	
+mignottePS: mignottePS.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+	    	
 laguerre: laguerre.o
 # 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+	    	
+runnels: runnels.o
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+	    	
+runnelsPS: runnelsPS.o
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
 

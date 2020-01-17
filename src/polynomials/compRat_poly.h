@@ -46,6 +46,11 @@ POLYNOMIALS_INLINE void compRat_poly_init2( compRat_poly_t x, slong size ){
     realRat_poly_init2( compRat_poly_imagref(x), size );
 }
 
+POLYNOMIALS_INLINE void compRat_poly_fit_length( compRat_poly_t x, slong size ){
+    realRat_poly_fit_length( compRat_poly_realref(x), size );
+    realRat_poly_fit_length( compRat_poly_imagref(x), size );
+}
+
 POLYNOMIALS_INLINE void compRat_poly_clear( compRat_poly_t x ){
     realRat_poly_clear( compRat_poly_realref(x) );
     realRat_poly_clear( compRat_poly_imagref(x) );

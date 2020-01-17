@@ -72,9 +72,27 @@ typedef struct {
     /* Newton steps */
     int nbNewton;
     int nbFailingNewton;
+    int nbTSTestsInNewton;
+    int nbTaylorsInNewton;
+    int nbGraeffeInNewton;
     /* Power Sums */
-    int nbEval;
     int nbPsCountingTest;
+#ifdef CCLUSTER_STATS_PS_MACIS
+    int nbEval;
+    int nbM2;
+    int nbM1;
+    int nbEr;
+#endif
+#ifdef CCLUSTER_STATS_PS
+    int nbEval;
+    int nbTN; /* true negative; returns -1 and no root in the disk*/
+    int nbFP; /* false positive; returns 0 and there are roots in the disk*/
+//     int nbTN1; /* true negative; returns -1 and no root in the disk*/
+//     int nbFP1; /* false positive; returns 0 and there are roots in the disk*/
+//     int nbTN2; /* true negative; returns -1 and no root in the disk*/
+//     int nbFP2; /* false positive; returns 0 and there are roots in the disk*/
+#endif
+    
     boxes_by_prec_t bpc;
 } counters_by_depth;
 
@@ -117,7 +135,7 @@ METADATAS_INLINE void counters_unlock(counters_t t){
 void counters_add_discarded( counters_t st, int depth );
 void counters_add_validated( counters_t st, int depth, int nbSols );
 void counters_add_explored ( counters_t st, int depth );
-void counters_add_Test     ( counters_t st, int depth, int res, int discard, 
+void counters_add_Test     ( counters_t st, int depth, int res, int discard, int inNewton, 
                              int nbTaylors, int nbTaylorsRepeted, 
                              int nbGraeffe, int nbGraeffeRepeted,
                              slong prec
@@ -146,11 +164,35 @@ int counters_getNbTaylorsInTSTests          ( const counters_t st );
 int counters_getNbTaylorsRepetedInTSTests   ( const counters_t st );
 int counters_getNbNewton                    ( const counters_t st );
 int counters_getNbFailingNewton             ( const counters_t st );
-int counters_getNbEval                      ( const counters_t st );
+int counters_getNbTSTestsInNewton           ( const counters_t st );
+int counters_getNbTaylorsInNewton           ( const counters_t st );
+int counters_getNbGraeffeInNewton           ( const counters_t st );
 int counters_getNbPsCountingTest            ( const counters_t st );
-
+#ifdef CCLUSTER_STATS_PS_MACIS
+int counters_getNbEval                      ( const counters_t st );
+int counters_getNbM1            ( const counters_t st );
+int counters_getNbM2            ( const counters_t st );
+int counters_getNbEr            ( const counters_t st );
+#endif
+#ifdef CCLUSTER_STATS_PS
+int counters_getNbEval                      ( const counters_t st );
+int counters_getNbTN            ( const counters_t st );
+int counters_getNbFP            ( const counters_t st );
+// int counters_getNbTN1            ( const counters_t st );
+// int counters_getNbFP1            ( const counters_t st );
+// int counters_getNbTN2            ( const counters_t st );
+// int counters_getNbFP2            ( const counters_t st );
+#endif
 void counters_add_Eval( counters_t st, int nbEvals, int depth );
-void counters_add_PsCountingTest( counters_t st, int depth );
+void counters_add_PsCountingTest( counters_t st, int depth
+#ifdef CCLUSTER_STATS_PS_MACIS
+, int res, int er 
+#endif
+#ifdef CCLUSTER_STATS_PS
+, int resPS, int resTS
+// , int resPS, int resPS1, int resPS2, int resTS 
+#endif
+                                                            );
 
 METADATAS_INLINE int counters_boxes_by_prec_fprint ( FILE * file, const counters_t st ) {
     return boxes_by_prec_fprint( file, st->total->bpc);

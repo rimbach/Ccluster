@@ -19,6 +19,8 @@ void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_
     strategies_set( metadatas_stratref(m), strategy );
     counters_init( metadatas_countref(m) );
     chronos_init( metadatas_chronref(m) );
+    
+    pwSuDatas_init( metadatas_pwSumref(m) );
 }
 
 void metadatas_clear(metadatas_t m) {
@@ -26,6 +28,8 @@ void metadatas_clear(metadatas_t m) {
     strategies_clear( metadatas_stratref(m) );
     counters_clear( metadatas_countref(m) );
     chronos_clear( metadatas_chronref(m) );
+    
+    pwSuDatas_clear( metadatas_pwSumref(m) );
 }
 
 // void metadatas_join(metadatas_t m1, const metadatas_t m2){
@@ -88,7 +92,8 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     if (metadatas_usePredictPrec(meta)) len += sprintf( temp + len, " predPrec");
     if (metadatas_useStopWhenCompact(meta)) len += sprintf( temp + len, " stopWhenCompact");
     if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
-    if (metadatas_realCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
+    if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
+    if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " powerSums");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " test");
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));
@@ -100,22 +105,25 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     if (metadatas_getVerbo(meta)>=2) {
 //         metadatas_count(meta);
     r = fprintf(file, " -------------------TSTest used to discard boxes----------------------\n");
-    r = fprintf(file, "|%-39s %14d %14s|\n", "total number:",                       metadatas_getNbT0Tests(meta),        " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number DT:",                    metadatas_getNbT0Tests(meta),        " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "number of tests without conclusion:", metadatas_getNbFailingT0Tests(meta), " " );
-    r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in tests:",          metadatas_get_time_T0Tests(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in tests DT:",       metadatas_get_time_T0Tests(meta),    " " );
     r = fprintf(file, " -------------------TSTest used to validate clusters------------------\n");
-    r = fprintf(file, "|%-39s %14d %14s|\n", "total number:",                       metadatas_getNbTSTests(meta),        " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number VT:",                    metadatas_getNbTSTests(meta),        " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbTSTestsInNewton(meta), " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "number of tests without conclusion:", metadatas_getNbFailingTSTests(meta), " " );
-    r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in tests:",          metadatas_get_time_TSTests(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in tests VT:",       metadatas_get_time_TSTests(meta),    " " );
     r = fprintf(file, " -------------------Taylor shifts-------------------------------------\n");
     r = fprintf(file, "|%-39s %14d |%13d|\n", "total number TS:",                    nbTaylorShifts + nbTaylorShiftsR, nbTaylorShiftsR );
     r = fprintf(file, "|%-39s %14d |%13d|\n", "number in discarding TSTests TS:",    metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsRepetedInT0Tests(meta), metadatas_getNbTaylorsRepetedInT0Tests(meta) );
     r = fprintf(file, "|%-39s %14d |%13d|\n", "number in validating TSTests TS:",    metadatas_getNbTaylorsInTSTests(meta) + metadatas_getNbTaylorsRepetedInTSTests(meta), metadatas_getNbTaylorsRepetedInTSTests(meta) );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbTaylorsInNewton(meta), " " );
     r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in Taylor shifts:",  metadatas_get_time_Taylors(meta),    " " );
     r = fprintf(file, " -------------------Graeffe Iterations--------------------------------\n");
     r = fprintf(file, "|%-39s %14d |%13d|\n", "total number GR:",                       nbGraeffe + nbGraeffeR, nbGraeffeR );
     r = fprintf(file, "|%-39s %14d |%13d|\n", "number in discarding TSTests GR:",       metadatas_getNbGraeffeInT0Tests(meta) + metadatas_getNbGraeffeRepetedInT0Tests(meta), metadatas_getNbGraeffeRepetedInT0Tests(meta) );
     r = fprintf(file, "|%-39s %14d |%13d|\n", "number in validating TSTests GR:",       metadatas_getNbGraeffeInTSTests(meta) + metadatas_getNbGraeffeRepetedInTSTests(meta), metadatas_getNbGraeffeRepetedInTSTests(meta) );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbGraeffeInNewton(meta), " " );
     r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in Graeffe Iterations:", metadatas_get_time_Graeffe(meta),    " " );
     if (metadatas_useNewton(meta)){
     r = fprintf(file, " -------------------Newton Iterations---------------------------------\n");
@@ -128,11 +136,31 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     if (metadatas_useAnticipate(meta)){
     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Anticipate:",                 metadatas_get_time_Anticip(meta),    " " );
     }
-//     if (metadatas_forTests(meta)){
+    if (metadatas_usePowerSums(meta)){
 //     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of Ps counting tests:",  metadatas_getNbPsCountingTest(meta),    " " );
-//     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Evaluation:",                 metadatas_get_time_Evaluat(meta),    " " );
-//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of evaluations:",        metadatas_getNbEval(meta),    " " );
-//     }
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests:",          metadatas_get_time_PSTests(meta),    " " );
+/*#ifdef CCLUSTER_STATS_PS_MACIS
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests V:",        metadatas_get_time_PSTestV(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests D:",        metadatas_get_time_PSTests(meta)-metadatas_get_time_PSTestV(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Evaluation:",                 metadatas_get_time_Evaluat(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of evaluations:",        metadatas_getNbEval(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of -2:",                 metadatas_getNbM2(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of -1:",                 metadatas_getNbM1(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of errors:",             metadatas_getNbEr(meta),    " " );
+#endif 
+#ifdef CCLUSTER_STATS_PS
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests V:",        metadatas_get_time_PSTestV(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests D:",        metadatas_get_time_PSTests(meta)-metadatas_get_time_PSTestV(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Evaluation:",                 metadatas_get_time_Evaluat(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of evaluations:",        metadatas_getNbEval(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of True Negative:",      metadatas_getNbTN(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive:",     metadatas_getNbFP(meta),    " " );
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of True Negative 1:",      metadatas_getNbTN1(meta),    " " );
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive 1:",     metadatas_getNbFP1(meta),    " " );
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of True Negative 2:",      metadatas_getNbTN2(meta),    " " );
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive 2:",     metadatas_getNbFP2(meta),    " " );
+#endif*/ 
+    }
     r = fprintf(file, " -------------------Precision-----------------------------------------\n");
     r = metadatas_boxes_by_prec_fprint ( file, meta );
     

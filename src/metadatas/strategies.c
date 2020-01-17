@@ -11,15 +11,16 @@
 
 #include "metadatas/strategies.h"
 
-void strategies_init( strategies_t strat ){}
-void strategies_clear(strategies_t strat) {}
+void strategies_init( strategies_t strat ){ }
+void strategies_clear(strategies_t strat) { }
 
 void strategies_set_int( strategies_t strat, int useNewton, 
                                              int useTstarOptim, 
                                              int usePredictPrec, 
                                              int useStopWhenCompact, 
                                              int useAnticipate, 
-                                             int realCoeffs,
+                                             int useRealCoeffs,
+                                             int usePowerSums,
 //                                              int useCountSols,
                                              int useNBThreads,
                                              int additionalFlags
@@ -31,8 +32,11 @@ void strategies_set_int( strategies_t strat, int useNewton,
     strat->_useAnticipate         = 0;
     strat->_useNBThreads          = 0;
     strat->_additionalFlags       = 0;
-    strat->_realCoeffs            = 0;
-    strat->_forTests             = 0;
+    strat->_useRealCoeffs            = 0;
+    strat->_usePowerSums             = 0;
+    strat->_forTests              = 0;
+//     strat->_pwSuTest              = 0;
+//     strat->_pwSuNbPs              = 0;
     
     strat->_useNewton             = useNewton;
     strat->_useTstarOptim         = useTstarOptim;
@@ -42,7 +46,9 @@ void strategies_set_int( strategies_t strat, int useNewton,
 //     strat->_useCountSols          = useCountSols;
     strat->_useNBThreads          = useNBThreads;
     strat->_additionalFlags       = additionalFlags;
-    strat->_realCoeffs            = realCoeffs;
+    strat->_useRealCoeffs            = useRealCoeffs;
+    strat->_usePowerSums             = usePowerSums;
+//     strat->_pwSuTest              = pwSuTest;
 }
 
 void strategies_set( strategies_t strat, const strategies_t strat2) {
@@ -54,8 +60,11 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
 //     strat->_useCountSols          = strat2->_useCountSols      ;
     strat->_useNBThreads          = strat2->_useNBThreads      ;
     strat->_additionalFlags       = strat2->_additionalFlags   ;
-    strat->_realCoeffs            = strat2->_realCoeffs   ;
-    strat->_forTests             = strat2->_forTests   ;
+    strat->_useRealCoeffs            = strat2->_useRealCoeffs   ;
+    strat->_usePowerSums             = strat2->_usePowerSums   ;
+    strat->_forTests              = strat2->_forTests   ;
+//     strat->_pwSuTest              = strat2->_pwSuTest   ;
+//     strat->_pwSuNbPs           = strat2->_pwSuNbPs;
 }
 
 void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
@@ -67,8 +76,11 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
     strat->_useAnticipate         = 0;
     strat->_useNBThreads          = 0;
     strat->_additionalFlags       = 0;
-    strat->_realCoeffs            = 0;
+    strat->_useRealCoeffs         = 0;
+    strat->_usePowerSums         = 0;
+//     strat->_pwSuTest             = 0;
     strat->_forTests             = 0;
+//     strat->_pwSuNbPs          = 0;
     
     strat->_useNBThreads          = nbThreads;
     
@@ -77,7 +89,11 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_useTstarOptim         = 1;
         strat->_usePredictPrec        = 1;
         strat->_useAnticipate         = 1;
-        strat->_realCoeffs            = 1;
+        strat->_useRealCoeffs         = 1;
+        strat->_usePowerSums         = 0;
+//         strat->_pwSuTest              = 0;
+        strat->_forTests              = 0;
+//         printf("default strategy\n");
         return;
     }
     if (strcmp( stratName, STRAT_STR_V1 ) == 0) {
@@ -103,7 +119,26 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_useTstarOptim         = 1;
         strat->_usePredictPrec        = 1;
         strat->_useAnticipate         = 1;
-        strat->_realCoeffs            = 1;
+        strat->_useRealCoeffs            = 1;
+        return;
+    }
+    if (strcmp( stratName, STRAT_STR_PWSUTESTV4 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_useRealCoeffs         = 0;
+        strat->_usePowerSums          = 1;
+        strat->_forTests              = 0;
+        return;
+    }
+    if (strcmp( stratName, STRAT_STR_V6 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_useRealCoeffs         = 1;
+        strat->_usePowerSums          = 1;
         return;
     }
     if (strcmp( stratName, STRAT_STR_FORTESTS ) == 0) {
@@ -111,10 +146,35 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_useTstarOptim         = 1;
         strat->_usePredictPrec        = 1;
         strat->_useAnticipate         = 1;
-        strat->_realCoeffs            = 1;
-        strat->_forTests             = 1;
+        strat->_useRealCoeffs         = 1;
+        strat->_usePowerSums          = 1;
+        strat->_forTests              = 1;
+//         strat->_pwSuNbPs              = 1;
         return;
     }
+//     if (strcmp( stratName, STRAT_STR_FORTESTS1 ) == 0) {
+//         strat->_useNewton             = 1;
+//         strat->_useTstarOptim         = 1;
+//         strat->_usePredictPrec        = 1;
+//         strat->_useAnticipate         = 1;
+//         strat->_realCoeffs            = 1;
+//         strat->_pwSuTest              = 1;
+//         strat->_forTests              = 1;
+// //         strat->_pwSuNbPs              = 2;
+//         return;
+//     }
+//     if (strcmp( stratName, STRAT_STR_FORTESTS2 ) == 0) {
+//         strat->_useNewton             = 1;
+//         strat->_useTstarOptim         = 1;
+//         strat->_usePredictPrec        = 1;
+//         strat->_useAnticipate         = 1;
+//         strat->_realCoeffs            = 1;
+//         strat->_pwSuTest              = 1;
+//         strat->_forTests              = 1;
+// //         strat->_pwSuNbPs              = 3;
+//         return;
+//     }
+    
     /* otherwise set strategy to default */
     strategies_set_str ( strat, STRAT_STR_DEFAULT, nbThreads);
 }

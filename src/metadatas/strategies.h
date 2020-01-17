@@ -21,6 +21,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*for isoRatio*/
+#include "numbers/realRat.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -32,7 +35,8 @@ extern "C" {
 #define STRAT_STOPWHCO 8
 #define STRAT_ANTICIPA 16
 #define STRAT_REALCOEF 32
-#define STRAT_FORTESTS 64
+#define STRAT_PWSUTEST 64
+#define STRAT_FORTESTS 128
 
 #define STRAT_INT_DEFAULT 55
 #define STRAT_STR_DEFAULT "default"
@@ -49,8 +53,16 @@ extern "C" {
 #define STRAT_INT_V5 55
 #define STRAT_STR_V5 "V5"
 
-#define STRAT_INT_FORTESTS 119
+#define STRAT_INT_PWSUTESTV4 87
+#define STRAT_STR_PWSUTESTV4 "psV4"
+
+#define STRAT_INT_V6 119
+#define STRAT_STR_V6 "V6"
+
+#define STRAT_INT_FORTESTS 247
 #define STRAT_STR_FORTESTS "test"
+// #define STRAT_STR_FORTESTS1 "test1"
+// #define STRAT_STR_FORTESTS2 "test2"
 
 typedef struct {
     int _useNewton;
@@ -61,25 +73,33 @@ typedef struct {
 //     int _useCountSols;
     int _useNBThreads;
     int _additionalFlags;
-    int _realCoeffs;
+    int _useRealCoeffs;
+    int _usePowerSums;
     int _forTests;
+//     int _pwSuTest;
+//     int _pwSuNbPs;
+//     realRat _pwSuIsoRatio;
 } strategies;
 
 typedef strategies strategies_t[1];
 typedef strategies * strategies_ptr;
 
 void strategies_init( strategies_t strat );
+/* try to get rid of this interface... */
 void strategies_set_int ( strategies_t strat, int useNewton, 
                                               int useTstarOptim, 
                                               int usePredictPrec, 
                                               int useStopWhenCompact, 
                                               int useAnticipate, 
-                                              int realCoeffs,
+                                              int useRealCoeffs,
+                                              int usePowerSums,
 //                                               int useCountSols,
                                               int useNBThreads,
                                               int additionalFlags
                         );
+
 void strategies_set( strategies_t strat, const strategies_t strat2);
+
 void strategies_clear(strategies_t strat);
 
 void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads);
@@ -92,11 +112,20 @@ METADATAS_INLINE int strategies_useAnticipate     ( const strategies_t strat ) {
 // METADATAS_INLINE int strategies_useCountSols      ( const strategies_t strat ) { return strat->_useCountSols      ; }
 METADATAS_INLINE int strategies_useNBThreads      ( const strategies_t strat ) { return strat->_useNBThreads      ; }
 
-METADATAS_INLINE int strategies_realCoeffs        ( const strategies_t strat ) { return strat->_realCoeffs      ; }
-METADATAS_INLINE void strategies_set_realCoeffs   ( strategies_t strat, int flag ) { strat->_realCoeffs=flag      ; }
+METADATAS_INLINE int strategies_useRealCoeffs        ( const strategies_t strat ) { return strat->_useRealCoeffs      ; }
+METADATAS_INLINE void strategies_set_realCoeffs   ( strategies_t strat, int flag ) { strat->_useRealCoeffs=flag      ; }
+
+METADATAS_INLINE int strategies_usePowerSums        ( const strategies_t strat ) { return strat->_usePowerSums      ; }
+METADATAS_INLINE void strategies_set_powerSums   ( strategies_t strat, int flag ) { strat->_usePowerSums=flag      ; }
 
 METADATAS_INLINE int strategies_forTests        ( const strategies_t strat ) { return strat->_forTests      ; }
 METADATAS_INLINE void strategies_set_forTests   ( strategies_t strat, int flag ) { strat->_forTests=flag      ; }
+
+// METADATAS_INLINE int strategies_pwSuTest        ( const strategies_t strat ) { return strat->_pwSuTest      ; }
+// METADATAS_INLINE void strategies_set_pwSuTest   ( strategies_t strat, int flag ) { strat->_pwSuTest=flag      ; }
+
+// METADATAS_INLINE int strategies_pwSuNbPs       ( const strategies_t strat ) { return strat->_pwSuNbPs      ; }
+// METADATAS_INLINE void strategies_set_pwSuNbPs   ( strategies_t strat, int nb ) { strat->_pwSuNbPs=nb      ; }
 
 #ifdef __cplusplus
 }

@@ -88,9 +88,25 @@ void counters_by_depth_init( counters_by_depth_t st) {
     st->nbTaylorsRepetedInTSTests = 0;
     st->nbNewton                  = 0;
     st->nbFailingNewton           = 0;
-    st->nbEval                    = 0;
+    st->nbTSTestsInNewton                  = 0;
+    st->nbTaylorsInNewton          = 0;
+    st->nbGraeffeInNewton          = 0;
     st->nbPsCountingTest          = 0;
-
+#ifdef CCLUSTER_STATS_PS_MACIS    
+    st->nbEval                    = 0;
+    st->nbM2          = 0;
+    st->nbM1          = 0;
+    st->nbEr          = 0;
+#endif
+#ifdef CCLUSTER_STATS_PS    
+    st->nbEval                    = 0;
+    st->nbTN          = 0;
+    st->nbFP          = 0;
+//     st->nbTN1          = 0;
+//     st->nbFP1          = 0;
+//     st->nbTN2          = 0;
+//     st->nbFP2          = 0;
+#endif
     boxes_by_prec_init( st->bpc );
 }
 
@@ -175,7 +191,7 @@ void counters_add_explored ( counters_t st, int depth ){
     (st->table[depth]).nbExplored +=1;
 }
 
-void counters_add_Test     ( counters_t st, int depth, int res, int discard, 
+void counters_add_Test     ( counters_t st, int depth, int res, int discard, int inNewton, 
                              int nbTaylors, int nbTaylorsRepeted, 
                              int nbGraeffe, int nbGraeffeRepeted,
                              slong prec
@@ -196,6 +212,12 @@ void counters_add_Test     ( counters_t st, int depth, int res, int discard,
         (st->table[depth]).nbGraeffeRepetedInTSTests           += nbGraeffeRepeted;
         (st->table[depth]).nbTaylorsInTSTests                           += nbTaylors;
         (st->table[depth]).nbTaylorsRepetedInTSTests           += nbTaylorsRepeted;
+        
+        if (inNewton) {
+            (st->table[depth]).nbTSTestsInNewton                           += 1;
+            (st->table[depth]).nbTaylorsInNewton                           += 1;
+            (st->table[depth]).nbGraeffeInNewton                           += nbGraeffe;
+        }
     }
     boxes_by_prec_add_int( (st->table[depth]).bpc, prec, 1);    
 }
@@ -206,14 +228,48 @@ void counters_add_Newton   ( counters_t st, int depth, int res ){
     if (!res) (st->table[depth]).nbFailingNewton +=1;
 }
 
+#ifdef CCLUSTER_STATS_PS
 void counters_add_Eval( counters_t st, int nbEvals, int depth ){
     counters_adjust_table(st, depth);
     (st->table[depth]).nbEval                  +=nbEvals;
 }
+#endif
 
-void counters_add_PsCountingTest( counters_t st, int depth ){
+void counters_add_PsCountingTest( counters_t st, int depth
+#ifdef CCLUSTER_STATS_PS_MACIS
+, int res, int er 
+#endif
+#ifdef CCLUSTER_STATS_PS
+, int resPS, int resTS
+// , int resPS, int resPS1, int resPS2, int resTS 
+#endif
+                                ){
     counters_adjust_table(st, depth);
     (st->table[depth]).nbPsCountingTest                  +=1;
+#ifdef CCLUSTER_STATS_PS_MACIS
+    if (res==-2)
+        (st->table[depth]).nbM2                  +=1;
+    if (res==-1)
+        (st->table[depth]).nbM1                  +=1;
+    if (er==1)
+        (st->table[depth]).nbEr                  +=1;
+#endif
+#ifdef CCLUSTER_STATS_PS
+    if ((resPS==-1)&&(resTS==0))
+        (st->table[depth]).nbTN                  +=1;
+    if ((resPS==0)&&((resTS==-1)||(resTS>0)))
+        (st->table[depth]).nbFP                  +=1;
+//     
+//     if ((resPS1==-1)&&(resTS==0))
+//         (st->table[depth]).nbTN1                  +=1;
+//     if ((resPS1==0)&&((resTS==-1)||(resTS>0)))
+//         (st->table[depth]).nbFP1                  +=1;
+//     
+//     if ((resPS2==-1)&&(resTS==0))
+//         (st->table[depth]).nbTN2                  +=1;
+//     if ((resPS2==0)&&((resTS==-1)||(resTS>0)))
+//         (st->table[depth]).nbFP2                  +=1;
+#endif
 }
 
 void counters_count ( counters_t st ) {
@@ -236,8 +292,25 @@ void counters_count ( counters_t st ) {
        st->total->nbTaylorsRepetedInTSTests += (st->table)[i].nbTaylorsRepetedInTSTests ; 
        st->total->nbNewton                  += (st->table)[i].nbNewton                  ; 
        st->total->nbFailingNewton           += (st->table)[i].nbFailingNewton           ; 
-       st->total->nbEval                    += (st->table)[i].nbEval           ;
-       st->total->nbPsCountingTest          += (st->table)[i].nbPsCountingTest           ;
+       st->total->nbTSTestsInNewton         += (st->table)[i].nbTSTestsInNewton         ; 
+       st->total->nbTaylorsInNewton         += (st->table)[i].nbTaylorsInNewton         ; 
+       st->total->nbGraeffeInNewton         += (st->table)[i].nbGraeffeInNewton         ;
+       st->total->nbPsCountingTest          += (st->table)[i].nbPsCountingTest          ;
+#ifdef CCLUSTER_STATS_PS_MACIS       
+       st->total->nbEval        += (st->table)[i].nbEval           ;
+       st->total->nbM1          += (st->table)[i].nbM1           ;
+       st->total->nbM2          += (st->table)[i].nbM2           ;
+       st->total->nbEr          += (st->table)[i].nbEr           ;
+#endif
+#ifdef CCLUSTER_STATS_PS       
+       st->total->nbEval        += (st->table)[i].nbEval           ;
+       st->total->nbTN          += (st->table)[i].nbTN           ;
+       st->total->nbFP          += (st->table)[i].nbFP           ;
+//        st->total->nbTN1          += (st->table)[i].nbTN1           ;
+//        st->total->nbFP1          += (st->table)[i].nbFP1           ;
+//        st->total->nbTN2          += (st->table)[i].nbTN2           ;
+//        st->total->nbFP2          += (st->table)[i].nbFP2           ;
+#endif       
        boxes_by_prec_add_boxes_by_prec( st->total->bpc, (st->table)[i].bpc ); 
     }
 
@@ -263,9 +336,25 @@ int counters_getNbTaylorsInTSTests          ( const counters_t st ){ return st->
 int counters_getNbTaylorsRepetedInTSTests   ( const counters_t st ){ return st->total->nbTaylorsRepetedInTSTests ;}
 int counters_getNbNewton                    ( const counters_t st ){ return st->total->nbNewton                  ;}
 int counters_getNbFailingNewton             ( const counters_t st ){ return st->total->nbFailingNewton           ;}
+int counters_getNbTSTestsInNewton           ( const counters_t st ){ return st->total->nbTSTestsInNewton          ;}
+int counters_getNbTaylorsInNewton           ( const counters_t st ){ return st->total->nbTaylorsInNewton         ;}
+int counters_getNbGraeffeInNewton           ( const counters_t st ){ return st->total->nbGraeffeInNewton         ;}
+int counters_getNbPsCountingTest            ( const counters_t st ){ return st->total->nbPsCountingTest          ;}
+#ifdef CCLUSTER_STATS_PS_MACIS
 int counters_getNbEval                      ( const counters_t st ){ return st->total->nbEval                    ;}
-int counters_getNbPsCountingTest            ( const counters_t st ){ return st->total->nbPsCountingTest                    ;}
-
+int counters_getNbM1            ( const counters_t st ){ return st->total->nbM1          ;}
+int counters_getNbM2            ( const counters_t st ){ return st->total->nbM2          ;}
+int counters_getNbEr            ( const counters_t st ){ return st->total->nbEr          ;}
+#endif
+#ifdef CCLUSTER_STATS_PS
+int counters_getNbEval                      ( const counters_t st ){ return st->total->nbEval                    ;}
+int counters_getNbTN            ( const counters_t st ){ return st->total->nbTN          ;}
+int counters_getNbFP            ( const counters_t st ){ return st->total->nbFP          ;}
+// int counters_getNbTN1            ( const counters_t st ){ return st->total->nbTN1          ;}
+// int counters_getNbFP1            ( const counters_t st ){ return st->total->nbFP1          ;}
+// int counters_getNbTN2            ( const counters_t st ){ return st->total->nbTN2          ;}
+// int counters_getNbFP2            ( const counters_t st ){ return st->total->nbFP2          ;}
+#endif
 /* DEPRECATED
 void counters_by_depth_get_lenghts_of_str( counters_by_depth_t res, counters_by_depth_t st){
     

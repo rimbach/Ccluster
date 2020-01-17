@@ -19,10 +19,13 @@
 #endif
 
 #include "base/base.h"
+#include "numbers/compApp.h"
 #include "geometry/compBox.h"
 #include "metadatas/strategies.h"
 #include "metadatas/counters.h"
 #include "metadatas/chronos.h"
+
+#include "metadatas/pwSuDatas.h"
 
 #include <string.h>
 
@@ -44,7 +47,11 @@ typedef struct{
 //     pthread_mutex_t _mutex;
 // #endif
     /* for power sums */
-    slong      nbEvalPoints;
+    pwSuDatas  pwSum;
+//     slong      nbEvalPoints;
+//     slong      nbPowerSums; /* >=1, how many power sums, 
+//                                including 0-th, are computed in the discarding test*/
+//     void(*evalPoly)(compApp_t, compApp_t, const compApp_t, slong);
 //     slong      appPrec;
 } metadatas;
 
@@ -56,6 +63,7 @@ typedef metadatas * metadatas_ptr;
 #define metadatas_stratref(X) (&(X)->strat)
 #define metadatas_countref(X) (&(X)->count)
 #define metadatas_chronref(X) (&(X)->chron)
+#define metadatas_pwSumref(X) (&(X)->pwSum)
 
 void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_t strategy, int verbosity);
 void metadatas_clear(metadatas_t m);
@@ -75,10 +83,31 @@ METADATAS_INLINE void metadatas_unlock(metadatas_t m){
 }  
 
 METADATAS_INLINE int  metadatas_getVerbo(const metadatas_t m) { return m->verbo; }
+METADATAS_INLINE void  metadatas_setVerbo(metadatas_t m, int v) { m->verbo=v; }
 METADATAS_INLINE int  metadatas_haveToCount(const metadatas_t m) { return (m->verbo > 1); }
 
-METADATAS_INLINE slong  metadatas_getNbEvalPoints(const metadatas_t m) { return m->nbEvalPoints; }
-METADATAS_INLINE void   metadatas_setNbEvalPoints(metadatas_t m, slong nbEvalPoints) { m->nbEvalPoints = nbEvalPoints; }
+METADATAS_INLINE slong  metadatas_getNbEvalPoints   (const metadatas_t m) { 
+    return pwSuDatas_nbPntsEval(metadatas_pwSumref(m)); 
+}
+METADATAS_INLINE void   metadatas_setNbEvalPoints   (metadatas_t m, slong nbEvalPoints) { 
+    pwSuDatas_set_nbPntsEval(metadatas_pwSumref(m), nbEvalPoints); 
+}
+METADATAS_INLINE slong  metadatas_getNbPowerSums    (const metadatas_t m) { 
+    return pwSuDatas_nbPwSuComp(metadatas_pwSumref(m)); 
+}
+METADATAS_INLINE void   metadatas_setNbPowerSums    (metadatas_t m, slong nbPowerSums) { 
+    pwSuDatas_set_nbPwSuComp(metadatas_pwSumref(m), nbPowerSums); 
+}
+METADATAS_INLINE void   metadatas_setIsoRatio_si    (metadatas_t m, slong num, ulong den) { 
+    pwSuDatas_set_isolaRatio_si(metadatas_pwSumref(m), num, den); 
+}
+METADATAS_INLINE realRat_ptr metadatas_getIsoRatio  (metadatas_t m) { 
+    return pwSuDatas_isolaRatio_ptr( metadatas_pwSumref(m));
+}
+METADATAS_INLINE realRat_ptr metadatas_getWantedPrec  (metadatas_t m) { 
+    return pwSuDatas_wantedPrec_ptr( metadatas_pwSumref(m));
+}
+
 // METADATAS_INLINE slong  metadatas_getAppPrec(const metadatas_t m) { return m->appPrec; }
 // METADATAS_INLINE void   metadatas_setAppPrec(metadatas_t m, slong appPrec) { m->appPrec = appPrec; }
 
@@ -90,8 +119,10 @@ METADATAS_INLINE int metadatas_useStopWhenCompact( const metadatas_t m ) { retur
 METADATAS_INLINE int metadatas_useAnticipate     ( const metadatas_t m ) { return strategies_useAnticipate     (metadatas_stratref(m)); }
 // METADATAS_INLINE int metadatas_useCountSols      ( const metadatas_t m ) { return strategies_useCountSols      (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useNBThreads      ( const metadatas_t m ) { return strategies_useNBThreads      (metadatas_stratref(m)); }
-METADATAS_INLINE int metadatas_realCoeffs        ( const metadatas_t m ) { return strategies_realCoeffs        (metadatas_stratref(m)); }
-METADATAS_INLINE int metadatas_forTests         ( const metadatas_t m ) { return strategies_forTests         (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_useRealCoeffs     ( const metadatas_t m ) { return strategies_useRealCoeffs     (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_usePowerSums      ( const metadatas_t m ) { return strategies_usePowerSums      (metadatas_stratref(m)); }
+// METADATAS_INLINE int metadatas_pwSuTest         ( const metadatas_t m ) { return strategies_pwSuTest           (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_forTests          ( const metadatas_t m ) { return strategies_forTests          (metadatas_stratref(m)); }
 // /* counters */
 METADATAS_INLINE void metadatas_add_discarded( metadatas_t m, int depth ) { 
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -129,24 +160,42 @@ METADATAS_INLINE void metadatas_add_explored ( metadatas_t m, int depth ) {
 #endif
 }
 
-METADATAS_INLINE void metadatas_add_PsCountingTest ( metadatas_t m, int depth ) {
+METADATAS_INLINE void metadatas_add_PsCountingTest ( metadatas_t m, int depth
+#ifdef CCLUSTER_STATS_PS_MACIS
+, int res, int er 
+#endif 
+#ifdef CCLUSTER_STATS_PS
+, int resPS, int resTS
+// , int resPS, int resPS1, int resPS2, int resTS 
+#endif
+                                                   ) {
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
-    counters_add_PsCountingTest(metadatas_countref(m), depth);
+    counters_add_PsCountingTest(metadatas_countref(m), depth
+#ifdef CCLUSTER_STATS_PS_MACIS    
+    , res, er
+#endif
+#ifdef CCLUSTER_STATS_PS
+    , resPS, resTS 
+//     , resPS, resPS1, resPS2, resTS
+#endif
+    );
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_unlock(m);
 #endif
 }
 
-METADATAS_INLINE void metadatas_add_Test     ( metadatas_t m, int depth, int res, int discard, int nbTaylors, int nbTaylorsRepeted, int nbGraeffe, int nbGraeffeRepeted, int prec, double d) {
+METADATAS_INLINE void metadatas_add_Test     ( metadatas_t m, int depth, int res, int discard, int inNewton, 
+                                               int nbTaylors, int nbTaylorsRepeted, int nbGraeffe, int nbGraeffeRepeted, int prec, 
+                                               double d) {
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
-    counters_add_Test( metadatas_countref(m), depth, res, discard, nbTaylors, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted, prec);
+    counters_add_Test( metadatas_countref(m), depth, res, discard, inNewton, nbTaylors, nbTaylorsRepeted, nbGraeffe, nbGraeffeRepeted, prec);
     if (discard)
         chronos_add_time_T0Tests( metadatas_chronref(m), d, metadatas_useNBThreads(m));
     else
@@ -175,6 +224,7 @@ METADATAS_INLINE void metadatas_add_Newton   ( metadatas_t m, int depth, int res
 #endif
 }
 
+#ifdef CCLUSTER_STATS_PS
 METADATAS_INLINE void metadatas_add_Evals( metadatas_t m, int depth, int nbEvals, double d ) {
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
@@ -187,6 +237,7 @@ METADATAS_INLINE void metadatas_add_Evals( metadatas_t m, int depth, int nbEvals
                     metadatas_unlock(m);
 #endif    
 }
+#endif
 
 METADATAS_INLINE void metadatas_count ( metadatas_t m ) { counters_count(metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getDepth( const metadatas_t m) {return counters_getDepth (metadatas_countref(m));}
@@ -208,8 +259,27 @@ METADATAS_INLINE int  metadatas_getNbTaylorsInTSTests          ( const metadatas
 METADATAS_INLINE int  metadatas_getNbTaylorsRepetedInTSTests   ( const metadatas_t m ){ return counters_getNbTaylorsRepetedInTSTests   (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbNewton                    ( const metadatas_t m ){ return counters_getNbNewton                    (metadatas_countref(m));}
 METADATAS_INLINE int  metadatas_getNbFailingNewton             ( const metadatas_t m ){ return counters_getNbFailingNewton             (metadatas_countref(m));}
-METADATAS_INLINE int  metadatas_getNbEval             ( const metadatas_t m ){ return counters_getNbEval             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbTSTestsInNewton           ( const metadatas_t m ){ return counters_getNbTSTestsInNewton             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbTaylorsInNewton           ( const metadatas_t m ){ return counters_getNbTaylorsInNewton             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbGraeffeInNewton           ( const metadatas_t m ){ return counters_getNbGraeffeInNewton             (metadatas_countref(m));}
+
 METADATAS_INLINE int  metadatas_getNbPsCountingTest            ( const metadatas_t m ){ return counters_getNbPsCountingTest(metadatas_countref(m));}
+
+#ifdef CCLUSTER_STATS_PS_MACIS
+METADATAS_INLINE int  metadatas_getNbEval             ( const metadatas_t m ){ return counters_getNbEval             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbM1            ( const metadatas_t m ){ return counters_getNbM1(metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbM2            ( const metadatas_t m ){ return counters_getNbM2(metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbEr            ( const metadatas_t m ){ return counters_getNbEr(metadatas_countref(m));}
+#endif
+#ifdef CCLUSTER_STATS_PS
+METADATAS_INLINE int  metadatas_getNbEval             ( const metadatas_t m ){ return counters_getNbEval             (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbTN            ( const metadatas_t m ){ return counters_getNbTN(metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbFP            ( const metadatas_t m ){ return counters_getNbFP(metadatas_countref(m));}
+// METADATAS_INLINE int  metadatas_getNbTN1            ( const metadatas_t m ){ return counters_getNbTN1(metadatas_countref(m));}
+// METADATAS_INLINE int  metadatas_getNbFP1            ( const metadatas_t m ){ return counters_getNbFP1(metadatas_countref(m));}
+// METADATAS_INLINE int  metadatas_getNbTN2            ( const metadatas_t m ){ return counters_getNbTN2(metadatas_countref(m));}
+// METADATAS_INLINE int  metadatas_getNbFP2            ( const metadatas_t m ){ return counters_getNbFP2(metadatas_countref(m));}
+#endif
 
 METADATAS_INLINE int metadatas_boxes_by_prec_fprint ( FILE * file, const metadatas_t m ) {
     return counters_boxes_by_prec_fprint ( file, metadatas_countref(m) );
@@ -224,9 +294,14 @@ METADATAS_INLINE double metadatas_get_time_T0Tests ( const metadatas_t m ) { ret
 METADATAS_INLINE double metadatas_get_time_TSTests ( const metadatas_t m ) { return chronos_get_time_TSTests (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_Newtons ( const metadatas_t m ) { return chronos_get_time_Newtons (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_CclusAl ( const metadatas_t m ) { return chronos_get_time_CclusAl (metadatas_chronref(m)); }
-METADATAS_INLINE double metadatas_get_time_Evaluat ( const metadatas_t m ) { return chronos_get_time_Evaluat (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_Derivat ( const metadatas_t m ) { return chronos_get_time_Derivat (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_Anticip ( const metadatas_t m ) { return chronos_get_time_Anticip (metadatas_chronref(m)); }
+
+METADATAS_INLINE double metadatas_get_time_PSTests ( const metadatas_t m ) { return chronos_get_time_PSTests (metadatas_chronref(m)); }
+#ifdef CCLUSTER_STATS_PS
+METADATAS_INLINE double metadatas_get_time_PSTestV ( const metadatas_t m ) { return chronos_get_time_PSTestV (metadatas_chronref(m)); }
+METADATAS_INLINE double metadatas_get_time_Evaluat ( const metadatas_t m ) { return chronos_get_time_Evaluat (metadatas_chronref(m)); }
+#endif
 
 METADATAS_INLINE void metadatas_add_time_Approxi(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -287,6 +362,32 @@ METADATAS_INLINE void metadatas_add_time_Anticip(metadatas_t m, double d){
                     metadatas_unlock(m);
 #endif
 }
+
+METADATAS_INLINE void metadatas_add_time_PSTests(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_PSTests( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+#ifdef CCLUSTER_STATS_PS
+METADATAS_INLINE void metadatas_add_time_PSTestV(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_PSTestV( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+#endif
 
 METADATAS_INLINE void metadatas_add_time_CclusAl(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD
