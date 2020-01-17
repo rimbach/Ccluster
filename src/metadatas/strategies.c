@@ -11,12 +11,8 @@
 
 #include "metadatas/strategies.h"
 
-void strategies_init( strategies_t strat ){
-//     realRat_init(strategies_isoRatioRef(strat));
-}
-void strategies_clear(strategies_t strat) {
-//     realRat_clear(strategies_isoRatioRef(strat));
-}
+void strategies_init( strategies_t strat ){ }
+void strategies_clear(strategies_t strat) { }
 
 void strategies_set_int( strategies_t strat, int useNewton, 
                                              int useTstarOptim, 
@@ -69,7 +65,6 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
     strat->_forTests              = strat2->_forTests   ;
 //     strat->_pwSuTest              = strat2->_pwSuTest   ;
 //     strat->_pwSuNbPs           = strat2->_pwSuNbPs;
-//     realRat_set(strategies_isoRatioRef(strat), strategies_isoRatioRef(strat2));
 }
 
 void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){

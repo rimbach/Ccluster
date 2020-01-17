@@ -126,14 +126,6 @@ METADATAS_INLINE void strategies_set_forTests   ( strategies_t strat, int flag )
 
 // METADATAS_INLINE int strategies_pwSuNbPs       ( const strategies_t strat ) { return strat->_pwSuNbPs      ; }
 // METADATAS_INLINE void strategies_set_pwSuNbPs   ( strategies_t strat, int nb ) { strat->_pwSuNbPs=nb      ; }
-/*
-#define strategies_isoRatioRef(x) (&(x)->_pwSuIsoRatio)
-METADATAS_INLINE void strategies_set_pwSuIsoRatio   ( strategies_t strat, realRat_t isoRatio ) { 
-    realRat_set(strategies_isoRatioRef(strat), isoRatio); 
-}
-METADATAS_INLINE void strategies_set_pwSuIsoRatio_si   ( strategies_t strat, slong num, ulong den ) { 
-    realRat_set_si(strategies_isoRatioRef(strat), num, den); 
-}*/
 
 #ifdef __cplusplus
 }
