@@ -25,6 +25,8 @@
 #include "metadatas/counters.h"
 #include "metadatas/chronos.h"
 
+#include "metadatas/pwSuDatas.h"
+
 #include <string.h>
 
 // #ifdef CCLUSTER_HAVE_PTHREAD
@@ -45,10 +47,11 @@ typedef struct{
 //     pthread_mutex_t _mutex;
 // #endif
     /* for power sums */
-    slong      nbEvalPoints;
+    pwSuDatas  pwSum;
+//     slong      nbEvalPoints;
 //     slong      nbPowerSums; /* >=1, how many power sums, 
 //                                including 0-th, are computed in the discarding test*/
-    void(*evalPoly)(compApp_t, compApp_t, const compApp_t, slong);
+//     void(*evalPoly)(compApp_t, compApp_t, const compApp_t, slong);
 //     slong      appPrec;
 } metadatas;
 
@@ -60,6 +63,7 @@ typedef metadatas * metadatas_ptr;
 #define metadatas_stratref(X) (&(X)->strat)
 #define metadatas_countref(X) (&(X)->count)
 #define metadatas_chronref(X) (&(X)->chron)
+#define metadatas_pwSumref(X) (&(X)->pwSum)
 
 void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_t strategy, int verbosity);
 void metadatas_clear(metadatas_t m);
@@ -82,13 +86,27 @@ METADATAS_INLINE int  metadatas_getVerbo(const metadatas_t m) { return m->verbo;
 METADATAS_INLINE void  metadatas_setVerbo(metadatas_t m, int v) { m->verbo=v; }
 METADATAS_INLINE int  metadatas_haveToCount(const metadatas_t m) { return (m->verbo > 1); }
 
-METADATAS_INLINE slong  metadatas_getNbEvalPoints(const metadatas_t m) { return m->nbEvalPoints; }
-METADATAS_INLINE void   metadatas_setNbEvalPoints(metadatas_t m, slong nbEvalPoints) { m->nbEvalPoints = nbEvalPoints; }
-METADATAS_INLINE slong  metadatas_getNbPowerSums(const metadatas_t m) { return (slong) strategies_pwSuNbPs(metadatas_stratref(m)); }
-METADATAS_INLINE void   metadatas_setNbPowerSums(metadatas_t m, slong nbPowerSums) { strategies_set_pwSuNbPs(metadatas_stratref(m), (slong) nbPowerSums); }
-METADATAS_INLINE void   metadatas_setIsoRatio(metadatas_t m, realRat_t isoRatio) { strategies_set_pwSuIsoRatio(metadatas_stratref(m), isoRatio); }
-METADATAS_INLINE void   metadatas_setIsoRatio_si(metadatas_t m, slong num, ulong den) { strategies_set_pwSuIsoRatio_si(metadatas_stratref(m), num, den); }
-METADATAS_INLINE realRat_ptr metadatas_getIsoRatio(metadatas_t m) { return strategies_isoRatioRef(metadatas_stratref(m)); }
+METADATAS_INLINE slong  metadatas_getNbEvalPoints   (const metadatas_t m) { 
+    return pwSuDatas_nbPntsEval(metadatas_pwSumref(m)); 
+}
+METADATAS_INLINE void   metadatas_setNbEvalPoints   (metadatas_t m, slong nbEvalPoints) { 
+    pwSuDatas_set_nbPntsEval(metadatas_pwSumref(m), nbEvalPoints); 
+}
+METADATAS_INLINE slong  metadatas_getNbPowerSums    (const metadatas_t m) { 
+    return pwSuDatas_nbPwSuComp(metadatas_pwSumref(m)); 
+}
+METADATAS_INLINE void   metadatas_setNbPowerSums    (metadatas_t m, slong nbPowerSums) { 
+    pwSuDatas_set_nbPwSuComp(metadatas_pwSumref(m), nbPowerSums); 
+}
+METADATAS_INLINE void   metadatas_setIsoRatio_si    (metadatas_t m, slong num, ulong den) { 
+    pwSuDatas_set_isolaRatio_si(metadatas_pwSumref(m), num, den); 
+}
+METADATAS_INLINE realRat_ptr metadatas_getIsoRatio  (metadatas_t m) { 
+    return pwSuDatas_isolaRatio_ptr( metadatas_pwSumref(m));
+}
+METADATAS_INLINE realRat_ptr metadatas_getWantedPrec  (metadatas_t m) { 
+    return pwSuDatas_wantedPrec_ptr( metadatas_pwSumref(m));
+}
 
 // METADATAS_INLINE slong  metadatas_getAppPrec(const metadatas_t m) { return m->appPrec; }
 // METADATAS_INLINE void   metadatas_setAppPrec(metadatas_t m, slong appPrec) { m->appPrec = appPrec; }
@@ -101,9 +119,10 @@ METADATAS_INLINE int metadatas_useStopWhenCompact( const metadatas_t m ) { retur
 METADATAS_INLINE int metadatas_useAnticipate     ( const metadatas_t m ) { return strategies_useAnticipate     (metadatas_stratref(m)); }
 // METADATAS_INLINE int metadatas_useCountSols      ( const metadatas_t m ) { return strategies_useCountSols      (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useNBThreads      ( const metadatas_t m ) { return strategies_useNBThreads      (metadatas_stratref(m)); }
-METADATAS_INLINE int metadatas_realCoeffs        ( const metadatas_t m ) { return strategies_realCoeffs        (metadatas_stratref(m)); }
-METADATAS_INLINE int metadatas_pwSuTest         ( const metadatas_t m ) { return strategies_pwSuTest           (metadatas_stratref(m)); }
-METADATAS_INLINE int metadatas_forTests         ( const metadatas_t m ) { return strategies_forTests         (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_useRealCoeffs     ( const metadatas_t m ) { return strategies_useRealCoeffs     (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_usePowerSums      ( const metadatas_t m ) { return strategies_usePowerSums      (metadatas_stratref(m)); }
+// METADATAS_INLINE int metadatas_pwSuTest         ( const metadatas_t m ) { return strategies_pwSuTest           (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_forTests          ( const metadatas_t m ) { return strategies_forTests          (metadatas_stratref(m)); }
 // /* counters */
 METADATAS_INLINE void metadatas_add_discarded( metadatas_t m, int depth ) { 
 #ifdef CCLUSTER_HAVE_PTHREAD

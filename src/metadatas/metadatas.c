@@ -19,6 +19,8 @@ void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_
     strategies_set( metadatas_stratref(m), strategy );
     counters_init( metadatas_countref(m) );
     chronos_init( metadatas_chronref(m) );
+    
+    pwSuDatas_init( metadatas_pwSumref(m) );
 }
 
 void metadatas_clear(metadatas_t m) {
@@ -26,6 +28,8 @@ void metadatas_clear(metadatas_t m) {
     strategies_clear( metadatas_stratref(m) );
     counters_clear( metadatas_countref(m) );
     chronos_clear( metadatas_chronref(m) );
+    
+    pwSuDatas_clear( metadatas_pwSumref(m) );
 }
 
 // void metadatas_join(metadatas_t m1, const metadatas_t m2){
@@ -88,8 +92,8 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     if (metadatas_usePredictPrec(meta)) len += sprintf( temp + len, " predPrec");
     if (metadatas_useStopWhenCompact(meta)) len += sprintf( temp + len, " stopWhenCompact");
     if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
-    if (metadatas_realCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
-    if (metadatas_pwSuTest(meta)) len += sprintf( temp + len, " pwSuTest");
+    if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
+    if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " powerSums");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " test");
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));
@@ -132,10 +136,10 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     if (metadatas_useAnticipate(meta)){
     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Anticipate:",                 metadatas_get_time_Anticip(meta),    " " );
     }
-    if (metadatas_pwSuTest(meta)){
-    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of Ps counting tests:",  metadatas_getNbPsCountingTest(meta),    " " );
+    if (metadatas_usePowerSums(meta)){
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of Ps counting tests:",  metadatas_getNbPsCountingTest(meta),    " " );
     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests:",          metadatas_get_time_PSTests(meta),    " " );
-#ifdef CCLUSTER_STATS_PS_MACIS
+/*#ifdef CCLUSTER_STATS_PS_MACIS
     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests V:",        metadatas_get_time_PSTestV(meta),    " " );
     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests D:",        metadatas_get_time_PSTests(meta)-metadatas_get_time_PSTestV(meta),    " " );
     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Evaluation:",                 metadatas_get_time_Evaluat(meta),    " " );
@@ -155,7 +159,7 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
 //     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive 1:",     metadatas_getNbFP1(meta),    " " );
 //     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of True Negative 2:",      metadatas_getNbTN2(meta),    " " );
 //     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive 2:",     metadatas_getNbFP2(meta),    " " );
-#endif 
+#endif*/ 
     }
     r = fprintf(file, " -------------------Precision-----------------------------------------\n");
     r = metadatas_boxes_by_prec_fprint ( file, meta );

@@ -12,6 +12,56 @@
 #include "powerSums/powerSums.h"
 #include <time.h>
 
+void pwSuDatas_set( pwSuDatas_t p, 
+                    void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
+                    slong degree,
+                    slong iRnum, slong iRden,
+                    slong nbPws,
+                    int verb ) {
+    
+    p->evalPoly = evalFast;
+    pwSuDatas_set_isolaRatio_si( p, iRnum, iRden );
+    pwSuDatas_set_nbPwSuComp( p, nbPws );
+    slong nbP = powerSums_getNbOfPointsForCounting( pwSuDatas_wantedPrec_ptr(p), 
+                                                    degree, 
+                                                    pwSuDatas_isolaRatio_ptr(p) )
+                + pwSuDatas_nbPwSuComp(p) -1;
+    pwSuDatas_set_nbPntsEval(p, nbP);
+    if (verb>=2) {
+        
+        printf("nb of power sums computed: %d\n", (int) pwSuDatas_nbPwSuComp(p) );
+        printf("iso ratio used for tests:  "); realRat_print( pwSuDatas_isolaRatio_ptr(p) ); printf("\n");
+        printf("nb points for eval:        %d\n", (int) pwSuDatas_nbPntsEval(p) );
+        
+//         realRat_t errorNum, errorDen;
+//         realRat_init(errorNum);
+//         realRat_init(errorDen);
+//         realRat_inv(errorDen, isoRatio);
+//         realRat_pow_si(errorDen, errorDen, nbP);
+//         realRat_add_si(errorDen, errorDen, -1);
+//         realRat_neg(errorDen, errorDen);
+//         for (int h = 0; h<nbP/2; h++){
+//             realRat_inv(errorNum, isoRatio);
+//             realRat_pow_si(errorNum, errorNum, nbP-h);
+//             realRat_mul_si(errorNum, errorNum, cacheApp_getDegree(cache));
+//             realRat_div( errorNum, errorNum, errorDen );
+//             printf("error for h=%d: ", h); realRat_print( errorNum ); printf("\n");
+//         }
+//         realRat_clear(errorNum);
+//         realRat_clear(errorDen);
+    }
+}
+
+void metadatas_set_pwSuDatas( metadatas_t meta, 
+                              void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
+                              slong degree,
+                              slong iRnum, slong iRden,
+                              slong nbPws,
+                              int verb ) {
+    pwSuDatas_set( metadatas_pwSumref(meta), evalFast, degree, iRnum, iRden, nbPws, verb );
+}
+
+/* case where only 0-th power sum is computed */
 slong powerSums_getNbOfPointsForCounting( const realRat_t wantedPrec, slong degree, const realRat_t isoRatio ){
     
     slong res;
@@ -78,14 +128,14 @@ void powerSums_evaluateAtPoints( compApp_ptr f_val,
                                  slong prec,
                                  metadatas_t meta){
     
-    if (meta->evalPoly == NULL) {
+    if (metadatas_pwSumref(meta)->evalPoly == NULL) {
         compApp_poly_ptr app = cacheApp_getApproximation ( cache, prec );
         for (slong i=0; i<nbPoints; i++)
             compApp_poly_evaluate2_rectangular(f_val + i, fder_val + i, app, points + i, prec);
     }
     else {
         for (slong i=0; i<nbPoints; i++)
-            meta->evalPoly( f_val+i, fder_val + i, points+i, prec);
+            metadatas_pwSumref(meta)->evalPoly( f_val+i, fder_val + i, points+i, prec);
     }
 }
 

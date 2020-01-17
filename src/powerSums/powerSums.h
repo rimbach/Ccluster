@@ -12,6 +12,7 @@
 #ifndef POWERSUMS_H
 #define POWERSUMS_H
 
+
 #include "base/base.h"
 #include "numbers/realRat.h"
 #include "numbers/realApp.h"
@@ -25,6 +26,21 @@
 extern "C" {
 #endif
     
+void pwSuDatas_set( pwSuDatas_t p, 
+                    void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
+                    slong degree,
+                    slong iRnum, slong iRden,
+                    slong nbPws,
+                    int verb );
+
+void metadatas_set_pwSuDatas( metadatas_t meta, 
+                              void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
+                              slong degree,
+                              slong iRnum, slong iRden,
+                              slong nbPws,
+                              int verb );
+                              
+
 slong powerSums_getNbOfPointsForCounting( const realRat_t wantedPrec, slong degree, const realRat_t isoRatio );
 
 void powerSums_getEvaluationPoints( compApp_ptr points, 

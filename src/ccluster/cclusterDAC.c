@@ -138,7 +138,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         
          /* Real Coeff */
         pushConjugFlag = 0;
-        if (metadatas_realCoeffs(meta)){
+        if (metadatas_useRealCoeffs(meta)){
             /* test if the component contains the real line in its interior */
             if (!connCmp_is_imaginary_positive(ccur)) {
                 ccurConjClo = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
@@ -161,7 +161,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         if (connCmp_isSep(ccur)==0) {
             separationFlag = ccluster_compDsk_is_separated_DAC(fourCCDisk, qMainLoop, qResults, qAllResults, discardedCcs);
             /* Real Coeff */
-            if ( (separationFlag)&&(metadatas_realCoeffs(meta)) ) {
+            if ( (separationFlag)&&(metadatas_useRealCoeffs(meta)) ) {
                 if (connCmp_is_imaginary_positive(ccur)) {
                     /* check if ccur is separated from its complex conjugate */
                     realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
@@ -231,7 +231,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         }
         
         /* Real Coeff */
-        if (metadatas_realCoeffs(meta)){
+        if (metadatas_useRealCoeffs(meta)){
             if (connCmp_is_imaginary_positive(ccur)) {
                 /*compute the complex conjugate*/
                 pushConjugFlag = 1;
@@ -281,7 +281,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
             connCmp_list_push(qResults, ccur);
             nbSolsAlreadyFound += connCmp_nSols(ccur);
 
-            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+            if ((metadatas_useRealCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
                 connCmp_list_push(qResults, ccurConj);
@@ -295,7 +295,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
             nbSolsAlreadyFound += connCmp_nSols(ccur);
             
             /* Real Coeff */
-            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+            if ((metadatas_useRealCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
                 connCmp_list_push(qResults, ccurConj);

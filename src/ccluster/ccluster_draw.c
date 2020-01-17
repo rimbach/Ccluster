@@ -46,7 +46,7 @@ slong ccluster_discard_compBox_list_draw( compBox_list_t boxes, compBox_list_t d
         metadatas_add_explored( meta, depth);
         
         /* Real Coeffs */
-        if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
+        if (( metadatas_useRealCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
             compBox_list_push(discarded, btemp);
 //             compBox_clear(btemp);
 //             ccluster_free(btemp);
@@ -141,7 +141,7 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
     /* RealCoeffs */
     int cc_contains_real_line = 0;
     /* Check if cc contains the real line */
-    if ( (metadatas_realCoeffs(meta)) && (!connCmp_is_imaginary_positive(cc)) )
+    if ( (metadatas_useRealCoeffs(meta)) && (!connCmp_is_imaginary_positive(cc)) )
         cc_contains_real_line = 1;
     /* end RealCoeffs */
     
@@ -163,7 +163,7 @@ void ccluster_bisect_connCmp_draw( connCmp_list_t dest, connCmp_t cc, connCmp_li
         specialFlag = 0;
     
     /* RealCoeffs */
-    if ( (metadatas_realCoeffs(meta)) && (connCmp_list_get_size(ltemp) == 1) && (cc_contains_real_line == 1) ){
+    if ( (metadatas_useRealCoeffs(meta)) && (connCmp_list_get_size(ltemp) == 1) && (cc_contains_real_line == 1) ){
         ctemp = connCmp_list_first(ltemp);
         /* test if cc has been separated from real case;
          in which case reset everything*/
@@ -305,7 +305,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
         
         /* Real Coeff */
         pushConjugFlag = 0;
-        if (metadatas_realCoeffs(meta)){
+        if (metadatas_useRealCoeffs(meta)){
             /* test if the component contains the real line in its interior */
 //             printf("number of boxes before conjugate closure: %d\n", connCmp_nb_boxes(ccur));
             if (!connCmp_is_imaginary_positive(ccur)) {
@@ -331,7 +331,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
         
         /* Real Coeff */
-        if ( (separationFlag)&&(metadatas_realCoeffs(meta)) ) {
+        if ( (separationFlag)&&(metadatas_useRealCoeffs(meta)) ) {
             if (connCmp_is_imaginary_positive(ccur)) {
                 /* check if ccur is separated from its complex conjugate */
                 realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
@@ -392,7 +392,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
         }
         
         /* Real Coeff */
-        if (metadatas_realCoeffs(meta)
+        if (metadatas_useRealCoeffs(meta)
             && ( (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag)
                ||( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) ) ) {
             
@@ -446,7 +446,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
             /* Real Coeff */
-            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+            if ((metadatas_useRealCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
                 connCmp_list_push(qResults, ccurConj);
@@ -457,7 +457,7 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
             /* Real Coeff */
-            if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
+            if ((metadatas_useRealCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
                 connCmp_list_push(qResults, ccurConj);
