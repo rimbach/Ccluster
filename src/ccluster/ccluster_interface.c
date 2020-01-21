@@ -35,8 +35,12 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
     metadatas_init(meta, initialBox, strat, verb);
     
     /* initialize power sums */
-    if (metadatas_usePowerSums(meta))
-        metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
+    if (metadatas_usePowerSums(meta)) {
+        if (strat->_pwSuNbPs>1)
+            metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, strat->_pwSuNbPs, verb );
+        else 
+            metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
+    }
     
     connCmp_list_init(qRes);
     
@@ -88,8 +92,12 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     
     metadatas_init(meta, initialBox, strat, verb);
     /* initialize power sums */
-    if (metadatas_usePowerSums(meta))
-        metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
+    if (metadatas_usePowerSums(meta)) {
+        if (strat->_pwSuNbPs>1)
+            metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, strat->_pwSuNbPs, verb );
+        else 
+            metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
+    }
     
     ccluster_algo_global( qRes, initialBox, eps, cache, meta);
     
