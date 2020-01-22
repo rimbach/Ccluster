@@ -84,6 +84,11 @@ slong cacheApp_getDegree ( cacheApp_t cache );
 int cacheApp_is_real ( cacheApp_t cache );
 
 void cacheApp_root_bound ( realRat_t bound, cacheApp_t cache );
+/* when called from solver for triangular system */
+/* we are not sure of the degree of the polynomial */
+/* return 1 if no problem */
+/* return 0 if lcf vanishes */
+int cacheApp_root_bound_unsure ( realRat_t bound, cacheApp_t cache);
 
 #ifdef CCLUSTER_EXPERIMENTAL
 compApp_poly_ptr cacheApp_getDerivative ( cacheApp_t cache, slong prec, slong order );
