@@ -209,6 +209,35 @@ void cacheApp_root_bound ( realRat_t bound, cacheApp_t cache ){
     compApp_poly_root_bound_fujiwara( bound, p);
 }
 
+/* return 1 if no problem */
+/* return 0 if lcf vanishes */
+int cacheApp_root_bound_unsure ( realRat_t bound, cacheApp_t cache){
+    
+    int res=1;
+    
+    compApp_poly_ptr p;
+    slong deg = cacheApp_getDegree(cache);
+    slong prec = CCLUSTER_DEFAULT_PREC;
+    p = cacheApp_getApproximation (cache, prec);
+    
+    while ( compApp_contains_zero( compApp_poly_getCoeff(p, deg) ) 
+            && ( prec <= CCLUSTER_THRESHOLD_FOR_GLOBAL ) ) {
+        prec = 2*prec;
+        p = cacheApp_getApproximation (cache, prec);
+    }
+    
+    if (compApp_contains_zero( compApp_poly_getCoeff(p, deg))) {
+        realRat_set_si( bound, 2, 1 );
+        realRat_pow_si( bound, bound, CCLUSTER_THRESHOLD_FOR_GLOBAL );
+        res = 0;
+//         printf("WARNING FROM CCLUSTER, cacheApp.c, line 232: leading coeff is less than 
+    }
+    else
+        compApp_poly_root_bound_fujiwara( bound, p);
+    
+    return res;
+}
+
 void cacheApp_clear ( cacheApp_t cache ) {
 
 #ifdef CCLUSTER_EXPERIMENTAL    

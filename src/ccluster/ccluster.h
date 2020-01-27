@@ -183,6 +183,16 @@ void ccluster_forJulia_refine( connCmp_list_t qResults,
                                int nbThreads,
                                int verb);
 
+/* res = 1: OK */
+/* res = -1: lcf vanishes; may miss solutions with huge norm */
+int ccluster_global_forJulia_forTcluster_func( connCmp_list_t qResults, 
+                                                void(*func)(compApp_poly_t, slong), 
+                                                compBox_t initialBox,
+                                                const realRat_t eps, 
+                                                char * stratstr,
+                                                int nbThreads,
+                                                int verb);
+
 void ccluster_forJulia_draw( connCmp_list_t qResults, 
                             compBox_list_t qDiscarded, 
                             void(*func)(compApp_poly_t, slong), 

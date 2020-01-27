@@ -16,6 +16,11 @@
 
 #define CCLUSTER_DEFAULT_PREC 53
 
+/* when unsure if lcf is non-zero for global solving */
+/* use this as threshold to decide if it is zero */
+/* and 2^-this as upper bound */
+#define CCLUSTER_THRESHOLD_FOR_GLOBAL 106
+
 #define CCLUSTER_MIN(A,B) (A<=B? A : B)
 #define CCLUSTER_MAX(A,B) (A>=B? A : B)
 #define CCLUSTER_ABS(A) (A<=0? -A : A)
