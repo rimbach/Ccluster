@@ -81,8 +81,17 @@ POLYNOMIALS_INLINE void realRat_poly_mul(realRat_poly_t res, const realRat_poly_
 POLYNOMIALS_INLINE void realRat_poly_add(realRat_poly_t res, const realRat_poly_t poly1, const realRat_poly_t poly2) {
     fmpq_poly_add(res, poly1, poly2);
 }
+POLYNOMIALS_INLINE void realRat_poly_scalar_mul_si(realRat_poly_t res, const realRat_poly_t poly1, slong q) {
+    fmpq_poly_scalar_mul_si(res, poly1, q);
+}
 POLYNOMIALS_INLINE void realRat_poly_scalar_mul_realRat(realRat_poly_t res, const realRat_poly_t poly1, const realRat_t q) {
     fmpq_poly_scalar_mul_fmpq(res, poly1, q);
+}
+POLYNOMIALS_INLINE void realRat_poly_shift_left(realRat_poly_t res, const realRat_poly_t poly1, slong n) {
+    fmpq_poly_shift_left(res, poly1, n);
+}
+POLYNOMIALS_INLINE void realRat_poly_shift_right(realRat_poly_t res, const realRat_poly_t poly1, slong n) {
+    fmpq_poly_shift_right(res, poly1, n);
 }
 
 /* printing */
