@@ -50,6 +50,8 @@ BENCHS_HEADERS = $(wildcard $(patsubst %, %/*.h, $(BENCHS_DIR)))
 BENCHS_OBJS = $(BENCHS_SOURCES:%.c=%.o)
 BENCHS_EXE = $(BENCHS_SOURCES:%.c=%)
 
+EXAMPLES_DIR = ./examples
+
 export
 
 
@@ -66,11 +68,13 @@ clean:
 	rm -rf $(LIB_OBJS) $(LIB_LOBJS) libccluster.a $(CCLUSTER_LIB) \
 	$(CCLUSTER_LIBNAME) $(CCLUSTER_LIBNAME).$(CCLUSTER_MAJOR) 
 	rm -rf build
+	cd bin && make clean && cd ..
 # 	$(wildcard $(CCLUSTER_LIBNAME)*)
 
 distclean: clean benchsclean testclean
 	rm -f Makefile
 	rm -f test/Makefile
+	rm -f bin/Makefile
 	
 $(CCLUSTER_LIB): $(LIB_LOBJS) $(LIB_SOURCES) $(LIB_HEADERS)
 	@echo "Building $@"
@@ -134,8 +138,11 @@ compbenchs: library comptest
 	
 comptest: library
 	cd test && make build && cd ..
+
+bins: library
+	cd bin && make && cd ..
 	
-test: comptest
+test: comptest bins
 	cd test && make tM1 && cd ..
 	
 benchICMS: compbenchs

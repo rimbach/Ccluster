@@ -63,7 +63,9 @@ int scan_initialBox( char * argv, compBox_t target ){
 
 int scan_epsilon( char * argv, realRat_t target ){
     
-    if (strcmp( argv, INFINITY_STR_NAME ) == 0){
+    if ( (strcmp( argv, INFINITY_STR_NAME ) == 0)
+         ||(strcmp( argv, "inf" ) == 0) 
+         ||(strcmp( argv, "+inf" ) == 0) ) {
         realRat_set_si(target, 1,0);
         return 2;
     }
