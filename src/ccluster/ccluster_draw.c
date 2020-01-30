@@ -354,8 +354,10 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
             prec = resTstar.appPrec;
         }
         
-        if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && !widthFlag )
-            &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) ) {
+        if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
+               ( (!widthFlag)||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) ) )  )
+//             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) //this is DEPRECATED: pass eps = 1/0 instead
+        ) {
             
             if (metadatas_haveToCount(meta)){
                 start = clock();
@@ -393,8 +395,10 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
         
         /* Real Coeff */
         if (metadatas_useRealCoeffs(meta)
-            && ( (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag)
-               ||( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) ) ) {
+            && ( 
+//             (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag)
+//                ||//this is DEPRECATED: pass eps = 1/0 instead 
+               ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) ) ) {
             
             if (connCmp_is_imaginary_positive(ccur)) {
                 pushConjugFlag = 1;
@@ -441,18 +445,19 @@ void ccluster_main_loop_draw( connCmp_list_t qResults,  connCmp_list_t qMainLoop
             }
         }
         
-        if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
-            metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
-            connCmp_list_push(qResults, ccur);
-//             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
-            /* Real Coeff */
-            if ((metadatas_useRealCoeffs(meta))&&(pushConjugFlag)){
-                /*compute the complex conjugate*/
-                metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
-                connCmp_list_push(qResults, ccurConj);
-            }
-        }
-        else if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) {
+//         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
+//             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
+//             connCmp_list_push(qResults, ccur);
+// //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
+//             /* Real Coeff */
+//             if ((metadatas_useRealCoeffs(meta))&&(pushConjugFlag)){
+//                 /*compute the complex conjugate*/
+//                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
+//                 connCmp_list_push(qResults, ccurConj);
+//             }
+//         }
+//         else
+        if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
