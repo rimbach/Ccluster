@@ -1,0 +1,36 @@
+INCLUDE_PATH = $(INCS) -I../src
+LIBRARY_PATH = -L.. $(LIBS)
+LIBRARY_FLAG = -lflint -larb -lccluster -lm
+
+QUIET_CC  = @echo '   ' CC  ' ' $@;
+
+TEST=$(foreach x, ., $(wildcard $(x)/*.c))
+TEST_OBJS=$(TEST:%.c=%.o)
+TEST_EXECS=$(TEST:%.c=%)
+
+build: ccluster\
+       genPolFile
+
+#==================================================
+# HOUSEKEEPING 
+#==================================================
+
+clean :
+	rm -rf $(TEST_OBJS) $(TEST_EXECS)
+
+.c.o :
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ -c $< $(INCLUDE_PATH)
+	
+ccluster: ccluster.o parseArgs.h
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+
+genPolFile: genPolFile.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	

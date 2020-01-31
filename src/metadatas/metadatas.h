@@ -115,7 +115,6 @@ METADATAS_INLINE realRat_ptr metadatas_getWantedPrec  (metadatas_t m) {
 METADATAS_INLINE int metadatas_useNewton         ( const metadatas_t m ) { return strategies_useNewton         (metadatas_stratref(m)); } 
 METADATAS_INLINE int metadatas_useTstarOptim     ( const metadatas_t m ) { return strategies_useTstarOptim     (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_usePredictPrec    ( const metadatas_t m ) { return strategies_usePredictPrec    (metadatas_stratref(m)); }
-METADATAS_INLINE int metadatas_useStopWhenCompact( const metadatas_t m ) { return strategies_useStopWhenCompact(metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useAnticipate     ( const metadatas_t m ) { return strategies_useAnticipate     (metadatas_stratref(m)); }
 // METADATAS_INLINE int metadatas_useCountSols      ( const metadatas_t m ) { return strategies_useCountSols      (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useNBThreads      ( const metadatas_t m ) { return strategies_useNBThreads      (metadatas_stratref(m)); }

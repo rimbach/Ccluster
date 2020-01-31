@@ -32,7 +32,7 @@ extern "C" {
 #define STRAT_NEWTON   1
 #define STRAT_TSTAROPT 2
 #define STRAT_PREDPREC 4
-#define STRAT_STOPWHCO 8
+// #define STRAT_STOPWHCO 8
 #define STRAT_ANTICIPA 16
 #define STRAT_REALCOEF 32
 #define STRAT_PWSUTEST 64
@@ -68,7 +68,6 @@ typedef struct {
     int _useNewton;
     int _useTstarOptim;
     int _usePredictPrec;
-    int _useStopWhenCompact;
     int _useAnticipate;
 //     int _useCountSols;
     int _useNBThreads;
@@ -89,7 +88,6 @@ void strategies_init( strategies_t strat );
 void strategies_set_int ( strategies_t strat, int useNewton, 
                                               int useTstarOptim, 
                                               int usePredictPrec, 
-                                              int useStopWhenCompact, 
                                               int useAnticipate, 
                                               int useRealCoeffs,
                                               int usePowerSums,
@@ -107,7 +105,6 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads);
 METADATAS_INLINE int strategies_useNewton         ( const strategies_t strat ) { return strat->_useNewton         ; } 
 METADATAS_INLINE int strategies_useTstarOptim     ( const strategies_t strat ) { return strat->_useTstarOptim     ; }
 METADATAS_INLINE int strategies_usePredictPrec    ( const strategies_t strat ) { return strat->_usePredictPrec    ; }
-METADATAS_INLINE int strategies_useStopWhenCompact( const strategies_t strat ) { return strat->_useStopWhenCompact; }
 METADATAS_INLINE int strategies_useAnticipate     ( const strategies_t strat ) { return strat->_useAnticipate     ; }
 // METADATAS_INLINE int strategies_useCountSols      ( const strategies_t strat ) { return strat->_useCountSols      ; }
 METADATAS_INLINE int strategies_useNBThreads      ( const strategies_t strat ) { return strat->_useNBThreads      ; }

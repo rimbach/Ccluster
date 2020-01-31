@@ -84,17 +84,28 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     char temp[1000];
     compBox_sprint_for_stat( temp, metadatas_initBref(meta) );
     r = fprintf(file, "|box:%-65s\n", temp);
-    realRat_sprint_for_stat( temp, eps );
-    r = fprintf(file, "|eps: %-64s|\n", temp);
+    if (realRat_is_den_zero( eps ))
+        r = fprintf(file, "|eps: %-64s|\n", "+inf");
+    else {
+        realRat_sprint_for_stat( temp, eps );
+        r = fprintf(file, "|eps: %-64s|\n", temp);
+    }
     int len = 0;
-    if (metadatas_useNewton(meta)) len += sprintf( temp + len, " newton");
-    if (metadatas_useTstarOptim(meta)) len += sprintf( temp + len, " tstarOpt");
-    if (metadatas_usePredictPrec(meta)) len += sprintf( temp + len, " predPrec");
-    if (metadatas_useStopWhenCompact(meta)) len += sprintf( temp + len, " stopWhenCompact");
-    if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
-    if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
-    if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " powerSums");
-    if (metadatas_forTests(meta)) len += sprintf( temp + len, " test");
+    //TODO find a better way for this...
+    if ( metadatas_useNewton(meta) &&
+         metadatas_useTstarOptim(meta) &&
+         metadatas_usePredictPrec(meta) &&
+         metadatas_useAnticipate(meta) &&
+         metadatas_useRealCoeffs(meta) ) len += sprintf( temp + len, " default");
+    else {    
+        if (metadatas_useNewton(meta)) len += sprintf( temp + len, " newton");
+        if (metadatas_useTstarOptim(meta)) len += sprintf( temp + len, " tstarOpt");
+        if (metadatas_usePredictPrec(meta)) len += sprintf( temp + len, " predPrec");
+        if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
+        if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
+    }
+    if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
+    if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));
 #endif
