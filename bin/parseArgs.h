@@ -98,8 +98,8 @@ int scan_epsilon( char * argv, realRat_t target ){
         
 }
 
-int scan_strategy(char * argv, int * target ) {
-    return sscanf(argv, "%d", target);
+int scan_strategy(char * argv, char * target ) {
+    return sscanf(argv, "%s", target);
 }
 
 int scan_nbthreads(char * argv, int * target ) {
