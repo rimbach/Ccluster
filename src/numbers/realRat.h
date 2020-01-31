@@ -54,7 +54,8 @@ NUMBERS_INLINE int realRat_set_str  (realRat_t dest, const char * strN, const ch
 
 /* normalizing */
 NUMBERS_INLINE void realRat_canonicalise(realRat_t dest)    { fmpq_canonicalise(dest); }
-
+/* check if den is zero */
+NUMBERS_INLINE int realRat_is_den_zero(const realRat_t x) { return fmpz_is_zero(realRat_denref(x)); }
 /* comparisons */
 NUMBERS_INLINE int  realRat_is_zero(const realRat_t x) { return fmpq_is_zero(x); }
 /* returns negative if x<y, 0 if x==y, positive if x>y */

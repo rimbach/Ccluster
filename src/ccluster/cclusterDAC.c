@@ -192,8 +192,10 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
             
         }
         
-        if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && !widthFlag )
-            &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) ) {
+        if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) &&
+            ( (!widthFlag)||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) ) )  )
+//             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) //this is DEPRECATED: pass eps = 1/0 instead
+        ) {
             
             if (metadatas_haveToCount(meta)){
                 start = clock();
@@ -276,20 +278,21 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
             }
         }
         
-        if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
-            metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
-            connCmp_list_push(qResults, ccur);
-            nbSolsAlreadyFound += connCmp_nSols(ccur);
-
-            if ((metadatas_useRealCoeffs(meta))&&(pushConjugFlag)){
-                /*compute the complex conjugate*/
-                metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
-                connCmp_list_push(qResults, ccurConj);
-                nbSolsAlreadyFound += connCmp_nSols(ccurConj);
-            }
-            
-        }
-        else if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) {
+//         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
+//             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
+//             connCmp_list_push(qResults, ccur);
+//             nbSolsAlreadyFound += connCmp_nSols(ccur);
+// 
+//             if ((metadatas_useRealCoeffs(meta))&&(pushConjugFlag)){
+//                 /*compute the complex conjugate*/
+//                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
+//                 connCmp_list_push(qResults, ccurConj);
+//                 nbSolsAlreadyFound += connCmp_nSols(ccurConj);
+//             }
+//             
+//         }
+//         else 
+        if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
             nbSolsAlreadyFound += connCmp_nSols(ccur);
@@ -453,7 +456,8 @@ void ccluster_DAC_first_interface_forJulia( connCmp_list_t qResults,
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     metadatas_init(meta, initialBox, strat, verb);
     
 //     ccluster_algo( qResults, initialBox, eps, cache, meta);
@@ -489,7 +493,8 @@ void ccluster_DAC_next_interface_forJulia( connCmp_list_t qResults,
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st>>7);
-    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
+//     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
+    strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<4), st&(0x1<<5), st&(0x1<<6), st&(0x1<<7), st>>8);
     metadatas_init(meta, initialBox, strat, verb);
     
 //     ccluster_algo( qResults, initialBox, eps, cache, meta);
