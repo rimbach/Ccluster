@@ -238,6 +238,32 @@ int cacheApp_root_bound_unsure ( realRat_t bound, cacheApp_t cache){
     return res;
 }
 
+void cacheApp_separation_bound ( realRat_t sepBound, cacheApp_t cache){
+    
+    fmpq_poly_canonicalise(compRat_poly_realref(cache->_poly));
+    /* compute the inverse of the norm of the poly*/
+    fmpz_t norm2;
+    fmpz_poly_t num;
+    fmpz_init(norm2);
+    fmpz_poly_init(num);
+    fmpq_poly_get_numerator(num, compRat_poly_realref(cache->_poly) );
+    fmpz_poly_2norm(norm2, num);
+    fmpz_set_ui(realRat_numref(sepBound), 1); 
+    fmpz_set(realRat_denref(sepBound), norm2);
+    
+    slong deg = cacheApp_getDegree ( cache );
+    ulong exp = deg;
+    if (exp%2==1)
+        exp = exp+1;
+    exp = (exp+2)/2;
+    fmpz_set_si(norm2, deg);
+    fmpz_pow_ui(norm2, norm2, exp);
+    fmpq_div_fmpz(sepBound, sepBound, norm2);
+    
+    fmpz_clear(norm2);
+    fmpz_poly_clear(num);
+}
+
 void cacheApp_clear ( cacheApp_t cache ) {
 
 #ifdef CCLUSTER_EXPERIMENTAL    

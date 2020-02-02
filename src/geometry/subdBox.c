@@ -197,6 +197,40 @@ void subdBox_quadrisect_with_compDsk( compBox_list_t res, const compBox_t b, con
     
 }
 
+void subdBox_bisect_real( compBox_list_t res, const compBox_t b ){
+    realRat_t shift, width;
+    realRat_init(shift);
+    realRat_init(width);
+    
+    compBox_ptr bE, bW;
+    bE = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
+    bW = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
+    compBox_init(bE);
+    compBox_init(bW);
+    
+    realRat_set_si(shift, 1, 4);
+    realRat_set_si(width, 1, 2);
+    realRat_mul(shift, shift, compBox_bwidthref(b));
+    realRat_mul(width, width, compBox_bwidthref(b));
+    
+    compBox_set_compRat_realRat_int(bE, compBox_centerref(b), width, b->nbMSol);
+    realRat_add( compRat_realref(compBox_centerref(bE)), compRat_realref(compBox_centerref(bE)), shift);
+    
+    compBox_set_compRat_realRat_int(bW, compBox_centerref(b), width, b->nbMSol);
+    realRat_sub( compRat_realref(compBox_centerref(bW)), compRat_realref(compBox_centerref(bW)), shift);
+    
+    /*printf("bE: "); compBox_print(bE); printf("\n");*/
+    /*printf("bW: "); compBox_print(bW); printf("\n");*/
+    
+    compBox_list_push(res, bW);
+    compBox_list_push(res, bE);
+    
+    
+    realRat_clear(shift);
+    realRat_clear(width);
+    
+}
+
 /* DEPRECATED 
 
 void subdBox_quadrisect_intersect_compDsk( compBox_list_t res, const compBox_t b, const compDsk_t d){

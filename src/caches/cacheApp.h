@@ -90,6 +90,8 @@ void cacheApp_root_bound ( realRat_t bound, cacheApp_t cache );
 /* return 0 if lcf vanishes */
 int cacheApp_root_bound_unsure ( realRat_t bound, cacheApp_t cache);
 
+void cacheApp_separation_bound ( realRat_t sepBound, cacheApp_t cache);
+
 #ifdef CCLUSTER_EXPERIMENTAL
 compApp_poly_ptr cacheApp_getDerivative ( cacheApp_t cache, slong prec, slong order );
 #endif
