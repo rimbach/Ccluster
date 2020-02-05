@@ -114,6 +114,14 @@ runnelsPS: runnelsPS.o
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
 
+mandelbrot_expe: mandelbrot_expe.o
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+	    	
+runnels_expe: runnels_expe.o
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+
 #==================================================
 # END 
 #==================================================

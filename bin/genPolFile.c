@@ -16,6 +16,9 @@ void Legendre_polynomial(realRat_poly_t dest, int degree);
 void randomDense_polynomial( realRat_poly_t dest, int degree, int bitsize);
 void randomSparse_polynomial( realRat_poly_t dest, int degree, int bitsize, int nbterms);
 
+void Mandelbrot_polynomial( realRat_poly_t dest, int iterations);
+void Runnels_polynomial( realRat_poly_t dest, int iterations);
+
 int main(int argc, char **argv){
     
     srand(time(NULL));
@@ -36,8 +39,8 @@ int main(int argc, char **argv){
 //         printf("usage: %s WilkMul     format degree filename\n", argv[0]);
 //         printf("usage: %s Spiral      format degree prec filename\n", argv[0]);
 //         printf("usage: %s NestedClusters format     iterations prec filename\n", argv[0]);
-//         printf("usage: %s Mandelbrot  format iterations filename \n", argv[0]);
-//         printf("usage: %s Runnels     format iterations filename \n", argv[0]);
+        printf("usage: %s Mandelbrot  format iterations filename \n", argv[0]);
+        printf("usage: %s Runnels     format iterations filename \n", argv[0]);
 //         printf("usage: %s Laguerre    format degree filename \n", argv[0]);
         printf("where format is 1 for ccluster, 2 for mpsolve and 3 for anewdsc\n");
         return -1;
@@ -60,8 +63,8 @@ int main(int argc, char **argv){
 //     char wilkMul[] = "WilkMul\0";
 //     char spiral[] = "Spiral\0";
 //     char cluster[] = "NestedClusters\0";
-//     char mandelbrot[] = "Mandelbrot\0";
-//     char runnels[] = "Runnels\0";
+    char Mandelbrot[] = "Mandelbrot\0";
+    char Runnels[] = "Runnels\0";
 //     char laguerre[] = "Laguerre\0";
     int format = 0;
     int degree = 0;
@@ -128,6 +131,14 @@ int main(int argc, char **argv){
         else{
             randomSparse_polynomial(p, degree, thirdArg, fourthArg);
         }
+    }
+    
+    if (strcmp(poly, Mandelbrot)==0) {
+        Mandelbrot_polynomial(p, degree);
+    }
+    
+    if (strcmp(poly, Runnels)==0) {
+        Runnels_polynomial(p, degree);
     }
 
     FILE * curFile;
@@ -381,4 +392,58 @@ void randomSparse_polynomial( realRat_poly_t dest, int degree, int bitsize, int 
             length++;
         }
     }
+}
+
+void Mandelbrot_polynomial( realRat_poly_t pmand, int iterations){
+    
+    realRat_poly_t pone, px;
+    realRat_poly_init(pone);
+    realRat_poly_init(px);
+    
+    realRat_poly_one(pmand);
+    realRat_poly_one(pone);
+    realRat_poly_zero(px);
+    realRat_poly_set_coeff_si_ui(px, 1, 1, 1);
+    
+    for (int i = 1; i<=iterations; i++) {
+        realRat_poly_pow(pmand, pmand, 2);
+        realRat_poly_mul(pmand, pmand, px);
+        realRat_poly_add(pmand, pmand, pone);
+    }
+    
+    realRat_poly_clear(pone);
+    realRat_poly_clear(px);    
+}
+
+void Runnels_polynomial( realRat_poly_t prun, int iterations){
+    
+    realRat_poly_t prunm1, prunm2, pone, px;
+    realRat_poly_init(prunm1);
+    realRat_poly_init(prunm2);
+    realRat_poly_init(pone);
+    realRat_poly_init(px);
+    
+    realRat_poly_zero(px);
+    realRat_poly_set_coeff_si_ui(px, 1, 1, 1);
+    
+    realRat_poly_one(prunm2);
+    realRat_poly_set(prunm1, px);
+    realRat_poly_one(prun);
+    
+    for (int i = 2; i<=iterations; i++) {
+        
+        realRat_poly_pow(prunm2, prunm2, 4);
+        realRat_poly_mul(prunm2, prunm2, px);
+        
+        realRat_poly_pow(prun, prunm1, 2);
+        realRat_poly_add(prun, prun, prunm2);
+        
+        realRat_poly_set(prunm2, prunm1);
+        realRat_poly_set(prunm1, prun);
+    }
+     
+    realRat_poly_clear(prunm1);
+    realRat_poly_clear(prunm2);
+    realRat_poly_clear(pone);
+    realRat_poly_clear(px);
 }

@@ -207,7 +207,7 @@ int main(int argc, char **argv){
         
 //         ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
 //         ccluster_interface_func_eval( getApprox, evaluateRunnelsFast, bInit, eps, st, nbthreads, verbosity);
-        ccluster_expe_global_interface_func_eval( getApprox, evaluateMandelbrotFast, eps, st, nbthreads, verbosity);
+        ccluster_expe_global_interface_func_eval( getApprox, evaluateRunnelsFast, eps, st, nbthreads, verbosity);
     }
     
     realRat_poly_clear(prun);
