@@ -236,6 +236,14 @@ int ccluster_expe_global_interface_func( void(*func)(compApp_poly_t, slong),
                                           char * stratstr,
                                           int nbThreads,
                                           int verb);
+
+int ccluster_expe_global_interface_func_eval( void(*func)(compApp_poly_t, slong), 
+                                              void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
+                                          const realRat_t eps, 
+                                          char * stratstr,
+                                          int nbThreads,
+                                          int verb);
+
 /* implemented in ccluster_expe.c */
 int ccluster_expe_algo_global( connCmp_list_t qResults, 
                                 const compBox_t initialBox, 

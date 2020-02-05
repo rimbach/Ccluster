@@ -14,6 +14,7 @@
 #include "geometry/compBox.h"
 #include "numbers/realRat.h"
 #define GLOBAL_STR_NAME "global"
+#define INFINITY_STR_NAME "infinity"
 
 int scan_degree( char * argv, int * target) {
     return sscanf(argv, "%d", target);
@@ -61,6 +62,14 @@ int scan_initialBox( char * argv, compBox_t target ){
 }
 
 int scan_epsilon( char * argv, realRat_t target ){
+    
+    if ( (strcmp( argv, INFINITY_STR_NAME ) == 0)
+         ||(strcmp( argv, "inf" ) == 0) 
+         ||(strcmp( argv, "+inf" ) == 0) ) {
+        realRat_set_si(target, 1,0);
+        return 2;
+    }
+    
     char * tok=NULL;
     char temp[1000];
     char epsN[100]="1", epsD[100]="100";
@@ -89,8 +98,8 @@ int scan_epsilon( char * argv, realRat_t target ){
         
 }
 
-int scan_strategy(char * argv, int * target ) {
-    return sscanf(argv, "%d", target);
+int scan_strategy(char * argv, char * target ) {
+    return sscanf(argv, "%s", target);
 }
 
 int scan_nbthreads(char * argv, int * target ) {

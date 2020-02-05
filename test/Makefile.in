@@ -19,6 +19,7 @@ build: mignotte mignotteMul mignotteGen \
     mandelbrot laguerre\
     mandelbrotPS mignottePS\
     runnels runnelsPS\
+    mandelbrot_expe runnels_expe
 
 #==================================================
 # HOUSEKEEPING 
