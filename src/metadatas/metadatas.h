@@ -413,6 +413,9 @@ METADATAS_INLINE void metadatas_add_time_CclusAl(metadatas_t m, double d){
 // }
 
 /* printing */
+char * compBox_sprint_for_stat(char * out, const compBox_t x);
+char * realRat_sprint_for_stat(char * out, const realRat_t x);
+
 int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps);
 int metadatas_print(metadatas_t meta, const realRat_t eps);
 

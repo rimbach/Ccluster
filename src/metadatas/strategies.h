@@ -103,6 +103,8 @@ void strategies_clear(strategies_t strat);
 void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads);
     
 METADATAS_INLINE int strategies_useNewton         ( const strategies_t strat ) { return strat->_useNewton         ; } 
+METADATAS_INLINE void strategies_set_useNewton         ( strategies_t strat, int flag ) { strat->_useNewton = flag; } 
+
 METADATAS_INLINE int strategies_useTstarOptim     ( const strategies_t strat ) { return strat->_useTstarOptim     ; }
 METADATAS_INLINE int strategies_usePredictPrec    ( const strategies_t strat ) { return strat->_usePredictPrec    ; }
 METADATAS_INLINE int strategies_useAnticipate     ( const strategies_t strat ) { return strat->_useAnticipate     ; }

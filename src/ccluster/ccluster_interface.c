@@ -159,12 +159,13 @@ void ccluster_interface_func_eval( void(*func)(compApp_poly_t, slong),
 }
 
 /* experimental version */
-void ccluster_expe_global_interface_func( void(*func)(compApp_poly_t, slong), 
+int ccluster_expe_global_interface_func( void(*func)(compApp_poly_t, slong), 
                                           const realRat_t eps, 
                                           char * stratstr,
                                           int nbThreads,
                                           int verb){
 
+    int res = 0;
     cacheApp_t cache;
     strategies_t strat;
     metadatas_t meta;
@@ -191,6 +192,7 @@ void ccluster_expe_global_interface_func( void(*func)(compApp_poly_t, slong),
     
     connCmp_list_init(qRes);
     strategies_set_powerSums( strat, 1 );
+    strategies_set_useNewton( strat, 0 );
     metadatas_init(meta, initialBox, strat, verb);
     
     /* initialize power sums */
@@ -200,12 +202,20 @@ void ccluster_expe_global_interface_func( void(*func)(compApp_poly_t, slong),
 // //     if ( metadatas_pwSuTest(meta) )
 //     ccluster_initialize_pwSuTest(NULL, meta, cache, verb);
 //     if (metadatas_usePowerSums(meta))
-        metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 2, verb );
+        metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 4, 3, 3, verb );
     
-    ccluster_expe_algo_global( qRes, initialBox, eps, cache, meta);
-    
+    res = ccluster_expe_algo_global( qRes, initialBox, eps, cache, meta);
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    
+    /*check if number of sols is equal to degree*/
+    if ( metadatas_getNbSolutions(meta) != (int) cacheApp_getDegree(cache) ){
+        res = 2;
+        if (metadatas_getVerbo(meta)>=2) {
+            printf("FAILURE: %d solutions found, degree of input pol: %ld\n", metadatas_getNbSolutions(meta), cacheApp_getDegree(cache));
+        }
+    }
+    
+    metadatas_expe_fprint(stdout, res, meta, eps);
     
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qRes, meta);
@@ -216,6 +226,8 @@ void ccluster_expe_global_interface_func( void(*func)(compApp_poly_t, slong),
     metadatas_clear(meta);
     connCmp_list_clear(qRes);
     compBox_clear(initialBox);
+    
+    return res;
 }
 
 // void ccluster_forJulia_func( connCmp_list_t qResults, 
