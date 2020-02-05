@@ -663,13 +663,13 @@ int metadatas_expe_fprint(FILE * file, int res, metadatas_t meta, const realRat_
    
     r = fprintf(file, " -------------------Output:   ----------------------------------------\n");
     if (res==0)
-    r = fprintf(file, "|%-39s %14s %14s|\n", "success:",                            "YES",      " " );
+    r = fprintf(file, "|%-39s %14s %14s|\n", "failure:",                            "0",      " " );
     else if (res==1)
-    r = fprintf(file, "|%-39s %14s %14s|\n", "success:",                            "NO 1",      " " );
+    r = fprintf(file, "|%-39s %14s %14s|\n", "failure:",                            "1 1",      " " );
     else if (res==2)
-    r = fprintf(file, "|%-39s %14s %14s|\n", "success:",                            "NO 2",      " " ); 
+    r = fprintf(file, "|%-39s %14s %14s|\n", "failure:",                            "1 2",      " " ); 
     else if (res==3)
-    r = fprintf(file, "|%-39s %14s %14s|\n", "success:",                            "NO 3",      " " );
+    r = fprintf(file, "|%-39s %14s %14s|\n", "failure:",                            "1 3",      " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "number of clusters:",                 metadatas_getNbValidated(meta),      " " );
     r = fprintf(file, "|%-39s %14d %14s|\n", "number of solutions:",                metadatas_getNbSolutions(meta),      " " );
     r = fprintf(file, " -------------------Stats:    ----------------------------------------\n");
