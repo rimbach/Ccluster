@@ -240,6 +240,8 @@ int cacheApp_root_bound_unsure ( realRat_t bound, cacheApp_t cache){
 
 void cacheApp_separation_bound ( realRat_t sepBound, cacheApp_t cache){
     
+    slong deg = cacheApp_getDegree ( cache );
+    
     fmpq_poly_canonicalise(compRat_poly_realref(cache->_poly));
     /* compute the inverse of the norm of the poly*/
     fmpz_t norm2;
@@ -248,10 +250,10 @@ void cacheApp_separation_bound ( realRat_t sepBound, cacheApp_t cache){
     fmpz_poly_init(num);
     fmpq_poly_get_numerator(num, compRat_poly_realref(cache->_poly) );
     fmpz_poly_2norm(norm2, num);
+    fmpz_pow_ui(norm2, norm2, deg-1);
     fmpz_set_ui(realRat_numref(sepBound), 1); 
     fmpz_set(realRat_denref(sepBound), norm2);
-    
-    slong deg = cacheApp_getDegree ( cache );
+//     printf("norm: "); fmpz_print(norm2); printf("\n");
     ulong exp = deg;
     if (exp%2==1)
         exp = exp+1;

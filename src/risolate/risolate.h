@@ -92,6 +92,9 @@ void risolate_interface_poly( const realRat_poly_t poly,
                               int nbThreads,
                               int verb);
 
+void connCmp_risolate_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta);
+
+void connCmp_list_risolate_print_for_results(FILE * f, const connCmp_list_t l, metadatas_t meta);
 #ifdef __cplusplus
 }
 #endif

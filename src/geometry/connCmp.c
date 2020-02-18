@@ -327,6 +327,21 @@ void connCmp_componentBox( compBox_t res, const connCmp_t cc, const compBox_t in
     compRat_clear(RightBottomBordCb);
 }
 
+void connCmp_risolate_componentBox( compBox_t res, const connCmp_t cc, const compBox_t initialBox){
+    
+    realRat_ptr centerRe = compRat_realref(compBox_centerref(res));
+    realRat_ptr centerIm = compRat_imagref(compBox_centerref(res));
+    realRat_ptr width    = compBox_bwidthref(res);
+    
+    realRat_set_si(centerIm,0,1);
+    realRat_set_si(centerRe,1,2);
+    realRat_sub( width, connCmp_supReref(cc), connCmp_infReref(cc));
+    realRat_mul( centerRe, centerRe, width );
+    realRat_add( centerRe, connCmp_infReref(cc), centerRe);
+    
+    
+}
+
 int connCmp_is_strictly_in_compBox( const connCmp_t cc, const compBox_t b ){
     
     compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (cc) );
@@ -432,6 +447,16 @@ void connCmp_find_point_outside_connCmp( compRat_t res, const connCmp_t cc, cons
     realRat_clear(halfwidth);
     realRat_clear(halfwidthenlarged);
     compBox_clear(componentBox);
+}
+
+void connCmp_risolate_find_point_outside_connCmp( compRat_t res, const connCmp_t cc, const compBox_t initialBox ){
+    
+    realRat_ptr Rres = compRat_realref(res);
+    realRat_ptr Ires = compRat_imagref(res);
+    realRat_set_si(Ires, 0,0);
+    realRat_sub(Rres, connCmp_supReref(cc), connCmp_infReref(cc));
+    realRat_sub(Rres, connCmp_infReref(cc), Rres);
+    
 }
 
 /* RealCoeffs */

@@ -340,6 +340,144 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
     return res;
 }
 
+newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
+                                           connCmp_t CC,
+                                           cacheApp_t cache, 
+                                           const compRat_t c,
+                                           slong prec, 
+                                           metadatas_t meta) {
+    
+//     chronos_tic_Newtons(metadatas_chronref(meta));
+    /* printf("Newton: begin --------------------------- \n");*/
+    newton_res res;
+    if (metadatas_usePredictPrec(meta))
+        res.appPrec = prec;
+    else
+        res.appPrec = CCLUSTER_DEFAULT_PREC;
+    
+    realRat_t fourcc, two, nwidth;
+    compDsk_t ndisk;
+    compApp_t fcenter, fpcenter, iteration;
+    compBox_list_ptr ltemp;
+    compBox_ptr btemp;
+    realRat_init(fourcc);
+    realRat_init(two);
+    realRat_init(nwidth);
+    compDsk_init(ndisk);
+    compApp_init(fcenter);
+    compApp_init(fpcenter);
+    compApp_init(iteration);
+    
+    realRat_set_si(two,2,1);
+    connCmp_diameter(fourcc, CC);
+    realRat_mul(fourcc, fourcc, two);
+    
+//     slong precsave = prec;
+    
+    res = newton_first_condition( fcenter, fpcenter, cache, c, fourcc, res.appPrec, meta);
+//     printf("Newton: firstCondOk (nflag: %d) prec avant: %d, prec apres: %d \n", res.nflag, prec, res.appPrec);
+    
+    if (res.nflag){
+//         precsave = res.appPrec;
+        res = newton_iteration( iteration, cache, CC, c, fcenter, fpcenter, res.appPrec, meta);
+        compApp_get_compRat( compDsk_centerref(ndisk), iteration);
+        realRat_set_si(compDsk_radiusref(ndisk),1,8);
+        realRat_div_fmpz(compDsk_radiusref(ndisk), compDsk_radiusref(ndisk), connCmp_nwSpdref(CC));
+        realRat_mul(compDsk_radiusref(ndisk), compDsk_radiusref(ndisk), connCmp_widthref(CC));
+        res.nflag = connCmp_intersection_has_non_empty_interior_compDsk(CC, ndisk);
+//         res.appPrec = precsave;
+    }
+    
+    realRat_set_si(compRat_imagref( compDsk_centerref(ndisk)), 0,1);
+//     printf("Newton: iterationOK (nflag: %d) prec avant: %d, prec apres: %d \n", res.nflag, prec, res.appPrec);
+    
+    if (res.nflag) {
+//         precsave = res.appPrec;
+//         if (res.appPrec == prec) res.appPrec *=2;
+        
+        /*improvement: if one solution, try to validate with interval newton*/
+        /* to avoid a costly taylor-shift in the tstar tes                  */ 
+        newton_res nres;
+        nres.nflag = 0;
+        if (connCmp_nSolsref(CC)==1) {
+//             printf("---the CC contains one solution: try to validate with interval newton\n");
+            nres = newton_interval( ndisk, cache, res.appPrec, meta);
+        }
+        
+        if (nres.nflag==0) {
+//             printf("failed...\n");
+            slong depth = connCmp_getDepth(CC, metadatas_initBref(meta));
+            tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
+            res.appPrec = tres.appPrec;
+            res.nflag = (tres.nbOfSol == connCmp_nSolsref(CC));
+        
+        }
+//         printf("number of sols in ndisk from pellet test: %d\n\n", tres.nbOfSol);
+        /* end improvement */
+        
+    }
+    
+//     printf("Newton: tstarOk     (nflag: %d) prec avant: %d, prec apres: %d \n", res.nflag, prec, res.appPrec);
+    if (res.nflag) {
+        realRat_set_si(nwidth, 1,2);
+        realRat_div_fmpz(nwidth, nwidth, connCmp_nwSpdref(CC));
+        realRat_mul(nwidth, nwidth, connCmp_widthref(CC));
+        
+        ltemp = connCmp_boxesref(CC);
+        /*old version with successive quadrisections and intersections with ndisk*/
+        /*while (realRat_cmp( compBox_bwidthref(compBox_list_first(ltemp)), nwidth)>0){ */
+        /*    btemp = compBox_list_pop(ltemp);                                          */
+        /*    subdBox_quadrisect_intersect_compDsk(ltemp, btemp, ndisk);                */
+        /*    compBox_clear(btemp);                                                     */
+        /*    ccluster_free(btemp); */                                 /*comment it for julia... */
+        /*}                                                                             */
+        /*new version: we directly compute the boxes of width nwidth intersectiong ndisk*/
+        compBox_list_t ltemp2;
+        compBox_list_init(ltemp2);
+        
+        while (compBox_list_get_size(ltemp)>0){
+            btemp = compBox_list_pop(ltemp);
+            subdBox_risolate_bisect_with_compDsk( ltemp2, btemp, ndisk, nwidth);
+            compBox_clear(btemp);
+            ccluster_free(btemp); /*comment it for julia...*/
+        }
+        compBox_list_swap(ltemp, ltemp2);
+        compBox_list_clear(ltemp2);
+        
+        /*printf("length of list: %d\n", compBox_list_get_size(ltemp));*/
+        /*compBox_list_print(ltemp); printf("\n");                     */
+        
+        
+        /* printf("Newton: bisectOk (nflag: %d) (nbboxes: %d)--------------------------- \n", res.nflag, compBox_list_get_size(ltemp));*/
+        
+        btemp = compBox_list_pop(ltemp);
+        realRat_set(connCmp_widthref(nCC), compBox_bwidthref(btemp));
+        connCmp_insert_compBox(nCC, btemp);
+        while (!compBox_list_is_empty(ltemp))
+            connCmp_insert_compBox(nCC, compBox_list_pop(ltemp));
+        connCmp_nSols(nCC) = connCmp_nSols(CC);
+        fmpz_set(connCmp_nwSpdref(nCC), connCmp_nwSpdref(CC));
+        /* test */
+        connCmp_isSep(nCC) = connCmp_isSep(CC);
+        /* end test */
+        /*connCmp_appPrref(nCC) = res.appPrec;*/ /*adjust the precision in the main loop*/
+        
+    }
+    /* printf("Newton: new CC Ok (nflag: %d)--------------------------- \n", res.nflag);*/
+    
+    realRat_clear(fourcc);
+    realRat_clear(two);
+    realRat_clear(nwidth);
+    compDsk_clear(ndisk);
+    compApp_clear(fcenter);
+    compApp_clear(fpcenter);
+    compApp_clear(iteration);
+    
+//     chronos_toc_Newtons(metadatas_chronref(meta));
+    
+    return res;
+}
+
 newton_res newton_first_condition_forjulia( cacheApp_t cache, const realRat_t cRe, const realRat_t cIm, const realRat_t d, slong prec, metadatas_t meta){
     
     compRat_t temp;

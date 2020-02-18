@@ -64,6 +64,13 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
                                   slong prec, 
                                   metadatas_t meta);
 
+newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
+                                           connCmp_t CC,
+                                           cacheApp_t cache, 
+                                           const compRat_t c,
+                                           slong prec, 
+                                           metadatas_t meta);
+
 /* for julia: DEPRECATED */
 /*
 newton_res newton_first_condition_forjulia( cacheApp_t cache, const realRat_t cRe, const realRat_t cIm, const realRat_t d, slong prec, metadatas_t meta);

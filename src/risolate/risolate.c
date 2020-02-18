@@ -91,8 +91,7 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
     
     while (!connCmp_is_empty(cc)) {
         btemp = connCmp_pop(cc);
-//         subdBox_quadrisect( subBoxes, btemp );
-        subdBox_bisect_real( subBoxes, btemp );
+        subdBox_risolate_bisect( subBoxes, btemp );
         compBox_clear(btemp);
         ccluster_free(btemp);
     }
@@ -203,6 +202,7 @@ void risolate_main_loop( connCmp_list_t qResults,
     int separationFlag;
     int widthFlag;
     int compactFlag;
+    int sepBoundFlag;
     
     slong prec, depth;
     tstar_res resTstar;
@@ -224,18 +224,7 @@ void risolate_main_loop( connCmp_list_t qResults,
     
     connCmp_ptr ccur;
     
-    realRat_t sepBound;
-    realRat_init(sepBound);
-    cacheApp_separation_bound ( sepBound, cache);
-    printf("separation bound: "); realRat_print(sepBound); printf("\n");
-    
     clock_t start=clock();
-    
-//     /* Real Coeff */
-//     connCmp_ptr ccurConjClo, ccurConj;
-//     ccurConjClo = NULL;
-//     ccurConj = NULL;
-//     int pushConjugFlag = 0;
     
     realRat_set_si(four, 4, 1);
     realRat_set_si(three, 3, 1);
@@ -250,25 +239,7 @@ void risolate_main_loop( connCmp_list_t qResults,
         
         ccur = connCmp_list_pop(qMainLoop);
         
-//         /* Real Coeff */
-//         pushConjugFlag = 0;
-//         if (metadatas_realCoeffs(meta)){
-//             /* test if the component contains the real line in its interior */
-// //             printf("number of boxes before conjugate closure: %d\n", connCmp_nb_boxes(ccur));
-//             if (!connCmp_is_imaginary_positive(ccur)) {
-// //                 printf("number of boxes before conjugate closure: %d\n", connCmp_nb_boxes(ccur));
-//                 ccurConjClo = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
-//                 connCmp_init( ccurConjClo );
-//                 connCmp_set_conjugate_closure(ccurConjClo, ccur, metadatas_initBref(meta));
-//                 
-//                 connCmp_clear(ccur);
-//                 ccluster_free(ccur);
-//                 ccur = ccurConjClo;
-// //                 printf("number of boxes after  conjugate closure: %d\n", connCmp_nb_boxes(ccur));
-//             }
-//         }
-        
-        connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
+        connCmp_risolate_componentBox(componentBox, ccur, metadatas_initBref(meta));
         compBox_get_containing_dsk(ccDisk, componentBox);
         compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
         realRat_mul(threeWidth, three, connCmp_widthref(ccur));
@@ -276,32 +247,30 @@ void risolate_main_loop( connCmp_list_t qResults,
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
-        
-//         /* Real Coeff */
-//         if ( (separationFlag)&&(metadatas_realCoeffs(meta)) ) {
-//             if (connCmp_is_imaginary_positive(ccur)) {
-//                 /* check if ccur is separated from its complex conjugate */
-//                 realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
-//                 separationFlag = separationFlag&&(!compBox_intersection_is_not_empty_compDsk ( componentBox, fourCCDisk));
-//                 realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
-//             }
-//         }
       
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
         
+        sepBoundFlag   = (realRat_cmp( compBox_bwidthref(componentBox), metadatas_getSepBound(meta))<=0);
+        
         if (metadatas_getVerbo(meta)>3) {
             printf("---depth: %d\n", (int) depth);
-            printf("------component Box:"); compBox_print(componentBox); printf("\n");
-            printf("------separation Flag: %d\n", separationFlag);
-            printf("------widthFlag: %d\n", widthFlag); 
-            printf("------compactFlag: %d\n", compactFlag); 
+            printf("------component Box:       "); compBox_print(componentBox); printf("\n");
+            printf("------nb of roots:         %d\n", connCmp_nSolsref(ccur));
+            printf("------last newton success: %d\n", connCmp_newSuref(ccur));
+            printf("------separation Flag:     %d\n", separationFlag);
+            printf("------widthFlag:           %d\n", widthFlag); 
+            printf("------compactFlag:         %d\n", compactFlag);
+            printf("------sepBoundFlag:        %d\n", sepBoundFlag);
+            compBox_list_print( connCmp_boxesref(ccur) );
+            printf("\n");
         }
         
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
 //         if ((separationFlag)) {
 //             printf("depth: %d, connCmp_nSolsref(ccur): %d, prec: %d\n", (int) depth, (int) connCmp_nSolsref(ccur), (int) prec);
-            if (connCmp_nSolsref(ccur)==-1){
+//             
+//             if (connCmp_nSolsref(ccur)==-1){
                 
                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
@@ -309,14 +278,18 @@ void risolate_main_loop( connCmp_list_t qResults,
 //                     printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));
 //                 ???
                 prec = resTstar.appPrec;
-            }
+//             }
+                
 //             printf("validate: prec avant: %d prec apres: %d\n", (int) prec, (int) resTstar.appPrec);
 //             ???
 //             prec = resTstar.appPrec;
         }
         
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
-             ( (!widthFlag)||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) ) )  )
+             ( (!widthFlag) 
+               ||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) )
+               ||( !sepBoundFlag && (connCmp_nSols(ccur)>1))   
+            )  )
 //             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) 
         ) {
         
@@ -327,14 +300,14 @@ void risolate_main_loop( connCmp_list_t qResults,
             if (connCmp_nSols(ccur)==1) 
                 compRat_set(initPoint, compBox_centerref(componentBox));
             else
-                connCmp_find_point_outside_connCmp( initPoint, ccur, metadatas_initBref(meta) );
+                connCmp_risolate_find_point_outside_connCmp( initPoint, ccur, metadatas_initBref(meta) );
         
             connCmp_ptr nCC;
             nCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
             connCmp_init(nCC);
-            resNewton = newton_newton_connCmp( nCC, ccur, cache, initPoint, prec, meta);
+            resNewton = newton_risolate_newton_connCmp( nCC, ccur, cache, initPoint, prec, meta);
 
-//             printf("+++depth: %d, connCmp_nSolsref(ccur): %d, res_newton: %d \n", depth, connCmp_nSols(ccur), resNewton.nflag);
+//             printf("+++depth: %ld, connCmp_nSolsref(ccur): %d, res_newton: %d \n", depth, connCmp_nSols(ccur), resNewton.nflag);
             if (resNewton.nflag) {
                 connCmp_clear(ccur);
                 ccluster_free(ccur);
@@ -354,79 +327,14 @@ void risolate_main_loop( connCmp_list_t qResults,
             }
         }
         
-//         /* Real Coeff */
-//         if (metadatas_realCoeffs(meta)
-//             && ( (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag)
-//                ||( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) ) ) {
-//             
-//             if (connCmp_is_imaginary_positive(ccur)) {
-//                 pushConjugFlag = 1;
-//                 /*compute the complex conjugate*/
-//                 ccurConj = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
-//                 connCmp_init( ccurConj );
-//                 connCmp_set_conjugate(ccurConj, ccur);
-//                 
-//                 /* test if initial box is symetric relatively to real axe */
-//                 if ( !realRat_is_zero(compRat_imagref(compBox_centerref(metadatas_initBref(meta)))) ) {
-//                     /* test if the cc intersects initial box */
-//                     if ( connCmp_intersection_is_not_empty(ccurConj, metadatas_initBref(meta)) ) {
-//                         /* test if the cc is confined */
-// //                         if (connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
-// //                             pushConjugFlag = 1;
-// //                         }
-// //                         else {
-//                         if (!connCmp_is_confined(ccurConj, metadatas_initBref(meta))) {
-//                             pushConjugFlag = 0;
-//                             separationFlag = 0; 
-//                           /* delete ccurConj*/
-//                             connCmp_clear(ccurConj);
-//                             ccluster_free(ccurConj);
-//                         }
-//                     }
-//                     else {
-//                         pushConjugFlag = 0;
-//                         /* delete ccurConj*/
-//                         connCmp_clear(ccurConj);
-//                         ccluster_free(ccurConj);
-//                     }
-//                 } 
-//             }
-//             else {
-//                 /* test if initial box is symetric relatively to real axe */
-//                 if ( !realRat_is_zero(compRat_imagref(compBox_centerref(metadatas_initBref(meta)))) ) {
-//                     /* test if the cc is confined and intersects initial box */
-//                     if (! ( connCmp_is_confined(ccur, metadatas_initBref(meta)) 
-//                          && connCmp_intersection_is_not_empty(ccur, metadatas_initBref(meta)) ) ){
-// //                         /* bisect ccur until this hold */
-//                         separationFlag = 0;
-//                     }
-//                 }
-//             }
-//         }
-        
-//         if (metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) && separationFlag){
-//             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
-//             connCmp_list_push(qResults, ccur);
-// //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
-// //             /* Real Coeff */
-// //             if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
-// //                 /*compute the complex conjugate*/
-// //                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
-// //                 connCmp_list_push(qResults, ccurConj);
-// //             }
-//         }
-//         else 
-        if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) ) {
+        if ( (connCmp_nSols(ccur)>0) && (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) 
+             && separationFlag && widthFlag && compactFlag
+             && ( sepBoundFlag || (connCmp_nSols(ccur)==1)) ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
-//             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
-//             printf("metadatas_realCoeffs(meta): %d, pushConjugFlag: %d\n", metadatas_realCoeffs(meta), pushConjugFlag);
-//             /* Real Coeff */
-//             if ((metadatas_realCoeffs(meta))&&(pushConjugFlag)){
-//                 /*compute the complex conjugate*/
-//                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
-//                 connCmp_list_push(qResults, ccurConj);
-//             }
+            if (metadatas_getVerbo(meta)>3) {
+                printf("------validated with %d roots\n", connCmp_nSols(ccur));
+            }
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
             connCmp_list_insert_sorted(qMainLoop, ccur);
@@ -466,7 +374,6 @@ void risolate_main_loop( connCmp_list_t qResults,
     compRat_clear(initPoint);
     connCmp_list_clear(ltemp);
     
-    realRat_clear(sepBound);
 }
 
 void risolate_algo( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
@@ -546,4 +453,48 @@ void risolate_algo_global( connCmp_list_t qResults, const compBox_t initialBox, 
     
 //     chronos_toc_CclusAl(metadatas_chronref(meta));
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
+}
+
+void connCmp_risolate_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta){
+    
+    compBox_t containingBox;
+    compBox_init(containingBox);
+    compDsk_t containingDisk;
+    compDsk_init(containingDisk);
+    
+    fprintf(f, "--cluster with %5d sols: ", connCmp_nSols(c));
+    
+    connCmp_risolate_componentBox( containingBox, c, metadatas_initBref(meta));
+    compBox_get_containing_dsk( containingDisk, containingBox);
+    
+    slong d = fmpz_clog_ui(realRat_denref(compDsk_radiusref(containingDisk)),10) - fmpz_clog_ui(realRat_numref(compDsk_radiusref(containingDisk)),10); 
+    slong p = fmpz_clog_ui(realRat_denref(compDsk_radiusref(containingDisk)),2) - fmpz_clog_ui(realRat_numref(compDsk_radiusref(containingDisk)),2)+50; 
+    
+    realApp_t cRe, rad;
+    realApp_init(cRe);
+    realApp_init(rad);
+    
+    realApp_set_realRat(cRe, compRat_realref(compDsk_centerref(containingDisk)), p);
+    realApp_set_realRat(rad, compDsk_radiusref(containingDisk), p);
+    
+    fprintf(f, "center: ");
+    realApp_fprintn(f, cRe, d, ARB_STR_NO_RADIUS);
+    fprintf(f, " radius: ");
+    realApp_fprintn(f, rad, 5, ARB_STR_NO_RADIUS);
+    
+    compBox_init(containingBox);
+    compDsk_init(containingDisk);
+    realApp_clear(cRe);
+//     realApp_clear(cIm);
+    realApp_clear(rad);
+}
+
+void connCmp_list_risolate_print_for_results(FILE * f, const connCmp_list_t l, metadatas_t meta){
+    connCmp_list_iterator it = connCmp_list_begin(l);
+    
+    while (it!=connCmp_list_end() ) {
+        connCmp_risolate_print_for_results(f, connCmp_list_elmt(it), meta);
+        it = connCmp_list_next(it);
+        fprintf(f, "\n");
+    }
 }

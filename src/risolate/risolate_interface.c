@@ -24,31 +24,46 @@ void risolate_interface_poly( const realRat_poly_t poly,
     metadatas_t meta;
     connCmp_list_t qRes;
     
+    compBox_t initBox;
+    compBox_init(initBox);
+    compBox_set(initBox, initialBox);
+    /* force imaginary part of initial box to be centered in 0 */
+    realRat_set_si(compRat_imagref(compBox_centerref(initBox)),0,1);
+    
+    
     cacheApp_init_realRat_poly ( cache, poly);
     strategies_init(strat);
     
     strategies_set_str( strat, stratstr, nbThreads );
-//     /* automatically set realCoeffs */
-//     if (cacheApp_is_real(cache)==0
-//         || compBox_contains_real_line_in_interior(initialBox)==0 )
-//         strategies_set_realCoeffs(strat, 0);
     
-    metadatas_init(meta, initialBox, strat, verb);
+    metadatas_init(meta, initBox, strat, verb);
     
     /* initialize power sums */
 //     if (metadatas_usePowerSums(meta))
 //         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
+
+    /* separation bound */
+    realRat_t sepBound;
+    realRat_init(sepBound);
+    cacheApp_separation_bound ( sepBound, cache);
+    if (verb>=3) {
+        printf("separation bound: "); realRat_print(sepBound); printf("\n");
+    }
+    metadatas_setSepBound(meta, sepBound);
     
     connCmp_list_init(qRes);
     
-    risolate_algo( qRes, initialBox, eps, cache, meta);
+    risolate_algo( qRes, initBox, eps, cache, meta);
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+//     metadatas_fprint(stdout, meta, eps);
+    metadatas_risolate_fprint(stdout, meta, eps);
     
     if (verb>=3) {
-        connCmp_list_print_for_results(stdout, qRes, meta);
+        connCmp_list_risolate_print_for_results(stdout, qRes, meta);
     }
     
+    compBox_clear(initBox);
+    realRat_clear(sepBound);
     cacheApp_clear(cache);
     strategies_clear(strat);
     metadatas_clear(meta);
@@ -80,10 +95,6 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
     strategies_set_str( strat, stratstr, nbThreads );
-//     /* automaticly set realCoeffs */
-//     if (cacheApp_is_real(cache)==0
-//         || compBox_contains_real_line_in_interior(initialBox)==0 )
-//         strategies_set_realCoeffs(strat, 0);
     
     connCmp_list_init(qRes);
     
@@ -92,15 +103,26 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
 //     if (metadatas_usePowerSums(meta))
 //         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
+    /* separation bound */
+    realRat_t sepBound;
+    realRat_init(sepBound);
+    cacheApp_separation_bound ( sepBound, cache);
+    if (verb>=3) {
+        printf("separation bound: "); realRat_print(sepBound); printf("\n");
+    }
+    metadatas_setSepBound(meta, sepBound);
+    
     risolate_algo_global( qRes, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+//     metadatas_fprint(stdout, meta, eps);
+    metadatas_risolate_fprint(stdout, meta, eps);
     
     if (verb>=3) {
-        connCmp_list_print_for_results(stdout, qRes, meta);
+        connCmp_list_risolate_print_for_results(stdout, qRes, meta);
     }
     
+    realRat_clear(sepBound);
     cacheApp_clear(cache);
     strategies_clear(strat);
     metadatas_clear(meta);
