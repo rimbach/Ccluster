@@ -89,13 +89,34 @@ int scan_epsilon( char * argv, realRat_t target ){
     else {
         sprintf(epsD, "%s", tok);
         if (realRat_set_str(target, epsN, epsD, 10)==-1){
-            printf("error in parsing epsilon box! %s %s\n", epsN, epsD);
+            printf("error in parsing epsilon ! %s %s\n", epsN, epsD);
             return 0;
         }
     }
     
     return 1;
         
+}
+
+int scan_output( char * argv, int * target ) {
+    
+    if ( (strcmp( argv, "g" ) == 0)
+         ||(strcmp( argv, "G" ) == 0) 
+         ||(strcmp( argv, "Gnuplot" ) == 0)
+         ||(strcmp( argv, "gnuplot" ) == 0) ) {
+        *target = -2;
+        return 1;
+    } else if ( (strcmp( argv, "r" ) == 0)
+         ||(strcmp( argv, "R" ) == 0) 
+         ||(strcmp( argv, "rational" ) == 0)
+         ||(strcmp( argv, "Rational" ) == 0) ) {
+        *target = -1;
+        return 1;
+    }
+    else {
+        sscanf(argv, "%d", target);
+        return 1;
+    }
 }
 
 int scan_strategy(char * argv, char * target ) {

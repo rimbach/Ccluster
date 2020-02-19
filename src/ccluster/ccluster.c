@@ -835,6 +835,77 @@ void connCmp_list_print_for_results(FILE * f, const connCmp_list_t l, metadatas_
     }
 }
 
+void connCmp_print_for_results_withOutput(FILE * f, const connCmp_t c, int output, metadatas_t meta){
+    
+    compBox_t containingBox;
+    compBox_init(containingBox);
+    compDsk_t containingDisk;
+    compDsk_init(containingDisk);
+    
+//     int lensols = (int) log10(metadatas_getNbSolutions(meta)) +1;
+//     int lens = (int) log10(connCmp_nSols(c)) +1;
+//     char temp[100], temp2[100];
+//     sprintf(temp, "%d", connCmp_nSols(c));
+//     for (int i = lens; i<=lensols; i++) sprintf(temp2, " ");
+//     fprintf(f, "--cluster with %s sols: ", temp);
+    if (connCmp_nSols(c) <= (10^6)-1)
+        fprintf(f, "--cluster with %5d sols: ", connCmp_nSols(c));
+    else
+        fprintf(f, "--cluster with %d sols: ", connCmp_nSols(c));
+    
+    connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
+    compBox_get_containing_dsk( containingDisk, containingBox);
+    
+    if (output == -1) { /* rational output */
+        fprintf(f, "center: ");
+        realRat_print(compRat_realref(compDsk_centerref(containingDisk)));
+        fprintf(f, " + ");
+        realRat_print(compRat_imagref(compDsk_centerref(containingDisk)));
+        fprintf(f, "j\n%26s radius: ", " ");
+        realRat_print(compDsk_radiusref(containingDisk));
+    } else if (output>0) {
+    
+        int coeff = 4; /* = ceil(log(10)/log(2)) */
+        slong prec = coeff*output; 
+        
+        realApp_t cRe, cIm, rad;
+        realApp_init(cRe);
+        realApp_init(cIm);
+        realApp_init(rad);
+        
+        realApp_set_realRat(cRe, compRat_realref(compDsk_centerref(containingDisk)), prec);
+        realApp_set_realRat(cIm, compRat_imagref(compDsk_centerref(containingDisk)), prec);
+        realApp_set_realRat(rad, compDsk_radiusref(containingDisk), prec);
+        
+        
+    //     printf("d: %d, prec: %d\n", (int) d, (int) p);
+        fprintf(f, "center: ");
+        realApp_fprintn(f, cRe, output, ARB_STR_MORE);
+        fprintf(f, " + ");
+        realApp_fprintn(f, cIm, output, ARB_STR_MORE);
+        fprintf(f, "j\n%26s radius: ", " ");
+        realApp_fprintn(f, rad, 5, ARB_STR_MORE);
+        
+        realApp_clear(cRe);
+        realApp_clear(cIm);
+        realApp_clear(rad);
+    
+    }
+    
+    compBox_clear(containingBox);
+    compDsk_clear(containingDisk);
+}
+
+void connCmp_list_print_for_results_withOutput(FILE * f, const connCmp_list_t l, int output, metadatas_t meta){
+    connCmp_list_iterator it = connCmp_list_begin(l);
+    
+    while (it!=connCmp_list_end() ) {
+        connCmp_print_for_results_withOutput(f, connCmp_list_elmt(it), output, meta);
+        it = connCmp_list_next(it);
+        fprintf(f, "\n");
+    }
+}
+
 /* old version with complicated multithreading */
 // void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
 //     

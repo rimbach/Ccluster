@@ -91,6 +91,25 @@ void connCmp_list_print_for_results(FILE * f,
                                     const connCmp_list_t c, 
                                     metadatas_t meta);
 
+void connCmp_print_for_results_withOutput(FILE * f, 
+                                          const connCmp_t c, 
+                                          int output, 
+                                          metadatas_t meta);
+
+void connCmp_list_print_for_results_withOutput(FILE * f, 
+                                               const connCmp_list_t l, 
+                                               int output, 
+                                               metadatas_t meta);
+
+void connCmp_gnuplot(FILE * f, 
+                     const connCmp_t c, 
+                     metadatas_t meta);
+
+void connCmp_list_gnuplot(FILE * f, 
+                          const connCmp_list_t c, 
+                          metadatas_t meta,
+                          int withInitBox);
+
 void ccluster_algo_draw( connCmp_list_t qResults, 
                          compBox_list_t discarded, 
                          const compBox_t initialBox, 
@@ -106,6 +125,7 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
                               const realRat_t eps, 
                               char * stratstr,
                               int nbThreads,
+                              int output,
                               int verb);
 
 
@@ -113,6 +133,7 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
                                      const realRat_t eps, 
                                      char * stratstr,
                                      int nbThreads,
+                                     int output,
                                      int verb);
 
 void ccluster_interface_func_eval( void(*func)(compApp_poly_t, slong),
