@@ -106,6 +106,12 @@ int scan_output( char * argv, int * target ) {
          ||(strcmp( argv, "gnuplot" ) == 0) ) {
         *target = -2;
         return 1;
+    } else if ( (strcmp( argv, "gs" ) == 0)
+         ||(strcmp( argv, "GS" ) == 0) 
+         ||(strcmp( argv, "GnuplotS" ) == 0)
+         ||(strcmp( argv, "gnuplotS" ) == 0) ) {
+        *target = -3;
+        return 1;
     } else if ( (strcmp( argv, "r" ) == 0)
          ||(strcmp( argv, "R" ) == 0) 
          ||(strcmp( argv, "rational" ) == 0)

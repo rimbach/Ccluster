@@ -53,6 +53,7 @@ typedef struct{
 //                                including 0-th, are computed in the discarding test*/
 //     void(*evalPoly)(compApp_t, compApp_t, const compApp_t, slong);
 //     slong      appPrec;
+    int        drSub;
 } metadatas;
 
 typedef metadatas metadatas_t[1];
@@ -85,6 +86,9 @@ METADATAS_INLINE void metadatas_unlock(metadatas_t m){
 METADATAS_INLINE int  metadatas_getVerbo(const metadatas_t m) { return m->verbo; }
 METADATAS_INLINE void  metadatas_setVerbo(metadatas_t m, int v) { m->verbo=v; }
 METADATAS_INLINE int  metadatas_haveToCount(const metadatas_t m) { return (m->verbo > 1); }
+
+METADATAS_INLINE int  metadatas_getDrSub(const metadatas_t m) { return m->drSub; }
+METADATAS_INLINE void  metadatas_setDrSub(metadatas_t m, int v) { m->drSub=v; }
 
 METADATAS_INLINE slong  metadatas_getNbEvalPoints   (const metadatas_t m) { 
     return pwSuDatas_nbPntsEval(metadatas_pwSumref(m)); 

@@ -26,7 +26,8 @@ int main(int argc, char **argv){
         printf("                     0: [default] NO OUTPUT\n");
         printf("                     d>0: d digit precision floating point numbers\n");
         printf("                     -1: rational numbers\n");
-        printf("                     -2: gnuplot output: can be piped to gnuplot \n");
+        printf("                     -2 or g or G: gnuplot output: can be piped to gnuplot \n");
+        printf("                     -3 or gs or GS: gnuplot output with subdivision tree \n");
         printf("      -m, --mode: the version of the algorithm\n");
         printf("                     default value is \"default\"  \n");
         printf("      -v, --verbose: an integer for verbosity\n");

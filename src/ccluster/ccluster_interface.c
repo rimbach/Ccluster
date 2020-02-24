@@ -23,6 +23,7 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
     strategies_t strat;
     metadatas_t meta;
     connCmp_list_t qRes;
+    compBox_list_t bDis;
     
     cacheApp_init(cache, func);
     strategies_init(strat);
@@ -40,14 +41,21 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
     connCmp_list_init(qRes);
+    compBox_list_init(bDis);
     
-    ccluster_algo( qRes, initialBox, eps, cache, meta);
+    if (output==-3) 
+        metadatas_setDrSub(meta, 1);
+    
+    ccluster_algo( qRes, bDis, initialBox, eps, cache, meta);
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     
     if (output==-2) {
 //         printf("gnuplot output: not yet implemented\n");
         connCmp_list_gnuplot(stdout, qRes, meta, 1);
+    } else if (output==-3){
+//         connCmp_list_gnuplot(stdout, qRes, meta, 1);
+        connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
     } else if (output!=0) {
 //         printf("cluster output: not yet implemented\n");
         connCmp_list_print_for_results_withOutput(stdout, qRes, output, meta);
@@ -57,6 +65,7 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
     strategies_clear(strat);
     metadatas_clear(meta);
     connCmp_list_clear(qRes);
+    compBox_list_clear(bDis);
 }
 
 void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong), 
@@ -70,6 +79,7 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     strategies_t strat;
     metadatas_t meta;
     connCmp_list_t qRes;
+    compBox_list_t bDis;
     
     cacheApp_init(cache, func);
     strategies_init(strat);
@@ -91,13 +101,18 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
         strategies_set_realCoeffs(strat, 0);
     
     connCmp_list_init(qRes);
+    compBox_list_init(bDis);
     
     metadatas_init(meta, initialBox, strat, verb);
+    
+    if (output==-3) 
+        metadatas_setDrSub(meta, 1);
+    
     /* initialize power sums */
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo_global( qRes, initialBox, eps, cache, meta);
+    ccluster_algo_global( qRes, bDis, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -105,6 +120,9 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     if (output==-2) {
 //         printf("gnuplot output: not yet implemented\n");
         connCmp_list_gnuplot(stdout, qRes, meta, 0);
+    } else if (output==-3){
+//         connCmp_list_gnuplot(stdout, qRes, meta, 0);
+        connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
     } else if (output!=0) {
 //         printf("cluster output: not yet implemented\n");
         connCmp_list_print_for_results_withOutput(stdout, qRes, output, meta);
@@ -114,159 +132,8 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     strategies_clear(strat);
     metadatas_clear(meta);
     connCmp_list_clear(qRes);
+    compBox_list_clear(bDis);
     compBox_clear(initialBox);
-}
-
-void connCmp_gnuplot(FILE * f, 
-                     const connCmp_t c, 
-                     metadatas_t meta){
-    
-    compBox_t containingBox;
-    compBox_init(containingBox);
-    compDsk_t containingDisk;
-    compDsk_init(containingDisk);
-    realApp_t cRe, cIm, rad;
-    realApp_init(cRe);
-    realApp_init(cIm);
-    realApp_init(rad);
-    
-    connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
-    compBox_get_containing_dsk( containingDisk, containingBox);
-    
-    slong l = fmpz_clog_ui( realRat_denref(compDsk_radiusref(containingDisk)), (ulong) 2);
-//     printf("l: %ld\n", l);
-    int prec = ( 53 > l ? 53 : l );
-    int nbdigits = (int) ceil( prec/4 ) ;
-    
-    realApp_set_realRat(cRe, compRat_realref(compDsk_centerref(containingDisk)), prec);
-    realApp_set_realRat(cIm, compRat_imagref(compDsk_centerref(containingDisk)), prec);
-    realApp_set_realRat(rad, compDsk_radiusref(containingDisk), prec);
-    
-    realApp_fprintn(f, cRe, nbdigits, ARB_STR_NO_RADIUS);
-    fprintf(f, "   ");
-    realApp_fprintn(f, cIm, nbdigits, ARB_STR_NO_RADIUS);
-    fprintf(f, "   ");
-    realApp_fprintn(f, rad, nbdigits, ARB_STR_NO_RADIUS);
-    
-    realApp_clear(cRe);
-    realApp_clear(cIm);
-    realApp_clear(rad);
-    compBox_clear(containingBox);
-    compDsk_clear(containingDisk);
-}
-
-void connCmp_list_gnuplot(FILE * f, 
-                          const connCmp_list_t l, 
-                          metadatas_t meta,
-                          int withInitBox){
-    
-    char preamble[100] = "# Ccluster output for GNUPLOT\n#Pipe it to gnuplot!\n";
-//     char Bcommand[100] = "set pointsize 0.3\nplot '-' title 'Computed clusters' with xyerrorbars\n";
-    char Bcommand1[100] = "set pointsize 1\n";
-    char Bcommand2[1000] = "plot '-' title 'Computed clusters' with circles lc rgb \"#008080\" fs transparent solid 0.15 noborder,\\\n";
-    char Bcommand3[1000] = "     '-' u 1:2 title 'centers of clusters' pt 2 lc rgb \"#008080\"";
-    char Ecommand[100] = "e\npause mouse close\n";
-    
-    /*set X,Y ranges to (5/4) initbox*/
-    realRat_t xinf, xsup, yinf, ysup;
-    realRat_t factor;
-    realApp_t xinfa, xsupa, yinfa, ysupa;
-    int nbdigits = 12;
-    int prec = 53;
-    
-    realRat_init(factor);
-    realRat_init(xinf);
-    realRat_init(xsup);
-    realRat_init(yinf);
-    realRat_init(ysup);
-    realApp_init(xinfa);
-    realApp_init(xsupa);
-    realApp_init(yinfa);
-    realApp_init(ysupa);
-    
-    realRat_set_si(factor, 5, 8);
-    realRat_mul(factor, factor, compBox_bwidthref(metadatas_initBref(meta)));
-    realRat_sub(xinf, compRat_realref(compBox_centerref(metadatas_initBref(meta))), factor);
-    realRat_add(xsup, compRat_realref(compBox_centerref(metadatas_initBref(meta))), factor);
-    realRat_sub(yinf, compRat_imagref(compBox_centerref(metadatas_initBref(meta))), factor);
-    realRat_add(ysup, compRat_imagref(compBox_centerref(metadatas_initBref(meta))), factor);
-    realApp_set_realRat(xinfa, xinf, prec);
-    realApp_set_realRat(xsupa, xsup, prec);
-    realApp_set_realRat(yinfa, yinf, prec);
-    realApp_set_realRat(ysupa, ysup, prec);
-    
-
-    fprintf(f, "%s", preamble);
-    if (withInitBox) {
-        fprintf(f, "set xrange["); realApp_fprintn(f, xinfa, nbdigits, ARB_STR_NO_RADIUS);
-        fprintf(f, ":");realApp_fprintn(f, xsupa, nbdigits, ARB_STR_NO_RADIUS);
-        fprintf(f, "]\n");
-        fprintf(f, "set yrange["); realApp_fprintn(f, yinfa, nbdigits, ARB_STR_NO_RADIUS);
-        fprintf(f, ":");realApp_fprintn(f, ysupa, nbdigits, ARB_STR_NO_RADIUS);
-        fprintf(f, "]\n");
-    }
-//     fprintf(f, "%s", Bcommand);
-    fprintf(f, "%s", Bcommand1);
-    fprintf(f, "%s", Bcommand2);
-    fprintf(f, "%s", Bcommand3);
-    if (withInitBox) {
-        fprintf(f, ",\\\n     '-' title 'initial box' with lines lw 2 lc rgb \"black\"");
-    }
-    fprintf(f, "\n");
-    
-    connCmp_list_iterator it = connCmp_list_begin(l);
-    
-    while (it!=connCmp_list_end() ) {
-        connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
-        it = connCmp_list_next(it);
-        fprintf(f, "\n");
-    }
-    fprintf(f, "e\n");
-//     fprintf(f, "%s", Bcommand3);
-    
-    it = connCmp_list_begin(l);
-    
-    while (it!=connCmp_list_end() ) {
-        connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
-        it = connCmp_list_next(it);
-        fprintf(f, "\n");
-    }
-    if (withInitBox) {
-        realRat_set_si(factor, 1, 2);
-        realRat_mul(factor, factor, compBox_bwidthref(metadatas_initBref(meta)));
-        realRat_sub(xinf, compRat_realref(compBox_centerref(metadatas_initBref(meta))), factor);
-        realRat_add(xsup, compRat_realref(compBox_centerref(metadatas_initBref(meta))), factor);
-        realRat_sub(yinf, compRat_imagref(compBox_centerref(metadatas_initBref(meta))), factor);
-        realRat_add(ysup, compRat_imagref(compBox_centerref(metadatas_initBref(meta))), factor);
-        realApp_set_realRat(xinfa, xinf, prec);
-        realApp_set_realRat(xsupa, xsup, prec);
-        realApp_set_realRat(yinfa, yinf, prec);
-        realApp_set_realRat(ysupa, ysup, prec);
-        fprintf(f, "e\n");
-        realApp_fprintn(f, xinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "   ");
-        realApp_fprintn(f, yinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "\n");
-        realApp_fprintn(f, xsupa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "   ");
-        realApp_fprintn(f, yinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "\n");
-        realApp_fprintn(f, xsupa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "   ");
-        realApp_fprintn(f, ysupa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "\n");
-        realApp_fprintn(f, xinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "   ");
-        realApp_fprintn(f, ysupa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "\n");
-        realApp_fprintn(f, xinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "   ");
-        realApp_fprintn(f, yinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "\n");
-    }
-    
-    
-    fprintf(f, "%s", Ecommand);
-    
-    realRat_clear(factor);
-    realRat_clear(xinf);
-    realRat_clear(xsup);
-    realRat_clear(yinf);
-    realRat_clear(ysup);
-    realApp_clear(xinfa);
-    realApp_clear(xsupa);
-    realApp_clear(yinfa);
-    realApp_clear(ysupa);
 }
 
 /* version with function for fast evaluation */
@@ -297,7 +164,7 @@ void ccluster_interface_func_eval( void(*func)(compApp_poly_t, slong),
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, evalFast, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo( qRes, initialBox, eps, cache, meta);
+    ccluster_algo( qRes, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -502,7 +369,7 @@ int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * m
     
     connCmp_list_init(qRes);
     
-    ccluster_algo( qRes, initialBox, eps, cache, meta);
+    ccluster_algo( qRes, NULL, initialBox, eps, cache, meta);
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     

@@ -37,18 +37,22 @@
 extern "C" {
 #endif
 
-slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
+slong ccluster_discard_compBox_list( compBox_list_t boxes, 
+                                     compBox_list_t bDiscarded,
+                                     cacheApp_t cache, 
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta);
 
 void ccluster_bisect_connCmp( connCmp_list_t dest, 
                               connCmp_t cc, 
                               connCmp_list_t discardedCcs, 
+                              compBox_list_t bDiscarded,
                               cacheApp_t cache, 
                               metadatas_t meta, 
                               slong nbThreads);  
 
-void ccluster_prep_loop( connCmp_list_t qMainLoop, 
+void ccluster_prep_loop( compBox_list_t bDiscarded,
+                         connCmp_list_t qMainLoop, 
                          connCmp_list_t qPrepLoop, 
                          connCmp_list_t discardedCcs, 
                          cacheApp_t cache, 
@@ -58,7 +62,8 @@ int  ccluster_compDsk_is_separated( const compDsk_t d,
                                     connCmp_list_t qMainLoop, 
                                     connCmp_list_t discardedCcs );
 
-void ccluster_main_loop( connCmp_list_t qResults,  
+void ccluster_main_loop( connCmp_list_t qResults, 
+                         compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t discardedCcs, 
                          const realRat_t eps, 
@@ -66,12 +71,14 @@ void ccluster_main_loop( connCmp_list_t qResults,
                          metadatas_t meta);
 
 void ccluster_algo( connCmp_list_t qResults, 
+                    compBox_list_t bDiscarded, 
                     const compBox_t initialBox, 
                     const realRat_t eps, 
                     cacheApp_t cache, 
                     metadatas_t meta);
 
-void ccluster_algo_global( connCmp_list_t qResults, 
+void ccluster_algo_global( connCmp_list_t qResults,
+                           compBox_list_t bDiscarded,
                            const compBox_t initialBox, 
                            const realRat_t eps, 
                            cacheApp_t cache, 
@@ -105,16 +112,18 @@ void connCmp_gnuplot(FILE * f,
                      const connCmp_t c, 
                      metadatas_t meta);
 
+void compBox_gnuplot(FILE * f, 
+                     const compBox_t b);
+
 void connCmp_list_gnuplot(FILE * f, 
                           const connCmp_list_t c, 
                           metadatas_t meta,
                           int withInitBox);
 
-void ccluster_algo_draw( connCmp_list_t qResults, 
-                         compBox_list_t discarded, 
-                         const compBox_t initialBox, 
-                         const realRat_t eps, 
-                         cacheApp_t cache, metadatas_t meta);
+void connCmp_list_gnuplot_drawSubdiv(FILE * f, 
+                          const connCmp_list_t l, 
+                          const compBox_list_t lb,
+                          metadatas_t meta);
 
 /* INTERFACES */
 
@@ -278,6 +287,8 @@ slong ccluster_expe_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache
                                      slong prec, metadatas_t meta);
 
 ///implemented in ccluster_draw.c
+/* DEPRECATED */
+
 void ccluster_interface_forJulia_draw( connCmp_list_t qResults, 
                                        compBox_list_t qDiscarded, 
                                   void(*func)(compApp_poly_t, slong), 

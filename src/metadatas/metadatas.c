@@ -21,6 +21,8 @@ void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_
     chronos_init( metadatas_chronref(m) );
     
     pwSuDatas_init( metadatas_pwSumref(m) );
+    
+    m->drSub = 0;
 }
 
 void metadatas_clear(metadatas_t m) {
