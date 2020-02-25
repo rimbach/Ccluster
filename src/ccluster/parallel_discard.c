@@ -22,7 +22,7 @@ void * _parallel_discard_list_worker( void * arg_ptr ){
     /* arg->status has been set to 1 by caller           */
     /* nb_thread_running has been incremented by caller; */
     
-    arg->prec = ccluster_discard_compBox_list( arg->boxes, arg->cache, arg->prec, arg->meta);
+    arg->prec = ccluster_discard_compBox_list( arg->boxes, NULL, arg->cache, arg->prec, arg->meta);
     
     flint_cleanup();
     
