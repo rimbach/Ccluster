@@ -17,20 +17,26 @@ int main(int argc, char **argv){
         printf("usage: %s [OPTIONS] <filename> ", argv[0]);
         printf("                                 \n");
         printf("      -d , --domain: the initial region of interest\n");
-        printf("                     global [default] finds all the roots\n");
+        printf("                     global [default] finds all the real roots\n");
         printf("                     a box, for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
-        printf("                     if a bounded box B is given, ccluster finds all natural clusters in B, and possibly some in (5/4)B \n");
-        printf("      -e , --epsilon: the size of output clusters\n");
-        printf("                     +inf [default] output natural clusters wits less roots than degree of input polynomial\n");
+        printf("                     if a bounded box B is given, risolate finds all real roots in B, and possibly some in (5/4)B \n");
+        printf("      -e , --epsilon: the size of output isolating intervals\n");
+        printf("                     +inf [default] output isolating intervals separate real roots\n");
         printf("                     a positive number as 1,100 (1/100) or -53 (1/2^(-53))\n");
+        printf("      -o , --output: the way roots are output; default is NO OUTPUT\n");
+        printf("                     0: [default] NO OUTPUT\n");
+        printf("                     d>0: d digit precision floating point numbers\n");
+        printf("                     -1: rational numbers\n");
+        printf("                     -2 or g or G: gnuplot output: can be piped to gnuplot \n");
+        printf("                     -3 or gs or GS: gnuplot output with subdivision tree \n");
         printf("      -m, --mode: the version of the algorithm\n");
         printf("                     default value is \"default\"  \n");
         printf("      -v, --verbose: an integer for verbosity\n");
         printf("                     0: nothing\n");
         printf("                     1 [default]: abstract of input and output\n");
         printf("                     2: detailed reports concerning algorithm\n");
-        printf("                     3: same as 2 + prints the clusters to stdout\n");
-        printf("TODO: nbthreads, display precision of outout\n");
+        printf("                     3: same as 2 + prints the roots to stdout\n");
+        printf("TODO: nbthreads \n");
         if (argc<2)
             return -1;
     }
@@ -43,6 +49,7 @@ int main(int argc, char **argv){
     int nbthreads = 1;
     int global = 2; /* by default, search all the roots */
     int infinity = 2;
+    int output = 0;
     
     compBox_t bInit;
     realRat_t eps;
@@ -83,6 +90,13 @@ int main(int argc, char **argv){
             }
         }
         
+        if ( (strcmp( argv[arg], "-o" ) == 0) || (strcmp( argv[arg], "--output" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*scan_output(argv[arg+1], &output);
+                arg++;
+            }
+        }
+        
         if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mode" ) == 0) ) {
             if (argc>arg+1) {
 //                 parse = parse*scan_strategy( argv[arg+1], st );
@@ -110,9 +124,9 @@ int main(int argc, char **argv){
 //             compRat_poly_set_realRat_poly(p_global,p);
             
             if (global==2)
-                risolate_global_interface_poly( p, eps, st, nbthreads, verbosity);
+                risolate_global_interface_poly( p, eps, st, nbthreads, output, verbosity);
             else
-                risolate_interface_poly( p, bInit, eps, st, nbthreads, verbosity);
+                risolate_interface_poly( p, bInit, eps, st, nbthreads, output, verbosity);
             
             fclose (curFile);
         }

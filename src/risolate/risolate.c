@@ -462,7 +462,7 @@ void connCmp_risolate_print_for_results(FILE * f, const connCmp_t c, metadatas_t
     compDsk_t containingDisk;
     compDsk_init(containingDisk);
     
-    fprintf(f, "--cluster with %5d sols: ", connCmp_nSols(c));
+    fprintf(f, "--solution with mult. %5d: ", connCmp_nSols(c));
     
     connCmp_risolate_componentBox( containingBox, c, metadatas_initBref(meta));
     compBox_get_containing_dsk( containingDisk, containingBox);
@@ -494,6 +494,69 @@ void connCmp_list_risolate_print_for_results(FILE * f, const connCmp_list_t l, m
     
     while (it!=connCmp_list_end() ) {
         connCmp_risolate_print_for_results(f, connCmp_list_elmt(it), meta);
+        it = connCmp_list_next(it);
+        fprintf(f, "\n");
+    }
+}
+
+void connCmp_risolate_print_for_results_withOutput(FILE * f, const connCmp_t c, int output, metadatas_t meta){
+    
+    compBox_t containingBox;
+    compBox_init(containingBox);
+    compDsk_t containingDisk;
+    compDsk_init(containingDisk);
+    
+    if (connCmp_nSols(c) <= (10^6)-1)
+        fprintf(f, "#--solution with mult. %5d: ", connCmp_nSols(c));
+    else
+        fprintf(f, "#--solution with mult. %5d: ", connCmp_nSols(c));
+    
+    connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
+    compBox_get_containing_dsk( containingDisk, containingBox);
+    
+    if (output == -1) { /* rational output */
+        fprintf(f, "center: ");
+        realRat_print(compRat_realref(compDsk_centerref(containingDisk)));
+//         fprintf(f, " + ");
+//         realRat_print(compRat_imagref(compDsk_centerref(containingDisk)));
+        fprintf(f, "\n#%28s radius: ", " ");
+        realRat_print(compDsk_radiusref(containingDisk));
+    } else if (output>0) {
+    
+        int coeff = 4; /* = ceil(log(10)/log(2)) */
+        slong prec = coeff*output; 
+        
+        realApp_t cRe, rad;
+        realApp_init(cRe);
+        realApp_init(rad);
+        
+        realApp_set_realRat(cRe, compRat_realref(compDsk_centerref(containingDisk)), prec);
+//         realApp_set_realRat(cIm, compRat_imagref(compDsk_centerref(containingDisk)), prec);
+        realApp_set_realRat(rad, compDsk_radiusref(containingDisk), prec);
+        
+        
+    //     printf("d: %d, prec: %d\n", (int) d, (int) p);
+        fprintf(f, "center: ");
+        realApp_fprintn(f, cRe, output, ARB_STR_MORE);
+//         fprintf(f, " + ");
+//         realApp_fprintn(f, cIm, output, ARB_STR_MORE);
+        fprintf(f, "\n#%28s radius: ", " ");
+        realApp_fprintn(f, rad, 5, ARB_STR_MORE);
+        
+        realApp_clear(cRe);
+        realApp_clear(rad);
+    
+    }
+    
+    compBox_clear(containingBox);
+    compDsk_clear(containingDisk);
+}
+
+void connCmp_list_risolate_print_for_results_withOutput(FILE * f, const connCmp_list_t l, int output, metadatas_t meta){
+    connCmp_list_iterator it = connCmp_list_begin(l);
+    
+    while (it!=connCmp_list_end() ) {
+        connCmp_risolate_print_for_results_withOutput(f, connCmp_list_elmt(it), output, meta);
         it = connCmp_list_next(it);
         fprintf(f, "\n");
     }

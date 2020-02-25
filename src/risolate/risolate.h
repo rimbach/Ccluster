@@ -83,6 +83,7 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
                                      const realRat_t eps, 
                                      char * stratstr,
                                      int nbThreads,
+                                     int output,
                                      int verb);
 
 void risolate_interface_poly( const realRat_poly_t poly,
@@ -90,11 +91,17 @@ void risolate_interface_poly( const realRat_poly_t poly,
                               const realRat_t eps, 
                               char * stratstr,
                               int nbThreads,
+                              int output,
                               int verb);
 
 void connCmp_risolate_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta);
 
 void connCmp_list_risolate_print_for_results(FILE * f, const connCmp_list_t l, metadatas_t meta);
+
+void connCmp_risolate_print_for_results_withOutput(FILE * f, const connCmp_t c, int output, metadatas_t meta);
+
+void connCmp_list_risolate_print_for_results_withOutput(FILE * f, const connCmp_list_t l, int output, metadatas_t meta);
+
 #ifdef __cplusplus
 }
 #endif
