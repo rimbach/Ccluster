@@ -54,6 +54,8 @@ typedef struct{
 //     void(*evalPoly)(compApp_t, compApp_t, const compApp_t, slong);
 //     slong      appPrec;
     int        drSub;
+    /* for Risolate */
+    realRat    spBnd;
 } metadatas;
 
 typedef metadatas metadatas_t[1];
@@ -65,6 +67,7 @@ typedef metadatas * metadatas_ptr;
 #define metadatas_countref(X) (&(X)->count)
 #define metadatas_chronref(X) (&(X)->chron)
 #define metadatas_pwSumref(X) (&(X)->pwSum)
+#define metadatas_spBndref(X) (&(X)->spBnd)
 
 void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_t strategy, int verbosity);
 void metadatas_clear(metadatas_t m);
@@ -111,6 +114,16 @@ METADATAS_INLINE realRat_ptr metadatas_getIsoRatio  (metadatas_t m) {
 METADATAS_INLINE realRat_ptr metadatas_getWantedPrec  (metadatas_t m) { 
     return pwSuDatas_wantedPrec_ptr( metadatas_pwSumref(m));
 }
+
+
+METADATAS_INLINE realRat_ptr metadatas_getSepBound  (metadatas_t m) { 
+    return metadatas_spBndref(m);
+}
+
+METADATAS_INLINE void metadatas_setSepBound  (metadatas_t m, const realRat_t sepBound) { 
+    realRat_set(metadatas_spBndref(m), sepBound);
+}
+
 
 // METADATAS_INLINE slong  metadatas_getAppPrec(const metadatas_t m) { return m->appPrec; }
 // METADATAS_INLINE void   metadatas_setAppPrec(metadatas_t m, slong appPrec) { m->appPrec = appPrec; }
@@ -419,6 +432,8 @@ METADATAS_INLINE void metadatas_add_time_CclusAl(metadatas_t m, double d){
 /* printing */
 int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps);
 int metadatas_print(metadatas_t meta, const realRat_t eps);
+
+int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps);
 
 #ifdef __cplusplus
 }

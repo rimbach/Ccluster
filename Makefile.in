@@ -26,6 +26,7 @@ BUILD_DIRS = $(SRC_PATH)\
 	     $(SRC_PATH)/metadatas\
 	     $(SRC_PATH)/newton\
 	     $(SRC_PATH)/ccluster\
+	     $(SRC_PATH)/risolate\
 	     $(SRC_PATH)/powerSums\
 	     $(SRC_PATH)/doubApp
 
