@@ -156,8 +156,8 @@ void clear_table( compApp_poly_ptr tab ) {
 
 int main() {
     
-    slong degree = 256;
-    slong prec = 53;
+    slong degree = 512;
+    slong prec = 500;
     int nbtests = 1000;
     
     compApp_poly_t p, pshift1, pshift2;
@@ -173,8 +173,8 @@ int main() {
     
     compApp_poly_ptr ptab = (compApp_poly_ptr) malloc ((degree+1)*sizeof(compApp_poly));
     
-    bernoulli_polynomial(pbern, degree);
-//     mignotte_polynomial(pbern, degree, 200);
+//     bernoulli_polynomial(pbern, degree);
+    mignotte_polynomial(pbern, degree, 200);
 //     realRat_poly_wilkinson(pbern, degree);
 //     realRat_poly_wilkRat(pbern, degree);
 //     realRat_poly_wilkFac(pbern, degree);
@@ -190,6 +190,7 @@ int main() {
     compApp_set_compRat(c, center, prec);
     
     clock_t ti;
+    
     ti = clock();
     for (int i = 0; i<nbtests; i++) {
         compApp_poly_set(pshift1, p);
@@ -213,6 +214,37 @@ int main() {
     printf ("time for %d home taylor shifts, degree %d, prec %d: %f seconds.\n", nbtests, (int) degree,(int) prec, ((float)ti)/CLOCKS_PER_SEC);
 //     printf("pshift2: \n"); compApp_poly_printd(pshift2, prec); printf("\n\n");
     
+    ti = clock();
+    for (int i = 0; i<nbtests; i++) {
+        compApp_poly_evaluate( (pshift2->coeffs), ptab, c, prec);
+        compApp_poly_evaluate( (pshift2->coeffs)+1, ptab+1, c, prec);
+    }
+    ti = clock() - ti;
+    printf ("time for %d rectangular evaluations, degree %d, prec %d: %f seconds.\n", nbtests, (int) degree,(int) prec, ((float)ti)/CLOCKS_PER_SEC);
+    
+    ti = clock();
+    for (int i = 0; i<nbtests; i++) {
+        compApp_poly_evaluate( (pshift2->coeffs), ptab+degree/2, c, prec);
+        compApp_poly_evaluate( (pshift2->coeffs)+1, ptab+degree/2 +1, c, prec);
+    }
+    ti = clock() - ti;
+    printf ("time for %d rectangular evaluations, degree %d, prec %d: %f seconds.\n", nbtests, (int) degree,(int) prec, ((float)ti)/CLOCKS_PER_SEC);
+    
+    ti = clock();
+    for (int i = 0; i<nbtests; i++) {
+        compApp_poly_evaluate_horner( (pshift2->coeffs), ptab, c, prec);
+        compApp_poly_evaluate_horner( (pshift2->coeffs)+1, ptab+1, c, prec);
+    }
+    ti = clock() - ti;
+    printf ("time for %d horner evaluations, degree %d, prec %d: %f seconds.\n", nbtests, (int) degree,(int) prec, ((float)ti)/CLOCKS_PER_SEC);
+    
+    ti = clock();
+    for (int i = 0; i<nbtests; i++) {
+        compApp_poly_evaluate_horner( (pshift2->coeffs), ptab+degree/2, c, prec);
+        compApp_poly_evaluate_horner( (pshift2->coeffs)+1, ptab+degree/2 +1, c, prec);
+    }
+    ti = clock() - ti;
+    printf ("time for %d horner evaluations, degree %d, prec %d: %f seconds.\n", nbtests, (int) degree,(int) prec, ((float)ti)/CLOCKS_PER_SEC);
     
     clear_table( ptab );
     

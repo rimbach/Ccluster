@@ -85,7 +85,7 @@ test_app_rat_poly: test_app_rat_poly.o
 	
 test_cacheApp: test_cacheApp.o 
 	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG)
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lpthread
 	
 test_compDsk: test_compDsk.o 
 	@echo "Building $@"

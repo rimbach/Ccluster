@@ -43,7 +43,8 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
 //         }
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
            
-            res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
+//             res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
+            res = tstar_real_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
                 metadatas_add_discarded( meta, depth);
@@ -272,7 +273,8 @@ void risolate_main_loop( connCmp_list_t qResults,
 //             
 //             if (connCmp_nSolsref(ccur)==-1){
                 
-                resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
+//                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
+                resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
 //                 if (metadatas_getVerbo(meta)>3)
 //                     printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));

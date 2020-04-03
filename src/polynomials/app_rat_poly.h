@@ -22,11 +22,17 @@
 #include "numbers/app_rat.h"
 #include "polynomials/realRat_poly.h"
 #include "polynomials/compRat_poly.h"
+#include "polynomials/realApp_poly.h"
 #include "polynomials/compApp_poly.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* converting realRat_poly to realApp_poly  */
+POLYNOMIALS_INLINE void realApp_poly_set_realRat_poly(realApp_poly_t poly, const realRat_poly_t re, slong prec){
+    arb_poly_set_fmpq_poly(poly, re, prec);
+}
 
 /* converting realRat_poly to compApp_poly  */
 POLYNOMIALS_INLINE void compApp_poly_set_realRat_poly(compApp_poly_t poly, const realRat_poly_t re, slong prec) {
@@ -43,16 +49,30 @@ void compApp_poly_root_bound_fujiwara(realRat_t bound, compApp_poly_t poly);
 
 /* scaling in place */
 /* requires: r is canonical */ 
+void realApp_poly_scale_realRat_in_place( realApp_ptr fptr, const realRat_t r, slong len, slong prec);
+
 void compApp_poly_scale_realRat_in_place( compApp_ptr fptr, const realRat_t r, slong len, slong prec );
 
-/*
-void compApp_poly_taylorShift_in_place( compApp_poly_t f, const realRat_t creal, const realRat_t cimag, const realRat_t radius, slong prec );
-*/
-void compApp_poly_taylorShift_in_place( compApp_poly_t f, const compRat_t center, const realRat_t radius, slong prec );
+void realApp_poly_taylorShift_in_place( realApp_poly_t f, 
+                                        const realRat_t center, 
+                                        const realRat_t radius, 
+                                        slong prec );
+
+void compApp_poly_taylorShift_in_place( compApp_poly_t f, 
+                                        const compRat_t center, 
+                                        const realRat_t radius, 
+                                        slong prec );
+
+void realApp_poly_taylorShift( realApp_poly_t res, 
+                               const realApp_poly_t f, 
+                               const realRat_t center, 
+                               const realRat_t radius, 
+                               slong prec );
 
 void compApp_poly_taylorShift( compApp_poly_t res, 
                                const compApp_poly_t f, 
-                               const compRat_t center, const realRat_t radius, 
+                               const compRat_t center, 
+                               const realRat_t radius, 
                                slong prec );
 
 /*void compApp_poly_taylorShift_in_place_new( compApp_poly_t f, const realRat_t creal, const realRat_t cimag, const realRat_t radius, slong prec );*/

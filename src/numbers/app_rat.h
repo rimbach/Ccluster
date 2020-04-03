@@ -64,6 +64,7 @@ NUMBERS_INLINE void compApp_get_compRat( compRat_t res, compApp_t x){
 
 /* arithmetic */
 void realApp_mul_realRat( realApp_t x, const realApp_t y, const realRat_t z, slong prec );
+void realApp_mul_realRat_in_place( realApp_t x, const realRat_t y, slong prec );
 void compApp_mul_realRat( compApp_t x, const compApp_t y, const realRat_t z, slong prec );
 void compApp_mul_realRat_in_place( compApp_t x, const realRat_t y, slong prec );
 
