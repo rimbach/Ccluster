@@ -21,6 +21,7 @@
 #include "base/base.h"
 #include "numbers/compApp.h"
 #include "polynomials/compRat_poly.h"
+#include "polynomials/realApp_poly.h"
 #include "polynomials/compApp_poly.h"
 #include "polynomials/app_rat_poly.h"
 
@@ -36,10 +37,15 @@ extern "C" {
 #endif
     
 typedef struct {
+    
     void(*_getApproximation)(compApp_poly_t, slong);
     compApp_poly_t *_cache;
     int _size;
     int _allocsize;
+    
+    realApp_poly_t *_cache_real;
+    int _size_real;
+    int _allocsize_real;
     
     compRat_poly_t _poly;
     int _from_poly;
@@ -80,6 +86,7 @@ void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly);
 void cacheApp_init_realRat_poly ( cacheApp_t cache, const realRat_poly_t poly);
 
 compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec );
+realApp_poly_ptr cacheApp_getApproximation_real ( cacheApp_t cache, slong prec );
 slong cacheApp_getDegree ( cacheApp_t cache );
 int cacheApp_is_real ( cacheApp_t cache );
 

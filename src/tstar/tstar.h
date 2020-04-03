@@ -79,6 +79,38 @@ tstar_res tstar_optimized( cacheApp_t cache,
                            int depth,         /*the depth for counter                            */
                            metadatas_t meta);
 
+void tstar_real_getApproximation( realApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta);
+void tstar_real_taylor_shift_inplace( realApp_poly_t res, const compDsk_t d, slong prec, metadatas_t meta);
+void tstar_real_graeffe_iterations_inplace( realApp_poly_t res, int N, slong prec, metadatas_t meta);
+void tstar_real_graeffe_iterations_abs_two_first_coeffs( realApp_t coeff0, realApp_t coeff1, const realApp_poly_t pApprox, int N, slong prec, metadatas_t meta);
+
+tstar_res tstar_real_interface( cacheApp_t cache,
+                           const compDsk_t d,
+                           int max_nb_sols,    /*the maximum number of sols in the disk          */
+                           int discard,        /*a flag saying if it is a discarding test or not */
+                           int inNewton,      /*a flag saying if it is for newton refinement     */
+                           slong prec,         /*the "default" arithmetic precision              */
+                           int depth,          /*the depth for counter                           */
+                           metadatas_t meta);
+
+tstar_res tstar_real_asInPaper( cacheApp_t cache,
+                           const compDsk_t d,
+                           int max_nb_sols,    /*the maximum number of sols in the disk,         */
+                           int discard,        /*a flag saying if it is a discarding test or not */
+                           int inNewton,      /*a flag saying if it is for newton refinement     */
+                           slong prec,         /*the "default" arithmetic precision              */
+                           int depth,          /*the depth for counter                           */
+                           metadatas_t meta);
+
+tstar_res tstar_real_optimized( cacheApp_t cache,
+                           const compDsk_t d,
+                           int max_nb_sols,   /*the maximum number of sols in the disk          */
+                           int discard,       /*a flag saying if it is a discarding test or not */
+                           int inNewton,      /*a flag saying if it is for newton refinement     */
+                           slong prec,        /*the "default" arithmetic precision              */
+                           int depth,         /*the depth for counter                           */
+                           metadatas_t meta);
+
 /*EXPERIMENTAL*/
 #ifdef CCLUSTER_EXPERIMENTAL
 void tstar_getDerivative( compApp_poly_t res, cacheApp_t cache, slong prec, slong order, metadatas_t meta);
