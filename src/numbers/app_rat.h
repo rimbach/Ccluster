@@ -70,6 +70,10 @@ void compApp_mul_realRat_in_place( compApp_t x, const realRat_t y, slong prec );
 
 void compApp_mul_compRat( compApp_t x, const compApp_t y, const compRat_t z, slong prec );
 
+NUMBERS_INLINE void compApp_mul_fmpz( compApp_t x, const compApp_t y, const fmpz_t z, slong prec ){
+    acb_mul_fmpz( x, y, z, prec );
+}
+
 #ifdef __cplusplus
 }
 #endif
