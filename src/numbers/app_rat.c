@@ -30,7 +30,7 @@ void compApp_set_compDsk( compApp_t res, const compRat_t center, const realRat_t
 /* arithmetic */
 void realApp_mul_realRat( realApp_t x, const realApp_t y, const realRat_t z, slong prec ){
     arb_mul_fmpz(x, y, fmpq_numref(z), prec);
-    arb_div_fmpz(x, y, fmpq_denref(z), prec);
+    arb_div_fmpz(x, x, fmpq_denref(z), prec);
 }
 
 void realApp_mul_realRat_in_place( realApp_t x, const realRat_t y, slong prec ){
@@ -48,7 +48,7 @@ void compApp_mul_realRat_in_place( compApp_t x, const realRat_t y, slong prec ) 
     acb_div_fmpz(x, x, fmpq_denref(y), prec);
 }
 
-void compApp_mul_compRat( compApp_t z, const compApp_t x, const compRat_t y, slong prec ){
+void _compApp_mul_compRat( compApp_t z, const compApp_t x, const compRat_t y, slong prec ){
 #define a compApp_realref(x)
 #define b compApp_imagref(x)
 #define c compRat_realref(y)
@@ -100,6 +100,19 @@ void compApp_mul_compRat( compApp_t z, const compApp_t x, const compRat_t y, slo
 #undef d
 #undef e
 #undef f
+}
+
+void compApp_mul_compRat( compApp_t z, const compApp_t x, const compRat_t y, slong prec ){
+    
+    if (z==x) {
+        compApp_t temp;
+        compApp_init(temp);
+        _compApp_mul_compRat( temp, x, y, prec );
+        compApp_set(z, temp);
+        compApp_clear(temp);
+    }
+    else
+        _compApp_mul_compRat( z, x, y, prec );
 }
 
 /*getting a realRat lying in the ball defined by a realApp */

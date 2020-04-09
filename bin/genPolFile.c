@@ -25,7 +25,7 @@ int main(int argc, char **argv){
     
     if (argc<4){
         printf("usage: %s Bernoulli    format degree filename\n", argv[0]);
-        printf("       %s Regular Grid format degree filename\n", argv[0]);
+        printf("       %s RegularGrid  format degree filename\n", argv[0]);
         printf("       %s Mignotte     format degree bitsize filename\n", argv[0]);
         printf("       %s Chebyshev1   format degree filename\n", argv[0]);
         printf("       %s Chebyshev2   format degree filename\n", argv[0]);

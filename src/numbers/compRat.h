@@ -74,6 +74,11 @@ NUMBERS_INLINE void compRat_set_sisi(compRat_t x, slong preal, ulong qreal, slon
     realRat_set_si(compRat_imagref(x), pimag, qimag);
 }
 
+NUMBERS_INLINE void compRat_one(compRat_t x) { 
+    realRat_set_si(compRat_realref(x), 1, 1); 
+    realRat_set_si(compRat_imagref(x), 0, 1);
+}
+
 NUMBERS_INLINE int compRat_set_str  (compRat_t x, const char * strReN, const char * strReD, const char * strImN, const char * strImD, int b){
     if (realRat_set_str(compRat_realref(x), strReN, strReD, b) == 0)
         return realRat_set_str(compRat_imagref(x), strImN, strImD, b);
@@ -85,6 +90,9 @@ NUMBERS_INLINE void compRat_set(compRat_t dest, const compRat_t src) {
     realRat_set(compRat_realref(dest), compRat_realref(src)); 
     realRat_set(compRat_imagref(dest), compRat_imagref(src));
 }
+
+/*arithmetic*/
+void compRat_mul(compRat_t dest, const compRat_t x, const compRat_t y);
 
 /* geometric operations */
 /* sets dest to abs(x.real-y.real) + i*abs(x.imag-y.imag) */
