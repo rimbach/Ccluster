@@ -631,6 +631,17 @@ int main() {
     printf ("time for %d div conq taylor shifts, degree %d, prec %d: %f seconds.\n", nbtests, (int) degree,(int) prec, ((float)ti)/CLOCKS_PER_SEC);
     
     ti = clock();
+    for (int i = 0; i<nbtests; i++) {
+        compApp_poly_set(pshift1, p);
+        _acb_poly_taylor_shift_horner(pshift1->coeffs, c, pshift1->length, prec);
+//         _acb_poly_taylor_shift_convolution(pshift1->coeffs, c, pshift1->length, prec);
+//         _acb_poly_taylor_shift_divconquer(pshift1->coeffs, c, pshift1->length, prec);
+//         printf("pshift1: \n"); compApp_poly_printd(pshift1, prec); printf("\n\n");
+    }
+    ti = clock() - ti;
+    printf ("time for %d horner taylor shifts, degree %d, prec %d: %f seconds.\n", nbtests, (int) degree,(int) prec, ((float)ti)/CLOCKS_PER_SEC);
+    
+    ti = clock();
     precompute( ptab, p, prec );
     ti = clock() - ti;
     printf ("time for precomputing derivatives: %f seconds.\n", ((float)ti)/CLOCKS_PER_SEC);
