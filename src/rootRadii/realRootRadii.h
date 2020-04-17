@@ -1,0 +1,63 @@
+/* ************************************************************************** */
+/*  Copyright (C) 2020 Remi Imbach                                            */
+/*                                                                            */
+/*  This file is part of Ccluster.                                            */
+/*                                                                            */
+/*  Ccluster is free software: you can redistribute it and/or modify it under */
+/*  the terms of the GNU Lesser General Public License (LGPL) as published    */
+/*  by the Free Software Foundation; either version 2.1 of the License, or    */
+/*  (at your option) any later version.  See <http://www.gnu.org/licenses/>.  */
+/* ************************************************************************** */
+
+#ifndef REALROOTRADII_H
+#define REALROOTRADII_H
+
+#ifdef ROOTRAD_INLINE_C
+#define ROOTRAD_INLINE
+#else
+#define ROOTRAD_INLINE static __inline__
+#endif
+
+#include "base/base.h"
+#include "geometry/compAnn.h"
+#include "lists/compAnn_list.h"
+#include "caches/cacheApp.h"
+#include "metadatas/metadatas.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+void realRootRadii_getApproximation( realApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta);
+void realRootRadii_graeffe_iterations_inplace( realApp_poly_t res, int N, slong prec, metadatas_t meta);
+
+/* assume i<j<k */
+/* assume absPi=|Pi|, absPj=|Pj|, absPk=|Pk| are approximations of integers */
+/* decide if [j,log|Pj|] lies below of on the line passing trough [i,log|Pi|] and [k,log|Pk|]*/
+/* returns 1 if yes */
+/*         0 if no  */
+/*        -1 if it can not be decided */
+int realRootRadii_liesBelow( slong i, const realApp_t absPi,
+                             slong j, const realApp_t absPj,
+                             slong k, const realApp_t absPk,
+                             slong prec );
+
+/* assume convexHull is already initialized, and contains enough space for a convex hull of len points */
+/* returns 0 if needs more precision on the coeffs */
+/* otherwise returns the length of the convex hull */
+slong realRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec );
+
+/* returns the precision used to carry out root radii */
+slong realRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
+                               cacheApp_t cache,        /* polynomial */
+                               const realRat_t delta);
+
+void realRootRadii_connectedComponents( compAnn_list_t annulii, slong prec );  /* list of annulii */
+
+void realRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache, slong prec );  /* list of annulii */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

@@ -89,11 +89,13 @@ NUMBERS_INLINE void realApp_sub(realApp_t z, const realApp_t x, const realApp_t 
 NUMBERS_INLINE void realApp_mul(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_mul(z, x, y, prec); }
 NUMBERS_INLINE void realApp_neg(realApp_t z, const realApp_t x) { arb_neg(z, x); }
 NUMBERS_INLINE void realApp_div(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_div(z, x, y, prec); }
+NUMBERS_INLINE void realApp_div_si(realApp_t z, const realApp_t x, slong y, slong prec) { arb_div_si(z, x, y, prec); }
+NUMBERS_INLINE void realApp_div_ui(realApp_t z, const realApp_t x, ulong y, slong prec) { arb_div_ui(z, x, y, prec); }
 NUMBERS_INLINE void realApp_mul_si( realApp_t dest, const realApp_t x, slong y,           slong prec) { arb_mul_si(dest, x, y, prec); }
 NUMBERS_INLINE void realApp_pow_ui(realApp_t y, const realApp_t x, ulong e, slong prec) { arb_pow_ui(y, x, e, prec); }
 NUMBERS_INLINE void realApp_root_ui(realApp_t y, const realApp_t x, ulong e, slong prec) { arb_root_ui(y, x, e, prec); }
 NUMBERS_INLINE void realApp_mul_2exp_si(realApp_t y, const realApp_t x, slong e) { arb_mul_2exp_si(y, x, e); }
-
+NUMBERS_INLINE void realApp_inv(realApp_t z, const realApp_t x, slong prec) { arb_inv(z, x, prec); }
 /* logarithm */
 NUMBERS_INLINE void realApp_log(realApp_t z, const realApp_t x, slong prec) { arb_log(z, x, prec); }
 /* other */
@@ -106,6 +108,9 @@ NUMBERS_INLINE slong realApp_ceil_si(const realApp_t x, slong prec){
     arf_clear(ubound);
     return res;
 }
+
+/* Returns 1 if x is strictly positive, -1 if x is strictly negative, and 0 if x is zero or a ball containing zero so that its sign is not determined. */
+NUMBERS_INLINE int realApp_sgn_nonzero(const realApp_t z) { return arb_sgn_nonzero(z); }
 
 /* printing */
 NUMBERS_INLINE void realApp_fprint (FILE * file, const realApp_t x)                           { arb_fprint (file, x               ); }

@@ -63,6 +63,7 @@ void * gen_list_data_at_index(const gen_list_t l, int index);
 void gen_list_insert_sorted(gen_list_t l, void * data, int (isless_func)(const void * d1, const void * d2));
 
 void gen_list_fprint(FILE * file, const gen_list_t l, void (* print_func)(FILE *, const void *) );
+void gen_list_fprintd(FILE * file, const gen_list_t l, slong digits, void (* print_func)(FILE *, const void *, slong digits) );
 
 int gen_list_is_empty(const gen_list_t l);
 int gen_list_get_size(const gen_list_t l);
@@ -85,6 +86,11 @@ LISTS_INLINE gen_list_iterator gen_list_end(){
 LISTS_INLINE void * gen_list_elmt(gen_list_iterator it){
     return it->_elmt;
 }
+
+/* assume itnext is not NULL */
+/* assume it is not NULL */
+/* remove element just after it, if it is not NULL */
+void * gen_list_remove_at( gen_list_t l, gen_list_iterator it);
  
 #ifdef __cplusplus
 }

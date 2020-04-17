@@ -119,8 +119,13 @@ slong realRat_poly_bitsize (const realRat_poly_t pol);
 POLYNOMIALS_INLINE void bernoulli_polynomial( realRat_poly_t poly, slong deg) {
     arith_bernoulli_polynomial(poly , deg);
 }
+/* multiple of Bernoulli polynomial with integer coefficients*/
+void bernoulliInt_polynomial(realRat_poly_t poly, slong deg);
+
 void mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize);
 void mignotte_generalized(realRat_poly_t poly, slong deg, ulong pow, slong bitsize);
+
+void wilkinson_polynomial(realRat_poly_t poly, slong deg);
 
 #ifdef __cplusplus
 }

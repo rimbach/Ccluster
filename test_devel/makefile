@@ -34,7 +34,7 @@ TEST=$(foreach x, ., $(wildcard $(x)/*.c))
 TEST_OBJS=$(TEST:%.c=%.o)
 TEST_EXECS=$(TEST:%.c=%)
 
-test: test_realRat test_realRat_poly test_compRat test_compRat_poly test_realApp test_compApp test_app_rat test_compApp_poly test_app_rat_poly test_cacheApp test_compDsk test_compBox test_parallel_taylor test_parallel_convol_taylor test_taylor_shift_convolution test_gen_list test_compBox_list test_connCmp test_strategies test_chronos test_counters test_metadatas test_subdBox test_ciso_algo test_graeffe test_c0_pred test_TS test_doubRealApp test_doubCompApp test_doubCompApp_poly test_doubCompApp_poly_mul test_doubCompApp_poly_mulk test_doubCompApp_poly_sqr test_doubCompApp_poly_sqrk test_doubCompApp_poly_TS test_doubCompApp_poly_G test_powerSums
+test: test_realRat test_realRat_poly test_compRat test_compRat_poly test_realApp test_compApp test_app_rat test_compApp_poly test_app_rat_poly test_cacheApp test_compDsk test_compBox test_parallel_taylor test_parallel_convol_taylor test_taylor_shift_convolution test_gen_list test_compBox_list test_connCmp test_strategies test_chronos test_counters test_metadatas test_subdBox test_ciso_algo test_graeffe test_c0_pred test_TS test_doubRealApp test_doubCompApp test_doubCompApp_poly test_doubCompApp_poly_mul test_doubCompApp_poly_mulk test_doubCompApp_poly_sqr test_doubCompApp_poly_sqrk test_doubCompApp_poly_TS test_doubCompApp_poly_G test_powerSums test_realRootRadii
 
 clean :
 	rm -rf $(TEST_OBJS) $(TEST_EXECS)
@@ -196,5 +196,9 @@ testSpiralDac: testSpiralDac.c
 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
 	
 test_powerSums: test_powerSums.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_realRootRadii: test_realRootRadii.c
 	@echo "Building $@"
 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm

@@ -85,6 +85,28 @@ void gen_list_push(gen_list_t l, void * data){
     l->_size +=1;
 }
 
+/* assume it is not NULL */
+/* remove element just after it, if it is not NULL */
+void * gen_list_remove_at( gen_list_t l, gen_list_iterator it){
+    
+    void * res;
+    struct gen_elmt * temp = it->_next;
+    
+    if (it->_next == NULL) { /* do nothing */
+//         printf("ici!!!!\n");
+        res = NULL;
+    }
+    else{
+        res = it->_next->_elmt;
+        if (l->_end == it->_next)
+            l->_end = it;
+        it->_next = it->_next->_next;
+        ccluster_free(temp);
+        l->_size-=1;
+    }
+    return res;
+}
+
 void * gen_list_pop(gen_list_t l){
     void * res;
     struct gen_elmt * temp = l->_begin;
@@ -164,6 +186,19 @@ void gen_list_fprint(FILE * file, const gen_list_t l, void (* print_func)(FILE *
         voyager = voyager->_next;
     }
     fprintf(file, "]");
+}
+
+void gen_list_fprintd(FILE * file, const gen_list_t l, slong digits, void (* print_func)(FILE *, const void *, slong digits) ){
+    fprintf(file, "length: %d, elements: [", l->_size);
+    
+    struct gen_elmt * voyager = l->_begin;
+    while (voyager != NULL) {
+        print_func(file, voyager->_elmt, digits);
+        if (voyager->_next != NULL)
+            fprintf(file, ", ");
+        voyager = voyager->_next;
+    }
+    fprintf(file, "]"); 
 }
 
 int gen_list_is_empty(const gen_list_t l){

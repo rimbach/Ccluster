@@ -65,6 +65,12 @@ slong realRat_poly_bitsize (const realRat_poly_t pol){
     return bitsize;
 }
 
+/* multiple of Bernoulli polynomial with integer coefficients*/
+void bernoulliInt_polynomial(realRat_poly_t poly, slong deg){
+    bernoulli_polynomial( poly, deg);
+    fmpq_poly_canonicalise(poly);
+}
+
 void mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize){
     
     realRat_t coeff, two;
@@ -124,4 +130,20 @@ void mignotte_generalized(realRat_poly_t poly, slong deg, ulong pow, slong bitsi
     realRat_clear(two);
     realRat_poly_clear(p1);
     realRat_poly_clear(p2);
+}
+
+void wilkinson_polynomial(realRat_poly_t poly, slong degree){
+    realRat_poly_t ptemp;
+    realRat_poly_init2(ptemp,2);
+    
+    realRat_poly_one(poly);
+    realRat_poly_zero(ptemp);
+    realRat_poly_set_coeff_si_ui(ptemp, 1, 1, 1);
+    
+    for (int i=1; i<=degree; i++){
+        realRat_poly_set_coeff_si_ui(ptemp, 0, -i, 1);
+        realRat_poly_mul(poly, poly, ptemp);
+    }
+    
+    realRat_poly_clear(ptemp);
 }
