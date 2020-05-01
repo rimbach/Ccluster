@@ -131,6 +131,7 @@ int main(int argc, char **argv){
     int verbosity;
     int nbthreads = 1;
     int global = 0;
+    int output = 16;
     
     compBox_t bInit;
     realRat_t eps;
@@ -158,9 +159,9 @@ int main(int argc, char **argv){
     
     if (parse){
         if (global==2)
-            ccluster_global_interface_func( getApprox, eps, st, nbthreads, verbosity);
+            ccluster_global_interface_func( getApprox, eps, st, nbthreads, output, verbosity);
         else
-            ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
+            ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, output, verbosity);
     }
         
     
