@@ -23,7 +23,7 @@ ARB_INCLUDE_PATH = /home/imbach/libs/arb
 
 INCLUDE_PATH = -I$(FLINT_INCLUDE_PATH) -I$(ARB_INCLUDE_PATH) -I$(INC_PATH)
 LIBRARY_PATH = -L/home/imbach/libs/flint2 -L/home/imbach/libs/arb -L/home/imbach/Ccluster
-LIBRARY_FLAG = -lflint -larb -lccluster
+LIBRARY_FLAG = -lgmp -lflint -larb -lccluster -lm
 
 
 SRCS=$(foreach x, $(SRC_DIRS), $(wildcard $(x)/*.c))
@@ -85,7 +85,7 @@ test_app_rat_poly: test_app_rat_poly.o
 	
 test_cacheApp: test_cacheApp.o 
 	@echo "Building $@"
-	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG)
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lpthread
 	
 test_compDsk: test_compDsk.o 
 	@echo "Building $@"

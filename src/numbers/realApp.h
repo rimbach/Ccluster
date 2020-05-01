@@ -31,6 +31,7 @@ extern "C" {
 typedef arb_struct realApp;
 typedef realApp realApp_t[1];
 typedef realApp * realApp_ptr;
+typedef const realApp * realApp_srcptr;
 
 /* memory managment */
 NUMBERS_INLINE void realApp_init (realApp_t x) { arb_init (x); }
@@ -81,12 +82,14 @@ NUMBERS_INLINE int realApp_contains_zero (const realApp_t x) {
 }
 
 /* arithmetic operations */
+NUMBERS_INLINE void realApp_abs   ( realApp_t dest, const realApp_t x )                   { arb_abs   (dest, x); }
 NUMBERS_INLINE void realApp_add(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_add(z, x, y, prec); }
 NUMBERS_INLINE void realApp_add_si(realApp_t z, const realApp_t x, slong y, slong prec) { arb_add_si(z, x, y, prec); }
 NUMBERS_INLINE void realApp_sub(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_sub(z, x, y, prec); }
 NUMBERS_INLINE void realApp_mul(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_mul(z, x, y, prec); }
 NUMBERS_INLINE void realApp_neg(realApp_t z, const realApp_t x) { arb_neg(z, x); }
 NUMBERS_INLINE void realApp_div(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_div(z, x, y, prec); }
+NUMBERS_INLINE void realApp_mul_si( realApp_t dest, const realApp_t x, slong y,           slong prec) { arb_mul_si(dest, x, y, prec); }
 NUMBERS_INLINE void realApp_pow_ui(realApp_t y, const realApp_t x, ulong e, slong prec) { arb_pow_ui(y, x, e, prec); }
 NUMBERS_INLINE void realApp_root_ui(realApp_t y, const realApp_t x, ulong e, slong prec) { arb_root_ui(y, x, e, prec); }
 NUMBERS_INLINE void realApp_mul_2exp_si(realApp_t y, const realApp_t x, slong e) { arb_mul_2exp_si(y, x, e); }
@@ -112,6 +115,15 @@ NUMBERS_INLINE void realApp_fprintn(FILE * file, const realApp_t x, slong digits
 NUMBERS_INLINE void realApp_print (const realApp_t x)                           { arb_print (x               ); }
 NUMBERS_INLINE void realApp_printd(const realApp_t x, slong digits)             { arb_printd(x, digits       ); }
 NUMBERS_INLINE void realApp_printn(const realApp_t x, slong digits, ulong flags){ arb_printn(x, digits, flags); }
+
+/* accuracy */
+NUMBERS_INLINE int realApp_checkAccuracy( const realApp_t z, slong prec) {
+    return ( (-arb_rel_error_bits(z)) >= prec );
+}
+
+NUMBERS_INLINE slong realApp_getAccuracy( const realApp_t z) {
+    return -arb_rel_error_bits(z);
+}
 
 #ifdef __cplusplus
 }

@@ -1,14 +1,15 @@
 #include <string.h>
 #include <stdio.h>
 #include "ccluster/ccluster.h"
+#include "risolate/risolate.h"
 
 #include "parseArgs.h"
 
-compRat_poly_t p_global;
-
-void getApprox(compApp_poly_t dest, slong prec){
-    compApp_poly_set_compRat_poly(dest, p_global, prec);
-}
+// compRat_poly_t p_global;
+// 
+// void getApprox(compApp_poly_t dest, slong prec){
+//     compApp_poly_set_compRat_poly(dest, p_global, prec);
+// }
 
 int main(int argc, char **argv){
     
@@ -16,13 +17,13 @@ int main(int argc, char **argv){
         printf("usage: %s <filename> [OPTIONS]", argv[0]);
         printf("                                 \n");
         printf("      -d , --domain: the initial region of interest\n");
-        printf("                     global [default] finds all the roots\n");
+        printf("                     global [default] finds all the real roots\n");
         printf("                     a box, for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
-        printf("                     if a bounded box B is given, ccluster finds all natural clusters in B, and possibly some in (5/4)B \n");
-        printf("      -e , --epsilon: the size of output clusters\n");
-        printf("                     +inf [default] output natural clusters wits less roots than degree of input polynomial\n");
+        printf("                     if a bounded box B is given, risolate finds all real roots in B, and possibly some in (5/4)B \n");
+        printf("      -e , --epsilon: the size of output isolating intervals\n");
+        printf("                     +inf [default] output isolating intervals separate real roots\n");
         printf("                     a positive number as 1,100 (1/100) or -53 (1/2^(-53))\n");
-        printf("      -o , --output: the way cluster are output; default is NO OUTPUT\n");
+        printf("      -o , --output: the way roots are output; default is NO OUTPUT\n");
         printf("                     0: [default] NO OUTPUT\n");
         printf("                     d>0: d digit precision floating point numbers\n");
         printf("                     -1: rational numbers\n");
@@ -34,10 +35,8 @@ int main(int argc, char **argv){
         printf("                     0: nothing\n");
         printf("                     1 [default]: abstract of input and output\n");
         printf("                     2: detailed reports concerning algorithm\n");
-        printf("                     >=3: debugging mode\n");
-        printf("      -j, --nbThreads: an positive integer for the number of threads\n");
-        printf("                       1 [default]: one thread is used\n");
-        printf("                       >1: no compatibility with -o -3 option\n");
+        printf("                     3: same as 2 + prints the roots to stdout\n");
+//         printf("TODO: nbthreads \n");
         if (argc<2)
             return -1;
     }
@@ -66,7 +65,6 @@ int main(int argc, char **argv){
     filename = argv[1];
     
     /* loop on arguments to figure out options */
-    
     for (int arg = 2; arg< argc; arg++) {
         
         if ( (strcmp( argv[arg], "-v" ) == 0) || (strcmp( argv[arg], "--verbose" ) == 0) ) {
@@ -99,14 +97,6 @@ int main(int argc, char **argv){
             }
         }
         
-        if ( (strcmp( argv[arg], "-j" ) == 0)  ) {
-            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
-                parse = parse*scan_nbthreads(argv[arg+1], &nbthreads);
-//                 printf("nb threads: %d\n", nbthreads);
-                arg++;
-            }
-        }
-        
         if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mode" ) == 0) ) {
             if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
 //                 parse = parse*scan_strategy( argv[arg+1], st );
@@ -122,7 +112,7 @@ int main(int argc, char **argv){
     
     realRat_poly_t p;
     realRat_poly_init(p);
-    compRat_poly_init(p_global);
+//     compRat_poly_init(p_global);
     FILE * curFile;
         
     if (parse) {
@@ -131,12 +121,12 @@ int main(int argc, char **argv){
         curFile = fopen (filename,"r");
         if (curFile!=NULL) {
             realRat_poly_fread(curFile, p);
-            compRat_poly_set_realRat_poly(p_global,p);
+//             compRat_poly_set_realRat_poly(p_global,p);
             
             if (global==2)
-                ccluster_global_interface_func( getApprox, eps, st, nbthreads, output, verbosity);
+                risolate_global_interface_poly( p, eps, st, nbthreads, output, verbosity);
             else
-                ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, output, verbosity);
+                risolate_interface_poly( p, bInit, eps, st, nbthreads, output, verbosity);
             
             fclose (curFile);
         }
@@ -144,7 +134,7 @@ int main(int argc, char **argv){
     }
     
     realRat_poly_clear(p);
-    compRat_poly_clear(p_global);
+//     compRat_poly_clear(p_global);
     realRat_clear(eps);
     compBox_clear(bInit);
     

@@ -13,7 +13,9 @@
 
 // #include <pthread.h>
 
-slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
+slong ccluster_discard_compBox_list( compBox_list_t boxes, 
+                                     compBox_list_t bDiscarded,
+                                     cacheApp_t cache, 
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta){
     
@@ -48,8 +50,13 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
         
         /* Real Coeffs */
         if (( metadatas_useRealCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
-            compBox_clear(btemp);
-            ccluster_free(btemp);
+//             printf("ici\n");
+//             if (metadatas_getDrSub(meta)==0){
+                compBox_clear(btemp);
+                ccluster_free(btemp);
+//             } else {
+//                 compBox_list_push(bDiscarded, btemp);
+//             }
             continue;
         }
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
@@ -120,8 +127,12 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
             if (metadatas_haveToCount(meta)){
                 metadatas_add_discarded( meta, depth);
             }
-            compBox_clear(btemp);
-            ccluster_free(btemp);
+            if (metadatas_getDrSub(meta)==0){
+                compBox_clear(btemp);
+                ccluster_free(btemp);
+            } else {
+                compBox_list_push(bDiscarded, btemp);
+            }
         }
         
         else{
@@ -186,7 +197,13 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache,
     return res.appPrec;
 }
 
-void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t discardedCcs, cacheApp_t cache, metadatas_t meta, slong nbThreads){
+void ccluster_bisect_connCmp( connCmp_list_t dest, 
+                              connCmp_t cc, 
+                              connCmp_list_t discardedCcs, 
+                              compBox_list_t bDiscarded, 
+                              cacheApp_t cache, 
+                              metadatas_t meta, 
+                              slong nbThreads){
     
     slong prec = connCmp_appPr(cc);
     compBox_list_t subBoxes;
@@ -244,12 +261,12 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
 //             printf("--ccluster_parallel_bisect_connCmp: depth: %d, nb threads: %d, nbboxes: %d\n", (int) depth, (int) nbThreads, compBox_list_get_size(subBoxes) );
 //         }
 //         clock_t start=clock();
-        prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
+        prec = ccluster_discard_compBox_list( subBoxes, bDiscarded, cache, prec, meta);
 //         if (metadatas_getVerbo(meta)>1)
 //             printf(" nb of clicks            : %f\n", (double) (clock() - start)/CLOCKS_PER_SEC );
     }
 #else
-    prec = ccluster_discard_compBox_list( subBoxes, cache, prec, meta);
+    prec = ccluster_discard_compBox_list( subBoxes, bDiscarded, cache, prec, meta);
 #endif
     
     while (!compBox_list_is_empty(subBoxes)) {
@@ -307,7 +324,12 @@ void ccluster_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_list_t 
     connCmp_list_clear(ltemp);
 }
 
-void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, connCmp_list_t discardedCcs, cacheApp_t cache, metadatas_t meta) {
+void ccluster_prep_loop( compBox_list_t bDiscarded,
+                         connCmp_list_t qMainLoop, 
+                         connCmp_list_t qPrepLoop, 
+                         connCmp_list_t discardedCcs, 
+                         cacheApp_t cache, 
+                         metadatas_t meta) {
     
     connCmp_list_t ltemp;
     realRat_t halfwidth, diam;
@@ -328,7 +350,7 @@ void ccluster_prep_loop( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop, con
         if ( connCmp_is_confined(ctemp, metadatas_initBref(meta)) && (realRat_cmp(diam, halfwidth)<0) )
             connCmp_list_insert_sorted(qMainLoop, ctemp);
         else {
-            ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
+            ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, bDiscarded, cache, meta, metadatas_useNBThreads(meta));
             
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
@@ -357,7 +379,13 @@ int  ccluster_compDsk_is_separated( const compDsk_t d, connCmp_list_t qMainLoop,
     return res;
 }
                          
-void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+void ccluster_main_loop( connCmp_list_t qResults,  
+                         compBox_list_t bDiscarded,
+                         connCmp_list_t qMainLoop, 
+                         connCmp_list_t discardedCcs, 
+                         const realRat_t eps, 
+                         cacheApp_t cache, 
+                         metadatas_t meta){
     
     int separationFlag;
     int widthFlag;
@@ -650,13 +678,13 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
 //             if (connCmp_nSols(ccur)==0) 
 //                 printf("ici\n");
 #ifdef CCLUSTER_HAVE_PTHREAD
-            ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
+            ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cache, meta, metadatas_useNBThreads(meta));
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
             ccluster_free(ccur);
 #else
-            ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
+            ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
@@ -675,7 +703,12 @@ void ccluster_main_loop( connCmp_list_t qResults,  connCmp_list_t qMainLoop, con
     connCmp_list_clear(ltemp);
 }
 
-void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+void ccluster_algo( connCmp_list_t qResults, 
+                    compBox_list_t bDiscarded, 
+                    const compBox_t initialBox, 
+                    const realRat_t eps, 
+                    cacheApp_t cache, 
+                    metadatas_t meta){
     
 //     chronos_tic_CclusAl(metadatas_chronref(meta));
     clock_t start = clock();
@@ -701,9 +734,9 @@ void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const r
     
     connCmp_list_push(qPrepLoop, initialCC);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
-    ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
+    ccluster_prep_loop( bDiscarded, qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
-    ccluster_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    ccluster_main_loop( qResults, bDiscarded, qMainLoop, discardedCcs, eps, cache, meta);
     
     
     realRat_clear(factor);
@@ -715,7 +748,12 @@ void ccluster_algo( connCmp_list_t qResults, const compBox_t initialBox, const r
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
-void ccluster_algo_global( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+void ccluster_algo_global( connCmp_list_t qResults, 
+                           compBox_list_t bDiscarded,
+                           const compBox_t initialBox, 
+                           const realRat_t eps, 
+                           cacheApp_t cache, 
+                           metadatas_t meta){
     
     clock_t start = clock();
     
@@ -742,7 +780,7 @@ void ccluster_algo_global( connCmp_list_t qResults, const compBox_t initialBox, 
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
 //     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
-    ccluster_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    ccluster_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, meta);
     
     
 //     realRat_clear(factor);
@@ -770,7 +808,7 @@ void ccluster_refine( connCmp_list_t qResults,
     connCmp_list_t discardedCcs;
     connCmp_list_init(discardedCcs);
 
-    ccluster_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    ccluster_main_loop( qResults,  NULL, qMainLoop, discardedCcs, eps, cache, meta);
     
     connCmp_list_clear(discardedCcs);
     
@@ -792,7 +830,7 @@ void connCmp_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta){
 //     sprintf(temp, "%d", connCmp_nSols(c));
 //     for (int i = lens; i<=lensols; i++) sprintf(temp2, " ");
 //     fprintf(f, "--cluster with %s sols: ", temp);
-    fprintf(f, "--cluster with %5d sols: ", connCmp_nSols(c));
+    fprintf(f, "#--cluster with %5d sols: ", connCmp_nSols(c));
     
     connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
     compBox_get_containing_dsk( containingDisk, containingBox);
@@ -830,6 +868,77 @@ void connCmp_list_print_for_results(FILE * f, const connCmp_list_t l, metadatas_
     
     while (it!=connCmp_list_end() ) {
         connCmp_print_for_results(f, connCmp_list_elmt(it), meta);
+        it = connCmp_list_next(it);
+        fprintf(f, "\n");
+    }
+}
+
+void connCmp_print_for_results_withOutput(FILE * f, const connCmp_t c, int output, metadatas_t meta){
+    
+    compBox_t containingBox;
+    compBox_init(containingBox);
+    compDsk_t containingDisk;
+    compDsk_init(containingDisk);
+    
+//     int lensols = (int) log10(metadatas_getNbSolutions(meta)) +1;
+//     int lens = (int) log10(connCmp_nSols(c)) +1;
+//     char temp[100], temp2[100];
+//     sprintf(temp, "%d", connCmp_nSols(c));
+//     for (int i = lens; i<=lensols; i++) sprintf(temp2, " ");
+//     fprintf(f, "--cluster with %s sols: ", temp);
+    if (connCmp_nSols(c) <= (10^6)-1)
+        fprintf(f, "#--cluster with %5d sols: ", connCmp_nSols(c));
+    else
+        fprintf(f, "#--cluster with %d sols: ", connCmp_nSols(c));
+    
+    connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
+    compBox_get_containing_dsk( containingDisk, containingBox);
+    
+    if (output == -1) { /* rational output */
+        fprintf(f, "center: ");
+        realRat_print(compRat_realref(compDsk_centerref(containingDisk)));
+        fprintf(f, " + ");
+        realRat_print(compRat_imagref(compDsk_centerref(containingDisk)));
+        fprintf(f, "j\n#%26s radius: ", " ");
+        realRat_print(compDsk_radiusref(containingDisk));
+    } else if (output>0) {
+    
+        int coeff = 4; /* = ceil(log(10)/log(2)) */
+        slong prec = coeff*output; 
+        
+        realApp_t cRe, cIm, rad;
+        realApp_init(cRe);
+        realApp_init(cIm);
+        realApp_init(rad);
+        
+        realApp_set_realRat(cRe, compRat_realref(compDsk_centerref(containingDisk)), prec);
+        realApp_set_realRat(cIm, compRat_imagref(compDsk_centerref(containingDisk)), prec);
+        realApp_set_realRat(rad, compDsk_radiusref(containingDisk), prec);
+        
+        
+    //     printf("d: %d, prec: %d\n", (int) d, (int) p);
+        fprintf(f, "center: ");
+        realApp_fprintn(f, cRe, output, ARB_STR_MORE);
+        fprintf(f, " + ");
+        realApp_fprintn(f, cIm, output, ARB_STR_MORE);
+        fprintf(f, "j\n#%26s radius: ", " ");
+        realApp_fprintn(f, rad, 5, ARB_STR_MORE);
+        
+        realApp_clear(cRe);
+        realApp_clear(cIm);
+        realApp_clear(rad);
+    
+    }
+    
+    compBox_clear(containingBox);
+    compDsk_clear(containingDisk);
+}
+
+void connCmp_list_print_for_results_withOutput(FILE * f, const connCmp_list_t l, int output, metadatas_t meta){
+    connCmp_list_iterator it = connCmp_list_begin(l);
+    
+    while (it!=connCmp_list_end() ) {
+        connCmp_print_for_results_withOutput(f, connCmp_list_elmt(it), output, meta);
         it = connCmp_list_next(it);
         fprintf(f, "\n");
     }

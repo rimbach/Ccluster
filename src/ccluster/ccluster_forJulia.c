@@ -39,7 +39,7 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo( qResults, initialBox, eps, cache, meta);
+    ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -90,7 +90,7 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo_global( qResults, initialBox, eps, cache, meta);
+    ccluster_algo_global( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -132,7 +132,7 @@ void ccluster_forJulia_compRat_poly( connCmp_list_t qResults,
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo( qResults, initialBox, eps, cache, meta);
+    ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -184,7 +184,7 @@ void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults,
     
     metadatas_init(meta, initialBox, strat, verb);
     
-    ccluster_algo( qResults, initialBox, eps, cache, meta);
+    ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -347,7 +347,7 @@ int ccluster_global_forJulia_forTcluster_func( connCmp_list_t qResults,
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo_global( qResults, initialBox, eps, cache, meta);
+    ccluster_algo_global( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -394,7 +394,8 @@ void ccluster_forJulia_draw( connCmp_list_t qResults,
     
     metadatas_init(meta, initialBox, strat, verb);
     
-    ccluster_algo_draw( qResults, qDiscarded, initialBox, eps, cache, meta);
+//     ccluster_algo_draw( qResults, qDiscarded, initialBox, eps, cache, meta);
+    ccluster_algo( qResults, qDiscarded, initialBox, eps, cache, meta);
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     if (verb>=3) {
@@ -436,7 +437,7 @@ void ccluster_interface_forJulia ( connCmp_list_t qResults,
     
     metadatas_init(meta, initialBox, strat, verb);
     
-    ccluster_algo( qResults, initialBox, eps, cache, meta);
+    ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -480,7 +481,8 @@ void ccluster_interface_forJulia_draw( connCmp_list_t qResults,
     
     metadatas_init(meta, initialBox, strat, verb);
     
-    ccluster_algo_draw( qResults, qDiscarded, initialBox, eps, cache, meta);
+//     ccluster_algo_draw( qResults, qDiscarded, initialBox, eps, cache, meta);
+    ccluster_algo( qResults, qDiscarded, initialBox, eps, cache, meta);
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     if (verb>=3) {
@@ -555,7 +557,7 @@ void ccluster_interface_forJulia_compRat_poly( connCmp_list_t qResults,
     
     metadatas_init(meta, initialBox, strat, verb);
     
-    ccluster_algo( qResults, initialBox, eps, cache, meta);
+    ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);

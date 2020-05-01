@@ -21,6 +21,7 @@
 #include "acb_poly.h"
 #include "base/base.h"
 #include "numbers/compApp.h"
+#include "polynomials/realApp_poly.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,6 +63,8 @@ POLYNOMIALS_INLINE void compApp_poly_one (compApp_poly_t poly) { acb_poly_one (p
 POLYNOMIALS_INLINE void compApp_poly_set (compApp_poly_t dest, const compApp_poly_t src) { acb_poly_set (dest, src); }
 POLYNOMIALS_INLINE void compApp_poly_set_coeff_si (compApp_poly_t dest, slong n, slong x)           { acb_poly_set_coeff_si (dest, n, x); }
 POLYNOMIALS_INLINE void compApp_poly_set_coeff_compApp(compApp_poly_t dest, slong n, const compApp_t x) { acb_poly_set_coeff_acb(dest, n, x); }
+
+POLYNOMIALS_INLINE void compApp_poly_set_realApp_poly(compApp_poly_t dest, const realApp_poly_t x) { acb_poly_set_arb_poly(dest, x); }
 
 POLYNOMIALS_INLINE void compApp_poly_set_fmpq_poly(compApp_poly_t poly, const fmpq_poly_t re, slong prec) {
     acb_poly_set_fmpq_poly(poly, re, prec);
