@@ -70,14 +70,14 @@ int main(int argc, char **argv){
     for (int arg = 2; arg< argc; arg++) {
         
         if ( (strcmp( argv[arg], "-v" ) == 0) || (strcmp( argv[arg], "--verbose" ) == 0) ) {
-            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
+            if (argc>arg+1) {
                 parse = parse*scan_verbosity(argv[arg+1], &verbosity );
                 arg++;
             }
         }
         
         if ( (strcmp( argv[arg], "-d" ) == 0) || (strcmp( argv[arg], "--domain" ) == 0) ) {
-            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
+            if (argc>arg+1) {
                 global = scan_initialBox( argv[arg+1], bInit );
                 parse = parse*global;
                 arg++;
@@ -85,7 +85,7 @@ int main(int argc, char **argv){
         }
         
         if ( (strcmp( argv[arg], "-e" ) == 0) || (strcmp( argv[arg], "--epsilon" ) == 0) ) {
-            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
+            if (argc>arg+1) {
                 infinity = scan_epsilon( argv[arg+1], eps );
                 parse = parse*infinity;
                 arg++;
@@ -93,14 +93,14 @@ int main(int argc, char **argv){
         }
         
         if ( (strcmp( argv[arg], "-o" ) == 0) || (strcmp( argv[arg], "--output" ) == 0) ) {
-            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
+            if (argc>arg+1) {
                 parse = parse*scan_output(argv[arg+1], &output);
                 arg++;
             }
         }
         
         if ( (strcmp( argv[arg], "-j" ) == 0)  ) {
-            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
+            if (argc>arg+1) {
                 parse = parse*scan_nbthreads(argv[arg+1], &nbthreads);
 //                 printf("nb threads: %d\n", nbthreads);
                 arg++;
@@ -108,7 +108,7 @@ int main(int argc, char **argv){
         }
         
         if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mode" ) == 0) ) {
-            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
+            if (argc>arg+1) {
 //                 parse = parse*scan_strategy( argv[arg+1], st );
                 st = argv[arg+1];
                 arg++;
