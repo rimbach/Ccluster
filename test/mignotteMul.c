@@ -45,6 +45,7 @@ int main(int argc, char **argv){
     int power;
     char * st;
     int verbosity;
+    int output = 16;
     
     compBox_t bInit;
     realRat_t eps;
@@ -72,7 +73,7 @@ int main(int argc, char **argv){
         compRat_poly_set_realRat_poly(p_global,pmign);
     
 //         ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
-        ccluster_interface_func( getApprox, bInit, eps, st, 1, verbosity);
+        ccluster_interface_func( getApprox, bInit, eps, st, 1, output, verbosity);
     }
     
     realRat_poly_clear(pmign);

@@ -77,6 +77,7 @@ int main(int argc, char **argv){
     char * st;
     int verbosity;
     int nbthreads = 1;
+    int output = 16;
     
     compBox_t bInit;
     realRat_t eps;

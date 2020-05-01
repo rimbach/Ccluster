@@ -12,6 +12,16 @@ build: ccluster\
        risolate\
        genPolFile
 
+# TESTING VARIABLES
+degree=64
+bitsize=14
+poly=Mignotte
+file=${poly}"_"${degree}"_"${bitsize}".ccl"
+
+test: build
+	./genPolFile ${poly} 1 ${degree} ${bitsize} ${file}
+	./ccluster ${file}
+
 #==================================================
 # HOUSEKEEPING 
 #==================================================
