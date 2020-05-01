@@ -27,6 +27,8 @@
 #include "tstar/tstar.h"
 #include "newton/newton.h"
 // #include "powerSums/powerSums.h"
+#include "geometry/compAnn.h"
+#include "rootRadii/realIntRootRadii.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include "ccluster/parallel_discard.h"
@@ -37,6 +39,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+void risolate_compBox_get_containing_dsk( compDsk_t d, const compBox_t b);
 
 slong risolate_discard_compBox_list( compBox_list_t boxes, 
                                      cacheApp_t cache, 
@@ -74,6 +78,27 @@ void risolate_prep_loop( connCmp_list_t qMainLoop,
 			             connCmp_list_t discardedCcs, 
 			             cacheApp_t cache, 
 			             metadatas_t meta);
+
+void risolate_prep_loop_rootRadii( connCmp_list_t qCover, 
+                                   const compBox_t initialBox,
+                                   const compAnn_list_t annulii,
+                                   cacheApp_t cache, 
+                                   metadatas_t meta);
+/*
+void risolate_prep_loop_rootRadii2( connCmp_list_t qCover, 
+                                   const compBox_t initialBox,
+                                   cacheApp_t cache, 
+                                   metadatas_t meta);*/
+
+slong risolate_exclusion_rootRadii( connCmp_list_t qCover,
+                                   cacheApp_t cache, 
+                                   metadatas_t meta);
+
+void risolate_algo_global_rootRadii( connCmp_list_t qResults, 
+                                     const compBox_t initialBox, 
+                                     const realRat_t eps, 
+                                     cacheApp_t cache, 
+                                     metadatas_t meta);
 
 /* INTERFACES */
 

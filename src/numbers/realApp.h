@@ -51,6 +51,8 @@ NUMBERS_INLINE int realApp_lt(const realApp_t x, const realApp_t y) { return arb
 NUMBERS_INLINE int realApp_le(const realApp_t x, const realApp_t y) { return arb_le(x,y); }
 NUMBERS_INLINE int realApp_gt(const realApp_t x, const realApp_t y) { return arb_gt(x,y); }
 NUMBERS_INLINE int realApp_ge(const realApp_t x, const realApp_t y) { return arb_ge(x,y); }
+NUMBERS_INLINE int realApp_is_negative(const realApp_t x) { return arb_is_negative(x); }
+NUMBERS_INLINE int realApp_is_positive(const realApp_t x) { return arb_is_positive(x); }
 
 /* ball operations */
 NUMBERS_INLINE int  realApp_is_finite(const realApp_t x) { return arb_is_finite( x ); }
@@ -73,6 +75,9 @@ NUMBERS_INLINE void realApp_add_error(realApp_t z, const realApp_t x) { arb_add_
 /* interval operations */
 NUMBERS_INLINE int  realApp_intersection(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { 
     return arb_intersection( z, x, y, prec ); 
+}
+NUMBERS_INLINE void  realApp_union(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { 
+    arb_union( z, x, y, prec ); 
 }
 NUMBERS_INLINE int realApp_contains (const realApp_t x, const realApp_t y) {
     return arb_contains(x,y);

@@ -33,6 +33,7 @@ void risolate_interface_poly( const realRat_poly_t poly,
     
     
     cacheApp_init_realRat_poly ( cache, poly);
+    cacheApp_canonicalise( cache );
     strategies_init(strat);
     
     strategies_set_str( strat, stratstr, nbThreads );
@@ -99,6 +100,7 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     connCmp_list_t qRes;
     
     cacheApp_init_realRat_poly ( cache, poly);
+    cacheApp_canonicalise( cache );
     strategies_init(strat);
     
     /* automaticly set initialBox */
@@ -112,8 +114,6 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
     strategies_set_str( strat, stratstr, nbThreads );
-    
-    connCmp_list_init(qRes);
     
     metadatas_init(meta, initialBox, strat, verb);
 //     /* initialize power sums */
@@ -129,10 +129,15 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     }
     metadatas_setSepBound(meta, sepBound);
     
+    connCmp_list_init(qRes);
+    
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    risolate_algo_global( qRes, initialBox, eps, cache, meta);
+    if (metadatas_useRootRadii(meta)) 
+        risolate_algo_global_rootRadii( qRes, initialBox, eps, cache, meta);
+    else
+        risolate_algo_global( qRes, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
 //     metadatas_fprint(stdout, meta, eps);
@@ -153,6 +158,21 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
 //         connCmp_list_risolate_print_for_results(stdout, qRes, meta);
         connCmp_list_risolate_print_for_results_withOutput(stdout, qRes, output, meta);
     }
+    
+//     if (metadatas_useRootRadii(meta)){
+//         compBox_clear_annuli(initialBox);
+//         compAnn_list_clear(annulii);
+//         /* have to clear annulii in qRes */
+//         connCmp_list_iterator it = connCmp_list_begin(qRes);
+//         while ( it!=connCmp_list_end() ){
+//             compBox_list_iterator itb = compBox_list_begin( connCmp_boxesref( connCmp_list_elmt(it) ) );
+//             while ( itb!=compBox_list_end() ){
+//                 compBox_clear_annuli(compBox_list_elmt(itb));
+//                 itb = compBox_list_next(itb);
+//             }
+//             it = connCmp_list_next(it);
+//         }
+//     }
     
     realRat_clear(sepBound);
     cacheApp_clear(cache);

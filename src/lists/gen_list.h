@@ -51,11 +51,18 @@ void gen_list_swap(gen_list_t l1, gen_list_t l2);
 void gen_list_clear(gen_list_t l);
 void gen_list_clear_for_tables(gen_list_t l);
 
+/* empty the list with NO delete of elements */
+void gen_list_empty(gen_list_t l);
+/* copy the list, not the elements */
+void gen_list_copy(gen_list_t ltarget, const gen_list_t lsrc);
+
 void gen_list_push(gen_list_t l, void * data);
 
 void * gen_list_pop(gen_list_t l);
 
 void * gen_list_first(gen_list_t l);
+
+void * gen_list_last(gen_list_t l);
 
 /* do not check bound!!! */
 void * gen_list_data_at_index(const gen_list_t l, int index);

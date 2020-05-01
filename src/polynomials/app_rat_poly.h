@@ -75,6 +75,9 @@ void compApp_poly_taylorShift( compApp_poly_t res,
                                const realRat_t radius, 
                                slong prec );
 
+/* evaluate at order 1 on an interval geven by center + width */
+void realApp_poly_evaluate_order_one( realApp_t y, const realApp_poly_t f, const realApp_poly_t fder, const realRat_t c, const realRat_t w, slong prec);
+
 /*void compApp_poly_taylorShift_in_place_new( compApp_poly_t f, const realRat_t creal, const realRat_t cimag, const realRat_t radius, slong prec );*/
 void compApp_poly_taylor_shift_convolution_without_pre(compApp_poly_t dest, const compApp_poly_t p, 
                                                        realApp_t f, compApp_ptr t, 

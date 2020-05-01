@@ -20,6 +20,9 @@
 
 #include "numbers/realRat.h"
 #include "numbers/compRat.h"
+#include "geometry/compAnn.h"
+#include "lists/compAnn_list.h"
+#include "numbers/app_rat.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,6 +32,9 @@ typedef struct {
     compRat center;
     realRat bwidth;
     int     nbMSol;
+    /* when root radii are used */
+    compAnn_list annuli; /*list of pointers on annulii having a non-empty intersection with the 
+                              containing disk of the box */
 } compBox;
 
 typedef compBox compBox_t[1];
@@ -37,6 +43,7 @@ typedef compBox * compBox_ptr;
 #define compBox_centerref(X) (&(X)->center)
 #define compBox_bwidthref(X) (&(X)->bwidth)
 #define compBox_nbMSolref(X) (X->nbMSol)
+#define compBox_annuliref(X) (&(X)->annuli)
 
 slong compBox_getDepth(const compBox_t b, const compBox_t initialBox);
 
@@ -47,9 +54,29 @@ GEOMETRY_INLINE void compBox_init(compBox_t x) {
 /*     x->nbMSol=-1;*/
 }
 
+GEOMETRY_INLINE void compBox_init_annuli(compBox_t x) { 
+    compAnn_list_init(compBox_annuliref(x));
+}
+
+GEOMETRY_INLINE void compBox_copy_annuli(compBox_t x, const compAnn_list_t anulii) { 
+    compAnn_list_copy( compBox_annuliref(x), anulii);
+}
+
+/* assume lmother contains anulii in increasing order of their radii */
+/* assume compBox_annuliref(X) is initialized and empty*/
+void compBox_actualize_anulii( compBox_t x, const compAnn_list_t lmother );
+
+void compBox_actualize_anulii_risolate( compBox_t x, const compAnn_list_t lmother );
+
 GEOMETRY_INLINE void compBox_clear(compBox_t x) { 
     compRat_clear(compBox_centerref(x)); 
     realRat_clear(compBox_bwidthref(x));
+}
+
+/* do NOT delete the annulii !!! */
+GEOMETRY_INLINE void compBox_clear_annuli(compBox_t x) { 
+    compAnn_list_empty(compBox_annuliref(x));
+    compAnn_list_clear(compBox_annuliref(x));
 }
 
 /* members access */

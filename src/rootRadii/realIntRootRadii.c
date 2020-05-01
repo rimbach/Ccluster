@@ -9,9 +9,9 @@
 /*  (at your option) any later version.  See <http://www.gnu.org/licenses/>.  */
 /* ************************************************************************** */
 
-#include "realRootRadii.h"
+#include "realIntRootRadii.h"
 
-void realRootRadii_getApproximation( realApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta){
+void realIntRootRadii_getApproximation( realApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta){
         clock_t start = clock();
 
         realApp_poly_set(res, cacheApp_getApproximation_real ( cache, prec ));
@@ -21,7 +21,7 @@ void realRootRadii_getApproximation( realApp_poly_t res, cacheApp_t cache, slong
         
 }
 
-void realRootRadii_graeffe_iterations_inplace( realApp_poly_t res, int N, slong prec, metadatas_t meta){
+void realIntRootRadii_graeffe_iterations_inplace( realApp_poly_t res, int N, slong prec, metadatas_t meta){
     
         clock_t start = clock();
         for(int i = 0; i < N; i++)
@@ -37,7 +37,7 @@ void realRootRadii_graeffe_iterations_inplace( realApp_poly_t res, int N, slong 
 /* returns 1 if yes */
 /*         0 if no  */
 /*        -1 if it can not be decided */
-int realRootRadii_liesBelow( slong i, const realApp_t absPi,
+int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
                              slong j, const realApp_t absPj,
                              slong k, const realApp_t absPk,
                              slong prec ){
@@ -49,7 +49,7 @@ int realRootRadii_liesBelow( slong i, const realApp_t absPi,
     /*  <=> decide if |pj|^(k-i) * |pi|^(j-i) - |pk|^(j-i) * |pi|^(k-i) <= 0                 */
     /*                left side of inequality is integer                                     */
     
-//     printf( "realRootRadii.c , realRootRadii_liesBelow: i: %ld, j:%ld, k:%ld \n", i, j, k);
+//     printf( "realIntRootRadii.c , realIntRootRadii_liesBelow: i: %ld, j:%ld, k:%ld \n", i, j, k);
     ulong kmi = k-i;
     ulong jmi = j-i;
     realApp_t leftSide, rightSide, temp;
@@ -66,7 +66,7 @@ int realRootRadii_liesBelow( slong i, const realApp_t absPi,
     realApp_mul   (rightSide, rightSide, temp,      prec);
     realApp_sub   (leftSide,  leftSide,  rightSide, prec);
     
-//     printf( "realRootRadii.c , realRootRadii_liesBelow: leftSide: ");
+//     printf( "realIntRootRadii.c , realIntRootRadii_liesBelow: leftSide: ");
 //     realApp_printd(leftSide, 10);
 //     printf("\n");
     
@@ -90,7 +90,7 @@ int realRootRadii_liesBelow( slong i, const realApp_t absPi,
     realApp_clear(rightSide);
     realApp_init(temp);
 
-//     printf( "realRootRadii.c , realRootRadii_liesBelow: leq 0: %d \n", res);
+//     printf( "realIntRootRadii.c , realIntRootRadii_liesBelow: leq 0: %d \n", res);
     
     return res;
 }
@@ -98,7 +98,7 @@ int realRootRadii_liesBelow( slong i, const realApp_t absPi,
 /* assume convexHull is already initialized, and contains enough space for a convex hull of len points */
 /* returns 0 if needs more precision on the coeffs */
 /* otherwise returns the length of the convex hull */
-slong realRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec ){
+slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec ){
     
     slong res = 0;
     /* push two first points */
@@ -110,7 +110,7 @@ slong realRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs,
     for (slong i = 2; i<len; i++){
         int liesBelow = 1;
         while ((res >= 2) && (liesBelow==1) ) {
-            liesBelow = realRootRadii_liesBelow( convexHull[res-2], abscoeffs + convexHull[res-2], 
+            liesBelow = realIntRootRadii_liesBelow( convexHull[res-2], abscoeffs + convexHull[res-2], 
                                                  convexHull[res-1], abscoeffs + convexHull[res-1],
                                                  i,     abscoeffs + i, 
                                                  prec);
@@ -121,7 +121,7 @@ slong realRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs,
                 return res;
             }
         }
-//         printf("realRootRadii.c , realRootRadii_convexHull: res: %ld\n", res);
+//         printf("realIntRootRadii.c , realIntRootRadii_convexHull: res: %ld\n", res);
         convexHull[res] = i;
         res++;
     }
@@ -129,7 +129,7 @@ slong realRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs,
     return res;
 }
 
-slong realRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
+slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
                                cacheApp_t cache,        /* polynomial */
                                const realRat_t delta){
     
@@ -147,7 +147,7 @@ slong realRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
     log2_1pdelta = log2_1pdelta / log(2);
     int N = (int) ceil( log2( log2(2*degree)/log2_1pdelta ) );
     
-    printf("realRootRadii.c; realRootRadii_rootRadii : number of Graeffe iterations: %d \n", N);
+    printf("realIntRootRadii.c; realIntRootRadii_rootRadii : number of Graeffe iterations: %d \n", N);
     
     slong lenCh = 0;
     slong * convexHull = (slong *) ccluster_malloc ( (degree+1)*sizeof(slong) );
@@ -158,25 +158,25 @@ slong realRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
     
     while ( lenCh == 0 ) {
         
-        //     realRootRadii_getApproximation( pApprox, cache, prec, meta );
+        //     realIntRootRadii_getApproximation( pApprox, cache, prec, meta );
         realApp_poly_set(pApprox, cacheApp_getApproximation_real ( cache, prec ));
-        //  realRootRadii_graeffe_iterations_inplace( pApprox, N, prec, meta);
+        //  realIntRootRadii_graeffe_iterations_inplace( pApprox, N, prec, meta);
         for(int i = 0; i < N; i++)
             realApp_poly_oneGraeffeIteration_in_place( pApprox, prec );
         /* compute abs of coeffs */
         for(slong i = 0; i <= degree; i++)
             realApp_abs( (pApprox->coeffs)+i, (pApprox->coeffs)+i );
         /* compute convex hull */
-        lenCh = realRootRadii_convexHull( convexHull, (pApprox->coeffs), degree+1, prec );
+        lenCh = realIntRootRadii_convexHull( convexHull, (pApprox->coeffs), degree+1, prec );
         
         if (lenCh==0) /* double precision */
             prec = 2*prec;
     }
     
-    printf(" Convex hull: %ld vertices: ", lenCh );
-    for (slong ind = 0; ind < lenCh; ind++)
-        printf("%ld, ", convexHull[ind]);
-    printf("\n");
+//     printf(" Convex hull: %ld vertices: ", lenCh );
+//     for (slong ind = 0; ind < lenCh; ind++)
+//         printf("%ld, ", convexHull[ind]);
+//     printf("\n");
     
     /* create list of annulii */
     compAnn_ptr cur;
@@ -214,7 +214,7 @@ slong realRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
     return prec;
 }
 
-void realRootRadii_connectedComponents( compAnn_list_t annulii, slong prec ){
+void realIntRootRadii_connectedComponents( compAnn_list_t annulii, slong prec ){
     
     compAnn_ptr cur, curnext;
     compAnn_list_iterator it, itnext;
@@ -249,7 +249,7 @@ void realRootRadii_connectedComponents( compAnn_list_t annulii, slong prec ){
     
 }
 
-void realRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache, slong prec ){
+void realIntRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache, slong prec ){
     
     compAnn_ptr cur;
     compAnn_list_iterator it;
@@ -257,7 +257,7 @@ void realRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache, s
     slong degree = cacheApp_getDegree(cache);
     realApp_poly_t pApprox;
     realApp_poly_init2(pApprox,degree+1);
-    //     realRootRadii_getApproximation( pApprox, cache, prec, meta );
+    //     realIntRootRadii_getApproximation( pApprox, cache, prec, meta );
     realApp_poly_set(pApprox, cacheApp_getApproximation_real ( cache, prec ));
     
     realApp_t centerLeft, centerLeftVal, centerRight, centerRightVal;
@@ -265,6 +265,12 @@ void realRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache, s
     realApp_init(centerLeftVal);
     realApp_init(centerRight);
     realApp_init(centerRightVal);
+    
+//     realApp_poly_t pApproxDer;
+//     realApp_poly_init2(pApproxDer,degree);
+//     realApp_poly_derivative(pApproxDer, pApprox);
+    realApp_t interval;
+    realApp_init(interval);
     
     it = compAnn_list_begin(annulii);
     while (it!=compAnn_list_end() ) {
@@ -303,15 +309,98 @@ void realRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache, s
                 }
                 /* else can not decide */
             }
+        } else { /* try interval evaluations */
+            realApp_get_mid_realApp( centerLeft, compAnn_radInfref(cur) );
+            realApp_get_mid_realApp( centerRight, compAnn_radSupref(cur) );
+            realApp_union(interval, centerLeft, centerRight, prec);
+            realApp_poly_evaluate(interval, pApprox, interval, prec);
+            if (realApp_contains_zero(interval)==0)
+                compAnn_rrInPoref(cur) = 0;
+            
+            realApp_neg( centerLeft, centerLeft );
+            realApp_neg( centerRight, centerRight ); /* no need to swap */
+            realApp_union(interval, centerLeft, centerRight, prec);
+            realApp_poly_evaluate(interval, pApprox, interval, prec);
+            if (realApp_contains_zero(interval)==0)
+                compAnn_rrInNeref(cur) = 0;
         }
         it = compAnn_list_next(it);
     }
     
     realApp_poly_clear(pApprox);
+//     realApp_poly_clear(pApproxDer);
+    realApp_clear(interval);
     
     realApp_clear(centerLeft);
     realApp_clear(centerLeftVal);
     realApp_clear(centerRight);
     realApp_clear(centerRightVal);
     
+}
+
+void realIntRootRadii_bisect_connCmp( connCmp_list_t dest, 
+                                      connCmp_t cc){
+    
+    compBox_list_t subBoxes;
+    compBox_list_init(subBoxes);
+    
+    compBox_ptr btemp, bstemp;
+    
+    while (!connCmp_is_empty(cc)) {
+        btemp = connCmp_pop(cc);
+        /* bisect */
+        subdBox_risolate_bisect( subBoxes, btemp );
+        /* remove boxes that do not intersect an annulus */
+        while (!compBox_list_is_empty(subBoxes)) {
+            bstemp = compBox_list_pop(subBoxes);
+            compBox_init_annuli(bstemp);
+            compBox_actualize_anulii_risolate( bstemp, compBox_annuliref(btemp) );
+            
+            int nbSol=-1;
+            if ( compAnn_list_get_size(compBox_annuliref(bstemp)) == 0 )
+                nbSol = 0;
+            if ( compAnn_list_get_size(compBox_annuliref(bstemp)) == 1 ) {
+                realApp_t center;
+                realApp_t left, right, rad;
+                realApp_init(center);
+                realApp_init(left);
+                realApp_init(right);
+                realApp_init(rad);
+                
+                realApp_set_realRat( center, compRat_realref(compBox_centerref(bstemp)), CCLUSTER_DEFAULT_PREC );
+                realApp_set_realRat( rad,    compBox_bwidthref(bstemp), CCLUSTER_DEFAULT_PREC );
+                realApp_div_si     ( rad,    rad,                  2, CCLUSTER_DEFAULT_PREC );
+                realApp_sub        ( left,   center,                 rad, CCLUSTER_DEFAULT_PREC );
+                realApp_add        ( right,  center,                 rad, CCLUSTER_DEFAULT_PREC );
+                
+                compAnn_ptr ann = compAnn_list_first( compBox_annuliref(bstemp) ); /* there is only one element in the list */
+                
+                if ( ( (realApp_is_positive(left)==1)  && (compAnn_rrInPoref(ann) == 0) ) ||
+                     ( (realApp_is_negative(right)==1)  && (compAnn_rrInNeref(ann) == 0) ) )
+                    nbSol=0;
+                
+                realApp_clear(center);
+                realApp_clear(left);
+                realApp_clear(right);
+                realApp_clear(rad);
+            }
+            
+            if (nbSol==0) { /* delete bstemp */
+                compBox_clear_annuli(bstemp);
+                compBox_clear(bstemp);
+                ccluster_free(bstemp);
+            } else {
+                connCmp_union_compBox( dest, bstemp);
+            }
+        }
+        
+        /* delete btemp */
+        compBox_clear_annuli(btemp);
+        compBox_clear(btemp);
+        ccluster_free(btemp);
+        
+        
+    }
+    
+    compBox_list_clear(subBoxes);
 }

@@ -11,6 +11,11 @@
 
 #include "risolate/risolate.h"
 
+void risolate_compBox_get_containing_dsk( compDsk_t d, const compBox_t b) {
+    compDsk_set_compRat_realRat(d, compBox_centerref(b), compBox_bwidthref(b) );
+    realRat_div_ui( compDsk_radiusref(d), compDsk_radiusref(d), 2 );
+}
+
 slong risolate_discard_compBox_list( compBox_list_t boxes, 
                                      cacheApp_t cache, 
                                      slong prec, 
@@ -31,30 +36,24 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
     while (!compBox_list_is_empty(boxes)){
         
         btemp = compBox_list_pop(boxes);
-        compBox_get_containing_dsk(bdisk, btemp);
+        
+        risolate_compBox_get_containing_dsk(bdisk, btemp);
+        /* compBox_get_containing_dsk(bdisk, btemp); */
+        
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
         metadatas_add_explored( meta, depth);
         
-//         /* Real Coeffs */
-//         if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
-//             compBox_clear(btemp);
-//             ccluster_free(btemp);
-//             continue;
-//         }
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
-           
-//             res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
-            res = tstar_real_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
+        
+        res = tstar_real_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
                 metadatas_add_discarded( meta, depth);
             }
+        
             compBox_clear(btemp);
             ccluster_free(btemp);
-        }
-        
-        else{
-            
+        } else {
                 if (res.nbOfSol>0)
                     btemp->nbMSol = res.nbOfSol;
                 compBox_list_push(ltemp, btemp);
@@ -83,13 +82,6 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
     compBox_ptr btemp;
     connCmp_ptr ctemp;
     
-//     /* RealCoeffs */
-//     int cc_contains_real_line = 0;
-//     /* Check if cc contains the real line */
-//     if ( (metadatas_realCoeffs(meta)) && (!connCmp_is_imaginary_positive(cc)) )
-//         cc_contains_real_line = 1;
-//     /* end RealCoeffs */
-    
     while (!connCmp_is_empty(cc)) {
         btemp = connCmp_pop(cc);
         subdBox_risolate_bisect( subBoxes, btemp );
@@ -106,16 +98,6 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
     int specialFlag = 1;
     if (connCmp_list_get_size(ltemp) == 1)
         specialFlag = 0;
-    
-//     /* RealCoeffs */
-//     if ( (metadatas_realCoeffs(meta)) && (connCmp_list_get_size(ltemp) == 1) && (cc_contains_real_line == 1) ){
-//         ctemp = connCmp_list_first(ltemp);
-//         /* test if cc has been separated from real case;
-//          in which case reset everything*/
-//         if ( connCmp_is_imaginary_positive(ctemp) )
-//             specialFlag = 1;
-//     }
-//     /* end RealCoeffs */
     
     slong nprec; 
     if (prec == connCmp_appPrref(cc)) {
@@ -193,6 +175,209 @@ void risolate_prep_loop( connCmp_list_t qMainLoop,
     realRat_clear(diam);
 }
 
+void risolate_prep_loop_rootRadii( connCmp_list_t qCover, 
+                                   const compBox_t initialBox,
+                                   const compAnn_list_t annulii,
+                                   cacheApp_t cache, 
+                                   metadatas_t meta) {
+    
+    connCmp_list_t qLoop, ltemp;
+    connCmp_ptr ccur;
+    compBox_ptr box;
+    compAnn_ptr ann;
+    
+    connCmp_list_init(qLoop);
+    connCmp_list_init(ltemp);
+    
+    box = (compBox_ptr) ccluster_malloc (sizeof(compBox));
+    compBox_init(box);
+    compBox_set(box, initialBox);
+    compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
+    compBox_init_annuli(box);
+    compBox_copy_annuli(box, annulii);
+    
+    ccur = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
+    connCmp_init_compBox(ccur, box);
+    connCmp_list_push(qLoop, ccur);
+    
+    compBox_list_iterator itb;
+    compAnn_list_ptr annl;
+    int intersectUniqueAnnulus = 0;
+    
+    while (!connCmp_list_is_empty(qLoop)) {
+          ccur = connCmp_list_pop(qLoop);
+          /* check if ccur intersects a unique annulus */  
+          itb = compBox_list_begin( connCmp_boxesref( ccur ) );
+          box = compBox_list_elmt( itb ) ;                     /* at least one box in ccur */
+          intersectUniqueAnnulus = (compAnn_list_get_size( compBox_annuliref( box ) ) == 1);
+          ann = compAnn_list_first(compBox_annuliref( box ));  /* box intersects at least one annulus */
+          itb = compBox_list_next( itb );
+          while ( ( intersectUniqueAnnulus == 1 ) && 
+                    (itb != compBox_list_end()   ) ) {
+              
+              box = compBox_list_elmt( itb ) ;
+              annl = compBox_annuliref( box ); 
+              intersectUniqueAnnulus = intersectUniqueAnnulus & (compAnn_list_get_size( annl ) == 1) ;
+              intersectUniqueAnnulus = intersectUniqueAnnulus & (compAnn_list_first(annl) == ann ) ;
+              itb = compBox_list_next( itb );
+          }
+          
+          if (intersectUniqueAnnulus==1) {
+              
+              itb  = compBox_list_begin( connCmp_boxesref( ccur ) );
+              box  = compBox_list_elmt( itb );
+              annl = compBox_annuliref( box );
+              ann  = compAnn_list_first(annl);
+              
+              /* transform ccur in a cc with a unique box */
+              box = (compBox_ptr) ccluster_malloc (sizeof(compBox));
+              compBox_init(box);
+              connCmp_risolate_componentBox( box, ccur, initialBox);
+              compBox_init_annuli(box);
+              compBox_copy_annuli(box, annl);
+              compBox_nbMSolref( box ) = compAnn_indMaxref(ann) - compAnn_indMinref(ann) + 1;
+              /*delete Ccur*/
+              while ( itb!=compBox_list_end() ){
+                compBox_clear_annuli(compBox_list_elmt(itb));
+                itb = compBox_list_next(itb);
+              }
+              connCmp_clear(ccur);
+              ccluster_free(ccur);
+              /* create the new connected component */
+              ccur = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
+              connCmp_init_compBox(ccur, box);
+              /*check if ccur contains a unique real root */
+              if ( (compAnn_indMaxref(ann)==compAnn_indMinref(ann)) && (compAnn_rrInPoref(ann)>-1) )
+                connCmp_nSolsref(ccur) = 1;
+                
+              /* push ccur in qCover */
+                connCmp_list_insert_sorted(qCover, ccur);
+              
+          } else { /* bisect ccur */
+                
+                realIntRootRadii_bisect_connCmp( ltemp, ccur);
+                while (!connCmp_list_is_empty(ltemp))
+                    connCmp_list_insert_sorted(qLoop, connCmp_list_pop(ltemp));
+                connCmp_clear(ccur);
+                ccluster_free(ccur);
+                
+          }
+    }
+    
+    connCmp_list_clear(ltemp);
+    connCmp_list_clear(qLoop);
+}
+
+// void risolate_prep_loop_rootRadii2( connCmp_list_t qCover, 
+//                                    const compBox_t initialBox,
+//                                    cacheApp_t cache, 
+//                                    metadatas_t meta){
+//     
+//     /* qCover contains a list of cc intersecting one annulus */
+//     connCmp_ptr ccur;
+//     connCmp_list_t ltemp;
+//     connCmp_list_init(ltemp);
+//     
+//     compBox_ptr box;
+//     compAnn_ptr ann;
+//     compBox_list_iterator itb;
+//     compAnn_list_ptr annl;
+//     
+//     while (!connCmp_list_is_empty(qCover)) {
+//         ccur = connCmp_list_pop(qCover);
+//         itb  = compBox_list_begin( connCmp_boxesref( ccur ) );
+//         box  = compBox_list_elmt( itb );
+//         annl = compBox_annuliref( box );
+//         ann  = compAnn_list_first(annl);
+//         /* transform ccur in a cc with a unique box */
+//         box = (compBox_ptr) ccluster_malloc (sizeof(compBox));
+//         compBox_init(box);
+//         connCmp_risolate_componentBox( box, ccur, initialBox);
+//         compBox_init_annuli(box);
+//         compBox_copy_annuli(box, annl);
+//         compBox_nbMSolref( box ) = compAnn_indMaxref(ann) - compAnn_indMinref(ann) + 1;
+//         /*delete Ccur*/
+//         while ( itb!=compBox_list_end() ){
+//           compBox_clear_annuli(compBox_list_elmt(itb));
+//           itb = compBox_list_next(itb);
+//         }
+//         connCmp_clear(ccur);
+//         ccluster_free(ccur);
+//         /* create the new connected component */
+//         ccur = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
+//         connCmp_init_compBox(ccur, box);
+//         /*check if ccur contains a unique real root */
+//         if (compAnn_rrInPoref(ann)>-1)
+//           connCmp_nSolsref(ccur) = 1;
+//           
+//         /* push ccur in ltemp */
+//         connCmp_list_insert_sorted(ltemp, ccur);
+//         
+//     }
+//     
+//     connCmp_list_swap(ltemp, qCover);
+//     connCmp_list_clear(ltemp);
+//     
+// }
+
+slong risolate_exclusion_rootRadii( connCmp_list_t qCover,
+                                   cacheApp_t cache, 
+                                   metadatas_t meta){
+    
+    connCmp_list_t ltemp;
+    connCmp_ptr ccur;
+    compBox_ptr box;
+    
+    compDsk_t ccDisk;
+    compDsk_init(ccDisk);
+    
+    connCmp_list_init(ltemp);
+    
+    slong depth = 0;
+    tstar_res res;
+    res.appPrec = CCLUSTER_DEFAULT_PREC;
+    
+    while (!connCmp_list_is_empty(qCover)) {
+          ccur = connCmp_list_pop(qCover);
+          
+          if (connCmp_nSolsref(ccur) == -1) {
+              
+            box  = compBox_list_first( connCmp_boxesref(ccur) );
+            /*get containing disk */
+            risolate_compBox_get_containing_dsk(ccDisk, box);
+            /* do an exclusion test */
+            res = tstar_real_interface( cache, ccDisk, compBox_get_nbMSol(box), 1, 0, res.appPrec , depth, meta);
+//             res.appPrec = res.appPrec/2;
+            
+            if (res.nbOfSol==0) { /* clear ccur */
+                if (metadatas_haveToCount(meta)){
+                        metadatas_add_discarded( meta, depth);
+                }
+                compBox_clear_annuli(box);
+                connCmp_clear(ccur);
+                ccluster_free(ccur);
+            } else {
+                if (res.nbOfSol>0) {
+                    compBox_nbMSolref(box) = res.nbOfSol;
+                    connCmp_nSolsref(ccur) = res.nbOfSol;
+                }
+                connCmp_appPrref(ccur) = res.appPrec;
+                connCmp_list_insert_sorted(ltemp, ccur);
+            }
+          } else {
+              connCmp_list_insert_sorted(ltemp, ccur);
+          }
+    }
+    
+    
+    connCmp_list_swap(ltemp, qCover);
+    
+    connCmp_list_clear(ltemp);
+    compDsk_clear(ccDisk);
+    
+    return res.appPrec;
+}
+
 void risolate_main_loop( connCmp_list_t qResults,  
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t discardedCcs, 
@@ -242,12 +427,13 @@ void risolate_main_loop( connCmp_list_t qResults,
         
         connCmp_risolate_componentBox(componentBox, ccur, metadatas_initBref(meta));
         compBox_get_containing_dsk(ccDisk, componentBox);
+        
         compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
+        separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
+        
         realRat_mul(threeWidth, three, connCmp_widthref(ccur));
         prec = connCmp_appPr(ccur);
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
-        
-        separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
       
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
@@ -271,7 +457,8 @@ void risolate_main_loop( connCmp_list_t qResults,
 //         if ((separationFlag)) {
 //             printf("depth: %d, connCmp_nSolsref(ccur): %d, prec: %d\n", (int) depth, (int) connCmp_nSolsref(ccur), (int) prec);
 //             
-//             if (connCmp_nSolsref(ccur)==-1){
+//             if (connCmp_nSolsref(ccur)==-1){ /* do not do that because one can loose complex roots */
+               if (connCmp_nSolsref(ccur)!=1){
                 
 //                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                 resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
@@ -280,7 +467,7 @@ void risolate_main_loop( connCmp_list_t qResults,
 //                     printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));
 //                 ???
                 prec = resTstar.appPrec;
-//             }
+            }
                 
 //             printf("validate: prec avant: %d prec apres: %d\n", (int) prec, (int) resTstar.appPrec);
 //             ???
@@ -329,6 +516,13 @@ void risolate_main_loop( connCmp_list_t qResults,
             }
         }
         
+        if ( (connCmp_nSols(ccur)==1) && widthFlag && compactFlag ) {
+            metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
+            connCmp_list_push(qResults, ccur);
+            if (metadatas_getVerbo(meta)>3) {
+                printf("------validated with %d roots\n", connCmp_nSols(ccur));
+            }
+        } else
         if ( (connCmp_nSols(ccur)>0) && (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) 
              && separationFlag && widthFlag && compactFlag
              && ( sepBoundFlag || (connCmp_nSols(ccur)==1)) ) {
@@ -457,6 +651,134 @@ void risolate_algo_global( connCmp_list_t qResults, const compBox_t initialBox, 
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
+void risolate_algo_global_rootRadii( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+    
+    clock_t start = clock();
+    clock_t start2 = clock();
+    
+    compAnn_list_t annulii;
+    connCmp_list_t qCover;
+    realRat_t delta;
+    
+    compAnn_list_init(annulii);
+    connCmp_list_init(qCover);
+    realRat_init(delta);
+    
+    slong degree = cacheApp_getDegree( cache );
+//     realRat_set_si(delta, 1, degree);
+    realRat_set_si(delta, 1, degree*degree);
+//     realRat_set_si(delta, 1, degree*degree*degree);
+    
+    slong prec = realIntRootRadii_rootRadii( annulii, cache, delta );
+    
+    printf("time in computing RootRadii           : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    printf("precision needed: %ld\n", prec);
+    start2 = clock();
+    
+    realIntRootRadii_connectedComponents( annulii, prec );
+    
+    printf("time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    start2 = clock();
+    
+//     printf("Annulii: ");
+//     compAnn_list_printd(annulii, 10);
+//     printf("\n\n");
+    
+    realIntRootRadii_containsRealRoot( annulii, cache, prec );
+    
+    printf("time in discarding real intervals     : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    start2 = clock();
+    
+//     printf("Annulii: ");
+//     compAnn_list_printd(annulii, 10);
+//     printf("\n\n");
+    
+    risolate_prep_loop_rootRadii( qCover, initialBox, annulii, cache, meta);
+    
+    printf("time in covering intervals with boxes : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    start2 = clock();
+    
+    connCmp_list_iterator itc;
+    /* display qCover */
+//     itc = connCmp_list_begin(qCover);
+    printf("Number of CC in qCover: %d \n", connCmp_list_get_size(qCover));
+//     while( itc!= connCmp_list_end() ){
+//         printf("--- Box: "); compBox_print( compBox_list_first(connCmp_boxesref(connCmp_list_elmt(itc))) );
+//         printf("\n");
+//         printf("--- nb of sols in CC: %d \n", connCmp_nSolsref(connCmp_list_elmt(itc)) );
+//         printf("--- nb of inter annulus: %d \n", compAnn_list_get_size(compBox_annuliref(compBox_list_first(connCmp_boxesref(connCmp_list_elmt(itc))))) );
+//            
+//         itc = connCmp_list_next( itc );
+//     }
+//     printf("\n\n");
+        
+    prec = risolate_exclusion_rootRadii( qCover, cache, meta);
+    
+    printf("time in exclusion tests               : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    printf("precision needed: %ld\n", prec);
+    start2 = clock();
+    
+    /* display qCover */
+//     itc = connCmp_list_begin(qCover);
+    printf("Number of CC in qCover: %d \n", connCmp_list_get_size(qCover));
+//     while( itc!= connCmp_list_end() ){
+//         printf("--- Box: "); compBox_print( compBox_list_first(connCmp_boxesref(connCmp_list_elmt(itc))) );
+//         printf("\n");
+//         printf("--- nb of sols in CC: %d \n", connCmp_nSolsref(connCmp_list_elmt(itc)) );
+//         printf("--- nb of inter annulus: %d \n", compAnn_list_get_size(compBox_annuliref(compBox_list_first(connCmp_boxesref(connCmp_list_elmt(itc))))) ); 
+//         itc = connCmp_list_next( itc );
+//     }
+//     printf("\n\n");
+    
+    /* clear annulii information */
+    itc = connCmp_list_begin(qCover);
+    while( itc!= connCmp_list_end() ){
+        compBox_list_iterator itb = compBox_list_begin( connCmp_boxesref( connCmp_list_elmt(itc) ) );
+        while ( itb!=compBox_list_end() ){
+            compBox_clear_annuli(compBox_list_elmt(itb));
+            itb = compBox_list_next(itb);
+        }
+        itc = connCmp_list_next( itc );
+    }
+    
+    printf("total time in root radii              : %f \n", ((double) (clock() - start))/CLOCKS_PER_SEC );
+    
+    connCmp_list_t discardedCcs;
+    connCmp_list_init(discardedCcs);
+    
+    /* main loop */
+    risolate_main_loop( qResults,  qCover, discardedCcs, eps, cache, meta);
+    
+    connCmp_list_clear(qCover);
+    realRat_clear(delta);
+    compAnn_list_clear(annulii);
+    connCmp_list_clear(discardedCcs);
+    metadatas_add_time_CclusAl(meta, (double) (clock() - start));
+    
+//     compBox_ptr box;
+//     box = (compBox_ptr) ccluster_malloc (sizeof(compBox));
+//     compBox_init(box);
+//     compBox_set(box, initialBox);
+//     compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
+    
+//     connCmp_ptr initialCC;
+//     initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
+//     connCmp_init_compBox(initialCC, box);
+/*    
+    connCmp_list_t qMainLoop, discardedCcs;
+    connCmp_list_init(qMainLoop);
+    connCmp_list_init(discardedCcs);
+    
+    connCmp_list_push(qMainLoop, initialCC);
+    risolate_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    
+    
+    connCmp_list_clear(qMainLoop);
+    connCmp_list_clear(discardedCcs);
+    
+    metadatas_add_time_CclusAl(meta, (double) (clock() - start));*/
+}
+
 void connCmp_risolate_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta){
     
     compBox_t containingBox;
@@ -467,7 +789,8 @@ void connCmp_risolate_print_for_results(FILE * f, const connCmp_t c, metadatas_t
     fprintf(f, "--solution with mult. %5d: ", connCmp_nSols(c));
     
     connCmp_risolate_componentBox( containingBox, c, metadatas_initBref(meta));
-    compBox_get_containing_dsk( containingDisk, containingBox);
+    
+    risolate_compBox_get_containing_dsk( containingDisk, containingBox);
     
     slong d = fmpz_clog_ui(realRat_denref(compDsk_radiusref(containingDisk)),10) - fmpz_clog_ui(realRat_numref(compDsk_radiusref(containingDisk)),10); 
     slong p = fmpz_clog_ui(realRat_denref(compDsk_radiusref(containingDisk)),2) - fmpz_clog_ui(realRat_numref(compDsk_radiusref(containingDisk)),2)+50; 
@@ -514,7 +837,8 @@ void connCmp_risolate_print_for_results_withOutput(FILE * f, const connCmp_t c, 
         fprintf(f, "#--solution with mult. %5d: ", connCmp_nSols(c));
     
     connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
-    compBox_get_containing_dsk( containingDisk, containingBox);
+    
+    risolate_compBox_get_containing_dsk( containingDisk, containingBox);
     
     if (output == -1) { /* rational output */
         fprintf(f, "center: ");

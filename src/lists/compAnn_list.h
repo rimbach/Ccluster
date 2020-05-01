@@ -61,6 +61,15 @@ LISTS_INLINE void compAnn_list_clear_for_tables(compAnn_list_t l) {
     gen_list_clear_for_tables(l);
 }
 
+/*empty the list with NO delete of elements*/
+LISTS_INLINE void compAnn_list_empty(compAnn_list_t l){
+    gen_list_empty(l);
+}
+/* copy the list, not the elements */
+LISTS_INLINE void compAnn_list_copy(compAnn_list_t ltarget, const compAnn_list_t lsrc){
+    gen_list_copy( ltarget, lsrc );
+}
+
 LISTS_INLINE void compAnn_list_push(compAnn_list_t l, compAnn_ptr b){
     gen_list_push(l, b);
 }
@@ -71,6 +80,10 @@ LISTS_INLINE compAnn_ptr compAnn_list_pop(compAnn_list_t l){
 
 LISTS_INLINE compAnn_ptr compAnn_list_first(compAnn_list_t l){
     return (compAnn_ptr) gen_list_first(l);
+}
+
+LISTS_INLINE compAnn_ptr compAnn_list_last(compAnn_list_t l){
+    return (compAnn_ptr) gen_list_last(l);
 }
 
 /* do not check bound!!! */

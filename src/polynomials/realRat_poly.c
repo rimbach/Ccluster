@@ -11,7 +11,7 @@
 
 #include "polynomials/realRat_poly.h"
 
-/* here we assume that the coefficients of the pol are interger! */
+/* here we assume that the coefficients of the pol are integer! */
 void realRat_poly_separationBound (realRat_t sep, const realRat_poly_t pol){
     
     realRat_t lcoeff, coefftemp;
@@ -43,7 +43,7 @@ void realRat_poly_separationBound (realRat_t sep, const realRat_poly_t pol){
 }
 
 /*bitsize for integer polynomials*/
-/* here we assume that the coefficients of the pol are interger! */
+/* here we assume that the coefficients of the pol are integer! */
 slong realRat_poly_bitsize (const realRat_poly_t pol){
     realRat_t lcoeff, coefftemp;
     realRat_init(lcoeff);
@@ -68,7 +68,7 @@ slong realRat_poly_bitsize (const realRat_poly_t pol){
 /* multiple of Bernoulli polynomial with integer coefficients*/
 void bernoulliInt_polynomial(realRat_poly_t poly, slong deg){
     bernoulli_polynomial( poly, deg);
-    fmpq_poly_canonicalise(poly);
+    realRat_poly_canonicalise(poly);
 }
 
 void mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize){

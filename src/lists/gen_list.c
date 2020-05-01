@@ -134,6 +134,13 @@ void * gen_list_first(gen_list_t l){
         return (l->_begin)->_elmt;
 }
 
+void * gen_list_last(gen_list_t l){
+    if (l->_end == NULL)
+        return NULL;
+    else
+        return (l->_end)->_elmt;
+}
+
 void * gen_list_data_at_index(const gen_list_t l, int index){
     struct gen_elmt * voyager = l->_begin;
     for (int i=0;i<index; i++)
@@ -207,3 +214,20 @@ int gen_list_is_empty(const gen_list_t l){
 int gen_list_get_size(const gen_list_t l){
     return l->_size;
 }
+
+/* empty the list with NO delete of elements */
+void gen_list_empty(gen_list_t l){
+    while (!gen_list_is_empty(l))
+        gen_list_pop(l);
+}
+
+/* copy the list, not the elements */
+void gen_list_copy(gen_list_t ltarget, const gen_list_t lsrc){
+    struct gen_elmt * voyager = lsrc->_begin;
+    
+    while ( voyager!=gen_list_end() ) {
+        gen_list_push( ltarget, gen_list_elmt( voyager ) );
+        voyager = gen_list_next(voyager);
+    }
+}
+

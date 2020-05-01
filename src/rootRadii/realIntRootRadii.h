@@ -9,8 +9,8 @@
 /*  (at your option) any later version.  See <http://www.gnu.org/licenses/>.  */
 /* ************************************************************************** */
 
-#ifndef REALROOTRADII_H
-#define REALROOTRADII_H
+#ifndef REALINTROOTRADII_H
+#define REALINTROOTRADII_H
 
 #ifdef ROOTRAD_INLINE_C
 #define ROOTRAD_INLINE
@@ -20,16 +20,19 @@
 
 #include "base/base.h"
 #include "geometry/compAnn.h"
+#include "geometry/subdBox.h"
+#include "geometry/connCmp_union_find.h"
 #include "lists/compAnn_list.h"
 #include "caches/cacheApp.h"
+#include "lists/connCmp_list.h"
 #include "metadatas/metadatas.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
     
-void realRootRadii_getApproximation( realApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta);
-void realRootRadii_graeffe_iterations_inplace( realApp_poly_t res, int N, slong prec, metadatas_t meta);
+void realIntRootRadii_getApproximation( realApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta);
+void realIntRootRadii_graeffe_iterations_inplace( realApp_poly_t res, int N, slong prec, metadatas_t meta);
 
 /* assume i<j<k */
 /* assume absPi=|Pi|, absPj=|Pj|, absPk=|Pk| are approximations of integers */
@@ -37,7 +40,7 @@ void realRootRadii_graeffe_iterations_inplace( realApp_poly_t res, int N, slong 
 /* returns 1 if yes */
 /*         0 if no  */
 /*        -1 if it can not be decided */
-int realRootRadii_liesBelow( slong i, const realApp_t absPi,
+int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
                              slong j, const realApp_t absPj,
                              slong k, const realApp_t absPk,
                              slong prec );
@@ -45,16 +48,19 @@ int realRootRadii_liesBelow( slong i, const realApp_t absPi,
 /* assume convexHull is already initialized, and contains enough space for a convex hull of len points */
 /* returns 0 if needs more precision on the coeffs */
 /* otherwise returns the length of the convex hull */
-slong realRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec );
+slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec );
 
 /* returns the precision used to carry out root radii */
-slong realRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
+slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
                                cacheApp_t cache,        /* polynomial */
                                const realRat_t delta);
 
-void realRootRadii_connectedComponents( compAnn_list_t annulii, slong prec );  /* list of annulii */
+void realIntRootRadii_connectedComponents( compAnn_list_t annulii, slong prec );  /* list of annulii */
 
-void realRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache, slong prec );  /* list of annulii */
+void realIntRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache, slong prec );  /* list of annulii */
+
+void realIntRootRadii_bisect_connCmp( connCmp_list_t dest, 
+                                      connCmp_t cc);
 
 #ifdef __cplusplus
 }

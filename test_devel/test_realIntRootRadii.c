@@ -15,7 +15,7 @@
 #include "polynomials/compApp_poly.h"
 #include "polynomials/app_rat_poly.h"
 #include "caches/cacheApp.h"
-#include "rootRadii/realRootRadii.h"
+#include "rootRadii/realIntRootRadii.h"
 
 int main() {
     
@@ -40,7 +40,7 @@ int main() {
         realApp_add_error(absPj, rad);
         realApp_add_error(absPk, rad);
         
-        int res = realRootRadii_liesBelow( i, absPi, j, absPj, k, absPk, 53 );
+        int res = realIntRootRadii_liesBelow( i, absPi, j, absPj, k, absPk, 53 );
         printf( "res: %d \n", res);
         
         realApp_set_d(absPi, 2.);
@@ -51,7 +51,7 @@ int main() {
         realApp_add_error(absPj, rad);
         realApp_add_error(absPk, rad);
         
-        res = realRootRadii_liesBelow( i, absPi, j, absPj, k, absPk, 53 );
+        res = realIntRootRadii_liesBelow( i, absPi, j, absPj, k, absPk, 53 );
         printf( "res: %d \n", res);
         
         realApp_set_d(absPi, 2.);
@@ -62,7 +62,7 @@ int main() {
         realApp_add_error(absPj, rad);
         realApp_add_error(absPk, rad);
         
-        res = realRootRadii_liesBelow( i, absPi, j, absPj, k, absPk, 53 );
+        res = realIntRootRadii_liesBelow( i, absPi, j, absPj, k, absPk, 53 );
         printf( "res: %d \n", res);
         
         realApp_set_d(absPi, 2.);
@@ -73,7 +73,7 @@ int main() {
         realApp_add_error(absPj, rad);
         realApp_add_error(absPk, rad);
         
-        res = realRootRadii_liesBelow( i, absPi, j, absPj, k, absPk, 53 );
+        res = realIntRootRadii_liesBelow( i, absPi, j, absPj, k, absPk, 53 );
         printf( "res: %d \n", res);
         
         i=1;
@@ -87,7 +87,7 @@ int main() {
         realApp_add_error(absPj, rad);
         realApp_add_error(absPk, rad);
         
-        res = realRootRadii_liesBelow( i, absPi, j, absPj, k, absPk, 53 );
+        res = realIntRootRadii_liesBelow( i, absPi, j, absPj, k, absPk, 53 );
         printf( "res: %d \n", res);
         
         
@@ -114,7 +114,7 @@ int main() {
         slong lenCh = 0;
         slong * convexHull = (slong *) ccluster_malloc ( (len)*sizeof(slong) );
         
-        lenCh = realRootRadii_convexHull( convexHull, absCoeffs, len, 53 );
+        lenCh = realIntRootRadii_convexHull( convexHull, absCoeffs, len, 53 );
         
         printf(" Convex hull: %ld vertices: ", lenCh );
         for (slong ind = 0; ind < lenCh; ind++)
@@ -148,17 +148,17 @@ int main() {
         compAnn_list_t annulii;
         compAnn_list_init(annulii);
         
-        slong prec = realRootRadii_rootRadii( annulii, cache, delta );
+        slong prec = realIntRootRadii_rootRadii( annulii, cache, delta );
         
         compAnn_list_printd(annulii, 10);
         printf("\n\n");
         
-        realRootRadii_connectedComponents( annulii, prec );
+        realIntRootRadii_connectedComponents( annulii, prec );
         
         compAnn_list_printd(annulii, 10);
         printf("\n\n");
         
-        realRootRadii_containsRealRoot( annulii, cache, prec );
+        realIntRootRadii_containsRealRoot( annulii, cache, prec );
         
         compAnn_list_printd(annulii, 10);
         printf("\n\n");
