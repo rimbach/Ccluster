@@ -14,7 +14,7 @@
 int main(int argc, char **argv){
     
     if (argc<=2){
-        printf("usage: %s [OPTIONS] <filename> ", argv[0]);
+        printf("usage: %s <filename> [OPTIONS]", argv[0]);
         printf("                                 \n");
         printf("      -d , --domain: the initial region of interest\n");
         printf("                     global [default] finds all the real roots\n");
@@ -36,7 +36,7 @@ int main(int argc, char **argv){
         printf("                     1 [default]: abstract of input and output\n");
         printf("                     2: detailed reports concerning algorithm\n");
         printf("                     3: same as 2 + prints the roots to stdout\n");
-        printf("TODO: nbthreads \n");
+//         printf("TODO: nbthreads \n");
         if (argc<2)
             return -1;
     }
@@ -68,14 +68,14 @@ int main(int argc, char **argv){
     for (int arg = 2; arg< argc; arg++) {
         
         if ( (strcmp( argv[arg], "-v" ) == 0) || (strcmp( argv[arg], "--verbose" ) == 0) ) {
-            if (argc>arg+1) {
+            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
                 parse = parse*scan_verbosity(argv[arg+1], &verbosity );
                 arg++;
             }
         }
         
         if ( (strcmp( argv[arg], "-d" ) == 0) || (strcmp( argv[arg], "--domain" ) == 0) ) {
-            if (argc>arg+1) {
+            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
                 global = scan_initialBox( argv[arg+1], bInit );
                 parse = parse*global;
                 arg++;
@@ -83,7 +83,7 @@ int main(int argc, char **argv){
         }
         
         if ( (strcmp( argv[arg], "-e" ) == 0) || (strcmp( argv[arg], "--epsilon" ) == 0) ) {
-            if (argc>arg+1) {
+            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
                 infinity = scan_epsilon( argv[arg+1], eps );
                 parse = parse*infinity;
                 arg++;
@@ -91,14 +91,14 @@ int main(int argc, char **argv){
         }
         
         if ( (strcmp( argv[arg], "-o" ) == 0) || (strcmp( argv[arg], "--output" ) == 0) ) {
-            if (argc>arg+1) {
+            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
                 parse = parse*scan_output(argv[arg+1], &output);
                 arg++;
             }
         }
         
         if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mode" ) == 0) ) {
-            if (argc>arg+1) {
+            if ((argc>arg+1)&&(argv[arg+1][0]!='-')) {
 //                 parse = parse*scan_strategy( argv[arg+1], st );
                 st = argv[arg+1];
                 arg++;

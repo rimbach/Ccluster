@@ -38,38 +38,44 @@
 extern "C" {
 #endif
 
-slong risolate_discard_compBox_list( compBox_list_t boxes, 
+slong risolate_discard_compBox_list( compBox_list_t boxes,
+                                     compBox_list_t bDiscarded,
                                      cacheApp_t cache, 
                                      slong prec, 
                                      metadatas_t meta);
   
 void risolate_bisect_connCmp( connCmp_list_t dest, 
                               connCmp_t cc, 
-                              connCmp_list_t discardedCcs, 
+                              connCmp_list_t discardedCcs,
+                              compBox_list_t bDiscarded,
                               cacheApp_t cache, 
                               metadatas_t meta, 
                               slong nbThreads);
 
 void risolate_algo( connCmp_list_t qResults, 
+                    compBox_list_t bDiscarded,
 		            const compBox_t initialBox, 
 		            const realRat_t eps, 
 		            cacheApp_t cache, 
 		            metadatas_t meta);
 
 void risolate_algo_global( connCmp_list_t qResults, 
+                           compBox_list_t bDiscarded,
 			               const compBox_t initialBox, 
 			               const realRat_t eps, 
 			               cacheApp_t cache, 
 			               metadatas_t meta);
 
-void risolate_main_loop( connCmp_list_t qResults, 
+void risolate_main_loop( connCmp_list_t qResults,
+                         compBox_list_t bDiscarded,
 			             connCmp_list_t qMainLoop, 
 			             connCmp_list_t discardedCcs, 
 			             const realRat_t eps, 
 			             cacheApp_t cache, 
 			             metadatas_t meta);
 
-void risolate_prep_loop( connCmp_list_t qMainLoop, 
+void risolate_prep_loop( compBox_list_t bDiscarded,
+                         connCmp_list_t qMainLoop, 
 			             connCmp_list_t qPrepLoop, 
 			             connCmp_list_t discardedCcs, 
 			             cacheApp_t cache, 
@@ -101,6 +107,23 @@ void connCmp_list_risolate_print_for_results(FILE * f, const connCmp_list_t l, m
 void connCmp_risolate_print_for_results_withOutput(FILE * f, const connCmp_t c, int output, metadatas_t meta);
 
 void connCmp_list_risolate_print_for_results_withOutput(FILE * f, const connCmp_list_t l, int output, metadatas_t meta);
+
+void risolate_connCmp_gnuplot(FILE * f, 
+                     const connCmp_t c, 
+                     metadatas_t meta);
+
+void risolate_compBox_gnuplot(FILE * f, 
+                     const compBox_t b);
+
+void risolate_connCmp_list_gnuplot(FILE * f, 
+                          const connCmp_list_t c, 
+                          metadatas_t meta,
+                          int withInitBox);
+
+void risolate_connCmp_list_gnuplot_drawSubdiv(FILE * f, 
+                          const connCmp_list_t l, 
+                          const compBox_list_t lb,
+                          metadatas_t meta);
 
 #ifdef __cplusplus
 }
