@@ -32,7 +32,7 @@ if you use it in your research.
 Ccluster depends on flint2 (>= 2.5.2, https://github.com/wbhart/flint2)
 and arb (>= 2.17.0, https://github.com/fredrik-johansson/arb).
 
-## Installation on Linux
+## Installation
 
 1. clone Ccluster
 
@@ -47,6 +47,9 @@ If you want to install Ccluster in /usr/local and have permissions:
 ```
 make install
 ```
+## Binary ccluster: compute *eps-natural clusters* of complex roots of a polynomial with rational coefficients
+
+
 
 ## Use with Singular
 Requires the ccluster library to be installed on your system.
