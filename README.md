@@ -63,9 +63,30 @@ We provide a programm called genPolFile that generates input files for state of 
 ```
 bin/genPolFile
 ```
-to see the possible options.
+to see the possible options. In particular, genPolFile can also generate input files for anewdsc or mpsolve.
 
 ### Basic options
+Try command
+```
+bin/ccluster
+```
+to see the possible options and default values for ccluster.
+
+Let's say you want to compute a set of clusters of size less *2^-53* for all roots of Mignotte polynomial of degree 64 and bitsize 14.
+Do:
+```
+bin/genPolFile Mignotte 1 64 14 bin/Mignotte_64_14.ccl
+```
+to generate the input file, then 
+```
+bin/ccluster bin/Mignotte_64_14.ccl -e -53 -o 5
+```
+means that 5-bit approximations of the computed clusters are printed.
+For a graphical output, if gnuplot is install on your system, do
+```
+bin/ccluster bin/Mignotte_64_14.ccl -o -2 | gnuplot
+```
+and use option -o -3 to draw the subdivision tree.
 
 ## Use with Singular
 Requires the ccluster library to be installed on your system.
