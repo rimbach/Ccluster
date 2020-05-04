@@ -51,8 +51,12 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
                 metadatas_add_discarded( meta, depth);
             }
         
-            compBox_clear(btemp);
-            ccluster_free(btemp);
+            if (metadatas_getDrSub(meta)==0){
+                compBox_clear(btemp);
+                ccluster_free(btemp);
+            } else {
+                compBox_list_push(bDiscarded, btemp);
+            }
         } else {
                 if (res.nbOfSol>0)
                     btemp->nbMSol = res.nbOfSol;
