@@ -41,11 +41,12 @@ and arb (>= 2.17.0, https://github.com/fredrik-johansson/arb).
 ```
 ./configure --with-flint="path to flint" --with-arb="path to arb"
 make
+```
+Specifying the location of flint and arb is optional if these libraries are in /usr/local. 
+If you want to install Ccluster in /usr/local and have permissions:
+```
 make install
 ```
-
-By default, Ccluster is installed in /usr/local.
-Specifying the location of flint and arb is optional if these libraries are in /usr/local. 
 
 ## Use with Singular
 Requires the ccluster library to be installed on your system.
