@@ -115,6 +115,9 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     
     strategies_set_str( strat, stratstr, nbThreads );
     
+    connCmp_list_init(qRes);
+    compBox_list_init(bDis);
+    
     metadatas_init(meta, initialBox, strat, verb);
 //     /* initialize power sums */
 //     if (metadatas_usePowerSums(meta))
@@ -129,11 +132,10 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     }
     metadatas_setSepBound(meta, sepBound);
     
-    connCmp_list_init(qRes);
-    compBox_list_init(bDis);
-    
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
+    
+    risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);
     
     if (metadatas_useRootRadii(meta)) 
         risolate_algo_global_rootRadii( qRes, initialBox, eps, cache, meta);

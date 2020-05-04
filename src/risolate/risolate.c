@@ -46,23 +46,25 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
         
         res = tstar_real_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
-        if (res.nbOfSol==0) {
+    if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
                 metadatas_add_discarded( meta, depth);
             }
-        
             if (metadatas_getDrSub(meta)==0){
                 compBox_clear(btemp);
                 ccluster_free(btemp);
             } else {
                 compBox_list_push(bDiscarded, btemp);
             }
-        } else {
+        }
+        
+        else{
+            
                 if (res.nbOfSol>0)
                     btemp->nbMSol = res.nbOfSol;
                 compBox_list_push(ltemp, btemp);
         }
-    }   
+    } 
     compBox_list_swap(boxes, ltemp);
     compBox_list_clear(ltemp);
     compDsk_clear(bdisk);
