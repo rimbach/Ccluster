@@ -47,6 +47,13 @@ If you want to install Ccluster in /usr/local and have permissions:
 ```
 make install
 ```
+## Using the library in a c programm
+
+The file bin/ccluster_spiral.c contains the code for an example where ccluster
+is used to compute clusters of roots of a polynomial given as an oracle, i.e.
+a function giving arbitrary approximation of its coefficients.
+This is implemented as a c function.
+
 ## Binary ccluster: compute *eps-natural clusters* of complex roots of a polynomial with rational coefficients
 
 We provide a binary file in the directory bin that takes in input a polynomial with rational coefficients, given in an input file.
