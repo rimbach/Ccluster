@@ -139,7 +139,12 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);
+//     risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);
+    
+    if (metadatas_useRootRadii(meta)) 
+        risolate_algo_global_rootRadii( qRes, initialBox, eps, cache, meta);
+    else
+        risolate_algo_global( qRes, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
 //     metadatas_fprint(stdout, meta, eps);
@@ -184,8 +189,3 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     compBox_list_clear(bDis);
     compBox_clear(initialBox);
 }
-
-//     if (metadatas_useRootRadii(meta)) 
-//         risolate_algo_global_rootRadii( qRes, initialBox, eps, cache, meta);
-//     else
-//         risolate_algo_global( qRes, initialBox, eps, cache, meta);
