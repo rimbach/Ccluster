@@ -130,6 +130,7 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     metadatas_setSepBound(meta, sepBound);
     
     connCmp_list_init(qRes);
+    compBox_list_init(bDis);
     
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
