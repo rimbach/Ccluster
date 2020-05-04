@@ -49,7 +49,23 @@ make install
 ```
 ## Binary ccluster: compute *eps-natural clusters* of complex roots of a polynomial with rational coefficients
 
+We provide a binary file in the directory bin that takes in input a polynomial with rational coefficients, given in an input file.
 
+### Input files
+
+A suitable input for ccluster for the polynomial *1z^3 + (1/2)z^2 + (1/3)z + (1/4)* is 
+```
+4 1/4 1/3 1/2 1
+```
+i.e the first string is the length, then the coefficients are given according to increesing degree.
+
+We provide a programm called genPolFile that generates input files for state of the art polynomials. Try command
+```
+bin/genPolFile
+```
+to see the possible options.
+
+### Basic options
 
 ## Use with Singular
 Requires the ccluster library to be installed on your system.
