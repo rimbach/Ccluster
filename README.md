@@ -29,8 +29,8 @@ if you use it in your research.
 
 ## Dependencies
 
-Ccluster depends on flint2 (https://github.com/wbhart/flint2)
-and arb (https://github.com/fredrik-johansson/arb).
+Ccluster depends on flint2 (>= 2.5.2, https://github.com/wbhart/flint2)
+and arb (>= 2.17.0, https://github.com/fredrik-johansson/arb).
 
 ## Installation on Linux
 
