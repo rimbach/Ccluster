@@ -57,7 +57,7 @@ EXAMPLES_DIR = ./examples
 export
 
 
-all: library
+all: library bins test
 
 quiet: library
 
@@ -144,8 +144,11 @@ comptest: library
 bins: library
 	cd bin && make && cd ..
 	
-test: comptest bins
-	cd test && make tM1 && cd ..
+# test: comptest bins
+# 	cd test && make tM1 && cd ..
+	
+test: bins
+	cd bin && make test && cd ..
 	
 benchICMS: compbenchs
 	cd benchs && make tableICMS && cd ..

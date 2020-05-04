@@ -5,16 +5,10 @@
 
 #include "parseArgs.h"
 
-// compRat_poly_t p_global;
-// 
-// void getApprox(compApp_poly_t dest, slong prec){
-//     compApp_poly_set_compRat_poly(dest, p_global, prec);
-// }
-
 int main(int argc, char **argv){
     
     if (argc<=2){
-        printf("usage: %s [OPTIONS] <filename> ", argv[0]);
+        printf("usage: %s <filename> [OPTIONS]", argv[0]);
         printf("                                 \n");
         printf("      -d , --domain: the initial region of interest\n");
         printf("                     global [default] finds all the real roots\n");
@@ -36,13 +30,11 @@ int main(int argc, char **argv){
         printf("                     1 [default]: abstract of input and output\n");
         printf("                     2: detailed reports concerning algorithm\n");
         printf("                     3: same as 2 + prints the roots to stdout\n");
-        printf("TODO: nbthreads \n");
         if (argc<2)
             return -1;
     }
     
     int parse = 1;
-//     int degree;
     char * filename;
     char * st;
     int verbosity=1;
@@ -99,20 +91,15 @@ int main(int argc, char **argv){
         
         if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mode" ) == 0) ) {
             if (argc>arg+1) {
-//                 parse = parse*scan_strategy( argv[arg+1], st );
                 st = argv[arg+1];
                 arg++;
             }
         }
         
     }
-//     if (argc>=7) {
-//         parse = parse*scan_nbthreads(argv[6], &nbthreads );
-//     }
     
     realRat_poly_t p;
     realRat_poly_init(p);
-//     compRat_poly_init(p_global);
     FILE * curFile;
         
     if (parse) {
@@ -121,7 +108,6 @@ int main(int argc, char **argv){
         curFile = fopen (filename,"r");
         if (curFile!=NULL) {
             realRat_poly_fread(curFile, p);
-//             compRat_poly_set_realRat_poly(p_global,p);
             
             if (global==2)
                 risolate_global_interface_poly( p, eps, st, nbthreads, output, verbosity);
@@ -134,7 +120,6 @@ int main(int argc, char **argv){
     }
     
     realRat_poly_clear(p);
-//     compRat_poly_clear(p_global);
     realRat_clear(eps);
     compBox_clear(bInit);
     

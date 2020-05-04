@@ -56,7 +56,7 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
             compBox_list_push(args[i].boxes, compBox_list_pop(boxes));
             j++;
         }
-        if (metadatas_getVerbo(meta)>1)
+//         if (metadatas_getVerbo(meta)>1)
 //             printf (" number of box in thread %d: %d\n",i, j);
         /* create the thread */
         pthread_create(&threads[i], NULL, _parallel_discard_list_worker, &args[i]);

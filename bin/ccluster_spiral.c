@@ -1,19 +1,33 @@
+/* ************************************************************************** */
+/*  Copyright (C) 2018 Remi Imbach                                            */
+/*                                                                            */
+/*  This file is part of Ccluster.                                            */
+/*                                                                            */
+/*  Ccluster is free software: you can redistribute it and/or modify it under */
+/*  the terms of the GNU Lesser General Public License (LGPL) as published    */
+/*  by the Free Software Foundation; either version 2.1 of the License, or    */
+/*  (at your option) any later version.  See <http://www.gnu.org/licenses/>.  */
+/* ************************************************************************** */
+
 #include <string.h>
 #include <stdio.h>
+// #include "polynomials/compRat_poly.h"
+// #include "polynomials/compApp_poly.h"
+// #include "polynomials/app_rat_poly.h"
 #include "ccluster/ccluster.h"
+// #include "numbers/compApp.h"
 
-#include "parseArgs.h"
+#include "./parseArgs.h"
 
-compRat_poly_t p_global;
-
-void getApprox(compApp_poly_t dest, slong prec){
-    compApp_poly_set_compRat_poly(dest, p_global, prec);
-}
+/* degree of the spiral polynomial */
+slong p_degree;
+/* writes in dest a prec-bit approximation of the spiral polynomial of degree p_degree*/
+void getApprox_Spiral(compApp_poly_t dest, slong prec);
 
 int main(int argc, char **argv){
     
     if (argc<=2){
-        printf("usage: %s <filename> [OPTIONS]", argv[0]);
+        printf("usage: %s degree [OPTIONS]", argv[0]);
         printf("                                 \n");
         printf("      -d , --domain: the initial region of interest\n");
         printf("                     global [default] finds all the roots\n");
@@ -43,8 +57,7 @@ int main(int argc, char **argv){
     }
     
     int parse = 1;
-//     int degree;
-    char * filename;
+    int degree;
     char * st;
     int verbosity=1;
     int nbthreads = 1;
@@ -62,8 +75,8 @@ int main(int argc, char **argv){
     realRat_init(eps);
     scan_epsilon( "+inf", eps );
     global = scan_initialBox( "global", bInit );
-    
-    filename = argv[1];
+    parse = parse*scan_degree( argv[1], &degree);
+    p_degree = (slong) degree;
     
     /* loop on arguments to figure out options */
     
@@ -115,35 +128,73 @@ int main(int argc, char **argv){
         
     }
     
-    realRat_poly_t p;
-    realRat_poly_init(p);
-    compRat_poly_init(p_global);
-    FILE * curFile;
-        
+    
+    
     if (parse) {
-        
-        /* open filename*/
-        curFile = fopen (filename,"r");
-        if (curFile!=NULL) {
-            realRat_poly_fread(curFile, p);
-            compRat_poly_set_realRat_poly(p_global,p);
-            
-            if (global==2)
-                ccluster_global_interface_func( getApprox, eps, st, nbthreads, output, verbosity);
-            else
-                ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, output, verbosity);
-            
-            fclose (curFile);
-        }
+       if (global==2)
+            ccluster_global_interface_func( getApprox_Spiral, eps, st, nbthreads, output, verbosity);
+       else
+            ccluster_interface_func( getApprox_Spiral, bInit, eps, st, nbthreads, output, verbosity);
+
         
     }
     
-    realRat_poly_clear(p);
-    compRat_poly_clear(p_global);
     realRat_clear(eps);
     compBox_clear(bInit);
     
     flint_cleanup();
     
     return 0;
+}
+
+void getApprox_temp(compApp_poly_t dest, slong prec){
+    
+    realRat_t modu;
+    realRat_t argu;
+    compApp_t a_modu;
+    compApp_t a_argu;
+    compApp_t coeff;
+    
+    realRat_init(modu);
+    realRat_init(argu);
+    compApp_init(a_modu);
+    compApp_init(a_argu);
+    compApp_init(coeff);
+    
+    compApp_poly_t temp;
+    compApp_poly_init2(temp,2);
+    compApp_poly_set_coeff_si(temp, 1, 1);
+    
+    compApp_poly_one(dest);
+    
+    for(int i=1; i<=p_degree; i++){
+        realRat_set_si(modu, -i, (ulong) p_degree);
+        realRat_set_si(argu, 4*i, (ulong) p_degree);
+        compApp_set_realRat( a_modu, modu, prec);
+        compApp_set_realRat( a_argu, argu, prec);
+        compApp_exp_pi_i( coeff, a_argu, prec);
+        compApp_mul( coeff, coeff, a_modu, prec);
+        compApp_poly_set_coeff_compApp(temp, 0, coeff);
+        compApp_poly_mul(dest, dest, temp, prec);
+    }
+    
+    realRat_clear(modu);
+    realRat_clear(argu);
+    compApp_clear(a_modu);
+    compApp_clear(a_argu);
+    compApp_clear(coeff);
+    compApp_poly_clear(temp);
+}
+
+void getApprox_Spiral(compApp_poly_t dest, slong prec){
+    
+    slong prectemp = 2*prec;
+    getApprox_temp( dest, prectemp );
+    
+    while (!compApp_poly_checkAccuracy( dest, prec)){
+        prectemp = 2*prectemp;
+        getApprox_temp( dest, prectemp );
+    }
+    
+    compApp_poly_set_round( dest, dest, prec);
 }

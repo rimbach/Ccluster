@@ -10,7 +10,18 @@ TEST_EXECS=$(TEST:%.c=%)
 
 build: ccluster\
        risolate\
-       genPolFile
+       genPolFile\
+       ccluster_spiral
+
+# TESTING VARIABLES
+degree=64
+bitsize=14
+poly=Mignotte
+file=${poly}"_"${degree}"_"${bitsize}".ccl"
+
+test: build
+	./genPolFile ${poly} 1 ${degree} ${bitsize} ${file}
+	./ccluster ${file}
 
 #==================================================
 # HOUSEKEEPING 
@@ -36,6 +47,12 @@ risolate: risolate.o parseArgs.h
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 
 genPolFile: genPolFile.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	
+ccluster_spiral: ccluster_spiral.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \

@@ -17,6 +17,7 @@ void risolate_compBox_get_containing_dsk( compDsk_t d, const compBox_t b) {
 }
 
 slong risolate_discard_compBox_list( compBox_list_t boxes, 
+                                     compBox_list_t bDiscarded,
                                      cacheApp_t cache, 
                                      slong prec, 
                                      metadatas_t meta){
@@ -74,7 +75,8 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
 
 void risolate_bisect_connCmp( connCmp_list_t dest, 
                               connCmp_t cc, 
-                              connCmp_list_t discardedCcs, 
+                              connCmp_list_t discardedCcs,
+                              compBox_list_t bDiscarded, 
                               cacheApp_t cache, 
                               metadatas_t meta, 
                               slong nbThreads){
@@ -95,7 +97,7 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
         ccluster_free(btemp);
     }
 
-    prec = risolate_discard_compBox_list( subBoxes, cache, prec, meta);
+    prec = risolate_discard_compBox_list( subBoxes, bDiscarded, cache, prec, meta);
     
     while (!compBox_list_is_empty(subBoxes)) {
         btemp = compBox_list_pop(subBoxes);
@@ -142,7 +144,8 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
     connCmp_list_clear(ltemp);
 }
 
-void risolate_prep_loop( connCmp_list_t qMainLoop, 
+void risolate_prep_loop( compBox_list_t bDiscarded,
+                         connCmp_list_t qMainLoop, 
                          connCmp_list_t qPrepLoop, 
                          connCmp_list_t discardedCcs, 
                          cacheApp_t cache, 
@@ -167,7 +170,7 @@ void risolate_prep_loop( connCmp_list_t qMainLoop,
         if ( connCmp_is_confined(ctemp, metadatas_initBref(meta)) && (realRat_cmp(diam, halfwidth)<0) )
             connCmp_list_insert_sorted(qMainLoop, ctemp);
         else {
-            risolate_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta, metadatas_useNBThreads(meta));
+            risolate_bisect_connCmp( ltemp, ctemp, discardedCcs, bDiscarded, cache, meta, metadatas_useNBThreads(meta));
             
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
@@ -385,6 +388,7 @@ slong risolate_exclusion_rootRadii( connCmp_list_t qCover,
 }
 
 void risolate_main_loop( connCmp_list_t qResults,  
+                         compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t discardedCcs, 
                          const realRat_t eps, 
@@ -558,7 +562,7 @@ void risolate_main_loop( connCmp_list_t qResults,
 //             connCmp_clear(ccur);
 //             ccluster_free(ccur);
 // #else
-            risolate_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
+            risolate_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
@@ -578,7 +582,9 @@ void risolate_main_loop( connCmp_list_t qResults,
     
 }
 
-void risolate_algo( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+void risolate_algo( connCmp_list_t qResults, 
+                    compBox_list_t bDiscarded,
+                    const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
     
 //     chronos_tic_CclusAl(metadatas_chronref(meta));
     clock_t start = clock();
@@ -604,9 +610,9 @@ void risolate_algo( connCmp_list_t qResults, const compBox_t initialBox, const r
     
     connCmp_list_push(qPrepLoop, initialCC);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
-    risolate_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
+    risolate_prep_loop( bDiscarded, qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
-    risolate_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    risolate_main_loop( qResults, bDiscarded, qMainLoop, discardedCcs, eps, cache, meta);
     
     
     realRat_clear(factor);
@@ -618,7 +624,9 @@ void risolate_algo( connCmp_list_t qResults, const compBox_t initialBox, const r
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
-void risolate_algo_global( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+void risolate_algo_global( connCmp_list_t qResults, 
+                           compBox_list_t bDiscarded,
+                           const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
     
     clock_t start = clock();
     
@@ -645,7 +653,7 @@ void risolate_algo_global( connCmp_list_t qResults, const compBox_t initialBox, 
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
 //     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
-    risolate_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    risolate_main_loop( qResults,  bDiscarded, qMainLoop, discardedCcs, eps, cache, meta);
     
     
 //     realRat_clear(factor);

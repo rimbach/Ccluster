@@ -11,7 +11,7 @@
 
 #include "ccluster/ccluster.h"
 
-void compBox_gnuplot(FILE * f, 
+void risolate_compBox_gnuplot(FILE * f, 
                      const compBox_t b){
     
     int nbdigits = 12;
@@ -67,7 +67,7 @@ void compBox_gnuplot(FILE * f,
     
 }
                      
-void connCmp_gnuplot(FILE * f, 
+void risolate_connCmp_gnuplot(FILE * f, 
                      const connCmp_t c, 
                      metadatas_t meta){
     
@@ -80,7 +80,7 @@ void connCmp_gnuplot(FILE * f,
     realApp_init(cIm);
     realApp_init(rad);
     
-    connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
+    connCmp_risolate_componentBox( containingBox, c, metadatas_initBref(meta));
     compBox_get_containing_dsk( containingDisk, containingBox);
     
     slong l = fmpz_clog_ui( realRat_denref(compDsk_radiusref(containingDisk)), (ulong) 2);
@@ -105,7 +105,7 @@ void connCmp_gnuplot(FILE * f,
     compDsk_clear(containingDisk);
 }
 
-void connCmp_list_gnuplot(FILE * f, 
+void risolate_connCmp_list_gnuplot(FILE * f, 
                           const connCmp_list_t l, 
                           metadatas_t meta,
                           int withInitBox){
@@ -167,7 +167,7 @@ void connCmp_list_gnuplot(FILE * f,
     connCmp_list_iterator it = connCmp_list_begin(l);
     
     while (it!=connCmp_list_end() ) {
-        connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
+        risolate_connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
         it = connCmp_list_next(it);
         fprintf(f, "\n");
     }
@@ -177,7 +177,7 @@ void connCmp_list_gnuplot(FILE * f,
     it = connCmp_list_begin(l);
     
     while (it!=connCmp_list_end() ) {
-        connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
+        risolate_connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
         it = connCmp_list_next(it);
         fprintf(f, "\n");
     }
@@ -219,7 +219,7 @@ void connCmp_list_gnuplot(FILE * f,
     realApp_clear(ysupa);
 }
 
-void connCmp_list_gnuplot_drawSubdiv(FILE * f, 
+void risolate_connCmp_list_gnuplot_drawSubdiv(FILE * f, 
                           const connCmp_list_t l, 
                           const compBox_list_t lb,
                           metadatas_t meta){
@@ -297,7 +297,7 @@ void connCmp_list_gnuplot_drawSubdiv(FILE * f,
     it = connCmp_list_begin(l);
     
     while (it!=connCmp_list_end() ) {
-        connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
+        risolate_connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
         it = connCmp_list_next(it);
         fprintf(f, "\n");
     }
@@ -308,7 +308,7 @@ void connCmp_list_gnuplot_drawSubdiv(FILE * f,
     it = connCmp_list_begin(l);
     
     while (it!=connCmp_list_end() ) {
-        connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
+        risolate_connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
         it = connCmp_list_next(it);
         fprintf(f, "\n");
     }
@@ -344,7 +344,7 @@ void connCmp_list_gnuplot_drawSubdiv(FILE * f,
     while (it!=connCmp_list_end() ) {
         compBox_list_iterator itb = compBox_list_begin( connCmp_boxesref( connCmp_list_elmt(it)) );
         while (itb!= compBox_list_end() ){
-            compBox_gnuplot(f, compBox_list_elmt(itb));
+            risolate_compBox_gnuplot(f, compBox_list_elmt(itb));
             itb = compBox_list_next( itb );
             fprintf(f, "e\n");
         }
@@ -355,7 +355,7 @@ void connCmp_list_gnuplot_drawSubdiv(FILE * f,
     connCmp_list_iterator itb = compBox_list_begin(lb);
     
     while (itb!=compBox_list_end() ) {
-        compBox_gnuplot(f, compBox_list_elmt(itb));
+        risolate_compBox_gnuplot(f, compBox_list_elmt(itb));
         itb = compBox_list_next(itb);
         fprintf(f, "e\n");
     }
