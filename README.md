@@ -56,7 +56,7 @@ This is implemented as a c function.
 
 ## Binary ccluster: compute *eps-natural clusters* of complex roots of a polynomial with rational coefficients
 
-We provide a binary file in the directory bin that takes in input a polynomial with rational coefficients, given in an input file.
+We provide the program bin/ccluster that takes in input a polynomial with rational coefficients, given in an input file.
 
 ### Input files
 
@@ -94,6 +94,11 @@ For a graphical output, if gnuplot is install on your system, do
 bin/ccluster bin/Mignotte_64_14.ccl -o -2 | gnuplot
 ```
 and use option -o -3 to draw the subdivision tree.
+
+## Binary risolate: isolate real roots of a polynomial with rational coefficients
+
+Usage of bin/risolate is similar to ccluster. Except that risolate can only deal with polynomial
+having rational coefficients; real roots are isolated.
 
 ## Use with Singular
 Requires the ccluster library to be installed on your system.
