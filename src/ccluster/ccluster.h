@@ -28,6 +28,9 @@
 #include "newton/newton.h"
 #include "powerSums/powerSums.h"
 
+#include "geometry/compAnn.h"
+#include "rootRadii/realIntRootRadii.h"
+
 
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include "ccluster/parallel_discard.h"
@@ -90,6 +93,17 @@ void ccluster_refine( connCmp_list_t qResults,
                       cacheApp_t cache, 
                       metadatas_t meta);
 
+/* rootRadii */
+void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
+                                     compBox_list_t bDiscarded,
+                                     compAnn_list_t qAnnulii,
+                                     compAnn_list_t qAnnulii1,
+                                     compAnn_list_t qAnnulii2,
+                                     const compBox_t initialBox, 
+                                     const realRat_t eps, 
+                                     cacheApp_t cache, 
+                                     metadatas_t meta);
+
 void connCmp_print_for_results(FILE * f, 
                                const connCmp_t c, 
                                metadatas_t meta);
@@ -123,6 +137,14 @@ void connCmp_list_gnuplot(FILE * f,
 void connCmp_list_gnuplot_drawSubdiv(FILE * f, 
                           const connCmp_list_t l, 
                           const compBox_list_t lb,
+                          metadatas_t meta);
+
+void connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f, 
+                          const connCmp_list_t l, 
+                          const compBox_list_t lb,
+                          const compAnn_list_t la,
+                          const compAnn_list_t la1,
+                          const compAnn_list_t la2,
                           metadatas_t meta);
 
 /* INTERFACES */

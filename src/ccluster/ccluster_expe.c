@@ -127,7 +127,7 @@ void ccluster_expe_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_li
     
     while (!connCmp_is_empty(cc)) {
         btemp = connCmp_pop(cc);
-        subdBox_quadrisect( subBoxes, btemp );
+        subdBox_quadrisect( subBoxes, btemp, 0 );
         compBox_clear(btemp);
         ccluster_free(btemp);
     }

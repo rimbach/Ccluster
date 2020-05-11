@@ -318,7 +318,9 @@ void compBox_actualize_anulii_risolate( compBox_t x, const compAnn_list_t lmothe
 }
 
 /* assume compBox_annuliref(x) contains anulii in increasing order of their radii */
-void compBox_actualize_anulii( compBox_t x, const compAnn_list_t lmother ){
+void compBox_actualize_anulii( compBox_t x, const compAnn_list_t lmother
+//                                            , const compAnn_list_t lmother1 
+                             ){
     
     compApp_t center;
     realApp_t left, right, rad;
@@ -327,7 +329,12 @@ void compBox_actualize_anulii( compBox_t x, const compAnn_list_t lmother ){
     realApp_init(right);
     realApp_init(rad);
     
+    /* list annulii */
+    compAnn_list_iterator it = compAnn_list_begin( lmother );
+    slong centerAnns = compAnn_getCenter(compAnn_list_elmt( it ));
     compApp_set_compRat( center, compBox_centerref(x), CCLUSTER_DEFAULT_PREC );
+    realApp_add_si( compApp_realref(center), compApp_realref(center), -centerAnns, CCLUSTER_DEFAULT_PREC);
+                    
     compApp_abs        ( left,   center,               CCLUSTER_DEFAULT_PREC );
     realApp_set        ( right,  left );
     realApp_set_realRat( rad,    compBox_bwidthref(x), CCLUSTER_DEFAULT_PREC );
@@ -336,7 +343,7 @@ void compBox_actualize_anulii( compBox_t x, const compAnn_list_t lmother ){
     realApp_sub        ( left,   left,                 rad, CCLUSTER_DEFAULT_PREC );
     realApp_add        ( right,  right,                rad, CCLUSTER_DEFAULT_PREC );
     
-    compAnn_list_iterator it = compAnn_list_begin( lmother );
+    
     /* go to the first annulus with rsup >= left */
     while ( (it!=compAnn_list_end()) && (realApp_lt( compAnn_radSupref(compAnn_list_elmt( it )), left )==1)  )
         it = compAnn_list_next(it);
@@ -346,6 +353,31 @@ void compBox_actualize_anulii( compBox_t x, const compAnn_list_t lmother ){
         compAnn_list_push( compBox_annuliref(x), compAnn_list_elmt( it ) );
         it = compAnn_list_next(it);
     }
+    
+//     /* list annulii1 */
+//     it = compAnn_list_begin( lmother1 );
+//     centerAnns = compAnn_getCenter(compAnn_list_elmt( it ));
+//     compApp_set_compRat( center, compBox_centerref(x), CCLUSTER_DEFAULT_PREC );
+//     realApp_add_si( compApp_realref(center), compApp_realref(center), -centerAnns, CCLUSTER_DEFAULT_PREC);
+//                     
+//     compApp_abs        ( left,   center,               CCLUSTER_DEFAULT_PREC );
+//     realApp_set        ( right,  left );
+//     realApp_set_realRat( rad,    compBox_bwidthref(x), CCLUSTER_DEFAULT_PREC );
+//     realApp_mul_si     ( rad,    rad,                  3, CCLUSTER_DEFAULT_PREC );
+//     realApp_div_si     ( rad,    rad,                  4, CCLUSTER_DEFAULT_PREC );
+//     realApp_sub        ( left,   left,                 rad, CCLUSTER_DEFAULT_PREC );
+//     realApp_add        ( right,  right,                rad, CCLUSTER_DEFAULT_PREC );
+//     
+//     
+//     /* go to the first annulus with rsup >= left */
+//     while ( (it!=compAnn_list_end()) && (realApp_lt( compAnn_radSupref(compAnn_list_elmt( it )), left )==1)  )
+//         it = compAnn_list_next(it);
+//     
+//     /* push annulii satisfying rinf <= right (and rsup >= left) */
+//     while ( (it!=compAnn_list_end()) && (!(realApp_gt( compAnn_radInfref(compAnn_list_elmt( it )), right )==1))  ) {
+//         compAnn_list_push( compBox_annuli1ref(x), compAnn_list_elmt( it ) );
+//         it = compAnn_list_next(it);
+//     }
     
     compApp_clear(center);
     realApp_clear(left);

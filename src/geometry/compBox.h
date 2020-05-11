@@ -35,6 +35,8 @@ typedef struct {
     /* when root radii are used */
     compAnn_list annuli; /*list of pointers on annulii having a non-empty intersection with the 
                               containing disk of the box */
+//     compAnn_list annuli1; /*list of pointers on annulii having a non-empty intersection with the 
+//                               containing disk of the box */
 } compBox;
 
 typedef compBox compBox_t[1];
@@ -44,6 +46,7 @@ typedef compBox * compBox_ptr;
 #define compBox_bwidthref(X) (&(X)->bwidth)
 #define compBox_nbMSolref(X) (X->nbMSol)
 #define compBox_annuliref(X) (&(X)->annuli)
+// #define compBox_annuli1ref(X) (&(X)->annuli1)
 
 slong compBox_getDepth(const compBox_t b, const compBox_t initialBox);
 
@@ -52,31 +55,46 @@ GEOMETRY_INLINE void compBox_init(compBox_t x) {
     compRat_init(compBox_centerref(x)); 
     realRat_init(compBox_bwidthref(x));
 /*     x->nbMSol=-1;*/
+    compAnn_list_init(compBox_annuliref(x));
+//     compAnn_list_init(compBox_annuli1ref(x));
 }
 
 GEOMETRY_INLINE void compBox_init_annuli(compBox_t x) { 
     compAnn_list_init(compBox_annuliref(x));
+//     compAnn_list_init(compBox_annuli1ref(x));
 }
 
-GEOMETRY_INLINE void compBox_copy_annuli(compBox_t x, const compAnn_list_t anulii) { 
+GEOMETRY_INLINE void compBox_copy_annuli(compBox_t x, const compAnn_list_t anulii
+//                                                     , const compAnn_list_t anulii1
+                                        ) { 
     compAnn_list_copy( compBox_annuliref(x), anulii);
+//     compAnn_list_copy( compBox_annuli1ref(x), anulii);
 }
 
 /* assume lmother contains anulii in increasing order of their radii */
 /* assume compBox_annuliref(X) is initialized and empty*/
-void compBox_actualize_anulii( compBox_t x, const compAnn_list_t lmother );
+void compBox_actualize_anulii( compBox_t x, const compAnn_list_t lmother 
+//                                           , const compAnn_list_t lmother1  
+                             );
 
 void compBox_actualize_anulii_risolate( compBox_t x, const compAnn_list_t lmother );
 
 GEOMETRY_INLINE void compBox_clear(compBox_t x) { 
     compRat_clear(compBox_centerref(x)); 
     realRat_clear(compBox_bwidthref(x));
+    /* do NOT delete the annulii !!! */
+    compAnn_list_empty(compBox_annuliref(x));
+    compAnn_list_clear(compBox_annuliref(x));
+//     compAnn_list_empty(compBox_annuli1ref(x));
+//     compAnn_list_clear(compBox_annuli1ref(x));
 }
 
 /* do NOT delete the annulii !!! */
 GEOMETRY_INLINE void compBox_clear_annuli(compBox_t x) { 
     compAnn_list_empty(compBox_annuliref(x));
     compAnn_list_clear(compBox_annuliref(x));
+//     compAnn_list_empty(compBox_annuli1ref(x));
+//     compAnn_list_clear(compBox_annuli1ref(x));
 }
 
 /* members access */
@@ -164,6 +182,9 @@ GEOMETRY_INLINE void compBox_set(compBox_t d, const compBox_t b){
     compRat_set( compBox_centerref(d), compBox_centerref(b));
     realRat_set( compBox_bwidthref(d), compBox_bwidthref(b));
     d->nbMSol=b->nbMSol;
+    compBox_copy_annuli(d, compBox_annuliref(b)
+//                          , compBox_annuli1ref(b)
+                       );
 }
 
 /* Inflate */

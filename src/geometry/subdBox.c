@@ -12,7 +12,7 @@
 #include "geometry/subdBox.h"
 
 
-void subdBox_quadrisect( compBox_list_t res, const compBox_t b ){
+void subdBox_quadrisect( compBox_list_t res, const compBox_t b, int useRootRadii ){
     realRat_t shift, width;
     realRat_init(shift);
     realRat_init(width);
@@ -47,6 +47,26 @@ void subdBox_quadrisect( compBox_list_t res, const compBox_t b ){
     compBox_set_compRat_realRat_int(bNW, compBox_centerref(b), width, b->nbMSol);
     realRat_sub( compRat_realref(compBox_centerref(bNW)), compRat_realref(compBox_centerref(bNW)), shift);
     realRat_add( compRat_imagref(compBox_centerref(bNW)), compRat_imagref(compBox_centerref(bNW)), shift);
+    
+    if (useRootRadii){
+        /* root radii */
+//         compBox_init_annuli(bNE);
+        compBox_actualize_anulii( bNE, compBox_annuliref(b)
+//                                       , compBox_annuli1ref(b) 
+                                );
+//         compBox_init_annuli(bSE);
+        compBox_actualize_anulii( bSE, compBox_annuliref(b) 
+//                                       , compBox_annuli1ref(b) 
+                                );
+//         compBox_init_annuli(bSW);
+        compBox_actualize_anulii( bSW, compBox_annuliref(b) 
+//                                       , compBox_annuli1ref(b) 
+                                );
+//         compBox_init_annuli(bNW);
+        compBox_actualize_anulii( bNW, compBox_annuliref(b) 
+//                                  , compBox_annuli1ref(b) 
+                                );
+    }
     
     /*printf("bNE: "); compBox_print(bNE); printf("\n");*/
     /*printf("bSE: "); compBox_print(bSE); printf("\n");*/

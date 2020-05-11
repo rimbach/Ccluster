@@ -31,6 +31,17 @@ void realIntRootRadii_graeffe_iterations_inplace( realApp_poly_t res, int N, slo
             metadatas_add_time_Graeffe(meta, (double) (clock() - start) );
 }
 
+void realIntRootRadii_taylor_shift_inplace( realApp_poly_t res, slong centerRe, slong prec){
+    
+//         clock_t start = clock();
+        realApp_poly_taylorShift_in_place_slong( res, 
+                                           centerRe, 
+                                           prec );
+
+//         if (metadatas_haveToCount(meta))
+//             metadatas_add_time_Taylors(meta, (double) (clock() - start) );
+}
+
 /* assume i<j<k */
 /* assume absPi=|pi|, absPj=|pj|, absPk=|pk| are approximations of integers */
 /* decide if [j,log|pj|] lies below of on the line passing trough [i,log|pi|] and [k,log|pk|]*/
@@ -49,7 +60,7 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
     /*  <=> decide if |pj|^(k-i) * |pi|^(j-i) - |pk|^(j-i) * |pi|^(k-i) <= 0                 */
     /*                left side of inequality is integer                                     */
     
-//     printf( "realIntRootRadii.c , realIntRootRadii_liesBelow: i: %ld, j:%ld, k:%ld \n", i, j, k);
+//     printf( "#realIntRootRadii.c , realIntRootRadii_liesBelow: i: %ld, j:%ld, k:%ld \n", i, j, k);
     ulong kmi = k-i;
     ulong jmi = j-i;
     realApp_t leftSide, rightSide, temp;
@@ -66,7 +77,7 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
     realApp_mul   (rightSide, rightSide, temp,      prec);
     realApp_sub   (leftSide,  leftSide,  rightSide, prec);
     
-//     printf( "realIntRootRadii.c , realIntRootRadii_liesBelow: leftSide: ");
+//     printf( "#realIntRootRadii.c , realIntRootRadii_liesBelow: leftSide: ");
 //     realApp_printd(leftSide, 10);
 //     printf("\n");
     
@@ -90,7 +101,7 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
     realApp_clear(rightSide);
     realApp_init(temp);
 
-//     printf( "realIntRootRadii.c , realIntRootRadii_liesBelow: leq 0: %d \n", res);
+//     printf( "#realIntRootRadii.c , realIntRootRadii_liesBelow: leq 0: %d \n", res);
     
     return res;
 }
@@ -121,7 +132,7 @@ slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoef
                 return res;
             }
         }
-//         printf("realIntRootRadii.c , realIntRootRadii_convexHull: res: %ld\n", res);
+//         printf("#realIntRootRadii.c , realIntRootRadii_convexHull: res: %ld\n", res);
         convexHull[res] = i;
         res++;
     }
@@ -130,6 +141,7 @@ slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoef
 }
 
 slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
+                                  slong centerRe,
                                cacheApp_t cache,        /* polynomial */
                                const realRat_t delta){
     
@@ -147,7 +159,7 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
     log2_1pdelta = log2_1pdelta / log(2);
     int N = (int) ceil( log2( log2(2*degree)/log2_1pdelta ) );
     
-    printf("realIntRootRadii.c; realIntRootRadii_rootRadii : number of Graeffe iterations: %d \n", N);
+    printf("#realIntRootRadii.c; realIntRootRadii_rootRadii : number of Graeffe iterations: %d \n", N);
     
     slong lenCh = 0;
     slong * convexHull = (slong *) ccluster_malloc ( (degree+1)*sizeof(slong) );
@@ -155,11 +167,15 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
     slong prec = CCLUSTER_DEFAULT_PREC;
     realApp_poly_t pApprox;
     realApp_poly_init2(pApprox,degree+1);
+    if (centerRe != 0)
+        realIntRootRadii_taylor_shift_inplace( pApprox, centerRe, prec);
     
     while ( lenCh == 0 ) {
         
         //     realIntRootRadii_getApproximation( pApprox, cache, prec, meta );
         realApp_poly_set(pApprox, cacheApp_getApproximation_real ( cache, prec ));
+        if (centerRe != 0)
+            realIntRootRadii_taylor_shift_inplace( pApprox, centerRe, prec);
         //  realIntRootRadii_graeffe_iterations_inplace( pApprox, N, prec, meta);
         for(int i = 0; i < N; i++)
             realApp_poly_oneGraeffeIteration_in_place( pApprox, prec );
@@ -173,7 +189,7 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
             prec = 2*prec;
     }
     
-//     printf(" Convex hull: %ld vertices: ", lenCh );
+//     printf("# Convex hull: %ld vertices: ", lenCh );
 //     for (slong ind = 0; ind < lenCh; ind++)
 //         printf("%ld, ", convexHull[ind]);
 //     printf("\n");
@@ -192,7 +208,7 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
         slong shift = right - left;
         compAnn_indMaxref(cur) = degree + 1 - (left +1);
         compAnn_indMinref(cur) = degree + 1 - (right);
-        
+        compAnn_centerref(cur) = centerRe;
         realApp_div( compAnn_radInfref(cur), (pApprox->coeffs) + right, (pApprox->coeffs) + left, prec );
         realApp_root_ui( compAnn_radInfref(cur), compAnn_radInfref(cur), shift, prec );
         realApp_inv( compAnn_radInfref(cur), compAnn_radInfref(cur), prec );

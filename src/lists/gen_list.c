@@ -196,16 +196,16 @@ void gen_list_fprint(FILE * file, const gen_list_t l, void (* print_func)(FILE *
 }
 
 void gen_list_fprintd(FILE * file, const gen_list_t l, slong digits, void (* print_func)(FILE *, const void *, slong digits) ){
-    fprintf(file, "length: %d, elements: [", l->_size);
+    fprintf(file, "#length: %d, elements: [", l->_size);
     
     struct gen_elmt * voyager = l->_begin;
     while (voyager != NULL) {
         print_func(file, voyager->_elmt, digits);
         if (voyager->_next != NULL)
-            fprintf(file, ", ");
+            fprintf(file, "#, ");
         voyager = voyager->_next;
     }
-    fprintf(file, "]"); 
+    fprintf(file, "#]"); 
 }
 
 int gen_list_is_empty(const gen_list_t l){

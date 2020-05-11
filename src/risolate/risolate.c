@@ -184,7 +184,8 @@ void risolate_prep_loop( compBox_list_t bDiscarded,
     realRat_clear(diam);
 }
 
-void risolate_prep_loop_rootRadii( connCmp_list_t qCover, 
+void risolate_prep_loop_rootRadii( compBox_list_t bDiscarded,
+                                   connCmp_list_t qCover, 
                                    const compBox_t initialBox,
                                    const compAnn_list_t annulii,
                                    cacheApp_t cache, 
@@ -202,8 +203,10 @@ void risolate_prep_loop_rootRadii( connCmp_list_t qCover,
     compBox_init(box);
     compBox_set(box, initialBox);
     compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
-    compBox_init_annuli(box);
-    compBox_copy_annuli(box, annulii);
+//     compBox_init_annuli(box);
+    compBox_copy_annuli(box, annulii
+//                            , annulii
+                       );
     
     ccur = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
     connCmp_init_compBox(ccur, box);
@@ -243,7 +246,9 @@ void risolate_prep_loop_rootRadii( connCmp_list_t qCover,
               compBox_init(box);
               connCmp_risolate_componentBox( box, ccur, initialBox);
               compBox_init_annuli(box);
-              compBox_copy_annuli(box, annl);
+              compBox_copy_annuli(box, annl
+//                                      , annl
+                                 );
               compBox_nbMSolref( box ) = compAnn_indMaxref(ann) - compAnn_indMinref(ann) + 1;
               /*delete Ccur*/
               while ( itb!=compBox_list_end() ){
@@ -665,7 +670,9 @@ void risolate_algo_global( connCmp_list_t qResults,
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
-void risolate_algo_global_rootRadii( connCmp_list_t qResults, const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
+void risolate_algo_global_rootRadii( connCmp_list_t qResults, 
+                                     compBox_list_t bDiscarded,
+                                     const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
     
     clock_t start = clock();
     clock_t start2 = clock();
@@ -683,15 +690,19 @@ void risolate_algo_global_rootRadii( connCmp_list_t qResults, const compBox_t in
     realRat_set_si(delta, 1, degree*degree);
 //     realRat_set_si(delta, 1, degree*degree*degree);
     
-    slong prec = realIntRootRadii_rootRadii( annulii, cache, delta );
+    slong prec = realIntRootRadii_rootRadii( annulii, 0, cache, delta );
     
-    printf("time in computing RootRadii           : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-    printf("precision needed: %ld\n", prec);
+    if (metadatas_getVerbo(meta)>3) {
+        printf("#time in computing RootRadii           : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+        printf("#precision needed: %ld\n", prec);
+    }
     start2 = clock();
     
     realIntRootRadii_connectedComponents( annulii, prec );
     
-    printf("time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    if (metadatas_getVerbo(meta)>3) {
+        printf("#time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    }
     start2 = clock();
     
 //     printf("Annulii: ");
@@ -700,22 +711,28 @@ void risolate_algo_global_rootRadii( connCmp_list_t qResults, const compBox_t in
     
     realIntRootRadii_containsRealRoot( annulii, cache, prec );
     
-    printf("time in discarding real intervals     : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    if (metadatas_getVerbo(meta)>3) {
+        printf("#time in discarding real intervals     : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    }
     start2 = clock();
     
 //     printf("Annulii: ");
 //     compAnn_list_printd(annulii, 10);
 //     printf("\n\n");
     
-    risolate_prep_loop_rootRadii( qCover, initialBox, annulii, cache, meta);
+    risolate_prep_loop_rootRadii( bDiscarded, qCover, initialBox, annulii, cache, meta);
     
-    printf("time in covering intervals with boxes : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    if (metadatas_getVerbo(meta)>3) {
+        printf("#time in covering intervals with boxes : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+    }
     start2 = clock();
     
     connCmp_list_iterator itc;
     /* display qCover */
 //     itc = connCmp_list_begin(qCover);
-    printf("Number of CC in qCover: %d \n", connCmp_list_get_size(qCover));
+    if (metadatas_getVerbo(meta)>3) {
+        printf("#Number of CC in qCover: %d \n", connCmp_list_get_size(qCover));
+    }
 //     while( itc!= connCmp_list_end() ){
 //         printf("--- Box: "); compBox_print( compBox_list_first(connCmp_boxesref(connCmp_list_elmt(itc))) );
 //         printf("\n");
@@ -728,13 +745,17 @@ void risolate_algo_global_rootRadii( connCmp_list_t qResults, const compBox_t in
         
     prec = risolate_exclusion_rootRadii( qCover, cache, meta);
     
-    printf("time in exclusion tests               : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-    printf("precision needed: %ld\n", prec);
+    if (metadatas_getVerbo(meta)>3) {
+        printf("#time in exclusion tests               : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+        printf("#precision needed: %ld\n", prec);
+    }
     start2 = clock();
     
     /* display qCover */
 //     itc = connCmp_list_begin(qCover);
-    printf("Number of CC in qCover: %d \n", connCmp_list_get_size(qCover));
+    if (metadatas_getVerbo(meta)>3) {
+        printf("#Number of CC in qCover: %d \n", connCmp_list_get_size(qCover));
+    }
 //     while( itc!= connCmp_list_end() ){
 //         printf("--- Box: "); compBox_print( compBox_list_first(connCmp_boxesref(connCmp_list_elmt(itc))) );
 //         printf("\n");
@@ -755,13 +776,15 @@ void risolate_algo_global_rootRadii( connCmp_list_t qResults, const compBox_t in
         itc = connCmp_list_next( itc );
     }
     
-    printf("total time in root radii              : %f \n", ((double) (clock() - start))/CLOCKS_PER_SEC );
+    if (metadatas_getVerbo(meta)>3) {
+        printf("#total time in root radii              : %f \n", ((double) (clock() - start))/CLOCKS_PER_SEC );
+    }
     
     connCmp_list_t discardedCcs;
     connCmp_list_init(discardedCcs);
     
     /* main loop */
-    risolate_main_loop( qResults,  qCover, discardedCcs, eps, cache, meta);
+    risolate_main_loop( qResults, bDiscarded,  qCover, discardedCcs, eps, cache, meta);
     
     connCmp_list_clear(qCover);
     realRat_clear(delta);

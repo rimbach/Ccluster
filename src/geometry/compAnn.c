@@ -13,9 +13,11 @@
 #include "geometry/compAnn.h"
 
 void compAnn_fprintd( FILE * file, const compAnn_t x, slong digits ){
-    fprintf(file, "indMax: %ld, indMin: %ld, rrInPo: %d, rrInNe: %d \n", 
+    fprintf(file, "#indMax: %ld, indMin: %ld, rrInPo: %d, rrInNe: %d \n", 
             compAnn_indMaxref(x), compAnn_indMinref(x), compAnn_rrInPoref(x), compAnn_rrInNeref(x) );
-    fprintf(file, "radInf: ");
+    if (compAnn_centerref(x)!=0)
+        fprintf(file, "#center: %ld, ", compAnn_centerref(x) );
+    fprintf(file, "#radInf: ");
     realApp_fprintd(file, compAnn_radInfref(x), digits);
     fprintf(file, "  radSup: ");
     realApp_fprintd(file, compAnn_radSupref(x), digits);
@@ -23,11 +25,13 @@ void compAnn_fprintd( FILE * file, const compAnn_t x, slong digits ){
 }
 
 void compAnn_fprint( FILE * file, const compAnn_t x){
-    fprintf(file, "indMax: %ld, indMin: %ld, rrInPo: %d, rrInNe: %d \n", 
+    fprintf(file, "#indMax: %ld, indMin: %ld, rrInPo: %d, rrInNe: %d \n", 
             compAnn_indMaxref(x), compAnn_indMinref(x), compAnn_rrInPoref(x), compAnn_rrInNeref(x) );
-    fprintf(file, "radInf: ");
+    if (compAnn_centerref(x)!=0)
+        fprintf(file, "#center: %ld, ", compAnn_centerref(x) );
+    fprintf(file, "#radInf: ");
     realApp_fprint(file, compAnn_radInfref(x));
-    fprintf(file, "  radSup: ");
+    fprintf(file, "#  radSup: ");
     realApp_fprint(file, compAnn_radSupref(x));
     fprintf(file, "\n");
 }

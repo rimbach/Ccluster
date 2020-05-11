@@ -126,6 +126,7 @@ int main(int argc, char **argv){
         curFile = fopen (filename,"r");
         if (curFile!=NULL) {
             realRat_poly_fread(curFile, p);
+            realRat_poly_canonicalise(p);
             compRat_poly_set_realRat_poly(p_global,p);
             
             if (global==2)

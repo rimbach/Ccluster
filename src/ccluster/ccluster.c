@@ -52,6 +52,8 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
         if (( metadatas_useRealCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
 //             printf("ici\n");
 //             if (metadatas_getDrSub(meta)==0){
+//                 if (metadatas_useRootRadii(meta))
+//                     compBox_clear_annuli(btemp);
                 compBox_clear(btemp);
                 ccluster_free(btemp);
 //             } else {
@@ -60,6 +62,25 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
             continue;
         }
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
+        if ( metadatas_useRootRadii(meta) ){
+            
+            /* check if btemp intersects at least an annulus */
+            if (compAnn_list_get_size( compBox_annuliref( btemp ) )==0){
+                if (metadatas_haveToCount(meta)){
+                    metadatas_add_discarded( meta, depth);
+                }
+//                 if (metadatas_getDrSub(meta)==0){
+                    compBox_clear(btemp);
+                    ccluster_free(btemp);
+//                 } else {
+//                     compBox_list_push(bDiscarded, btemp);
+//                 }
+                
+                continue;
+                
+            }
+                
+        }
         
         if ( metadatas_usePowerSums(meta) ){
 // #ifdef CCLUSTER_STATS_PS_MACIS
@@ -127,6 +148,8 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
             if (metadatas_haveToCount(meta)){
                 metadatas_add_discarded( meta, depth);
             }
+//             if (metadatas_useRootRadii(meta))
+//                 compBox_clear_annuli(btemp);
             if (metadatas_getDrSub(meta)==0){
                 compBox_clear(btemp);
                 ccluster_free(btemp);
@@ -223,7 +246,7 @@ void ccluster_bisect_connCmp( connCmp_list_t dest,
     
     while (!connCmp_is_empty(cc)) {
         btemp = connCmp_pop(cc);
-        subdBox_quadrisect( subBoxes, btemp );
+        subdBox_quadrisect( subBoxes, btemp, metadatas_useRootRadii(meta) );
         compBox_clear(btemp);
         ccluster_free(btemp);
     }
@@ -789,6 +812,120 @@ void ccluster_algo_global( connCmp_list_t qResults,
     connCmp_list_clear(discardedCcs);
     
 //     chronos_toc_CclusAl(metadatas_chronref(meta));
+    metadatas_add_time_CclusAl(meta, (double) (clock() - start));
+}
+
+void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
+                                     compBox_list_t bDiscarded,
+                                     compAnn_list_t annulii,
+                                     compAnn_list_t annulii1,
+                                     compAnn_list_t annulii2,
+                                     const compBox_t initialBox, 
+                                     const realRat_t eps, 
+                                     cacheApp_t cache, 
+                                     metadatas_t meta){
+    clock_t start = clock();
+    clock_t start2 = clock();
+    
+//     compAnn_list_t annulii;
+    connCmp_list_t qCover;
+    realRat_t delta;
+    
+//     compAnn_list_init(annulii);
+    connCmp_list_init(qCover);
+    realRat_init(delta);
+    
+    slong degree = cacheApp_getDegree( cache );
+//     realRat_set_si(delta, 1, degree);
+    realRat_set_si(delta, 1, degree*degree);
+//     realRat_set_si(delta, 1, degree*degree*degree);
+    
+    /* assume 0 is not a root of the poly */
+    slong prec = realIntRootRadii_rootRadii( annulii, 0, cache, delta );
+    
+    /* find two integers that are not a roots of the poly */
+    slong centerRe1 = realApp_ceil_si(compAnn_radSupref(compAnn_list_last(annulii)), prec);
+    slong centerRe2 = -centerRe1;
+    prec = realIntRootRadii_rootRadii( annulii1, centerRe1, cache, delta );
+    prec = realIntRootRadii_rootRadii( annulii2, centerRe2, cache, delta );
+    
+//     if (metadatas_getVerbo(meta)>3) {
+        printf("#time in computing RootRadii           : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+        printf("#precision needed: %ld\n", prec);
+//     }
+    start2 = clock();
+    
+    realIntRootRadii_connectedComponents( annulii, prec );
+    realIntRootRadii_connectedComponents( annulii1, prec );
+    realIntRootRadii_connectedComponents( annulii2, prec );
+    
+//     if (metadatas_getVerbo(meta)>3) {
+        printf("#time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+//     }
+    start2 = clock();
+    
+//     printf("#Annulii: ");
+//     compAnn_list_printd(annulii2, 10);
+//     printf("\n\n");
+    
+    compBox_ptr box;
+    box = (compBox_ptr) ccluster_malloc (sizeof(compBox));
+    compBox_init(box);
+    compBox_set(box, initialBox);
+    compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
+    
+//     compBox_init_annuli(box);
+    compBox_copy_annuli(box, annulii
+//                            , annulii1
+                       );
+    
+    printf("#Annulii: ");
+    compAnn_list_printd(compBox_annuliref(box), 10);
+    printf("\n\n");
+    
+    connCmp_ptr initialCC;
+    initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
+    connCmp_init_compBox(initialCC, box);
+    
+    connCmp_list_t qMainLoop, discardedCcs;
+    connCmp_list_init(qMainLoop);
+    connCmp_list_init(discardedCcs);
+    
+    connCmp_list_push(qMainLoop, initialCC);
+    ccluster_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, meta);
+    
+    /* clear annulii information */
+//     connCmp_list_iterator itc = connCmp_list_begin(qResults);
+//     while( itc!= connCmp_list_end() ){
+//         compBox_list_iterator itb = compBox_list_begin( connCmp_boxesref( connCmp_list_elmt(itc) ) );
+//         while ( itb!=compBox_list_end() ){
+//             compBox_clear_annuli(compBox_list_elmt(itb));
+//             itb = compBox_list_next(itb);
+//         }
+//         itc = connCmp_list_next( itc );
+//     }
+//     itc = connCmp_list_begin(discardedCcs);
+//     while( itc!= connCmp_list_end() ){
+//         compBox_list_iterator itb = compBox_list_begin( connCmp_boxesref( connCmp_list_elmt(itc) ) );
+//         while ( itb!=compBox_list_end() ){
+//             compBox_clear_annuli(compBox_list_elmt(itb));
+//             itb = compBox_list_next(itb);
+//         }
+//         itc = connCmp_list_next( itc );
+//     }
+//     compBox_list_iterator itb = compBox_list_begin(bDiscarded);
+//     while ( itb!=compBox_list_end() ){
+//         compBox_clear_annuli(compBox_list_elmt(itb));
+//         itb = compBox_list_next(itb);
+//     }
+    
+    connCmp_list_clear(qMainLoop);
+    connCmp_list_clear(discardedCcs);
+    
+    connCmp_list_clear(qCover);
+    realRat_clear(delta);
+//     compAnn_list_clear(annulii);
+    
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 

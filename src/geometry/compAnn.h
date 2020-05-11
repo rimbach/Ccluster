@@ -27,6 +27,7 @@ extern "C" {
 typedef struct {
     slong   indMax;
     slong   indMin;
+    slong   center;
     realApp radInf;
     realApp radSup;
     int     rrInPo; /* 1 if it contains a unique real root in its intersection with R+ */
@@ -38,6 +39,7 @@ typedef compAnn * compAnn_ptr;
 
 #define compAnn_indMaxref(X) (X->indMax)
 #define compAnn_indMinref(X) (X->indMin)
+#define compAnn_centerref(X) (X->center)
 #define compAnn_radInfref(X) (&(X)->radInf)
 #define compAnn_radSupref(X) (&(X)->radSup)
 #define compAnn_rrInPoref(X) (X->rrInPo)
@@ -48,6 +50,7 @@ GEOMETRY_INLINE void compAnn_init( compAnn_t x ){
     realApp_init( compAnn_radSupref(x) );
     compAnn_rrInPoref(x) = -1;
     compAnn_rrInNeref(x) = -1;
+    compAnn_centerref(x) = 0;
 }
 
 GEOMETRY_INLINE void compAnn_clear( compAnn_t x ){
@@ -55,11 +58,16 @@ GEOMETRY_INLINE void compAnn_clear( compAnn_t x ){
     realApp_clear( compAnn_radSupref(x) );
 }
 
-GEOMETRY_INLINE void compAnn_set( compAnn_t x, slong indMax, slong indMin, const realApp_t radInf, const realApp_t radSup){
+GEOMETRY_INLINE void compAnn_set( compAnn_t x, slong indMax, slong indMin, slong centerRe, const realApp_t radInf, const realApp_t radSup){
     compAnn_indMaxref(x) = indMax;
     compAnn_indMinref(x) = indMin;
+    compAnn_centerref(x) = centerRe;
     realApp_set( compAnn_radInfref(x), radInf);
     realApp_set( compAnn_radSupref(x), radSup);
+}
+
+GEOMETRY_INLINE slong compAnn_getCenter( const compAnn_t x ){
+    return x->center;
 }
 
 void compAnn_fprintd( FILE * file, const compAnn_t x, slong digits );
