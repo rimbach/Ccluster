@@ -66,6 +66,8 @@ extern "C" {
 #define STRAT_INT_V7 183
 #define STRAT_STR_V7 "V7"
 
+#define STRAT_STR_V8 "V8"
+
 
 // #define STRAT_STR_FORTESTS1 "test1"
 // #define STRAT_STR_FORTESTS2 "test2"

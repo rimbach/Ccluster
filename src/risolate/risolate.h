@@ -103,6 +103,19 @@ slong risolate_exclusion_rootRadii( connCmp_list_t qCover,
 
 void risolate_algo_global_rootRadii( connCmp_list_t qResults,
                                      compBox_list_t bDiscarded,
+                                     compAnn_list_t annulii,
+                                     compAnn_list_t annulii1,
+                                     compAnn_list_t annulii2,
+                                     const compBox_t initialBox, 
+                                     const realRat_t eps, 
+                                     cacheApp_t cache, 
+                                     metadatas_t meta);
+
+void risolate_algo_global_rootRadii_n( connCmp_list_t qResults,
+                                     compBox_list_t bDiscarded,
+                                     compAnn_list_t annulii,
+                                     compAnn_list_t annulii1,
+                                     compAnn_list_t annulii2,
                                      const compBox_t initialBox, 
                                      const realRat_t eps, 
                                      cacheApp_t cache, 
@@ -151,6 +164,15 @@ void risolate_connCmp_list_gnuplot_drawSubdiv(FILE * f,
                           const connCmp_list_t l, 
                           const compBox_list_t lb,
                           metadatas_t meta);
+
+void risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f, 
+                          const connCmp_list_t l, 
+                          const compBox_list_t lb,
+                          const compAnn_list_t la,
+                          const compAnn_list_t la1,
+                          const compAnn_list_t la2,
+                          metadatas_t meta);
+
 
 #ifdef __cplusplus
 }

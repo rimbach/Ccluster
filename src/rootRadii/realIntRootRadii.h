@@ -54,7 +54,15 @@ slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoef
 slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
                                   slong centerRe,
                                cacheApp_t cache,        /* polynomial */
-                               const realRat_t delta);
+                               const realRat_t delta,
+                               slong prec);
+
+/* returns the precision used to carry out root radii */
+slong realIntRootRadii_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of annulii */
+                                  slong centerIm,
+                               cacheApp_t cache,        /* polynomial */
+                               const realRat_t delta,
+                               slong prec);
 
 void realIntRootRadii_connectedComponents( compAnn_list_t annulii, slong prec );  /* list of annulii */
 

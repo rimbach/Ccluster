@@ -12,7 +12,7 @@
 #include "geometry/subdBox.h"
 
 
-void subdBox_quadrisect( compBox_list_t res, const compBox_t b, int useRootRadii ){
+void subdBox_quadrisect( compBox_list_t res, const compBox_t b){
     realRat_t shift, width;
     realRat_init(shift);
     realRat_init(width);
@@ -48,25 +48,11 @@ void subdBox_quadrisect( compBox_list_t res, const compBox_t b, int useRootRadii
     realRat_sub( compRat_realref(compBox_centerref(bNW)), compRat_realref(compBox_centerref(bNW)), shift);
     realRat_add( compRat_imagref(compBox_centerref(bNW)), compRat_imagref(compBox_centerref(bNW)), shift);
     
-    if (useRootRadii){
-        /* root radii */
-//         compBox_init_annuli(bNE);
-        compBox_actualize_anulii( bNE, compBox_annuliref(b)
-//                                       , compBox_annuli1ref(b) 
-                                );
-//         compBox_init_annuli(bSE);
-        compBox_actualize_anulii( bSE, compBox_annuliref(b) 
-//                                       , compBox_annuli1ref(b) 
-                                );
-//         compBox_init_annuli(bSW);
-        compBox_actualize_anulii( bSW, compBox_annuliref(b) 
-//                                       , compBox_annuli1ref(b) 
-                                );
-//         compBox_init_annuli(bNW);
-        compBox_actualize_anulii( bNW, compBox_annuliref(b) 
-//                                  , compBox_annuli1ref(b) 
-                                );
-    }
+    /* root radii */
+    compBox_actualize_anulii( bNE, b);
+    compBox_actualize_anulii( bSE, b);
+    compBox_actualize_anulii( bSW, b);
+    compBox_actualize_anulii( bNW, b);
     
     /*printf("bNE: "); compBox_print(bNE); printf("\n");*/
     /*printf("bSE: "); compBox_print(bSE); printf("\n");*/
@@ -246,6 +232,7 @@ void subdBox_quadrisect_with_compDsk( compBox_list_t res, const compBox_t b, con
             compBox_set_compRat_realRat_int(bnew, boxCenter, nwidth, b->nbMSol);
             
             if (compBox_intersection_has_non_empty_interior_compDsk (bnew, d)){
+                compBox_actualize_anulii( bnew, b);
                 compBox_list_push(res, bnew);
             }
             else {
@@ -305,6 +292,10 @@ void subdBox_risolate_bisect( compBox_list_t res, const compBox_t b ){
 //     printf("b : "); compBox_print(b ); printf("\n");
 //     printf("bE: "); compBox_print(bE); printf("\n");
 //     printf("bW: "); compBox_print(bW); printf("\n");
+    
+        /* root radii */
+    compBox_actualize_anulii_risolate( bW, b);
+    compBox_actualize_anulii_risolate( bE, b);
     
     compBox_list_push(res, bW);
     compBox_list_push(res, bE);
@@ -427,6 +418,7 @@ void subdBox_risolate_bisect_with_compDsk( compBox_list_t res, const compBox_t b
         compBox_set_compRat_realRat_int(bnew, boxCenter, nwidth, b->nbMSol);
         
         if (compBox_intersection_has_non_empty_interior_compDsk (bnew, d)){
+            compBox_actualize_anulii_risolate( bnew, b);
             compBox_list_push(res, bnew);
         }
         else {

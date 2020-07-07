@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-void subdBox_quadrisect( compBox_list_t res, const compBox_t b, int useRootRadii);
+void subdBox_quadrisect( compBox_list_t res, const compBox_t b);
 
 // void subdBox_quadrisect_withRootRadii( compBox_list_t res, const compBox_t b );
 

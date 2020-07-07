@@ -129,16 +129,13 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     metadatas_fprint(stdout, meta, eps);
     
     if (output==-2) {
-//         printf("gnuplot output: not yet implemented\n");
         connCmp_list_gnuplot(stdout, qRes, meta, 0);
     } else if (output==-3){
-//         connCmp_list_gnuplot(stdout, qRes, meta, 0);
         if (metadatas_useRootRadii(meta))
             connCmp_list_gnuplot_drawSubdiv_rootRadii(stdout, qRes, bDis, qAnn, qAnn1, qAnn2, meta);
         else
             connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
     } else if (output!=0) {
-//         printf("cluster output: not yet implemented\n");
         connCmp_list_print_for_results_withOutput(stdout, qRes, output, meta);
     }
     

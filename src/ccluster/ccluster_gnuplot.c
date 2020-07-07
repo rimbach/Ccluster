@@ -112,10 +112,10 @@ void compAnn_gnuplot(FILE * f,
     int prec = 53;
     int nbdigits = (int) ceil( prec/4 ) ;
     
-    fprintf(f, "%ld   0.0   ", compAnn_centerref(c));
+    fprintf(f, "%ld   %ld   ", compAnn_centerReref(c), compAnn_centerImref(c));
     realApp_fprintn(f, compAnn_radSupref(c), nbdigits, ARB_STR_NO_RADIUS);
     fprintf(f, "\n");
-    fprintf(f, "%ld   0.0   ", compAnn_centerref(c));
+    fprintf(f, "%ld   %ld   ", compAnn_centerReref(c), compAnn_centerImref(c));
     realApp_fprintn(f, compAnn_radInfref(c), nbdigits, ARB_STR_NO_RADIUS);
     
 }
@@ -450,8 +450,10 @@ void connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f,
     fprintf(f, "%s", Bcommand2);
     fprintf(f, "%s", Bcommand3);
     fprintf(f, "%s", Bcommand4);
-    fprintf(f, "%s", Bcommand5);
-    fprintf(f, "%s", Bcommand6);
+    if ( compAnn_list_get_size(la1) >=1 )
+        fprintf(f, "%s", Bcommand5);
+    if ( compAnn_list_get_size(la2) >=1 )
+        fprintf(f, "%s", Bcommand6);
     fprintf(f, ",\\\n     '-' title 'initial box' with lines lw 2 lc rgb \"black\"");
     
     /* iterate on cc in qres */
@@ -502,24 +504,26 @@ void connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f,
     }
     fprintf(f, "e\n");
     /* rootAnnulii1 */
-//     compAnn_list_iterator ita;
-    ita = compAnn_list_begin(la1);
-    while (ita!=connCmp_list_end() ) {
-        compAnn_gnuplot(f, compAnn_list_elmt(ita), meta);
-        ita = compAnn_list_next(ita);
-        fprintf(f, "\n");
+    if ( compAnn_list_get_size(la1) >=1 ){
+        ita = compAnn_list_begin(la1);
+        while (ita!=connCmp_list_end() ) {
+            compAnn_gnuplot(f, compAnn_list_elmt(ita), meta);
+            ita = compAnn_list_next(ita);
+            fprintf(f, "\n");
+        }
+        fprintf(f, "e\n");
     }
-    fprintf(f, "e\n");
     
         /* rootAnnulii2 */
-//     compAnn_list_iterator ita;
-    ita = compAnn_list_begin(la2);
-    while (ita!=connCmp_list_end() ) {
-        compAnn_gnuplot(f, compAnn_list_elmt(ita), meta);
-        ita = compAnn_list_next(ita);
-        fprintf(f, "\n");
+    if ( compAnn_list_get_size(la2) >=1 ){
+        ita = compAnn_list_begin(la2);
+        while (ita!=connCmp_list_end() ) {
+            compAnn_gnuplot(f, compAnn_list_elmt(ita), meta);
+            ita = compAnn_list_next(ita);
+            fprintf(f, "\n");
+        }
+        fprintf(f, "e\n");
     }
-    fprintf(f, "e\n");
     
     /* initial box */
     realRat_set_si(factor, 1, 2);

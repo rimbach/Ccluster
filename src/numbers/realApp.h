@@ -102,6 +102,10 @@ NUMBERS_INLINE void realApp_pow_ui(realApp_t y, const realApp_t x, ulong e, slon
 NUMBERS_INLINE void realApp_root_ui(realApp_t y, const realApp_t x, ulong e, slong prec) { arb_root_ui(y, x, e, prec); }
 NUMBERS_INLINE void realApp_mul_2exp_si(realApp_t y, const realApp_t x, slong e) { arb_mul_2exp_si(y, x, e); }
 NUMBERS_INLINE void realApp_inv(realApp_t z, const realApp_t x, slong prec) { arb_inv(z, x, prec); }
+
+NUMBERS_INLINE void realApp_sqr (realApp_t z, const realApp_t x, slong prec) { arb_sqr (z, x, prec); }
+NUMBERS_INLINE void realApp_sqrt(realApp_t z, const realApp_t x, slong prec) { arb_sqrt(z, x, prec); }
+
 /* logarithm */
 NUMBERS_INLINE void realApp_log(realApp_t z, const realApp_t x, slong prec) { arb_log(z, x, prec); }
 /* other */

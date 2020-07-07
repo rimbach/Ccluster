@@ -162,6 +162,19 @@ void realApp_poly_taylorShift_in_place_slong( realApp_poly_t f,
     realApp_clear(c);
 }
 
+void compApp_poly_taylorShift_in_place_slong( compApp_poly_t f, 
+                                              slong centerRe, 
+                                              slong centerIm,
+                                              slong prec ){
+    compApp_t c;
+    compApp_init(c);
+    compApp_set_sisi(c, centerRe, centerIm);
+    compApp_ptr fptr = f->coeffs;
+    const slong len  = f->length;
+    _acb_poly_taylor_shift_convolution(fptr, c, len, prec);
+    compApp_clear(c);
+}
+
 void compApp_poly_taylorShift_in_place( compApp_poly_t f, const compRat_t center, const realRat_t radius, slong prec ) {
     
     compApp_t c;
