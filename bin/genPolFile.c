@@ -42,6 +42,7 @@ int main(int argc, char **argv){
 //         printf("usage: %s NestedClusters format     iterations prec filename\n", argv[0]);
         printf("usage: %s Mandelbrot  format iterations filename \n", argv[0]);
         printf("usage: %s Runnels     format iterations filename \n", argv[0]);
+        printf("usage: %s Wilkinson   format degree     filename \n", argv[0]);
 //         printf("usage: %s Laguerre    format degree filename \n", argv[0]);
         printf("where format is 1 for ccluster, 2 for mpsolve and 3 for anewdsc\n");
         return -1;
@@ -66,6 +67,7 @@ int main(int argc, char **argv){
 //     char cluster[] = "NestedClusters\0";
     char Mandelbrot[] = "Mandelbrot\0";
     char Runnels[] = "Runnels\0";
+    char Wilkinson[] = "Wilkinson\0";
 //     char laguerre[] = "Laguerre\0";
     int format = 0;
     int degree = 0;

@@ -81,6 +81,10 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     connCmp_list_t qRes;
     compBox_list_t bDis;
     
+    compAnn_list_t qAnn;
+    compAnn_list_t qAnn1;
+    compAnn_list_t qAnn2;
+    
     cacheApp_init(cache, func);
     strategies_init(strat);
     
@@ -112,20 +116,33 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo_global( qRes, bDis, initialBox, eps, cache, meta);
+    if (metadatas_useRootRadii(meta)){
+        compAnn_list_init(qAnn);
+        compAnn_list_init(qAnn1);
+        compAnn_list_init(qAnn2);
+        ccluster_algo_global_rootRadii( qRes, bDis, qAnn, qAnn1, qAnn2, initialBox, eps, cache, meta);
+    }
+    else
+        ccluster_algo_global( qRes, bDis, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     
     if (output==-2) {
-//         printf("gnuplot output: not yet implemented\n");
         connCmp_list_gnuplot(stdout, qRes, meta, 0);
     } else if (output==-3){
-//         connCmp_list_gnuplot(stdout, qRes, meta, 0);
-        connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
+        if (metadatas_useRootRadii(meta))
+            connCmp_list_gnuplot_drawSubdiv_rootRadii(stdout, qRes, bDis, qAnn, qAnn1, qAnn2, meta);
+        else
+            connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
     } else if (output!=0) {
-//         printf("cluster output: not yet implemented\n");
         connCmp_list_print_for_results_withOutput(stdout, qRes, output, meta);
+    }
+    
+    if (metadatas_useRootRadii(meta)){
+        compAnn_list_clear(qAnn);
+        compAnn_list_clear(qAnn1);
+        compAnn_list_clear(qAnn2);
     }
     
     cacheApp_clear(cache);

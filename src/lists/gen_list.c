@@ -85,6 +85,28 @@ void gen_list_push(gen_list_t l, void * data){
     l->_size +=1;
 }
 
+/* assume it is not NULL */
+/* remove element just after it, if it is not NULL */
+void * gen_list_remove_at( gen_list_t l, gen_list_iterator it){
+    
+    void * res;
+    struct gen_elmt * temp = it->_next;
+    
+    if (it->_next == NULL) { /* do nothing */
+//         printf("ici!!!!\n");
+        res = NULL;
+    }
+    else{
+        res = it->_next->_elmt;
+        if (l->_end == it->_next)
+            l->_end = it;
+        it->_next = it->_next->_next;
+        ccluster_free(temp);
+        l->_size-=1;
+    }
+    return res;
+}
+
 void * gen_list_pop(gen_list_t l){
     void * res;
     struct gen_elmt * temp = l->_begin;
@@ -110,6 +132,13 @@ void * gen_list_first(gen_list_t l){
         return NULL;
     else
         return (l->_begin)->_elmt;
+}
+
+void * gen_list_last(gen_list_t l){
+    if (l->_end == NULL)
+        return NULL;
+    else
+        return (l->_end)->_elmt;
 }
 
 void * gen_list_data_at_index(const gen_list_t l, int index){
@@ -166,9 +195,39 @@ void gen_list_fprint(FILE * file, const gen_list_t l, void (* print_func)(FILE *
     fprintf(file, "]");
 }
 
+void gen_list_fprintd(FILE * file, const gen_list_t l, slong digits, void (* print_func)(FILE *, const void *, slong digits) ){
+    fprintf(file, "#length: %d, elements: [", l->_size);
+    
+    struct gen_elmt * voyager = l->_begin;
+    while (voyager != NULL) {
+        print_func(file, voyager->_elmt, digits);
+        if (voyager->_next != NULL)
+            fprintf(file, "#, ");
+        voyager = voyager->_next;
+    }
+    fprintf(file, "#]"); 
+}
+
 int gen_list_is_empty(const gen_list_t l){
     return (l->_size==0);
 }
 int gen_list_get_size(const gen_list_t l){
     return l->_size;
 }
+
+/* empty the list with NO delete of elements */
+void gen_list_empty(gen_list_t l){
+    while (!gen_list_is_empty(l))
+        gen_list_pop(l);
+}
+
+/* copy the list, not the elements */
+void gen_list_copy(gen_list_t ltarget, const gen_list_t lsrc){
+    struct gen_elmt * voyager = lsrc->_begin;
+    
+    while ( voyager!=gen_list_end() ) {
+        gen_list_push( ltarget, gen_list_elmt( voyager ) );
+        voyager = gen_list_next(voyager);
+    }
+}
+

@@ -519,7 +519,7 @@ void connCmp_set_conjugate                      ( connCmp_t res, const connCmp_t
     connCmp_nSolsref(res) = connCmp_nSolsref(cc);
 }
 
-void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc, const compBox_t initBox  ){
+void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc, const compBox_t initBox ){
     connCmp_set( res, cc);
     compBox_ptr nBox;
     
@@ -539,6 +539,7 @@ void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t
         compBox_init(nBox);
         
         compBox_set_conjugate(nBox, compBox_list_elmt(it));
+        
         if (!is_sym)
             realRat_sub( compRat_imagref(compBox_centerref(nBox)), compRat_imagref(compBox_centerref(nBox)), shift );
 //         printf(" box: "); compBox_print(compBox_list_elmt(it)); printf("\n"); 
@@ -556,6 +557,7 @@ void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t
             ccluster_free(nBox);
         }
         else { /* the conjugate is not already in the CC */
+        
             connCmp_insert_compBox(res, nBox);
         }
         

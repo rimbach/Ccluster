@@ -20,15 +20,24 @@
 
 #include "numbers/realRat.h"
 #include "numbers/compRat.h"
+#include "geometry/compAnn.h"
+#include "lists/compAnn_list.h"
+#include "numbers/app_rat.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
     
+# define GEOMETRY_NB_ANN_PER_BOX 3
+    
 typedef struct {
     compRat center;
     realRat bwidth;
     int     nbMSol;
+    /* when root radii are used */
+    compAnn_list annuli[GEOMETRY_NB_ANN_PER_BOX]; /* table of lists of concentric annulii */
+                                                  /* when rootRadii is used, it is guaranteed that 
+                                                   * each annulus has a non empty intersection with the box */                         
 } compBox;
 
 typedef compBox compBox_t[1];
@@ -37,20 +46,42 @@ typedef compBox * compBox_ptr;
 #define compBox_centerref(X) (&(X)->center)
 #define compBox_bwidthref(X) (&(X)->bwidth)
 #define compBox_nbMSolref(X) (X->nbMSol)
+#define compBox_annuliref(X,I) (&(X)->annuli[I])
+#define compBox_annuli0ref(X) (&(X)->annuli[0])
+#define compBox_annuli1ref(X) (&(X)->annuli[1])
+#define compBox_annuli2ref(X) (&(X)->annuli[2])
 
 slong compBox_getDepth(const compBox_t b, const compBox_t initialBox);
 
 /* memory managment */
+
+/* implemented in box_ann.c */
+void compBox_init_annulii(compBox_t x);
+void compBox_clear_annulii(compBox_t x);
+
 GEOMETRY_INLINE void compBox_init(compBox_t x) { 
     compRat_init(compBox_centerref(x)); 
     realRat_init(compBox_bwidthref(x));
 /*     x->nbMSol=-1;*/
+    compBox_init_annulii(x);
 }
 
 GEOMETRY_INLINE void compBox_clear(compBox_t x) { 
     compRat_clear(compBox_centerref(x)); 
     realRat_clear(compBox_bwidthref(x));
+    /* do NOT delete the annulii !!! */
+    compBox_clear_annulii(x);
 }
+
+/* annulii implemented in box_ann.c*/
+void compBox_copy_annulii(compBox_t x, int ind, const compAnn_list_t anulii);
+/* assume lmother contains anulii in increasing order of their radii */
+/* assume compBox_annuliref(X) is initialized and empty*/
+void compBox_actualize_anulii( compBox_t x, const compBox_t bmother);
+void compBox_actualize_anulii_compAnn_list_real( compBox_t x, int ind, const compAnn_list_t lmother );
+void compBox_actualize_anulii_compAnn_list_imag( compBox_t x, int ind, const compAnn_list_t lmother );
+void compBox_actualize_anulii_risolate( compBox_t x, const compBox_t bmother );
+void compBox_actualize_anulii_compAnn_list_risolate( compBox_t x, int ind, const compAnn_list_t lmother );
 
 /* members access */
 GEOMETRY_INLINE compRat_ptr compBox_center_ptr(compBox_t x) {
@@ -137,6 +168,13 @@ GEOMETRY_INLINE void compBox_set(compBox_t d, const compBox_t b){
     compRat_set( compBox_centerref(d), compBox_centerref(b));
     realRat_set( compBox_bwidthref(d), compBox_bwidthref(b));
     d->nbMSol=b->nbMSol;
+    
+    for (int ind=0; ind < GEOMETRY_NB_ANN_PER_BOX; ind++)
+        compBox_copy_annulii(d, ind, compBox_annuliref(b,ind));
+//     compBox_copy_annuli(d, compBox_annuliref(b)
+//                          , compBox_annuli1ref(b)
+//                          , compBox_annuli2ref(b)
+//                        );
 }
 
 /* Inflate */
