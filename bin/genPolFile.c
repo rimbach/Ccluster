@@ -66,7 +66,6 @@ int main(int argc, char **argv){
 //     char cluster[] = "NestedClusters\0";
     char Mandelbrot[] = "Mandelbrot\0";
     char Runnels[] = "Runnels\0";
-    char Wilkinson[] = "Wilkinson\0";
 //     char laguerre[] = "Laguerre\0";
     int format = 0;
     int degree = 0;
@@ -141,10 +140,6 @@ int main(int argc, char **argv){
     
     if (strcmp(poly, Runnels)==0) {
         Runnels_polynomial(p, degree);
-    }
-    
-    if (strcmp(poly, Wilkinson)==0) {
-        wilkinson_polynomial( p, degree);
     }
 
     FILE * curFile;
