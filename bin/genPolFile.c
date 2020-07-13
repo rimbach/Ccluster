@@ -18,6 +18,7 @@ void randomSparse_polynomial( realRat_poly_t dest, int degree, int bitsize, int 
 
 void Mandelbrot_polynomial( realRat_poly_t dest, int iterations);
 void Runnels_polynomial( realRat_poly_t dest, int iterations);
+void Wilkinson_polynomial(realRat_poly_t dest, int degree);
 
 int main(int argc, char **argv){
     
@@ -34,7 +35,7 @@ int main(int argc, char **argv){
         printf("       %s randomSparse format degree bitsize nbterms filename\n", argv[0]);
 //         printf("usage: %s MignotteGen format degree bitsize power filename\n", argv[0]);
 //         printf("usage: %s MignotteMul format degree bitsize power filename\n", argv[0]);
-//         printf("usage: %s Wilkinson   format degree filename\n", argv[0]);
+        printf("       %s Wilkinson   format degree filename\n", argv[0]);
 //         printf("usage: %s WilkRat     format degree filename\n", argv[0]);
 //         printf("usage: %s WilkMul     format degree filename\n", argv[0]);
 //         printf("usage: %s Spiral      format degree prec filename\n", argv[0]);
@@ -59,7 +60,7 @@ int main(int argc, char **argv){
     char randomSparse[] = "randomSparse\0";
 //     char mignotteGen[] = "MignotteGen\0";
 //     char mignotteMul[] = "MignotteMul\0";
-//     char wilkinson[] = "Wilkinson\0";
+    char Wilkinson[] = "Wilkinson\0";
 //     char wilkRat[] = "WilkRat\0";
 //     char wilkMul[] = "WilkMul\0";
 //     char spiral[] = "Spiral\0";
@@ -144,7 +145,7 @@ int main(int argc, char **argv){
     }
     
     if (strcmp(poly, Wilkinson)==0) {
-        wilkinson_polynomial( p, degree);
+        Wilkinson_polynomial( p, degree);
     }
 
     FILE * curFile;
@@ -452,4 +453,21 @@ void Runnels_polynomial( realRat_poly_t prun, int iterations){
     realRat_poly_clear(prunm2);
     realRat_poly_clear(pone);
     realRat_poly_clear(px);
+}
+
+void Wilkinson_polynomial(realRat_poly_t pdest, int degree){
+    
+    realRat_poly_t ptemp;
+    realRat_poly_init2(ptemp,2);
+    
+    realRat_poly_one(pdest);
+    realRat_poly_zero(ptemp);
+    realRat_poly_set_coeff_si_ui(ptemp, 1, 1, 1);
+    
+    for (int i=1; i<=degree; i++){
+        realRat_poly_set_coeff_si_ui(ptemp, 0, -i, 1);
+        realRat_poly_mul(pdest, pdest, ptemp);
+    }
+    
+    realRat_poly_clear(ptemp);
 }
