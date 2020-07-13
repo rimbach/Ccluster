@@ -437,10 +437,7 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
         
         while (compBox_list_get_size(ltemp)>0){
             btemp = compBox_list_pop(ltemp);
-            
             subdBox_risolate_bisect_with_compDsk( ltemp2, btemp, ndisk, nwidth);
-            
-            
             compBox_clear(btemp);
             ccluster_free(btemp); /*comment it for julia...*/
         }

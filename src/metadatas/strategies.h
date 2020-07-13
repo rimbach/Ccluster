@@ -36,8 +36,7 @@ extern "C" {
 #define STRAT_ANTICIPA 16
 #define STRAT_REALCOEF 32
 #define STRAT_PWSUTEST 64
-#define STRAT_ROOTRADI 128
-#define STRAT_FORTESTS 256
+#define STRAT_FORTESTS 128
 
 #define STRAT_INT_DEFAULT 55
 #define STRAT_STR_DEFAULT "default"
@@ -62,13 +61,6 @@ extern "C" {
 
 #define STRAT_INT_FORTESTS 247
 #define STRAT_STR_FORTESTS "test"
-
-#define STRAT_INT_V7 183
-#define STRAT_STR_V7 "V7"
-
-#define STRAT_STR_V8 "V8"
-
-
 // #define STRAT_STR_FORTESTS1 "test1"
 // #define STRAT_STR_FORTESTS2 "test2"
 
@@ -82,7 +74,6 @@ typedef struct {
     int _additionalFlags;
     int _useRealCoeffs;
     int _usePowerSums;
-    int _useRootRadii;
     int _forTests;
 //     int _pwSuTest;
 //     int _pwSuNbPs;
@@ -100,7 +91,6 @@ void strategies_set_int ( strategies_t strat, int useNewton,
                                               int useAnticipate, 
                                               int useRealCoeffs,
                                               int usePowerSums,
-//                                               int useRootRadii,
 //                                               int useCountSols,
                                               int useNBThreads,
                                               int additionalFlags
@@ -124,9 +114,6 @@ METADATAS_INLINE void strategies_set_realCoeffs   ( strategies_t strat, int flag
 
 METADATAS_INLINE int strategies_usePowerSums        ( const strategies_t strat ) { return strat->_usePowerSums      ; }
 METADATAS_INLINE void strategies_set_powerSums   ( strategies_t strat, int flag ) { strat->_usePowerSums=flag      ; }
-
-METADATAS_INLINE int strategies_useRootRadii        ( const strategies_t strat ) { return strat->_useRootRadii      ; }
-METADATAS_INLINE void strategies_set_RootRadii   ( strategies_t strat, int flag ) { strat->_useRootRadii=flag      ; }
 
 METADATAS_INLINE int strategies_forTests        ( const strategies_t strat ) { return strat->_forTests      ; }
 METADATAS_INLINE void strategies_set_forTests   ( strategies_t strat, int flag ) { strat->_forTests=flag      ; }

@@ -111,7 +111,6 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
         if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
     }
     if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
-    if (metadatas_useRootRadii(meta)) len += sprintf( temp + len, " + rootRadii");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));
@@ -247,7 +246,6 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
         if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
     }
     if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
-    if (metadatas_useRootRadii(meta)) len += sprintf( temp + len, " + rootRadii");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));

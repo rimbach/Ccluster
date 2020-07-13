@@ -36,9 +36,6 @@ POLYNOMIALS_INLINE void realRat_poly_init2     (realRat_poly_t poly, slong len) 
 POLYNOMIALS_INLINE void realRat_poly_clear     (realRat_poly_t poly)            { fmpq_poly_clear     (poly);}
 POLYNOMIALS_INLINE void realRat_poly_fit_length(realRat_poly_t poly, slong len) { fmpq_poly_fit_length(poly, len); }
 
-/* canonicalise, i.e. multiple with same roots and integer coeffs */
-POLYNOMIALS_INLINE void realRat_poly_canonicalise(realRat_poly_t poly) { fmpq_poly_canonicalise(poly); }
-
 /* setting */
 POLYNOMIALS_INLINE void realRat_poly_set (realRat_poly_t poly1, const realRat_poly_t poly2) {
     fmpq_poly_set(poly1, poly2);
@@ -112,23 +109,18 @@ POLYNOMIALS_INLINE int realRat_poly_fread       (FILE * file, realRat_poly_t pol
 POLYNOMIALS_INLINE int realRat_poly_read       (realRat_poly_t poly) { return fmpq_poly_read(poly); }
 
 /*separation bound for integer polynomials*/
-/* here we assume that the coefficients of the pol are integer! */
+/* here we assume that the coefficients of the pol are interger! */
 void realRat_poly_separationBound (realRat_t sep, const realRat_poly_t pol);
 /*bitsize for integer polynomials*/
-/* here we assume that the coefficients of the pol are integer! */
+/* here we assume that the coefficients of the pol are interger! */
 slong realRat_poly_bitsize (const realRat_poly_t pol);
 
 /*special polynomials */
 POLYNOMIALS_INLINE void bernoulli_polynomial( realRat_poly_t poly, slong deg) {
     arith_bernoulli_polynomial(poly , deg);
 }
-/* multiple of Bernoulli polynomial with integer coefficients*/
-void bernoulliInt_polynomial(realRat_poly_t poly, slong deg);
-
 void mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize);
 void mignotte_generalized(realRat_poly_t poly, slong deg, ulong pow, slong bitsize);
-
-void wilkinson_polynomial(realRat_poly_t poly, slong deg);
 
 #ifdef __cplusplus
 }

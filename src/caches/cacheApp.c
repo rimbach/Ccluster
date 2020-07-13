@@ -344,7 +344,7 @@ void cacheApp_separation_bound ( realRat_t sepBound, cacheApp_t cache){
     
     slong deg = cacheApp_getDegree ( cache );
     
-//     realRat_poly_canonicalise(compRat_poly_realref(cache->_poly));
+    fmpq_poly_canonicalise(compRat_poly_realref(cache->_poly));
     /* compute the inverse of the norm of the poly*/
     fmpz_t norm2;
     fmpz_poly_t num;

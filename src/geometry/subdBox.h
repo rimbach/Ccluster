@@ -25,19 +25,13 @@
 extern "C" {
 #endif
 
-void subdBox_quadrisect( compBox_list_t res, const compBox_t b);
-
-// void subdBox_quadrisect_withRootRadii( compBox_list_t res, const compBox_t b );
+void subdBox_quadrisect( compBox_list_t res, const compBox_t b );
 
 void subdBox_quadrisect_with_compDsk( compBox_list_t res, const compBox_t b, const compDsk_t d, const realRat_t nwidth);
 
 void subdBox_risolate_bisect( compBox_list_t res, const compBox_t b );
 
-// void subdBox_risolate_bisect_withRootRadii( compBox_list_t res, const compBox_t b );
-
 void subdBox_risolate_bisect_with_compDsk( compBox_list_t res, const compBox_t b, const compDsk_t d, const realRat_t nwidth);
-
-// void subdBox_risolate_bisect_with_compDsk_rootRadii( compBox_list_t res, const compBox_t b, const compDsk_t d, const realRat_t nwidth);
 
 /*DEPRECATED 
 

@@ -230,7 +230,7 @@ int connCmp_is_imaginary_positive               ( const connCmp_t cc  );
 /* Specification: set res to the complex conjugate of cc                                       */
 void connCmp_set_conjugate                      ( connCmp_t res, const connCmp_t cc  );
 
-void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc, const compBox_t initBox );
+void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc, const compBox_t initBox   );
 
 /* DEPRECATED
 void connCmp_find_point_outside_connCmp_for_julia( realRat_t resRe, realRat_t resIm, const connCmp_t cc, const compBox_t initialBox );
