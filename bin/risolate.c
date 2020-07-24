@@ -16,7 +16,7 @@ int main(int argc, char **argv){
         printf("                     if a bounded box B is given, risolate finds all real roots in B, and possibly some in (5/4)B \n");
         printf("      -e , --epsilon: the size of output isolating intervals\n");
         printf("                     +inf [default] output isolating intervals separate real roots\n");
-        printf("                     a positive number as 1,100 (1/100) or -53 (1/2^(-53))\n");
+        printf("                     a positive number as 1,100 (1/100) or -53 (2^(-53))\n");
         printf("      -o , --output: the way roots are output; default is NO OUTPUT\n");
         printf("                     0: [default] NO OUTPUT\n");
         printf("                     d>0: d digit precision floating point numbers\n");

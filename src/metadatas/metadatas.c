@@ -212,7 +212,7 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     int nbGraeffeR      = metadatas_getNbGraeffeRepetedInT0Tests(meta) + metadatas_getNbGraeffeRepetedInTSTests(meta);
     
     if (metadatas_getVerbo(meta)>=1) {
-    r = fprintf(file, "# -------------------Ccluster: ----------------------------------------\n");
+    r = fprintf(file, "# -------------------Risolate: ----------------------------------------\n");
     r = fprintf(file, "# -------------------Input:    ----------------------------------------\n");
     char temp[1000];
     compBox_sprint_for_stat( temp, metadatas_initBref(meta) );

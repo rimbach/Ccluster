@@ -8,15 +8,63 @@
   by the Free Software Foundation; either version 2.1 of the License, or
   (at your option) any later version.  See <http://www.gnu.org/licenses/>.
 
-  
-1/ Installation
-In ccluster repository:
+0/ Introduction
+===============
+
+Ccluster is a C library providing implementations of algorithms for computing 
+clusters of complex roots of univariate polynomials which coefficients are any
+complex numbers, possibly given as oracle numbers.
+
+It provides two binaries, bin/ccluster and bin/risolate, that take in input
+a file .ccl (containing the definition of a polynomial)
+and respectively compute clusters of complex roots and isolate real roots
+of the input polynomial.
+See bin/ccluster_spiral.c for example of use within a C program for 
+input polynomials given as oracles
+
+The implemented algorithm for complex root clustering is described here:
+https://dl.acm.org/doi/10.1145/2930889.2930939
+
+If you use Ccluster in your research, please cite:
+https://link.springer.com/chapter/10.1007/978-3-319-96418-8_28
+
+The github repository is:
+https://github.com/rimbach/Ccluster
+
+There is an interface for Julia called Ccluster.jl:
+https://github.com/rimbach/Ccluster.jl
+
+and Ccluster can be used in Singular (see README.md for more informations).
+
+
+1/ Installation and getting started
+===================================
+
+   1 Satisfying dependencies
+   --------------------------
+   ccluster is based on FLINT and ARB.
+   In turn, FLINT and ARB depend on GMP and MPFR.
+   To satisfy the dependencies:
+   - download and install GMP, version 6.1.2 or later: https://gmplib.org/#DOWNLOAD
+   - download and install MPFR, version 4.0.0 or later: https://www.mpfr.org/mpfr-current/
+   - download and install FLINT, version 2.6.1 or later: http://flintlib.org/downloads.html
+   - download and install ARB, version 2.18.0 or later: http://arblib.org/setup.html#download
+   
+   2 Compile Ccluster
+   ------------------
+   In ccluster repository:
 
     ./configure
     make
     
-2/ Use:
-Have a look at:
-benchs/benchBernoulli.c or benchWilkinson.c for polynomials with integers coefficients 
-or at:
-benchs/benchSpiral.c for polynomials with any complex coefficients.
+    optionally, you can install the binaries in /usr/local/ with
+    
+    make install
+    
+    if one of the 4 above mentioned library is not in a standard place, do 
+    ./ configure --with-XXX="path-to-XXX" where XXX is either gmp or flint or mpfr or arb
+    
+    3 Run tests and get started about using the binaries ccluster and risolate
+    --------------------------------------------------------------------------
+    
+    make test
