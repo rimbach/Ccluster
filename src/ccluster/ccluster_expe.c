@@ -189,18 +189,20 @@ void ccluster_expe_bisect_connCmp( connCmp_list_t dest, connCmp_t cc, connCmp_li
     connCmp_list_clear(ltemp);
 }
 
-void ccluster_expe_main_loop( connCmp_list_t qResults,  
+int ccluster_expe_main_loop( connCmp_list_t qResults,  
                               connCmp_list_t qMainLoop, 
                               connCmp_list_t discardedCcs, 
                               const realRat_t eps, 
                               cacheApp_t cache, 
                               metadatas_t meta){
     
+    int res=0;
+    
     int separationFlag;
     int widthFlag;
     int compactFlag;
     slong prec, depth;
-    tstar_res resTstar;
+//     tstar_res resTstar;
     newton_res resNewton;
     
     compBox_t componentBox;
@@ -230,7 +232,7 @@ void ccluster_expe_main_loop( connCmp_list_t qResults,
     realRat_set_si(four, 4, 1);
     realRat_set_si(three, 3, 1);
     
-    while (!connCmp_list_is_empty(qMainLoop)) {
+    while ((res==0)&&(!connCmp_list_is_empty(qMainLoop))) {
         
         //         if (metadatas_getVerbo(meta)>0) {
 //             printf("ccluster.c, ccluster_main_loop, size of queue: %d \n", connCmp_list_get_size(qMainLoop) );
@@ -292,14 +294,39 @@ void ccluster_expe_main_loop( connCmp_list_t qResults,
 //         if ((separationFlag)) {
 //             printf("depth: %d, connCmp_nSolsref(ccur): %d, prec: %d\n", (int) depth, (int) connCmp_nSolsref(ccur), (int) prec);
             if (connCmp_nSolsref(ccur)==-1){
-                
+
+#ifdef WITHTSTAR
+                    tstar_res resTstar;
                     resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                     connCmp_nSolsref(ccur) = resTstar.nbOfSol;
 //                     if (metadatas_getVerbo(meta)>3)
 //                         printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));
 //                 ???
                     prec = resTstar.appPrec;
-                
+#else
+                    powerSums_res resp;
+                    realRat_t temp;
+                    realRat_init(temp);
+                    realRat_set_si(temp, 2, 1);
+                    realRat_mul(temp, compDsk_radiusref(ccDisk), temp);
+//                     
+                    resp = powerSums_countingTest( compDsk_centerref(ccDisk), temp,
+                                                        cache,
+                                                        metadatas_getNbEvalPoints(meta), 
+                                                        1,
+                                                        prec, meta, depth );
+//                     
+                    connCmp_nSolsref(ccur) = resp.nbOfSol;
+                    prec = resp.appPrec;
+                    realRat_clear(temp);
+                    
+                    if (resp.nbOfSol == -1) {
+                        if (metadatas_getVerbo(meta)>=2) {
+                            printf("FAILURE OF A COUNTING TEST\n");
+                        }
+                        res = 1;
+                    }   
+#endif                
             }
 //             printf("validate: prec avant: %d prec apres: %d\n", (int) prec, (int) resTstar.appPrec);
 //             ???
@@ -410,6 +437,19 @@ void ccluster_expe_main_loop( connCmp_list_t qResults,
 //         }
 //         else 
         if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) ) {
+            
+            /*experimental version: check result with a Pellet test*/
+            compBox_get_containing_dsk(ccDisk, componentBox);
+            tstar_res resTstar;
+            resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
+            if (resTstar.nbOfSol != connCmp_nSols(ccur)) {
+                if (metadatas_getVerbo(meta)>=2) {
+                    printf("FAILURE: INCORRECT NUMBER OF SOLS IN A CLUSTER\n");
+                }
+                        
+                res = 1;
+            }
+            
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
@@ -458,9 +498,11 @@ void ccluster_expe_main_loop( connCmp_list_t qResults,
     realRat_clear(threeWidth);
     compRat_clear(initPoint);
     connCmp_list_clear(ltemp);
+    
+    return res;
 }
 
-void ccluster_expe_algo_global( connCmp_list_t qResults, 
+int ccluster_expe_algo_global( connCmp_list_t qResults, 
                                 const compBox_t initialBox, 
                                 const realRat_t eps, 
                                 cacheApp_t cache, 
@@ -468,6 +510,7 @@ void ccluster_expe_algo_global( connCmp_list_t qResults,
     
     clock_t start = clock();
     
+    int res = 0;
 //     realRat_t factor;
 //     realRat_init(factor);
 //     realRat_set_si(factor, 5, 4);
@@ -491,7 +534,7 @@ void ccluster_expe_algo_global( connCmp_list_t qResults,
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
 //     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
-    ccluster_expe_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
+    res = ccluster_expe_main_loop( qResults,  qMainLoop, discardedCcs, eps, cache, meta);
     
     
 //     realRat_clear(factor);
@@ -501,4 +544,141 @@ void ccluster_expe_algo_global( connCmp_list_t qResults,
     
 //     chronos_toc_CclusAl(metadatas_chronref(meta));
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
+    
+    return res;
+}
+
+int metadatas_expe_fprint(FILE * file, int res, metadatas_t meta, const realRat_t eps){
+    int r=1;
+    int nbTaylorShifts  = metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsInTSTests(meta);
+    int nbTaylorShiftsR = metadatas_getNbTaylorsRepetedInT0Tests(meta) + metadatas_getNbTaylorsRepetedInTSTests(meta);
+    int nbGraeffe       = metadatas_getNbGraeffeInT0Tests(meta) + metadatas_getNbGraeffeInTSTests(meta);
+    int nbGraeffeR      = metadatas_getNbGraeffeRepetedInT0Tests(meta) + metadatas_getNbGraeffeRepetedInTSTests(meta);
+    
+    if (metadatas_getVerbo(meta)>=1) {
+    r = fprintf(file, " -------------------Ccluster Expe: -----------------------------------\n");
+    r = fprintf(file, " -------------------Input:    ----------------------------------------\n");
+    char temp[1000];
+    compBox_sprint_for_stat( temp, metadatas_initBref(meta) );
+    r = fprintf(file, "|box:%-65s\n", temp);
+    if (realRat_is_den_zero( eps ))
+        r = fprintf(file, "|eps: %-64s|\n", "+inf");
+    else {
+        realRat_sprint_for_stat( temp, eps );
+        r = fprintf(file, "|eps: %-64s|\n", temp);
+    }
+    int len = 0;
+    //TODO find a better way for this...
+    if ( metadatas_useNewton(meta) &&
+         metadatas_useTstarOptim(meta) &&
+         metadatas_usePredictPrec(meta) &&
+         metadatas_useAnticipate(meta) &&
+         metadatas_useRealCoeffs(meta) ) len += sprintf( temp + len, " default");
+    else {    
+        if (metadatas_useNewton(meta)) len += sprintf( temp + len, " newton");
+        if (metadatas_useTstarOptim(meta)) len += sprintf( temp + len, " tstarOpt");
+        if (metadatas_usePredictPrec(meta)) len += sprintf( temp + len, " predPrec");
+        if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
+        if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
+    }
+    if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
+    if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
+#ifdef CCLUSTER_HAVE_PTHREAD
+    if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));
+#endif
+    if (metadatas_stratref(meta)->_additionalFlags !=0) 
+        len += sprintf(temp +len, " %d", metadatas_stratref(meta)->_additionalFlags);
+    r = fprintf(file, "|strat:%-63s|\n", temp);
+    
+    if (metadatas_getVerbo(meta)>=2) {
+//         metadatas_count(meta);
+    r = fprintf(file, " -------------------TSTest used to discard boxes----------------------\n");
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number DT:",                    metadatas_getNbT0Tests(meta),        " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number of tests without conclusion:", metadatas_getNbFailingT0Tests(meta), " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in tests DT:",       metadatas_get_time_T0Tests(meta),    " " );
+    r = fprintf(file, " -------------------TSTest used to validate clusters------------------\n");
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number VT:",                    metadatas_getNbTSTests(meta),        " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbTSTestsInNewton(meta), " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number of tests without conclusion:", metadatas_getNbFailingTSTests(meta), " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in tests VT:",       metadatas_get_time_TSTests(meta),    " " );
+    r = fprintf(file, " -------------------Taylor shifts-------------------------------------\n");
+    r = fprintf(file, "|%-39s %14d |%13d|\n", "total number TS:",                    nbTaylorShifts + nbTaylorShiftsR, nbTaylorShiftsR );
+    r = fprintf(file, "|%-39s %14d |%13d|\n", "number in discarding TSTests TS:",    metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsRepetedInT0Tests(meta), metadatas_getNbTaylorsRepetedInT0Tests(meta) );
+    r = fprintf(file, "|%-39s %14d |%13d|\n", "number in validating TSTests TS:",    metadatas_getNbTaylorsInTSTests(meta) + metadatas_getNbTaylorsRepetedInTSTests(meta), metadatas_getNbTaylorsRepetedInTSTests(meta) );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbTaylorsInNewton(meta), " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in Taylor shifts:",  metadatas_get_time_Taylors(meta),    " " );
+    r = fprintf(file, " -------------------Graeffe Iterations--------------------------------\n");
+    r = fprintf(file, "|%-39s %14d |%13d|\n", "total number GR:",                       nbGraeffe + nbGraeffeR, nbGraeffeR );
+    r = fprintf(file, "|%-39s %14d |%13d|\n", "number in discarding TSTests GR:",       metadatas_getNbGraeffeInT0Tests(meta) + metadatas_getNbGraeffeRepetedInT0Tests(meta), metadatas_getNbGraeffeRepetedInT0Tests(meta) );
+    r = fprintf(file, "|%-39s %14d |%13d|\n", "number in validating TSTests GR:",       metadatas_getNbGraeffeInTSTests(meta) + metadatas_getNbGraeffeRepetedInTSTests(meta), metadatas_getNbGraeffeRepetedInTSTests(meta) );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbGraeffeInNewton(meta), " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in Graeffe Iterations:", metadatas_get_time_Graeffe(meta),    " " );
+    if (metadatas_useNewton(meta)){
+    r = fprintf(file, " -------------------Newton Iterations---------------------------------\n");
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number NE:",                       metadatas_getNbNewton(meta),         " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number of fails:",                    metadatas_getNbFailingNewton(meta),  " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "total time spent in newton:",         metadatas_get_time_Newtons(meta),    " " );
+    }
+    r = fprintf(file, " -------------------Other---------------------------------------------\n");
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in getApproximation:",           metadatas_get_time_Approxi(meta),    " " );
+    if (metadatas_useAnticipate(meta)){
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Anticipate:",                 metadatas_get_time_Anticip(meta),    " " );
+    }
+    if (metadatas_usePowerSums(meta)){
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of Ps counting tests:",  metadatas_getNbPsCountingTest(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests:",          metadatas_get_time_PSTests(meta),    " " );
+#ifdef CCLUSTER_STATS_PS_MACIS
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests V:",        metadatas_get_time_PSTestV(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests D:",        metadatas_get_time_PSTests(meta)-metadatas_get_time_PSTestV(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Evaluation:",                 metadatas_get_time_Evaluat(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of evaluations:",        metadatas_getNbEval(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of -2:",                 metadatas_getNbM2(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of -1:",                 metadatas_getNbM1(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of errors:",             metadatas_getNbEr(meta),    " " );
+#endif 
+#ifdef CCLUSTER_STATS_PS
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests V:",        metadatas_get_time_PSTestV(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests D:",        metadatas_get_time_PSTests(meta)-metadatas_get_time_PSTestV(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in Evaluation:",                 metadatas_get_time_Evaluat(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of evaluations:",        metadatas_getNbEval(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of True Negative:",      metadatas_getNbTN(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive:",     metadatas_getNbFP(meta),    " " );
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of True Negative 1:",      metadatas_getNbTN1(meta),    " " );
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive 1:",     metadatas_getNbFP1(meta),    " " );
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of True Negative 2:",      metadatas_getNbTN2(meta),    " " );
+//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive 2:",     metadatas_getNbFP2(meta),    " " );
+#endif 
+    }
+    r = fprintf(file, " -------------------Precision-----------------------------------------\n");
+    r = metadatas_boxes_by_prec_fprint ( file, meta );
+    
+#ifdef CCLUSTER_EXPERIMENTAL    
+    if (CCLUSTER_EXP_NUM_T0(meta)||CCLUSTER_EXP_NUM_T1(meta)||CCLUSTER_INC_TEST(meta)) {
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in getDerivative:",              metadatas_get_time_Derivat(meta),    " " );
+    r = fprintf(file, "|%-39s %14f %14s|\n", "time in evaluate:",                   metadatas_get_time_Evaluat(meta),    " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number of evaluations:",              metadatas_getNbEval(meta),    " " );
+    }
+#endif 
+    }
+   
+    r = fprintf(file, " -------------------Output:   ----------------------------------------\n");
+    if (res==0)
+    r = fprintf(file, "|%-39s %14s %14s|\n", "failure:",                            "0",      " " );
+    else if (res==1)
+    r = fprintf(file, "|%-39s %14s %14s|\n", "failure:",                            "1 1",      " " );
+    else if (res==2)
+    r = fprintf(file, "|%-39s %14s %14s|\n", "failure:",                            "1 2",      " " ); 
+    else if (res==3)
+    r = fprintf(file, "|%-39s %14s %14s|\n", "failure:",                            "1 3",      " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number of clusters:",                 metadatas_getNbValidated(meta),      " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "number of solutions:",                metadatas_getNbSolutions(meta),      " " );
+    r = fprintf(file, " -------------------Stats:    ----------------------------------------\n");
+    if (metadatas_getVerbo(meta)>=2) {
+    r = fprintf(file, "|%-39s %14d %14s|\n", "tree depth:",                         metadatas_getDepth(meta),            " " );
+    r = fprintf(file, "|%-39s %14d %14s|\n", "tree size:",                          metadatas_getNbExplored(meta),       " " );
+    }
+    r = fprintf(file, "|%-39s %14f %14s|\n", "total time:",                         metadatas_get_time_CclusAl(meta),    " " );
+    r = fprintf(file, " ---------------------------------------------------------------------\n");
+    }
+    return r;
 }

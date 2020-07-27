@@ -11,7 +11,8 @@ TEST_EXECS=$(TEST:%.c=%)
 build: ccluster\
        risolate\
        genPolFile\
-       ccluster_spiral
+       ccluster_spiral\
+       ccluster_expe
 
 # TESTING VARIABLES
 degree=64
@@ -35,6 +36,12 @@ clean :
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ -c $< $(INCLUDE_PATH)
 	
 ccluster: ccluster.o parseArgs.h
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	
+ccluster_expe: ccluster_expe.o parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \

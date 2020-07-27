@@ -19,6 +19,7 @@ build: mignotte mignotteMul mignotteGen \
     mandelbrot laguerre\
     mandelbrotPS mignottePS\
     runnels runnelsPS\
+    mandelbrot_expe runnels_expe
 
 #==================================================
 # HOUSEKEEPING 
@@ -110,6 +111,14 @@ runnels: runnels.o
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
 	    	
 runnelsPS: runnelsPS.o
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+
+mandelbrot_expe: mandelbrot_expe.o
+	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+	    	
+runnels_expe: runnels_expe.o
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
 
