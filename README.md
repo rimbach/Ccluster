@@ -29,10 +29,10 @@ if you use it in your research.
 
 ## Dependencies
 
-Ccluster depends on flint2 (https://github.com/wbhart/flint2)
-and arb (https://github.com/fredrik-johansson/arb).
+Ccluster depends on flint2 (>= 2.5.2, https://github.com/wbhart/flint2)
+and arb (>= 2.17.0, https://github.com/fredrik-johansson/arb).
 
-## Installation on Linux
+## Installation
 
 1. clone Ccluster
 
@@ -41,11 +41,69 @@ and arb (https://github.com/fredrik-johansson/arb).
 ```
 ./configure --with-flint="path to flint" --with-arb="path to arb"
 make
+```
+Specifying the location of flint and arb is optional if these libraries are in /usr/local. 
+If you want to install Ccluster in /usr/local and have permissions:
+```
 make install
 ```
+To run simple tests together with a short tutorial about binaries provided in Ccluster,
+```
+make test
+```
 
-By default, Ccluster is installed in /usr/local.
-Specifying the location of flint and arb is optional if these libraries are in /usr/local. 
+## Using the library in a c programm
+
+The file bin/ccluster_spiral.c contains the code for an example where ccluster
+is used to compute clusters of roots of a polynomial given as an oracle, i.e.
+a function giving arbitrary approximation of its coefficients.
+This is implemented as a c function.
+
+## Binary ccluster: compute *eps-natural clusters* of complex roots of a polynomial with rational coefficients
+
+We provide the program bin/ccluster that takes in input a polynomial with rational coefficients, given in an input file.
+
+### Input files
+
+A suitable input for ccluster for the polynomial *1z^3 + (1/2)z^2 + (1/3)z + (1/4)* is 
+```
+4 1/4 1/3 1/2 1
+```
+i.e the first string is the length, then the coefficients are given according to increesing degree.
+
+We provide a programm called genPolFile that generates input files for state of the art polynomials. Try command
+```
+bin/genPolFile
+```
+to see the possible options. In particular, genPolFile can also generate input files for anewdsc or mpsolve.
+
+### Basic options
+Try command
+```
+bin/ccluster
+```
+to see the possible options and default values for ccluster.
+
+Let's say you want to compute a set of clusters of size less *2^-53* for all roots of Mignotte polynomial of degree 64 and bitsize 14.
+Do:
+```
+bin/genPolFile Mignotte 1 64 14 bin/Mignotte_64_14.ccl
+```
+to generate the input file, then 
+```
+bin/ccluster bin/Mignotte_64_14.ccl -e -53 -o 5
+```
+means that 5-bit approximations of the computed clusters are printed.
+For a graphical output, if gnuplot is install on your system, do
+```
+bin/ccluster bin/Mignotte_64_14.ccl -o -2 | gnuplot
+```
+and use option -o -3 to draw the subdivision tree.
+
+## Binary risolate: isolate real roots of a polynomial with rational coefficients
+
+Usage of bin/risolate is similar to ccluster. Except that risolate can only deal with polynomial
+having rational coefficients; real roots are isolated.
 
 ## Use with Singular
 Requires the ccluster library to be installed on your system.

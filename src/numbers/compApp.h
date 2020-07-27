@@ -69,6 +69,7 @@ NUMBERS_INLINE void compApp_div_si( compApp_t dest, const compApp_t x, slong y, 
 NUMBERS_INLINE void compApp_addmul( compApp_t dest, const compApp_t x, const compApp_t y, slong prec) { acb_addmul(dest, x, y, prec); }
 NUMBERS_INLINE void compApp_exp_pi_i( compApp_t dest, const compApp_t x, slong prec) { acb_exp_pi_i(dest, x, prec); }
 NUMBERS_INLINE void compApp_pow_si( compApp_t dest, const compApp_t x, slong l, slong prec) { acb_pow_si(dest, x, l, prec); }
+NUMBERS_INLINE void compApp_sqrt  ( compApp_t dest, const compApp_t x, slong prec) { acb_sqrt(dest, x, prec); }
 
 /* printing */
 NUMBERS_INLINE void compApp_fprint (FILE * file, const compApp_t x)                           { acb_fprint (file, x               ); }
@@ -88,6 +89,10 @@ NUMBERS_INLINE int compApp_contains (const compApp_t x, const compApp_t y) {
 }
 NUMBERS_INLINE int compApp_is_finite (const compApp_t z) {
     return acb_is_finite(z);
+}
+
+NUMBERS_INLINE int compApp_is_zero (const compApp_t z) {
+    return acb_is_zero(z);
 }
 
 NUMBERS_INLINE int compApp_intersection(compApp_t z, const compApp_t x, const compApp_t y, slong prec) { 

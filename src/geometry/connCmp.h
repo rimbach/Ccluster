@@ -190,7 +190,7 @@ GEOMETRY_INLINE int connCmp_cmp_infIm ( const connCmp_t cc1, const connCmp_t cc2
 }
 
 void connCmp_componentBox( compBox_t res, const connCmp_t cc, const compBox_t initialBox);
-
+void connCmp_risolate_componentBox( compBox_t res, const connCmp_t cc, const compBox_t initialBox);
 /*Precondition:                                           */
 /*Specification: returns true if each box of the cc is strictly in b   */
 /*                       false otherwise                  */
@@ -213,6 +213,7 @@ int connCmp_intersection_is_not_empty( const connCmp_t cc, const compBox_t b );
 int connCmp_are_8connected( const connCmp_t cc, const compBox_t b );
 
 void connCmp_find_point_outside_connCmp( compRat_t res, const connCmp_t cc, const compBox_t initialBox );
+void connCmp_risolate_find_point_outside_connCmp( compRat_t res, const connCmp_t cc, const compBox_t initialBox );
 
 /* RealCoeffs */
 /* Precondition:                                                                               */

@@ -62,7 +62,7 @@ int  boxes_by_prec_fprint( FILE * file, const boxes_by_prec_t bt ){
     for (int index = 0; index < bt->size; index ++ ){
         char buffer[50];
         r = sprintf (buffer, "boxes with %d:", ( 0x1<<(index) )*CCLUSTER_DEFAULT_PREC);
-        r = fprintf(file, "|%-39s %14d %14s|\n", buffer,           bt->table[index],    " " );
+        r = fprintf(file, "#|%-39s %14d %14s|\n", buffer,           bt->table[index],    " " );
     }
     return r;
 }

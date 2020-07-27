@@ -61,7 +61,7 @@ void ccluster_prep_loop_DAC( connCmp_list_t qMainLoop, connCmp_list_t qPrepLoop,
         if ( connCmp_is_confined(ctemp, metadatas_initBref(meta)) && (realRat_cmp(diam, halfwidth)<0) )
             connCmp_list_insert_sorted_inv(qMainLoop, ctemp);
         else {
-            ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta, 1);
+            ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, NULL, cache, meta, 1);
 //             ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
@@ -329,7 +329,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
 //                 ccluster_free(ccur);
 //             }
 // #else
-            ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, cache, meta,1);
+            ccluster_bisect_connCmp( ltemp, ccur, discardedCcs, NULL, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted_inv(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);

@@ -53,6 +53,9 @@ typedef struct{
 //                                including 0-th, are computed in the discarding test*/
 //     void(*evalPoly)(compApp_t, compApp_t, const compApp_t, slong);
 //     slong      appPrec;
+    int        drSub;
+    /* for Risolate */
+    realRat    spBnd;
 } metadatas;
 
 typedef metadatas metadatas_t[1];
@@ -64,6 +67,7 @@ typedef metadatas * metadatas_ptr;
 #define metadatas_countref(X) (&(X)->count)
 #define metadatas_chronref(X) (&(X)->chron)
 #define metadatas_pwSumref(X) (&(X)->pwSum)
+#define metadatas_spBndref(X) (&(X)->spBnd)
 
 void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_t strategy, int verbosity);
 void metadatas_clear(metadatas_t m);
@@ -86,6 +90,9 @@ METADATAS_INLINE int  metadatas_getVerbo(const metadatas_t m) { return m->verbo;
 METADATAS_INLINE void  metadatas_setVerbo(metadatas_t m, int v) { m->verbo=v; }
 METADATAS_INLINE int  metadatas_haveToCount(const metadatas_t m) { return (m->verbo > 1); }
 
+METADATAS_INLINE int  metadatas_getDrSub(const metadatas_t m) { return m->drSub; }
+METADATAS_INLINE void  metadatas_setDrSub(metadatas_t m, int v) { m->drSub=v; }
+
 METADATAS_INLINE slong  metadatas_getNbEvalPoints   (const metadatas_t m) { 
     return pwSuDatas_nbPntsEval(metadatas_pwSumref(m)); 
 }
@@ -107,6 +114,16 @@ METADATAS_INLINE realRat_ptr metadatas_getIsoRatio  (metadatas_t m) {
 METADATAS_INLINE realRat_ptr metadatas_getWantedPrec  (metadatas_t m) { 
     return pwSuDatas_wantedPrec_ptr( metadatas_pwSumref(m));
 }
+
+
+METADATAS_INLINE realRat_ptr metadatas_getSepBound  (metadatas_t m) { 
+    return metadatas_spBndref(m);
+}
+
+METADATAS_INLINE void metadatas_setSepBound  (metadatas_t m, const realRat_t sepBound) { 
+    realRat_set(metadatas_spBndref(m), sepBound);
+}
+
 
 // METADATAS_INLINE slong  metadatas_getAppPrec(const metadatas_t m) { return m->appPrec; }
 // METADATAS_INLINE void   metadatas_setAppPrec(metadatas_t m, slong appPrec) { m->appPrec = appPrec; }
@@ -418,6 +435,8 @@ char * realRat_sprint_for_stat(char * out, const realRat_t x);
 
 int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps);
 int metadatas_print(metadatas_t meta, const realRat_t eps);
+
+int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps);
 
 #ifdef __cplusplus
 }

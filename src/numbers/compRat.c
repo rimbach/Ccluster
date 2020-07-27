@@ -11,6 +11,56 @@
 
 #include "compRat.h"
 
+void compRat_mul( compRat_t z, const compRat_t x, const compRat_t y){
+#define a compRat_realref(x)
+#define b compRat_imagref(x)
+#define c compRat_realref(y)
+#define d compRat_imagref(y)
+#define e compRat_realref(z)
+#define f compRat_imagref(z)  
+    if ( ( realRat_is_zero(b) )&&( realRat_is_zero(d) ) )  {
+        realRat_mul( e, a, c );
+        realRat_zero(f);
+    } else if ( realRat_is_zero(b) ) {
+        realRat_mul( e, a, c );
+        realRat_mul( f, a, d );
+    } else if ( realRat_is_zero(d) ) {
+        realRat_mul( e, a, c );
+        realRat_mul( f, b, c );
+    } else if ( ( realRat_is_zero(a) )&&( realRat_is_zero(c) ) ){
+        realRat_mul( e, b, d );
+        realRat_neg( e, e );
+        realRat_zero(f);
+    } else if ( realRat_is_zero(a) ) {
+        realRat_mul( e, b, d );
+        realRat_neg( e, e );
+        realRat_mul( f, b, c);
+    } else if ( realRat_is_zero(c) ) {
+        realRat_mul( e, b, d );
+        realRat_neg( e, e );
+        realRat_mul( f, a, d);
+    } else {
+        realRat_t t;
+        realRat_init(t);
+        
+        realRat_mul( e, a, c );
+        realRat_mul( t, b, d );
+        realRat_sub( e, e, t );
+        
+        realRat_mul( f, b, c );
+        realRat_mul( t, a, d );
+        realRat_add( f, f, t );
+        
+        realRat_clear(t);
+    }
+#undef a
+#undef b
+#undef c
+#undef d
+#undef e
+#undef f
+}
+
 void compRat_fprint(FILE * file, const compRat_t x){
     
     if ( realRat_is_zero(compRat_imagref(x)) ) {

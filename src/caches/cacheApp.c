@@ -18,6 +18,10 @@ void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, s
     cache->_cache            = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsize) * sizeof(compApp_poly_t) );
     cache->_getApproximation = getApproximation;
     
+    cache->_size_real        = 0;
+    cache->_allocsize_real   = CACHE_DEFAULT_SIZE;
+    cache->_cache_real       = (realApp_poly_t *) ccluster_malloc ( (cache->_allocsize_real) * sizeof(realApp_poly_t) );
+    
     cache->_from_poly = 0;
 #ifdef CCLUSTER_EXPERIMENTAL    
     cache->_der_size         = (int *) ccluster_malloc ( (cache->_allocsize) * sizeof(int) );
@@ -37,6 +41,10 @@ void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly){
     cache->_cache            = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsize) * sizeof(compApp_poly_t) );
     cache->_getApproximation = NULL;
     
+    cache->_size_real        = 0;
+    cache->_allocsize_real   = CACHE_DEFAULT_SIZE;
+    cache->_cache_real       = (realApp_poly_t *) ccluster_malloc ( (cache->_allocsize_real) * sizeof(realApp_poly_t) );
+    
     compRat_poly_init(cache->_poly);
     compRat_poly_set(cache->_poly, poly);
     cache->_from_poly = 1;
@@ -51,6 +59,10 @@ void cacheApp_init_realRat_poly ( cacheApp_t cache, const realRat_poly_t poly){
     cache->_allocsize        = CACHE_DEFAULT_SIZE;
     cache->_cache            = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsize) * sizeof(compApp_poly_t) );
     cache->_getApproximation = NULL;
+    
+    cache->_size_real        = 0;
+    cache->_allocsize_real   = CACHE_DEFAULT_SIZE;
+    cache->_cache_real       = (realApp_poly_t *) ccluster_malloc ( (cache->_allocsize_real) * sizeof(realApp_poly_t) );
     
     compRat_poly_init(cache->_poly);
     compRat_poly_set_realRat_poly(cache->_poly, poly);
@@ -150,6 +162,95 @@ compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec ) {
     
 }
 
+//requires: prec is 2^n*CCLUSTER_DEFAULT_PREC
+realApp_poly_ptr cacheApp_getApproximation_real ( cacheApp_t cache, slong prec ) {
+    //get index in cache
+    slong log2prec = (slong)(prec/(slong)CCLUSTER_DEFAULT_PREC);
+    int index = 0;
+    while (log2prec>>=1) index++; //index should contain the log2 of prec/CCLUSTER_DEFAULT_PREC
+    
+    if (index < cache->_size_real)
+        return (cache->_cache_real)[index];
+    
+    compApp_poly_t temp;
+    if (cache->_from_poly==0) {
+//         if (cache->_size_real>=1)
+//             compApp_poly_init2( temp, realApp_poly_degree((cache->_cache_real)[0])+1 );
+//         else
+            compApp_poly_init( temp );
+    }
+
+#ifdef CCLUSTER_HAVE_PTHREAD 
+    cacheApp_lock(cache);
+#endif
+    
+    if (index < cache->_allocsize_real) {
+        while (index >= cache->_size_real){
+//             printf("initialize %d\n", cache->_size_real);
+            if (cache->_size_real>=1)
+                realApp_poly_init2(cache->_cache_real[cache->_size_real], realApp_poly_degree((cache->_cache_real)[0])+1);
+            else
+                realApp_poly_init(cache->_cache_real[cache->_size_real]);
+//             printf("end initialize %d\n", cache->_size);
+            slong nprec = (0x1<<(cache->_size_real))*CCLUSTER_DEFAULT_PREC;
+//             printf("call with prec: %d\n", nprec);
+            if (cache->_from_poly==0){
+                cache->_getApproximation( temp, nprec);
+                realApp_poly_fit_length(cache->_cache_real[cache->_size_real], temp->length);
+                realApp_poly_set_length(cache->_cache_real[cache->_size_real], temp->length);
+                for (slong i = 0; i < temp->length; i++)
+                    realApp_set( (cache->_cache_real[cache->_size_real])->coeffs + i, compApp_realref(temp->coeffs + i));
+            }
+            else {
+                realApp_poly_set_realRat_poly(cache->_cache_real[cache->_size_real], compRat_poly_realref(cache->_poly), nprec);
+            }
+//             printf("end call\n");         
+            cache->_size_real +=1;
+        }
+        
+#ifdef CCLUSTER_HAVE_PTHREAD 
+    cacheApp_unlock(cache);
+#endif
+    if (cache->_from_poly==0)
+        compApp_poly_clear( temp );
+    
+    return (cache->_cache_real)[index];
+    }
+    
+    while (index >= cache->_allocsize_real) 
+        cache->_allocsize_real += CACHE_DEFAULT_SIZE;
+    
+    cache->_cache_real = (realApp_poly_t *) ccluster_realloc (cache->_cache_real, (cache->_allocsize_real) * sizeof(realApp_poly_t) );
+  
+    while (index >= cache->_size_real){
+        realApp_poly_init2(cache->_cache_real[cache->_size_real], realApp_poly_degree((cache->_cache_real)[0])+1);
+        slong nprec = (0x1<<(cache->_size_real))*CCLUSTER_DEFAULT_PREC;
+        
+        if (cache->_from_poly==0){
+            cache->_getApproximation( temp, nprec);
+            realApp_poly_fit_length(cache->_cache_real[cache->_size_real], temp->length);
+            realApp_poly_set_length(cache->_cache_real[cache->_size_real], temp->length);
+            for (slong i = 0; i < temp->length; i++)
+                realApp_set( (cache->_cache_real[cache->_size_real])->coeffs + i, compApp_realref(temp->coeffs + i));
+        }
+        else {
+            realApp_poly_set_realRat_poly(cache->_cache_real[cache->_size_real], compRat_poly_realref(cache->_poly), nprec);
+        }
+        
+           
+        cache->_size_real +=1;
+    }
+#ifdef CCLUSTER_HAVE_PTHREAD 
+    cacheApp_unlock(cache);
+#endif
+    
+    if (cache->_from_poly==0)
+        compApp_poly_clear( temp );
+    
+    return (cache->_cache_real)[index];
+    
+}
+
 #ifdef CCLUSTER_EXPERIMENTAL
 compApp_poly_ptr cacheApp_getDerivative ( cacheApp_t cache, slong prec, slong order ) {
     
@@ -189,6 +290,7 @@ slong cacheApp_getDegree ( cacheApp_t cache ){
 }
 
 int cacheApp_is_real ( cacheApp_t cache ){
+    
     if (cache->_size == 0)
         cacheApp_getApproximation (cache, CCLUSTER_DEFAULT_PREC);
     return compApp_poly_is_real((cache->_cache)[0]);
@@ -238,6 +340,34 @@ int cacheApp_root_bound_unsure ( realRat_t bound, cacheApp_t cache){
     return res;
 }
 
+void cacheApp_separation_bound ( realRat_t sepBound, cacheApp_t cache){
+    
+    slong deg = cacheApp_getDegree ( cache );
+    
+    fmpq_poly_canonicalise(compRat_poly_realref(cache->_poly));
+    /* compute the inverse of the norm of the poly*/
+    fmpz_t norm2;
+    fmpz_poly_t num;
+    fmpz_init(norm2);
+    fmpz_poly_init(num);
+    fmpq_poly_get_numerator(num, compRat_poly_realref(cache->_poly) );
+    fmpz_poly_2norm(norm2, num);
+    fmpz_pow_ui(norm2, norm2, deg-1);
+    fmpz_set_ui(realRat_numref(sepBound), 1); 
+    fmpz_set(realRat_denref(sepBound), norm2);
+//     printf("norm: "); fmpz_print(norm2); printf("\n");
+    ulong exp = deg;
+    if (exp%2==1)
+        exp = exp+1;
+    exp = (exp+2)/2;
+    fmpz_set_si(norm2, deg);
+    fmpz_pow_ui(norm2, norm2, exp);
+    fmpq_div_fmpz(sepBound, sepBound, norm2);
+    
+    fmpz_clear(norm2);
+    fmpz_poly_clear(num);
+}
+
 void cacheApp_clear ( cacheApp_t cache ) {
 
 #ifdef CCLUSTER_EXPERIMENTAL    
@@ -249,6 +379,10 @@ void cacheApp_clear ( cacheApp_t cache ) {
     for (int i=0; i<cache->_size; i++)
         compApp_poly_clear( (cache->_cache)[i] );
     ccluster_free(cache->_cache);
+    
+    for (int i=0; i<cache->_size_real; i++)
+        realApp_poly_clear( (cache->_cache_real)[i] );
+    ccluster_free(cache->_cache_real);
 
 #ifdef CCLUSTER_EXPERIMENTAL
 //     printf("ici, len: %d\n", (int) len);
@@ -267,6 +401,9 @@ void cacheApp_clear ( cacheApp_t cache ) {
     cache->_size      = 0;
     cache->_allocsize = 0;
     
+    cache->_size_real      = 0;
+    cache->_allocsize_real = 0;
+    
     if (cache->_from_poly==1) {
         compRat_poly_clear(cache->_poly);
     }
@@ -275,5 +412,4 @@ void cacheApp_clear ( cacheApp_t cache ) {
     pthread_mutex_destroy( &(cache->_mutex) );
 #endif
     
-//     compApp_poly_clear(cacheApp_workref(cache));
 }

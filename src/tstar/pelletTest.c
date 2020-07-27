@@ -56,3 +56,17 @@ int compApp_poly_TkGtilda_with_sum( const compApp_poly_t f, const realApp_t s, c
     realApp_clear(diff);
     return res;
 }
+
+int realApp_poly_TkGtilda_with_sum( const realApp_poly_t f, const realApp_t s, const ulong k, slong prec){
+    realApp_t abs, diff;
+    int res;
+    realApp_init(abs);
+    realApp_init(diff);
+    realApp_abs(abs, (f->coeffs)+k);
+    realApp_sub(diff, s, abs, prec);
+
+    res = realApp_soft_compare( abs, diff, prec);
+    realApp_clear(abs);
+    realApp_clear(diff);
+    return res;
+}
