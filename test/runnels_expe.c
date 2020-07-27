@@ -16,6 +16,8 @@
 #include "polynomials/app_rat_poly.h"
 #include "ccluster/ccluster.h"
 
+#include "ISSAC20/ccluster_issac20.h"
+
 #include "./parseArgs.h"
 
 compRat_poly_t p_global;
@@ -89,47 +91,88 @@ void evaluateRunnelsFast( compApp_t dest, compApp_t dest2, const compApp_t point
 
 int main(int argc, char **argv){
     
-    if (argc<6){
-        printf("usage: %s iteration ", argv[0]);
-        printf("initial_box epsilon strategy verbosity\n");
-        printf("initial_box: for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
-        printf("eps:         for instance1,100 (1/100) or -53 (1/2^(-53))\n");  
-        printf("strategy:    default for default strategy\n");
-        printf("             test for testing mode\n");
-        printf("verbosity:   0: nothing\n");
-        printf("             1: abstract of input and output\n");
-        printf("             2: detailed reports concerning algorithm\n");
-        printf("             3: same as 2 + prints the clusters\n");
-        return -1;
+    if (argc<=2){
+        printf("usage: %s degree [OPTIONS] ", argv[0]);
+        printf("                                 \n");
+        printf("      -d , --domain: the initial region of interest\n");
+        printf("                     global [default] finds all the roots\n");
+        printf("                     a box, for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
+        printf("                     if a bounded box B is given, ccluster finds all natural clusters in B, and possibly some in (5/4)B \n");
+        printf("      -e , --epsilon: the size of output clusters\n");
+        printf("                     +inf [default] output natural clusters wits less roots than degree of input polynomial\n");
+        printf("                     a positive number as 1,100 (1/100) or -53 (1/2^(-53))\n");
+        printf("      -m, --mode: the version of the algorithm\n");
+        printf("                     default value is \"default\"  \n");
+        printf("      -v, --verbose: an integer for verbosity\n");
+        printf("                     0: nothing\n");
+        printf("                     1 [default]: abstract of input and output\n");
+        printf("                     2: detailed reports concerning algorithm\n");
+        printf("                     3: same as 2 + prints the clusters to stdout\n");
+        printf("TODO: nbthreads, display precision of outout\n");
+        if (argc<2)
+            return -1;
     }
     
     int parse = 1;
     int degree;
     char * st;
-    int verbosity;
+    int verbosity = 1;
     int nbthreads = 1;
+    int global = 2; /* by default, search all the roots */
+    int infinity = 2;
     
     compBox_t bInit;
     realRat_t eps;
     
+    char stDefault[] = "default"; 
+    st = stDefault;
+    
     compBox_init(bInit);
     realRat_init(eps);
+    scan_epsilon( "+inf", eps );
+    global = scan_initialBox( "global", bInit );
     
     parse = parse*scan_degree( argv[1], &degree);
-    parse = parse*scan_initialBox( argv[2], bInit );
-    parse = parse*scan_epsilon( argv[3], eps );
-//     parse = parse*scan_strategy(argv[4], &st );
-    st = argv[4];
-    parse = parse*scan_verbosity(argv[5], &verbosity );
     
-    if (argc>=7) {
-        parse = parse*scan_nbthreads(argv[6], &nbthreads );
-    } 
-    
-//     nbthreads = (nbthreads<<6);
-//     int add_temp = (st>>7)<<17;
-//     st = st&((0x1<<7)-1);
-//     st = st + nbthreads + add_temp;
+    /* loop on arguments to figure out options */
+    for (int arg = 2; arg< argc; arg++) {
+        
+        if ( (strcmp( argv[arg], "-v" ) == 0) || (strcmp( argv[arg], "--verbose" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*scan_verbosity(argv[arg+1], &verbosity );
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-d" ) == 0) || (strcmp( argv[arg], "--domain" ) == 0) ) {
+            if (argc>arg+1) {
+                global = scan_initialBox( argv[arg+1], bInit );
+                if (global==1) {
+                    printf("option --domain %s is not valid; doing global\n", argv[arg+1]);
+                    global =2;
+                }
+                parse = parse*global;
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-e" ) == 0) || (strcmp( argv[arg], "--epsilon" ) == 0) ) {
+            if (argc>arg+1) {
+                infinity = scan_epsilon( argv[arg+1], eps );
+                parse = parse*infinity;
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mode" ) == 0) ) {
+            if (argc>arg+1) {
+//                 parse = parse*scan_strategy( argv[arg+1], st );
+                st = argv[arg+1];
+                arg++;
+            }
+        }
+        
+    }
     
     realRat_poly_t prun, prunm1, prunm2, pone, px;
     realRat_poly_init(prun);
@@ -165,7 +208,8 @@ int main(int argc, char **argv){
         compRat_poly_set_realRat_poly(p_global,prun);
         
 //         ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
-        ccluster_interface_func_eval( getApprox, evaluateRunnelsFast, bInit, eps, st, nbthreads, verbosity);
+//         ccluster_interface_func_eval( getApprox, evaluateRunnelsFast, bInit, eps, st, nbthreads, verbosity);
+        ccluster_issac20_global_interface_func_eval( getApprox, evaluateRunnelsFast, eps, st, nbthreads, 10, verbosity);
     }
     
     realRat_poly_clear(prun);

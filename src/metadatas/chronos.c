@@ -23,10 +23,7 @@ void chronos_init( chronos_t times ){
     times->_clicks_Anticip_cumul = 0.0;
     
     times->_clicks_PSTests_cumul = 0.0;
-#ifdef CCLUSTER_STATS_PS
-    times->_clicks_PSTestV_cumul = 0.0;
     times->_clicks_Evaluat_cumul = 0.0;
-#endif
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(times->_mutex), NULL);
 #endif

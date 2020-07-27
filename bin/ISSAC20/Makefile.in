@@ -1,5 +1,5 @@
-INCLUDE_PATH = $(INCS) -I../src
-LIBRARY_PATH = -L.. $(LIBS)
+INCLUDE_PATH = $(INCS) -I../../src
+LIBRARY_PATH = -L../.. $(LIBS)
 LIBRARY_FLAG = -lflint -larb -lccluster -lm
 
 QUIET_CC  = @echo '   ' CC  ' ' $@;
@@ -8,20 +8,15 @@ TEST=$(foreach x, ., $(wildcard $(x)/*.c))
 TEST_OBJS=$(TEST:%.c=%.o)
 TEST_EXECS=$(TEST:%.c=%)
 
-build: ccluster\
-       risolate\
-       genPolFile\
-       ccluster_spiral
-
-# TESTING VARIABLES
-degree=64
-bitsize=14
-poly=Mignotte
-file=${poly}"_"${degree}"_"${bitsize}".ccl"
+build: ccluster_issac20\
+       ccluster_issac20_runnels\
+       ccluster_issac20_mandelbrot
 
 test: build
-	./genPolFile ${poly} 1 ${degree} ${bitsize} ${file}
-	./ccluster ${file}
+	../genPolFile Runnels 1 7 ../Runnels_7.ccl
+	../ccluster ../Runnels_7.ccl -o 0
+	./ccluster_issac20 ../Runnels_7.ccl -o 0
+	./ccluster_issac20_runnels 7 -o 0
 
 #==================================================
 # HOUSEKEEPING 
@@ -29,39 +24,25 @@ test: build
 
 clean :
 	rm -rf $(TEST_OBJS) $(TEST_EXECS)
-	cd ISSAC20 && make clean && cd ..
 
 .c.o :
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ -c $< $(INCLUDE_PATH)
-	
-ccluster: ccluster.o parseArgs.h
+	    	
+ccluster_issac20: ccluster_issac20.o ../parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 	    	
-ccluster_expe: ccluster_expe.o parseArgs.h
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) \
-	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
-
-risolate: risolate.o parseArgs.h
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) \
-	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
-
-genPolFile: genPolFile.o
+ccluster_issac20_runnels: ccluster_issac20_runnels.o ../parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 	    	
-ccluster_spiral: ccluster_spiral.o
+ccluster_issac20_mandelbrot: ccluster_issac20_mandelbrot.o ../parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
-	

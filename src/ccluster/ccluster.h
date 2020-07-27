@@ -255,37 +255,6 @@ int ccluster_interface_poly_real_imag( realRat_t * centerRe, realRat_t * centerI
                                        int st, 
                                        int verb);
 
-/* experimental version */
-/* implemented in ccluster_interface.c */
-void ccluster_expe_global_interface_func( void(*func)(compApp_poly_t, slong), 
-                                          const realRat_t eps, 
-                                          char * stratstr,
-                                          int nbThreads,
-                                          int verb);
-/* implemented in ccluster_expe.c */
-void ccluster_expe_algo_global( connCmp_list_t qResults, 
-                                const compBox_t initialBox, 
-                                const realRat_t eps, 
-                                cacheApp_t cache, 
-                                metadatas_t meta);
-
-void ccluster_expe_main_loop( connCmp_list_t qResults,  
-                              connCmp_list_t qMainLoop, 
-                              connCmp_list_t discardedCcs, 
-                              const realRat_t eps, 
-                              cacheApp_t cache, 
-                              metadatas_t meta);
-
-void ccluster_expe_bisect_connCmp( connCmp_list_t dest, 
-                              connCmp_t cc, 
-                              connCmp_list_t discardedCcs, 
-                              cacheApp_t cache, 
-                              metadatas_t meta, 
-                              slong nbThreads); 
-
-slong ccluster_expe_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
-                                     slong prec, metadatas_t meta);
-
 ///implemented in ccluster_draw.c
 /* DEPRECATED */
 
@@ -340,6 +309,9 @@ void ccluster_refine_forJulia( connCmp_list_t qResults,
                                   const realRat_t eps, 
                                   int st, 
                                   int verb);
+
+/* utilities */
+int  ccluster_compDsk_is_separated( const compDsk_t d, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs );
 
 #ifdef __cplusplus
 }

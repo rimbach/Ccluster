@@ -32,8 +32,6 @@
 #define CCLUSTER_V2(A)         ( ((&(A)->strat)->_additionalFlags)&(0x1<<3) )         /* strat + 512 */
 #define CCLUSTER_V5(A)         ( ((&(A)->strat)->_additionalFlags)&(0x1<<4) )         /* strat + 1024 */
 
-// #define CCLUSTER_STATS_PS
-
 #include <stdlib.h> /* for size_t */
 #include "flint/flint.h" /* for memory managment */ 
 
@@ -51,6 +49,8 @@ BASE_INLINE void * ccluster_malloc(size_t size) { return flint_malloc(size); }
 BASE_INLINE void * ccluster_realloc(void * ptr, size_t size) { return flint_realloc(ptr, size); }
 BASE_INLINE void * ccluster_calloc(size_t num, size_t size) { return flint_calloc(num, size); }
 BASE_INLINE void ccluster_free(void * ptr) { flint_free(ptr); }
+
+// #define CCLUSTER_STATS_PS
 
 #ifdef __cplusplus
 }

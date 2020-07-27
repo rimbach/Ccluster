@@ -61,8 +61,8 @@ extern "C" {
 
 #define STRAT_INT_FORTESTS 247
 #define STRAT_STR_FORTESTS "test"
-// #define STRAT_STR_FORTESTS1 "test1"
-// #define STRAT_STR_FORTESTS2 "test2"
+#define STRAT_STR_FORTESTS1 "test1"
+#define STRAT_STR_FORTESTS2 "test2"
 
 typedef struct {
     int _useNewton;
@@ -76,7 +76,7 @@ typedef struct {
     int _usePowerSums;
     int _forTests;
 //     int _pwSuTest;
-//     int _pwSuNbPs;
+    int _pwSuNbPs;
 //     realRat _pwSuIsoRatio;
 } strategies;
 
@@ -103,6 +103,8 @@ void strategies_clear(strategies_t strat);
 void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads);
     
 METADATAS_INLINE int strategies_useNewton         ( const strategies_t strat ) { return strat->_useNewton         ; } 
+METADATAS_INLINE void strategies_set_useNewton         ( strategies_t strat, int flag ) { strat->_useNewton = flag; } 
+
 METADATAS_INLINE int strategies_useTstarOptim     ( const strategies_t strat ) { return strat->_useTstarOptim     ; }
 METADATAS_INLINE int strategies_usePredictPrec    ( const strategies_t strat ) { return strat->_usePredictPrec    ; }
 METADATAS_INLINE int strategies_useAnticipate     ( const strategies_t strat ) { return strat->_useAnticipate     ; }
@@ -121,8 +123,8 @@ METADATAS_INLINE void strategies_set_forTests   ( strategies_t strat, int flag )
 // METADATAS_INLINE int strategies_pwSuTest        ( const strategies_t strat ) { return strat->_pwSuTest      ; }
 // METADATAS_INLINE void strategies_set_pwSuTest   ( strategies_t strat, int flag ) { strat->_pwSuTest=flag      ; }
 
-// METADATAS_INLINE int strategies_pwSuNbPs       ( const strategies_t strat ) { return strat->_pwSuNbPs      ; }
-// METADATAS_INLINE void strategies_set_pwSuNbPs   ( strategies_t strat, int nb ) { strat->_pwSuNbPs=nb      ; }
+METADATAS_INLINE int strategies_pwSuNbPs       ( const strategies_t strat ) { return strat->_pwSuNbPs      ; }
+METADATAS_INLINE void strategies_set_pwSuNbPs   ( strategies_t strat, int nb ) { strat->_pwSuNbPs=nb      ; }
 
 #ifdef __cplusplus
 }
