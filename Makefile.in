@@ -91,7 +91,7 @@ test: library bins exampleFiles
 	bin/risolate bin/Mignotte_511_14.ccl -o 0
 	@echo -e $(BGREEN) "Local clustering of complex roots of a Mignotte polynomial of degree 511 and bitsize 14 in [-1,1]+i[-1,1]: should take less than a second" $(NORMAL)
 	@echo -e $(BRED) "option -d to specify a square complex box of interest" $(NORMAL)
-	bin/ccluster bin/Mignotte_511_14.ccl -d 0,1,0,1,1,1 -o 0
+	bin/ccluster bin/Mignotte_511_14.ccl -d 0,1,0,1,1,1
 	@echo -e $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree 32: should take less than a second" $(NORMAL)
 	@echo -e $(BRED) "for a graphical output, use option -o -2 and pipe to gnuplot" $(NORMAL)
 	@echo -e $(BRED) "this test will stop with an error if you do not have gnuplot installed on your machine" $(NORMAL)
