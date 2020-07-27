@@ -71,34 +71,34 @@ exampleFiles: library bins
 	
 test: library bins exampleFiles
 	
-	@echo $(BGREEN) "Clustering complex roots of a Mandelbrot polynomial of degree 127: should take a few seconds"
-	@echo $(BRED) "when calling ccluster with no option, a brief recall of usage is diplayed:" $(NORMAL)
+	@echo -e $(BGREEN) "Clustering complex roots of a Mandelbrot polynomial of degree 127: should take a few seconds"
+	@echo -e $(BRED) "when calling ccluster with no option, a brief recall of usage is diplayed:" $(NORMAL)
 	bin/ccluster bin/Mandelbrot_7.ccl
-	@echo $(BGREEN) "Isolating real roots of a Mandelbrot polynomial of degree 127: should take about a seconds"
-	@echo $(BRED) "risolate is the binary for real root isolation" $(NORMAL)
-	@echo $(BRED) "with option -o, one can specify the number of digits for displaying the clusters" $(NORMAL)
+	@echo -e $(BGREEN) "Isolating real roots of a Mandelbrot polynomial of degree 127: should take about a seconds"
+	@echo -e $(BRED) "risolate is the binary for real root isolation" $(NORMAL)
+	@echo -e $(BRED) "with option -o, one can specify the number of digits for displaying the clusters" $(NORMAL)
 	bin/risolate bin/Mandelbrot_7.ccl -o 5
-	@echo $(BGREEN) "Clustering complex roots of a Mignotte polynomial of degree 128 and bitsize 14: should take a few seconds" $(NORMAL)
-	@echo $(BRED) "by defaults, ccluster computes clusters without size constraints (i.e. option -e +inf)" $(NORMAL)
-	@echo $(BRED) "notice the use of option -o with argument 0 for avoiding the output of clusters" $(NORMAL)
+	@echo -e $(BGREEN) "Clustering complex roots of a Mignotte polynomial of degree 128 and bitsize 14: should take a few seconds" $(NORMAL)
+	@echo -e $(BRED) "by defaults, ccluster computes clusters without size constraints (i.e. option -e +inf)" $(NORMAL)
+	@echo -e $(BRED) "notice the use of option -o with argument 0 for avoiding the output of clusters" $(NORMAL)
 	bin/ccluster bin/Mignotte_128_14.ccl -o 0
-	@echo $(BGREEN) "Computing Clusters of complex roots of size less than 2^-1000 of a Mignotte polynomial of degree 128 and bitsize 14: should be a bit slower, and should isolate the roots" $(NORMAL)
-	@echo $(BRED) "option -e precision where precision is given as the log in basis 2 of the maximum size of the clusters" $(NORMAL)
+	@echo -e $(BGREEN) "Computing Clusters of complex roots of size less than 2^-1000 of a Mignotte polynomial of degree 128 and bitsize 14: should be a bit slower, and should isolate the roots" $(NORMAL)
+	@echo -e $(BRED) "option -e precision where precision is given as the log in basis 2 of the maximum size of the clusters" $(NORMAL)
 	bin/ccluster bin/Mignotte_128_14.ccl -e -1000 -o 0
-	@echo $(BGREEN) "Isolating real roots of a Mignotte polynomial of degree 128 and bitsize 14: should take about a seconds" $(NORMAL)
+	@echo -e $(BGREEN) "Isolating real roots of a Mignotte polynomial of degree 128 and bitsize 14: should take about a seconds" $(NORMAL)
 	bin/risolate bin/Mignotte_128_14.ccl -o 0
-	@echo $(BGREEN) "Isolating real roots of a Mignotte polynomial of degree 511 and bitsize 14: should take less than a minute" $(NORMAL)
+	@echo -e $(BGREEN) "Isolating real roots of a Mignotte polynomial of degree 511 and bitsize 14: should take less than a minute" $(NORMAL)
 	bin/risolate bin/Mignotte_511_14.ccl -o 0
-	@echo $(BGREEN) "Local clustering of complex roots of a Mignotte polynomial of degree 511 and bitsize 14 in [-1,1]+i[-1,1]: should take less than a second" $(NORMAL)
-	@echo $(BRED) "option -d to specify a square complex box of interest" $(NORMAL)
+	@echo -e $(BGREEN) "Local clustering of complex roots of a Mignotte polynomial of degree 511 and bitsize 14 in [-1,1]+i[-1,1]: should take less than a second" $(NORMAL)
+	@echo -e $(BRED) "option -d to specify a square complex box of interest" $(NORMAL)
 	bin/ccluster bin/Mignotte_511_14.ccl -d 0,1,0,1,1,1 -o 0
-	@echo $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree 32: should take less than a second" $(NORMAL)
-	@echo $(BRED) "for a graphical output, use option -o -2 and pipe to gnuplot" $(NORMAL)
-	@echo $(BRED) "this test will stop with an error if you do not have gnuplot installed on your machine" $(NORMAL)
-	@echo $(BRED) "if gnuplot opens a window, close the window to continue" $(NORMAL)
+	@echo -e $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree 32: should take less than a second" $(NORMAL)
+	@echo -e $(BRED) "for a graphical output, use option -o -2 and pipe to gnuplot" $(NORMAL)
+	@echo -e $(BRED) "this test will stop with an error if you do not have gnuplot installed on your machine" $(NORMAL)
+	@echo -e $(BRED) "if gnuplot opens a window, close the window to continue" $(NORMAL)
 	bin/ccluster bin/Bernoulli_32.ccl -o -2 | gnuplot
-	@echo $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree 32: should take less than a second" $(NORMAL)
-	@echo $(BRED) "for a graphical output with the subdivision tree, use option -o -3 and pipe to gnuplot" $(NORMAL)
+	@echo -e $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree 32: should take less than a second" $(NORMAL)
+	@echo -e $(BRED) "for a graphical output with the subdivision tree, use option -o -3 and pipe to gnuplot" $(NORMAL)
 	bin/ccluster bin/Bernoulli_32.ccl -o -3 | gnuplot
 
 ################## End tests ######################################################
