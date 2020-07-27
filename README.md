@@ -47,6 +47,11 @@ If you want to install Ccluster in /usr/local and have permissions:
 ```
 make install
 ```
+To run simple tests together with a short tutorial about binaries provided in Ccluster,
+```
+make test
+```
+
 ## Using the library in a c programm
 
 The file bin/ccluster_spiral.c contains the code for an example where ccluster
