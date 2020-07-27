@@ -22,6 +22,7 @@ BUILD_DIRS = $(SRC_PATH)\
 	     $(SRC_PATH)/tstar\
 	     $(SRC_PATH)/caches\
 	     $(SRC_PATH)/geometry\
+	     $(SRC_PATH)/ISSAC20\
 	     $(SRC_PATH)/lists\
 	     $(SRC_PATH)/metadatas\
 	     $(SRC_PATH)/newton\
@@ -122,6 +123,7 @@ distclean: clean benchsclean testclean
 	rm -f Makefile
 	rm -f test/Makefile
 	rm -f bin/Makefile
+	rm -f bin/ISSAC20/Makefile
 	
 $(CCLUSTER_LIB): $(LIB_LOBJS) $(LIB_SOURCES) $(LIB_HEADERS)
 	@echo "Building $@"
@@ -194,6 +196,9 @@ bins: library
 	
 autotest: bins
 	cd bin && make test && cd ..
+	
+ISSAC: bins
+	cd bin/ISSAC20 && make && make test && cd ../..
 	
 benchICMS: compbenchs
 	cd benchs && make tableICMS && cd ..

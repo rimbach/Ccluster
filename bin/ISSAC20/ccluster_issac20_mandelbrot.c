@@ -18,7 +18,7 @@
 
 #include "ISSAC20/ccluster_issac20.h"
 
-#include "./parseArgs.h"
+#include "../parseArgs.h"
 
 compRat_poly_t p_global;
 int d_global;
@@ -27,35 +27,8 @@ void getApprox(compApp_poly_t dest, slong prec){
     compApp_poly_set_compRat_poly(dest, p_global, prec);
 }
 
-void evaluateMandelbrotFast( compApp_t dest, compApp_t dest2, const compApp_t point, slong prec ){
-    compApp_one(dest);
-    compApp_zero(dest2);
-    
-    compApp_t temp;
-    compApp_init(temp);
-    compApp_set(temp, dest);
-    
-    for (int i = 1; i <= d_global; i++){
-        
-        compApp_pow_si(dest, dest, 2, prec); /* Pk-1(z)*Pk-1(z)*/
-        
-        /*compute value of derivative*/
-        compApp_mul(dest2, temp, dest2, prec); /* P'k-1(z)*Pk-1(z) */
-        compApp_mul(dest2, dest2, point, prec); /* z*P'k-1(z)*Pk-1(z) */
-        compApp_mul_si( dest2, dest2, 2, prec); /* 2*z*P'k-1(z)*Pk-1(z) */
-        compApp_add(dest2, dest2, dest, prec); /* 2*z*P'k-1(z)*Pk-1(z) + Pk-1(z)*Pk-1(z) */
-        
-        /*compute value of poly*/
-//         compApp_pow_si(dest, dest, 2, prec);
-        compApp_mul(dest, dest, point, prec);
-        compApp_add_ui(dest, dest, 1, prec);
-        
-        compApp_set(temp, dest);
-    }
-    compApp_clear(temp);
-    
-    return;
-}
+void Mandelbrot_polynomial( realRat_poly_t dest, int iterations);
+void Mandelbrot_evaluate( compApp_t dest, compApp_t dest2, const compApp_t point, slong prec );
 
 int main(int argc, char **argv){
     
@@ -69,14 +42,17 @@ int main(int argc, char **argv){
         printf("      -e , --epsilon: the size of output clusters\n");
         printf("                     +inf [default] output natural clusters wits less roots than degree of input polynomial\n");
         printf("                     a positive number as 1,100 (1/100) or -53 (1/2^(-53))\n");
+        printf("      -o , --output: the way cluster are output; default is NO OUTPUT\n");
+        printf("                     0: [default] NO OUTPUT\n");
+        printf("                     d>0: d digit precision floating point numbers\n");
+        printf("                     -1: rational numbers\n");
         printf("      -m, --mode: the version of the algorithm\n");
         printf("                     default value is \"default\"  \n");
         printf("      -v, --verbose: an integer for verbosity\n");
         printf("                     0: nothing\n");
         printf("                     1 [default]: abstract of input and output\n");
         printf("                     2: detailed reports concerning algorithm\n");
-        printf("                     3: same as 2 + prints the clusters to stdout\n");
-        printf("TODO: nbthreads, display precision of outout\n");
+        printf("                     >=3: debugging mode\n");
         if (argc<2)
             return -1;
     }
@@ -88,6 +64,7 @@ int main(int argc, char **argv){
     int nbthreads = 1;
     int global = 2; /* by default, search all the roots */
     int infinity = 2;
+    int output = 0;
     
     compBox_t bInit;
     realRat_t eps;
@@ -132,6 +109,13 @@ int main(int argc, char **argv){
             }
         }
         
+        if ( (strcmp( argv[arg], "-o" ) == 0) || (strcmp( argv[arg], "--output" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*scan_output(argv[arg+1], &output);
+                arg++;
+            }
+        }
+        
         if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mode" ) == 0) ) {
             if (argc>arg+1) {
 //                 parse = parse*scan_strategy( argv[arg+1], st );
@@ -142,38 +126,20 @@ int main(int argc, char **argv){
         
     }
     
-    realRat_poly_t pmand, pone, px;
+    realRat_poly_t pmand;
     realRat_poly_init(pmand);
-    realRat_poly_init(pone);
-    realRat_poly_init(px);
     
     compRat_poly_init(p_global);
     d_global = degree;
     
+    Mandelbrot_polynomial( pmand, d_global);
+    compRat_poly_set_realRat_poly(p_global,pmand);
+    
     if (parse==1) {
-        
-        realRat_poly_one(pmand);
-        realRat_poly_one(pone);
-        realRat_poly_zero(px);
-        realRat_poly_set_coeff_si_ui(px, 1, 1, 1);
-        
-        for (int i = 1; i<=degree; i++) {
-            realRat_poly_pow(pmand, pmand, 2);
-            realRat_poly_mul(pmand, pmand, px);
-            realRat_poly_add(pmand, pmand, pone);
-        }
-        
-        compRat_poly_set_realRat_poly(p_global,pmand);
-//         printf("poly: "); compRat_poly_print(p_global); printf("\n");
-        
-//         ccluster_interface_func( getApprox, bInit, eps, st, verbosity);
-//         ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
-        ccluster_issac20_global_interface_func_eval( getApprox, evaluateMandelbrotFast, eps, st, nbthreads, 0, verbosity);
+        ccluster_issac20_global_interface_func_eval( getApprox, Mandelbrot_evaluate, eps, st, nbthreads, output, verbosity);
     }
     
     realRat_poly_clear(pmand);
-    realRat_poly_clear(pone);
-    realRat_poly_clear(px);
     compRat_poly_clear(p_global);
     realRat_clear(eps);
     compBox_clear(bInit);
@@ -181,4 +147,55 @@ int main(int argc, char **argv){
     flint_cleanup();
     
     return 0;
+}
+
+void Mandelbrot_polynomial( realRat_poly_t pmand, int iterations){
+    
+    realRat_poly_t pone, px;
+    realRat_poly_init(pone);
+    realRat_poly_init(px);
+    
+    realRat_poly_one(pmand);
+    realRat_poly_one(pone);
+    realRat_poly_zero(px);
+    realRat_poly_set_coeff_si_ui(px, 1, 1, 1);
+    
+    for (int i = 1; i<=iterations; i++) {
+        realRat_poly_pow(pmand, pmand, 2);
+        realRat_poly_mul(pmand, pmand, px);
+        realRat_poly_add(pmand, pmand, pone);
+    }
+    
+    realRat_poly_clear(pone);
+    realRat_poly_clear(px);    
+}
+
+void Mandelbrot_evaluate( compApp_t dest, compApp_t dest2, const compApp_t point, slong prec ){
+    compApp_one(dest);
+    compApp_zero(dest2);
+    
+    compApp_t temp;
+    compApp_init(temp);
+    compApp_set(temp, dest);
+    
+    for (int i = 1; i <= d_global; i++){
+        
+        compApp_pow_si(dest, dest, 2, prec); /* Pk-1(z)*Pk-1(z)*/
+        
+        /*compute value of derivative*/
+        compApp_mul(dest2, temp, dest2, prec); /* P'k-1(z)*Pk-1(z) */
+        compApp_mul(dest2, dest2, point, prec); /* z*P'k-1(z)*Pk-1(z) */
+        compApp_mul_si( dest2, dest2, 2, prec); /* 2*z*P'k-1(z)*Pk-1(z) */
+        compApp_add(dest2, dest2, dest, prec); /* 2*z*P'k-1(z)*Pk-1(z) + Pk-1(z)*Pk-1(z) */
+        
+        /*compute value of poly*/
+//         compApp_pow_si(dest, dest, 2, prec);
+        compApp_mul(dest, dest, point, prec);
+        compApp_add_ui(dest, dest, 1, prec);
+        
+        compApp_set(temp, dest);
+    }
+    compApp_clear(temp);
+    
+    return;
 }

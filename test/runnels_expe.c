@@ -16,6 +16,8 @@
 #include "polynomials/app_rat_poly.h"
 #include "ccluster/ccluster.h"
 
+#include "ISSAC20/ccluster_issac20.h"
+
 #include "./parseArgs.h"
 
 compRat_poly_t p_global;
@@ -73,7 +75,7 @@ void evaluateRunnelsFast( compApp_t dest, compApp_t dest2, const compApp_t point
         compApp_pow_si(dest, destm1, 2, prec);
         compApp_add(dest, dest, destm2, prec);
         
-        compApp_set(destm2, destm2);
+        compApp_set(destm2, destm1);
         compApp_set(destm1, dest);
     }
     
@@ -207,7 +209,7 @@ int main(int argc, char **argv){
         
 //         ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
 //         ccluster_interface_func_eval( getApprox, evaluateRunnelsFast, bInit, eps, st, nbthreads, verbosity);
-        ccluster_expe_global_interface_func_eval( getApprox, evaluateRunnelsFast, eps, st, nbthreads, verbosity);
+        ccluster_issac20_global_interface_func_eval( getApprox, evaluateRunnelsFast, eps, st, nbthreads, 10, verbosity);
     }
     
     realRat_poly_clear(prun);

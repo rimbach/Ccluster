@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdio.h>
-#include "ccluster/ccluster.h"
+#include "ISSAC20/ccluster_issac20.h"
 
 #include "../bin/parseArgs.h"
 
@@ -21,15 +21,18 @@ int main(int argc, char **argv){
         printf("                     if a bounded box B is given, ccluster finds all natural clusters in B, and possibly some in (5/4)B \n");
         printf("      -e , --epsilon: the size of output clusters\n");
         printf("                     +inf [default] output natural clusters wits less roots than degree of input polynomial\n");
-        printf("                     a positive number as 1,100 (1/100) or -53 (1/2^(-53))\n");
+        printf("                     a positive number as 1,100 (1/100) or -53 (2^(-53))\n");
+        printf("      -o , --output: the way cluster are output; default is NO OUTPUT\n");
+        printf("                     0: [default] NO OUTPUT\n");
+        printf("                     d>0: d digit precision floating point numbers\n");
+        printf("                     -1: rational numbers\n");
         printf("      -m, --mode: the version of the algorithm\n");
         printf("                     default value is \"default\"  \n");
         printf("      -v, --verbose: an integer for verbosity\n");
         printf("                     0: nothing\n");
         printf("                     1 [default]: abstract of input and output\n");
         printf("                     2: detailed reports concerning algorithm\n");
-        printf("                     3: same as 2 + prints the clusters to stdout\n");
-        printf("TODO: nbthreads, display precision of outout\n");
+        printf("                     >=3: debugging mode\n");
         if (argc<2)
             return -1;
     }
@@ -42,6 +45,7 @@ int main(int argc, char **argv){
     int nbthreads = 1;
     int global = 2; /* by default, search all the roots */
     int infinity = 2;
+    int output = 0;
     
     compBox_t bInit;
     realRat_t eps;
@@ -57,6 +61,7 @@ int main(int argc, char **argv){
     filename = argv[1];
     
     /* loop on arguments to figure out options */
+    
     for (int arg = 2; arg< argc; arg++) {
         
         if ( (strcmp( argv[arg], "-v" ) == 0) || (strcmp( argv[arg], "--verbose" ) == 0) ) {
@@ -82,6 +87,13 @@ int main(int argc, char **argv){
             if (argc>arg+1) {
                 infinity = scan_epsilon( argv[arg+1], eps );
                 parse = parse*infinity;
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-o" ) == 0) || (strcmp( argv[arg], "--output" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*scan_output(argv[arg+1], &output);
                 arg++;
             }
         }
@@ -112,12 +124,7 @@ int main(int argc, char **argv){
             realRat_poly_fread(curFile, p);
             compRat_poly_set_realRat_poly(p_global,p);
             
-//             if (global==2)
-//                 ccluster_global_interface_func( getApprox, eps, st, nbthreads, verbosity);
-//             else
-//                 ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
-            
-            ccluster_expe_global_interface_func( getApprox, eps, st, nbthreads, verbosity);
+            ccluster_issac20_global_interface_func( getApprox, eps, st, nbthreads, output, verbosity);
             
             fclose (curFile);
         }

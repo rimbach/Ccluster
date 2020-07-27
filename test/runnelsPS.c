@@ -73,7 +73,7 @@ void evaluateRunnelsFast( compApp_t dest, compApp_t dest2, const compApp_t point
         compApp_pow_si(dest, destm1, 2, prec);
         compApp_add(dest, dest, destm2, prec);
         
-        compApp_set(destm2, destm2);
+        compApp_set(destm2, destm1);
         compApp_set(destm1, dest);
     }
     
