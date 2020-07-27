@@ -11,8 +11,7 @@ TEST_EXECS=$(TEST:%.c=%)
 build: ccluster\
        risolate\
        genPolFile\
-       ccluster_spiral\
-       ccluster_expe
+       ccluster_spiral
 
 # TESTING VARIABLES
 degree=64
