@@ -17,10 +17,10 @@ build: ccluster\
 degree=64
 bitsize=14
 poly=Mignotte
-file=${poly}"_"${degree}"_"${bitsize}".ccl"
+file=${poly}_${degree}_${bitsize}.ccl
 
 test: build
-	./genPolFile ${poly} 1 ${degree} ${bitsize} ${file}
+	./genPolFile ${poly} ${degree} ${file} -b ${bitsize} 
 	./ccluster ${file}
 
 #==================================================

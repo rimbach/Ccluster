@@ -13,10 +13,10 @@ build: ccluster_issac20\
        ccluster_issac20_mandelbrot
 
 test: build
-	../genPolFile Runnels 1 7 ../Runnels_7.ccl
-	../ccluster ../Runnels_7.ccl -o 0
-	./ccluster_issac20 ../Runnels_7.ccl -o 0
-	./ccluster_issac20_runnels 7 -o 0
+	../genPolFile Runnels 7 ../Runnels_7.ccl
+	../ccluster ../Runnels_7.ccl 
+	./ccluster_issac20 ../Runnels_7.ccl
+	./ccluster_issac20_runnels 7
 
 #==================================================
 # HOUSEKEEPING 

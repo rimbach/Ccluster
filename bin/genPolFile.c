@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include "base/base.h"
 #include "polynomials/app_rat_poly.h"
 #include "flint/fmpq_poly.h"
 
@@ -25,30 +26,38 @@ int main(int argc, char **argv){
     srand(time(NULL));
     
     if (argc<4){
-        printf("usage: %s Bernoulli    format degree filename\n", argv[0]);
-        printf("       %s RegularGrid  format degree filename\n", argv[0]);
-        printf("       %s Mignotte     format degree bitsize filename\n", argv[0]);
-        printf("       %s Chebyshev1   format degree filename\n", argv[0]);
-        printf("       %s Chebyshev2   format degree filename\n", argv[0]);
-        printf("       %s Legendre     format degree filename\n", argv[0]);
-        printf("       %s randomDense  format degree bitsize filename\n", argv[0]);
-        printf("       %s randomSparse format degree bitsize nbterms filename\n", argv[0]);
-//         printf("usage: %s MignotteGen format degree bitsize power filename\n", argv[0]);
-//         printf("usage: %s MignotteMul format degree bitsize power filename\n", argv[0]);
-        printf("       %s Wilkinson   format degree filename\n", argv[0]);
-//         printf("usage: %s WilkRat     format degree filename\n", argv[0]);
-//         printf("usage: %s WilkMul     format degree filename\n", argv[0]);
-//         printf("usage: %s Spiral      format degree prec filename\n", argv[0]);
-//         printf("usage: %s NestedClusters format     iterations prec filename\n", argv[0]);
-        printf("usage: %s Mandelbrot  format iterations filename \n", argv[0]);
-        printf("usage: %s Runnels     format iterations filename \n", argv[0]);
-//         printf("usage: %s Laguerre    format degree filename \n", argv[0]);
-        printf("where format is 1 for ccluster, 2 for mpsolve and 3 for anewdsc\n");
+        printf("usage: %s Bernoulli    degree    filename [OPTIONS: format] \n", argv[0]);
+        printf("       %s RegularGrid  degree    filename [OPTIONS: format] \n", argv[0]);
+        printf("       %s Mignotte     degree    filename [OPTIONS: format bitsize] \n", argv[0]);
+        printf("       %s Chebyshev1   degree    filename [OPTIONS: format] \n", argv[0]);
+        printf("       %s Chebyshev2   degree    filename [OPTIONS: format] \n", argv[0]);
+        printf("       %s Legendre     degree    filename [OPTIONS: format] \n", argv[0]);
+        printf("       %s randomDense  degree    filename [OPTIONS: format bitsize] \n", argv[0]);
+        printf("       %s randomSparse degree    filename [OPTIONS: format bitsize nbterms] \n", argv[0]);
+        printf("       %s Wilkinson    degree    filename [OPTIONS: format] \n", argv[0]);
+        printf("       %s Mandelbrot   iteration filename [OPTIONS: format] \n", argv[0]);
+        printf("       %s Runnels      iteration filename [OPTIONS: format] \n", argv[0]);
+        printf("                                                                    \n");
+        printf("       -f , --format: the format of the output file                 \n");
+        printf("                      1: [default] Ccluster (.ccl)                  \n");
+        printf("                      2:           MPsolve  (.mpl)                  \n");
+        printf("                      3:           ANewDsc  (.dsc)                  \n");
+        printf("       -b , --bitsize: the bitsize of the coeffs (for Mignotte, randomDense, randomSparse\n");
+        printf("                      8: [default] or a positive integer            \n");
+        printf("       -n , --nbterms: the bnumber of non-zero coeffs (for randomSparse\n");
+        printf("                      10: [default] or a positive integer            \n");
         return -1;
     }
     
     char poly[100];
     char filename[100];
+    int firstArg  = 0;
+    
+    /* optional arguments */
+    int format    = 1;
+    int bitsize   = 8;
+    int nbterms   = 10;
+    
     char bernoulli[] = "Bernoulli\0";
     char mignotte[] = "Mignotte\0";
     char regularGrid[] = "RegularGrid\0";
@@ -57,97 +66,117 @@ int main(int argc, char **argv){
     char Legendre[] = "Legendre\0";
     char randomDense[] = "randomDense\0";
     char randomSparse[] = "randomSparse\0";
-//     char mignotteGen[] = "MignotteGen\0";
-//     char mignotteMul[] = "MignotteMul\0";
     char Wilkinson[] = "Wilkinson\0";
-//     char wilkRat[] = "WilkRat\0";
-//     char wilkMul[] = "WilkMul\0";
-//     char spiral[] = "Spiral\0";
-//     char cluster[] = "NestedClusters\0";
     char Mandelbrot[] = "Mandelbrot\0";
     char Runnels[] = "Runnels\0";
-//     char laguerre[] = "Laguerre\0";
-    int format = 0;
-    int degree = 0;
-    int thirdArg = 0;
-    int fourthArg = 0;
-//     int fifthArg = 0;
-//     FILE * pFile;
     
-    sscanf(argv[1], "%s", poly);
-    sscanf(argv[2], "%d", &format);
-    sscanf(argv[3], "%d", &degree);
-    sscanf(argv[argc-1], "%s", filename);
-    if (argc>=6)
-        sscanf(argv[4], "%d", &thirdArg);
+    int parse=1;
     
-    if (argc>=7)
-        sscanf(argv[5], "%d", &fourthArg);
+    parse = parse*sscanf(argv[1], "%s", poly);
+    parse = parse*sscanf(argv[2], "%d", &firstArg);
+    parse = parse*(firstArg>=0);
+    if (firstArg<0) {
+        printf("%s ERROR: NON-VALID DEGREE/ITERATION (should be positive) \n", argv[0]);
+    }
+    parse = parse*sscanf(argv[3], "%s", filename);
     
-//     if (argc>=7)
-//         sscanf(argv[5], "%d", &fifthArg);
+    /* loop on arguments to figure out options */
+    for (int arg = 4; arg< argc; arg++) {
+        
+        if ( (strcmp( argv[arg], "-f" ) == 0) || (strcmp( argv[arg], "--format" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &format);
+                if ((format<=0)||(format>3)) {
+                    printf("%s ERROR: NON-VALID FORMAT (should be 1, 2 or 3) \n", argv[0]);
+                    parse = 0;
+                }
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-b" ) == 0) || (strcmp( argv[arg], "--bitsize" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &bitsize);
+                if (bitsize<=0){
+                    printf("%s ERROR: NON-VALID BITSIZE (should >0) \n", argv[0]);
+                    parse = 0;
+                }
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-n" ) == 0) || (strcmp( argv[arg], "--nbterms" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &nbterms);
+                if (nbterms<=0){
+                    printf("%s ERROR: NON-VALID BITSIZE (should >0) \n", argv[0]);
+                    parse = 0;
+                }
+                arg++;
+            }
+        }
+    }
+    
+    if (!parse) {
+        printf("%s PARSING ERROR\n", argv[0] );
+        return -1;
+    }
     
     realRat_poly_t p;
     realRat_poly_init(p);
     
     if (strcmp(poly, bernoulli)==0) {
-        bernoulli_polynomial( p, degree);
-    }
+        bernoulli_polynomial( p, firstArg);
+    } else
     
     if (strcmp(poly, regularGrid)==0) {
-        regularGrid_polynomial(p, degree);
-    }
+        regularGrid_polynomial(p, firstArg);
+    } else
     
     if (strcmp(poly, Chebyshev1)==0) {
-        Chebyshev1_polynomial(p, degree);
-    }
+        Chebyshev1_polynomial(p, firstArg);
+    } else
     
     if (strcmp(poly, Chebyshev2)==0) {
-        Chebyshev1_polynomial(p, degree);
-    }
+        Chebyshev1_polynomial(p, firstArg);
+    } else
     
     if (strcmp(poly, Legendre)==0) {
-        Legendre_polynomial(p, degree);
-    }
+        Legendre_polynomial(p, firstArg);
+    } else
     
     if (strcmp(poly, mignotte)==0) {
-        if (argc<5)
-            printf("usage: %s Mignotte degree bitsize filename\n", argv[0]);
-        else{
-            mignotte_polynomial(p, degree, thirdArg);
-        }
-    }
+        mignotte_polynomial(p, firstArg, bitsize);
+    } else
     
     if (strcmp(poly, randomDense)==0) {
-        if (argc<5)
-            printf("usage: %s randomDense degree bitsize filename\n", argv[0]);
-        else{
-            randomDense_polynomial(p, degree, thirdArg);
-        }
-    }
+        randomDense_polynomial(p, firstArg, bitsize);
+    } else
     
     if (strcmp(poly, randomSparse)==0) {
-        if (argc<6)
-            printf("usage: %s randomSparse degree bitsize nbterms filename\n", argv[0]);
-        else{
-            randomSparse_polynomial(p, degree, thirdArg, fourthArg);
-        }
-    }
+        nbterms = CCLUSTER_MIN( firstArg, nbterms );
+        randomSparse_polynomial(p, firstArg, bitsize, nbterms);
+    } else
     
     if (strcmp(poly, Mandelbrot)==0) {
-        Mandelbrot_polynomial(p, degree);
-    }
+        Mandelbrot_polynomial(p, firstArg);
+    } else
     
     if (strcmp(poly, Runnels)==0) {
-        Runnels_polynomial(p, degree);
-    }
+        Runnels_polynomial(p, firstArg);
+    } else
     
     if (strcmp(poly, Wilkinson)==0) {
-        Wilkinson_polynomial( p, degree);
+        Wilkinson_polynomial( p, firstArg);
+    } else
+    {
+        printf ("%s PARSING ERROR; INVALID POLYNOMIAL: %s\n", argv[0], poly);
+        parse = 0;
+        return -1;
     }
 
     FILE * curFile;
-    printf ("output file: %s\n", filename);
+    printf ("%s PARSING OK; output file: %s\n", argv[0], filename);
     curFile = fopen (filename,"w");
     
     if (format==1) {

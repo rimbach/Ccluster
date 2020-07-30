@@ -26,7 +26,7 @@ void getApprox_Spiral(compApp_poly_t dest, slong prec);
 
 int main(int argc, char **argv){
     
-    if (argc<=2){
+    if (argc<2){
         printf("usage: %s degree [OPTIONS]", argv[0]);
         printf("                                 \n");
         printf("      -d , --domain: the initial region of interest\n");
@@ -52,8 +52,12 @@ int main(int argc, char **argv){
         printf("      -j, --nbThreads: an positive integer for the number of threads\n");
         printf("                       1 [default]: one thread is used\n");
         printf("                       >1: no compatibility with -o -3 option\n");
-        if (argc<2)
-            return -1;
+        return -1;
+    }
+    
+    if (argc<=2){ /* display usage */
+        printf("usage: %s degree [OPTIONS]\n", argv[0]);
+        printf("   or: %s to see options\n", argv[0]);
     }
     
     int parse = 1;
