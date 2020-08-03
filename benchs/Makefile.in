@@ -27,9 +27,18 @@ benchMACIS2019:
 	cd MACIS2019 &&\
 	./tableMACIS.sh --degrees="128 191 256 383"\
 	&& cd ..
-	
+
 cleanMACIS2010:
 	rm -rf MACIS2019/tableMACIS
+	
+benchISSAC2020:
+	@echo -e $(BGREEN) "Generate 1 table of ISSAC2020 paper" $(NORMAL)
+	cd ISSAC2020 &&\
+	./table2_IR43.sh --nbpols=2 --bitsize=8 --degrees="64" --nbitts="5" --sizegrid="5"\
+	&& cd ..
+	
+cleanISSAC2020:
+	rm -rf ISSAC2020/table2_IR43
 	
 tableBernoulliM:
 	@echo -e $(BGREEN) "Generate table Bernoulli (table 1) of ICMS2018 paper" $(NORMAL)

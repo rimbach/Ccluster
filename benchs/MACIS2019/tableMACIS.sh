@@ -85,10 +85,12 @@ if [ -z "$DEGREES" ]; then
 fi
 
 if [ -z "$DEGMAND" ]; then
+#    DEGMAND="7 8 9"
    DEGMAND="7 8 9"
 fi
 
 if [ -z "$DEGRUNN" ]; then
+#    DEGRUNN="8 9 10"
    DEGRUNN="8 9 10"
 fi
 

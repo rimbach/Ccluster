@@ -114,7 +114,12 @@ benchICMS2018: library bins
 	
 benchMACIS2019: library bins MACIS19
 	cd benchs && make benchMACIS2019 && cd ..
-
+	
+benchISSAC2020: library bins ISSAC20
+	cd benchs && make benchISSAC2020 && cd ..
+	
+################## End benchs ######################################################
+################## targets for building##############################################
 
 quiet: library
 
@@ -128,7 +133,6 @@ clean:
 	$(CCLUSTER_LIBNAME) $(CCLUSTER_LIBNAME).$(CCLUSTER_MAJOR) 
 	rm -rf build
 	cd bin && make clean && cd ..
-# 	$(wildcard $(CCLUSTER_LIBNAME)*)
 
 distclean: clean benchsclean testclean
 	rm -f Makefile
@@ -144,12 +148,6 @@ $(CCLUSTER_LIB): $(LIB_LOBJS) $(LIB_SOURCES) $(LIB_HEADERS)
 
 libccluster.a: $(LIB_OBJS) $(LIB_SOURCES) $(LIB_HEADERS)
 	$(AR) rcs libccluster.a $(LIB_OBJS)
-	
-# build/%.lo: %.c $(HEADERS) | build
-# 	$(QUIET_CC) $(CC) $(PIC_FLAG) $(CFLAGS) $(INCS) -I$(INC_PATH) -c $< -o $@;
-# 
-# build/%.o: %.c $(HEADERS) | build
-# 	$(QUIET_CC) $(CC) $(CFLAGS) $(INCS) -I$(INC_PATH) -c $< -o $@;
 
 %.lo : %.c $(HEADERS)
 # 	@echo "Building $@"
