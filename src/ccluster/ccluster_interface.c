@@ -187,6 +187,62 @@ void ccluster_interface_func_eval( void(*func)(compApp_poly_t, slong),
     connCmp_list_clear(qRes);
 }
 
+/* version with function for fast evaluation */
+void ccluster_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
+                                   void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong), 
+                                   const realRat_t eps, 
+                                   char * stratstr,
+                                   int nbThreads,
+                                   int verb){
+
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    connCmp_list_t qRes;
+    
+    cacheApp_init(cache, func);
+    strategies_init(strat);
+    
+    /* automaticly set initialBox */
+    compBox_t initialBox;
+    compBox_init(initialBox);
+    compBox_set_si(initialBox, 0,1,0,1,0,1);
+    cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
+    if (verb>=3) {
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+    }
+    realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
+    
+    strategies_set_str( strat, stratstr, nbThreads );
+    /* automaticly set realCoeffs */
+    if (cacheApp_is_real(cache)==0
+        || compBox_contains_real_line_in_interior(initialBox)==0 )
+        strategies_set_realCoeffs(strat, 0);
+ 
+    connCmp_list_init(qRes);
+    metadatas_init(meta, initialBox, strat, verb);
+    /* initialize power sums */
+    if (metadatas_usePowerSums(meta))
+        metadatas_set_pwSuDatas( meta, evalFast, cacheApp_getDegree(cache), 2, 1, 1, verb );
+    
+//     ccluster_algo( qRes, NULL, initialBox, eps, cache, meta);
+    ccluster_algo_global( qRes, NULL, initialBox, eps, cache, meta);
+    
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    
+    if (verb>=3) {
+        connCmp_list_print_for_results(stdout, qRes, meta);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
+    connCmp_list_clear(qRes);
+    
+    compBox_clear(initialBox);
+}
+
 // void ccluster_forJulia_func( connCmp_list_t qResults, 
 //                              void(*func)(compApp_poly_t, slong), 
 //                              const compBox_t initialBox, 

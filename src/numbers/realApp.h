@@ -116,13 +116,13 @@ NUMBERS_INLINE void realApp_print (const realApp_t x)                           
 NUMBERS_INLINE void realApp_printd(const realApp_t x, slong digits)             { arb_printd(x, digits       ); }
 NUMBERS_INLINE void realApp_printn(const realApp_t x, slong digits, ulong flags){ arb_printn(x, digits, flags); }
 
-/* accuracy */
-NUMBERS_INLINE int realApp_checkAccuracy( const realApp_t z, slong prec) {
-    return ( (-arb_rel_error_bits(z)) >= prec );
+/* for a ball m +/- r, relative accuracy of [max(1,|m|) +/- r]  */
+NUMBERS_INLINE int realApp_check_relOne_accuracy( const realApp_t z, slong prec) {
+    return ( arb_rel_one_accuracy_bits(z) >= prec );
 }
 
-NUMBERS_INLINE slong realApp_getAccuracy( const realApp_t z) {
-    return -arb_rel_error_bits(z);
+NUMBERS_INLINE slong realApp_get_relOne_accuracy( const realApp_t z) {
+    return arb_rel_one_accuracy_bits(z);
 }
 
 #ifdef __cplusplus

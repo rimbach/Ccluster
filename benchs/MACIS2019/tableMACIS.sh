@@ -79,17 +79,19 @@ done
 if [ -z "$DEGREES" ]; then
    DEGREES="64"
    DEGREES="64 128"
-   DEGREES="64 128 191"
-   DEGREES="64 128 191 256"
-   DEGREES="64 128 191 256 383"
+#    DEGREES="64 128 191"
+#    DEGREES="64 128 191 256"
+#    DEGREES="64 128 191 256 383"
 fi
 
 if [ -z "$DEGMAND" ]; then
-   DEGMAND="6 7 8 9"
+#    DEGMAND="7 8 9"
+   DEGMAND="7 8 9"
 fi
 
 if [ -z "$DEGRUNN" ]; then
-   DEGRUNN="7 8 9 10"
+#    DEGRUNN="8 9 10"
+   DEGRUNN="8 9 10"
 fi
 
 if [ -z "$BITSIZE" ]; then
@@ -114,31 +116,15 @@ if [ -z "$BLOCALM" ]; then
 fi
 
 if [ -z "$BGLOBAL" ]; then
-   BGLOBAL="0,1,0,1,1000,1"
+   BGLOBAL="global"
 fi
 
 if [ -z "$MPSOLVE" ]; then
    MPSOLVE=1
 fi
 
-if [ -z "$STOPWHENCOMPACT" ]; then
-   STOPWHENCOMPACT=0
-fi
-
-if [ -z "$ANTICIPATE" ]; then
-   ANTICIPATE=0
-fi
-
 if [ -z "$PURGE" ]; then
    PURGE=0
-fi
-
-VFLAG=7
-if [ $STOPWHENCOMPACT -eq 1 ]; then
-    VFLAG=$(( $VFLAG + 8 ))
-fi
-if [ $ANTICIPATE -eq 1 ]; then
-    VFLAG=$(( $VFLAG + 16 ))
 fi
 
 VFLAGV4="V4"
@@ -175,10 +161,11 @@ touch $TEMPTABFILE
 TEMPTABFILE2="temptabMACIS2.txt"
 touch $TEMPTABFILE2
 
+CCL_CALL="../../bin/ccluster"
+GPL_CALL="../../bin/genPolFile "
+
 ##########################naming
 POL_NAME="Bernoulli"
-CCLUSTER_CALL="../test/bernoulli"
-GENPOLFILE_CALL="./genPolFile "$POL_NAME
 
 for DEG in $DEGREES; do
 #     LINE_TAB=$POL_NAME", \$d="$DEG"\$"
@@ -186,6 +173,7 @@ for DEG in $DEGREES; do
     LINE_TAB="\$\Ber{"$DEG"}\$"
     LINE_TAB2="\$\Ber{"$DEG"}\$"
     
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
     FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
     FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
     FILENAME_CCLUSTER_L_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V5.out"
@@ -195,33 +183,35 @@ for DEG in $DEGREES; do
     FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
     FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
     
+    $GPL_CALL $POL_NAME $DEG $FILEIN
+    $GPL_CALL $POL_NAME $DEG $FILENAME_MPSOLVE_IN -f 2
+    
     if [ ! -e $FILENAME_CCLUSTER_L_V4_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V4_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_L_V4_OUT
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAGV4 -v "3" > $FILENAME_CCLUSTER_L_V4_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V4_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V4_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_G_V4_OUT
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAGV4 -v "3" > $FILENAME_CCLUSTER_G_V4_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_L_V5_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V5_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_L_V5_OUT
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAGV5 -v "3" > $FILENAME_CCLUSTER_L_V5_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V5_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V5_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_G_V5_OUT
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAGV5 -v "3" > $FILENAME_CCLUSTER_G_V5_OUT
     fi
     
     if [ ! -e $FILENAME_CCLUSTER_L_V6_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V6_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_L_V6_OUT
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAGV6 -v "3" > $FILENAME_CCLUSTER_L_V6_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V6_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V6_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_G_V6_OUT
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAGV6 -v "3" > $FILENAME_CCLUSTER_G_V6_OUT
     fi
-    
-    $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
+
     if [ $MPSOLVE -eq 1 ]; then
         if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
             echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
@@ -292,8 +282,6 @@ done
 
 ##########################naming
 POL_NAME="Mignotte"
-CCLUSTER_CALL="../test/mignottePS"
-GENPOLFILE_CALL="./genPolFile "$POL_NAME
 
 for DEG in $DEGREES; do
 #     LINE_TAB=$POL_NAME", \$a="$BITSIZE"\$, \$d="$DEG"\$"
@@ -301,6 +289,7 @@ for DEG in $DEGREES; do
     LINE_TAB="\$\Mig{"$BITSIZE"}{"$DEG"}\$"
     LINE_TAB2="\$\Mig{"$BITSIZE"}{"$DEG"}\$"
     
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
     FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
     FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
     FILENAME_CCLUSTER_L_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V5.out"
@@ -310,33 +299,35 @@ for DEG in $DEGREES; do
     FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
     FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
     
+    $GPL_CALL $POL_NAME $DEG $FILEIN -b 14
+    $GPL_CALL $POL_NAME $DEG $FILENAME_MPSOLVE_IN -b 14 -f 2
+    
     if [ ! -e $FILENAME_CCLUSTER_L_V4_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V4_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BITSIZE $BLOCAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_L_V4_OUT
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAGV4 -v "3" > $FILENAME_CCLUSTER_L_V4_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V4_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V4_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BITSIZE $BGLOBAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_G_V4_OUT
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAGV4 -v "3" > $FILENAME_CCLUSTER_G_V4_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_L_V5_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V5_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BITSIZE $BLOCAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_L_V5_OUT
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAGV5 -v "3" > $FILENAME_CCLUSTER_L_V5_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V5_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V5_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BITSIZE $BGLOBAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_G_V5_OUT
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAGV5 -v "3" > $FILENAME_CCLUSTER_G_V5_OUT
     fi
     
     if [ ! -e $FILENAME_CCLUSTER_L_V6_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V6_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BITSIZE $BLOCAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_L_V6_OUT
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAGV6 -v "3" > $FILENAME_CCLUSTER_L_V6_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V6_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V6_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BITSIZE $BGLOBAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_G_V6_OUT
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAGV6 -v "3" > $FILENAME_CCLUSTER_G_V6_OUT
     fi
     
-    $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
     if [ $MPSOLVE -eq 1 ]; then
         if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
             echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
@@ -407,8 +398,7 @@ done
 
 ##########################naming
 POL_NAME="Mandelbrot"
-CCLUSTER_CALL="../test/mandelbrotPS"
-GENPOLFILE_CALL="./genPolFile "$POL_NAME
+CCL_CALLV6="../../bin/MACIS19/ccluster_mandelbrot"
 
 for DEG in $DEGMAND; do
 #     LINE_TAB=$POL_NAME", \$d="$DEG"\$"
@@ -416,6 +406,7 @@ for DEG in $DEGMAND; do
     LINE_TAB="\$\Man{"$DEG"}\$"
     LINE_TAB2="\$\Man{"$DEG"}\$"
     
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
     FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
     FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
     FILENAME_CCLUSTER_L_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V5.out"
@@ -425,33 +416,35 @@ for DEG in $DEGMAND; do
     FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
     FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
     
+    $GPL_CALL $POL_NAME $DEG $FILEIN -b 14
+    $GPL_CALL $POL_NAME $DEG $FILENAME_MPSOLVE_IN -b 14 -f 2
+    
     if [ ! -e $FILENAME_CCLUSTER_L_V4_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V4_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCALM $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_L_V4_OUT
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAGV4 -v "3" > $FILENAME_CCLUSTER_L_V4_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V4_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V4_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_G_V4_OUT
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAGV4 -v "3" > $FILENAME_CCLUSTER_G_V4_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_L_V5_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V5_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCALM $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_L_V5_OUT
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAGV5 -v "3" > $FILENAME_CCLUSTER_L_V5_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V5_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V5_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_G_V5_OUT
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAGV5 -v "3" > $FILENAME_CCLUSTER_G_V5_OUT
     fi
     
     if [ ! -e $FILENAME_CCLUSTER_L_V6_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V6_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCALM $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_L_V6_OUT
+        $CCL_CALLV6 $DEG -d $BLOCAL -e $EPSILONCCL -m $VFLAGV6 -v "3" > $FILENAME_CCLUSTER_L_V6_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V6_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V6_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_G_V6_OUT
+        $CCL_CALLV6 $DEG -e $EPSILONCCL -m $VFLAGV6 -v "3" > $FILENAME_CCLUSTER_G_V6_OUT
     fi
     
-    $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
     if [ $MPSOLVE -eq 1 ]; then
         if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
             echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
@@ -522,8 +515,7 @@ done
 
 ##########################naming
 POL_NAME="Runnels"
-CCLUSTER_CALL="../test/runnelsPS"
-GENPOLFILE_CALL="./genPolFile "$POL_NAME
+CCL_CALLV6="../../bin/MACIS19/ccluster_runnels"
 
 for DEG in $DEGRUNN; do
 #     LINE_TAB=$POL_NAME", \$d="$DEG"\$"
@@ -531,6 +523,7 @@ for DEG in $DEGRUNN; do
     LINE_TAB="\$\Run{"$DEG"}\$"
     LINE_TAB2="\$\Run{"$DEG"}\$"
     
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
     FILENAME_CCLUSTER_L_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V4.out"
     FILENAME_CCLUSTER_G_V4_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global_V4.out"
     FILENAME_CCLUSTER_L_V5_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local_V5.out"
@@ -540,33 +533,35 @@ for DEG in $DEGRUNN; do
     FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
     FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
     
+    $GPL_CALL $POL_NAME $DEG $FILEIN -b 14
+    $GPL_CALL $POL_NAME $DEG $FILENAME_MPSOLVE_IN -b 14 -f 2
+    
     if [ ! -e $FILENAME_CCLUSTER_L_V4_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V4_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_L_V4_OUT
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAGV4 -v "3" > $FILENAME_CCLUSTER_L_V4_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V4_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V4_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV4 "3" > $FILENAME_CCLUSTER_G_V4_OUT
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAGV4 -v "3" > $FILENAME_CCLUSTER_G_V4_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_L_V5_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V5_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_L_V5_OUT
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAGV5 -v "3" > $FILENAME_CCLUSTER_L_V5_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V5_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V5_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV5 "3" > $FILENAME_CCLUSTER_G_V5_OUT
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAGV5 -v "3" > $FILENAME_CCLUSTER_G_V5_OUT
     fi
     
     if [ ! -e $FILENAME_CCLUSTER_L_V6_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_V6_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_L_V6_OUT
+        $CCL_CALLV6 $DEG -d $BLOCAL -e $EPSILONCCL -m $VFLAGV6 -v "3" > $FILENAME_CCLUSTER_L_V6_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_V6_OUT ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_V6_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAGV6 "3" > $FILENAME_CCLUSTER_G_V6_OUT
+        $CCL_CALLV6 $DEG -e $EPSILONCCL -m $VFLAGV6 -v "3" > $FILENAME_CCLUSTER_G_V6_OUT
     fi
     
-    $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
     if [ $MPSOLVE -eq 1 ]; then
         if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
             echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr

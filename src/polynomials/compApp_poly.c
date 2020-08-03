@@ -11,31 +11,31 @@
 
 #include "compApp_poly.h"
 
-int compApp_poly_checkAccuracy( const compApp_poly_t poly, slong prec) {
+int compApp_poly_check_relOne_accuracy( const compApp_poly_t poly, slong prec) {
     int result = 1;
     slong i = 0;
     while ( ( i<=compApp_poly_degree(poly) ) && result ) {
-        result = result && compApp_checkAccuracy( compApp_poly_getCoeff( poly, i) , prec );
+        result = result && compApp_check_relOne_accuracy( compApp_poly_getCoeff( poly, i) , prec );
         i++;
     }
     return result;
 }
 
-slong compApp_poly_getAccuracy_min( const compApp_poly_t poly){
+slong compApp_poly_get_relOne_accuracy_min( const compApp_poly_t poly){
     slong i = 0;
-    slong res = compApp_getAccuracy( compApp_poly_getCoeff( poly, i) );
+    slong res = compApp_get_relOne_accuracy( compApp_poly_getCoeff( poly, i) );
     while ( i<=compApp_poly_degree(poly) ) {
-        res = CCLUSTER_MIN(res, compApp_getAccuracy( compApp_poly_getCoeff( poly, i) ) );
+        res = CCLUSTER_MIN(res, compApp_get_relOne_accuracy( compApp_poly_getCoeff( poly, i) ) );
         i++;
     }
     return res;
 }
 
-slong compApp_poly_getAccuracy_max( const compApp_poly_t poly){
+slong compApp_poly_get_relOne_accuracy_max( const compApp_poly_t poly){
     slong i = 0;
-    slong res = compApp_getAccuracy( compApp_poly_getCoeff( poly, i) );
+    slong res = compApp_get_relOne_accuracy( compApp_poly_getCoeff( poly, i) );
     while ( i<=compApp_poly_degree(poly) ) {
-        res = CCLUSTER_MAX(res, compApp_getAccuracy( compApp_poly_getCoeff( poly, i) ) );
+        res = CCLUSTER_MAX(res, compApp_get_relOne_accuracy( compApp_poly_getCoeff( poly, i) ) );
         i++;
     }
     return res;

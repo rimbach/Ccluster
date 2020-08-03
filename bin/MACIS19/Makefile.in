@@ -8,15 +8,13 @@ TEST=$(foreach x, ., $(wildcard $(x)/*.c))
 TEST_OBJS=$(TEST:%.c=%.o)
 TEST_EXECS=$(TEST:%.c=%)
 
-build: ccluster_issac20\
-       ccluster_issac20_runnels\
-       ccluster_issac20_mandelbrot
+build: ccluster_runnels\
+       ccluster_mandelbrot
 
 test: build
 	../genPolFile Runnels 7 ../Runnels_7.ccl
-	../ccluster ../Runnels_7.ccl 
-	./ccluster_issac20 ../Runnels_7.ccl
-	./ccluster_issac20_runnels 7
+	../ccluster ../Runnels_7.ccl
+	./ccluster_runnels 7
 
 #==================================================
 # HOUSEKEEPING 
@@ -29,19 +27,14 @@ clean :
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ -c $< $(INCLUDE_PATH)
 	    	
-ccluster_issac20: ccluster_issac20.o ../parseArgs.h
+	    	
+ccluster_runnels: ccluster_runnels.o ../parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 	    	
-ccluster_issac20_runnels: ccluster_issac20_runnels.o ../parseArgs.h
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) \
-	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
-	    	
-ccluster_issac20_mandelbrot: ccluster_issac20_mandelbrot.o ../parseArgs.h
+ccluster_mandelbrot: ccluster_mandelbrot.o ../parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \

@@ -11,7 +11,7 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "ISSAC20/ccluster_issac20.h"
+#include "ccluster/ccluster.h"
 
 #include "../parseArgs.h"
 
@@ -91,10 +91,6 @@ int main(int argc, char **argv){
         if ( (strcmp( argv[arg], "-d" ) == 0) || (strcmp( argv[arg], "--domain" ) == 0) ) {
             if (argc>arg+1) {
                 global = scan_initialBox( argv[arg+1], bInit );
-                if (global==1) {
-                    printf("option --domain %s is not valid; doing global\n", argv[arg+1]);
-                    global =2;
-                }
                 parse = parse*global;
                 arg++;
             }
@@ -117,7 +113,7 @@ int main(int argc, char **argv){
         
         if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mode" ) == 0) ) {
             if (argc>arg+1) {
-//                 parse = parse*scan_strategy( argv[arg+1], st );
+                parse = parse*scan_strategy( argv[arg+1], st );
                 st = argv[arg+1];
                 arg++;
             }
@@ -166,7 +162,10 @@ int main(int argc, char **argv){
         
 //         ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, verbosity);
 //         ccluster_interface_func_eval( getApprox, evaluateRunnelsFast, bInit, eps, st, nbthreads, verbosity);
-        ccluster_issac20_global_interface_func_eval( getApprox, Runnels_evaluate, eps, st, nbthreads, output, verbosity);
+        if (global==2)
+            ccluster_global_interface_func_eval( getApprox, Runnels_evaluate, eps, st, nbthreads, verbosity);
+        else
+            ccluster_interface_func_eval( getApprox, Runnels_evaluate, bInit, eps, st, nbthreads, verbosity);
     }
     
     realRat_poly_clear(prun);

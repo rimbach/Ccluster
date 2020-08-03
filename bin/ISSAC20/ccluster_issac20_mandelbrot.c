@@ -32,8 +32,8 @@ void Mandelbrot_evaluate( compApp_t dest, compApp_t dest2, const compApp_t point
 
 int main(int argc, char **argv){
     
-    if (argc<=2){
-        printf("usage: %s degree [OPTIONS] ", argv[0]);
+    if (argc<2){
+        printf("usage: %s iteration [OPTIONS] ", argv[0]);
         printf("                                 \n");
         printf("      -d , --domain: the initial region of interest\n");
         printf("                     global [default] finds all the roots\n");
@@ -53,8 +53,12 @@ int main(int argc, char **argv){
         printf("                     1 [default]: abstract of input and output\n");
         printf("                     2: detailed reports concerning algorithm\n");
         printf("                     >=3: debugging mode\n");
-        if (argc<2)
-            return -1;
+        return -1;
+    }
+    
+    if (argc<=2){ /* display usage */
+        printf("usage: %s iteration [OPTIONS]\n", argv[0]);
+        printf("   or: %s to see options\n", argv[0]);
     }
     
     int parse = 1;

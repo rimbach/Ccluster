@@ -50,12 +50,6 @@ while [ "$1" != "" ]; do
       --bglobal)
         BGLOBAL="$VALUE"
         ;;
-      --stop-when-compact)
-        STOPWHENCOMPACT=1
-        ;;
-      --anticipate)
-        ANTICIPATE=1
-        ;;
       --purge)
         PURGE=1
         ;;
@@ -89,28 +83,14 @@ if [ -z "$BLOCAL" ]; then
 fi
 
 if [ -z "$BGLOBAL" ]; then
-   BGLOBAL="0,1,0,1,300,1"
-fi
-
-if [ -z "$STOPWHENCOMPACT" ]; then
-   STOPWHENCOMPACT=0
-fi
-
-if [ -z "$ANTICIPATE" ]; then
-   ANTICIPATE=0
+   BGLOBAL="global"
 fi
 
 if [ -z "$PURGE" ]; then
    PURGE=0
 fi
 
-VFLAG=7
-if [ $STOPWHENCOMPACT -eq 1 ]; then
-    VFLAG=$(( $VFLAG + 8 ))
-fi
-if [ $ANTICIPATE -eq 1 ]; then
-    VFLAG=$(( $VFLAG + 16 ))
-fi
+VFLAG="V5"
 
 REP="tableMignotte"
 
@@ -124,18 +104,18 @@ else
 fi
 
 ##########################solvers
-SOLVER_PATH="./"
+CCLUSTER_PATH="../"
+CCLUSTER_CALL=$CCLUSTER_PATH"/bin/ccluster"
+GENPOLFILE_CALL=$CCLUSTER_PATH"/bin/genPolFile"
 MPSOLVE_CALL="mpsolve -au -Gi -o"$EPSILONMPS" -j1"
 MPSOLVE_CALL_S="mpsolve -as -Gi -o"$EPSILONMPS" -j1"
 
 ##########################naming
 POL_NAME="Mignotte"
-CCLUSTER_CALL="../test/mignotte"
-GENPOLFILE_CALL="./genPolFile "$POL_NAME
 
 HEAD_TABLE="\begin{tabular}{l||c|c|c||c|c|c||c|c|}"
 FIRST_LINE="     & \multicolumn{3}{|c||}{\texttt{Ccluster} local (\$[-1,1]^2\$)}"
-FIRST_LINE=$FIRST_LINE"& \multicolumn{3}{|c||}{\texttt{Ccluster} global (\$[-75,75]^2\$)}"
+FIRST_LINE=$FIRST_LINE"& \multicolumn{3}{|c||}{\texttt{Ccluster} global }"
 FIRST_LINE=$FIRST_LINE"& \texttt{unisolve} & \texttt{secsolve} \\\\\\hline"
 SECOND_LINE="d, b& (\#Sols:\#Clus) & (depth:size) & \$\tau_\ell\$ (s)"
 SECOND_LINE=$SECOND_LINE"& (\#Sols:\#Clus) & (depth:size) & \$\tau_g\$ (s)"
@@ -148,20 +128,25 @@ touch $TEMPTABFILE
 for DEG in $DEGREES; do
     for BIT in $BITSIZES; do
         LINE_TAB=$DEG", "$BIT
+        FILEIN=$REP"/"$POL_NAME"_"$DEG"_"$BIT".ccl"
         FILENAME_CCLUSTER_L_OUT=$REP"/"$POL_NAME"_"$DEG"_"$BIT"_ccluster_local.out"
         FILENAME_CCLUSTER_G_OUT=$REP"/"$POL_NAME"_"$DEG"_"$BIT"_ccluster_global.out"
         FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG"_"$BIT".pol"
         FILENAME_MPSOLVE_U_OUT=$REP"/"$POL_NAME"_"$DEG"_"$BIT"_mpsolve_u.out"
         FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_"$BIT"_mpsolve_s.out"
+        
+        $GENPOLFILE_CALL $POL_NAME $DEG $FILEIN -f 1 -b $BIT
+        $GENPOLFILE_CALL $POL_NAME $DEG $FILENAME_MPSOLVE_IN -f 2 -b $BIT
+    
         if [ ! -e $FILENAME_CCLUSTER_L_OUT ]; then
             echo  "Clustering roots for $POL_NAME, degree $DEG, bitsize $BIT, local, output in "$FILENAME_CCLUSTER_L_OUT > /dev/stderr
-            $CCLUSTER_CALL $DEG $BIT $BLOCAL $EPSILONCCL $VFLAG "3" > $FILENAME_CCLUSTER_L_OUT
+            $CCLUSTER_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAG -v 3 > $FILENAME_CCLUSTER_L_OUT
         fi
         if [ ! -e $FILENAME_CCLUSTER_G_OUT ]; then
             echo  "Clustering roots for $POL_NAME, degree $DEG, bitsize $BIT, global, output in "$FILENAME_CCLUSTER_G_OUT > /dev/stderr
-            $CCLUSTER_CALL $DEG $BIT $BGLOBAL $EPSILONCCL $VFLAG "3" > $FILENAME_CCLUSTER_G_OUT
+            $CCLUSTER_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAG -v 3 > $FILENAME_CCLUSTER_G_OUT
         fi
-        $GENPOLFILE_CALL $DEG $BIT > $FILENAME_MPSOLVE_IN
+         
         if [ ! -e $FILENAME_MPSOLVE_U_OUT ]; then
             if [ $(( $DEG < 300 ? 0 : 1 )) -eq 0 ]; then
                 echo "Isolating roots in C with MPSOLVE UNISOLVE........." > /dev/stderr
