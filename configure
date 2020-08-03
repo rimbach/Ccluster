@@ -8,9 +8,8 @@
 # soname version
 #
 # ccluster     => soname
-# 0.0.1        => 0.0.0
-CCLUSTER_MAJOR=0
-CCLUSTER_MINOR=0
+CCLUSTER_MAJOR=1
+CCLUSTER_MINOR=1
 CCLUSTER_PATCH=0
 
 PREFIX="/usr/local"
