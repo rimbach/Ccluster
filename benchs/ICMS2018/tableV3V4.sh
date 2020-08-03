@@ -39,7 +39,7 @@ while [ "$1" != "" ]; do
          usage
          exit 0
          ;;
-      --degree)
+      --degrees)
         DEGREE=$VALUE
         ;;
       --epsilon)
@@ -76,7 +76,7 @@ done
 
 #default values
 if [ -z "$DEGREE" ]; then
-   DEGREE="64 128 256"
+   DEGREE="64 128"
 fi
 
 if [ -z "$EPSILONCCL" ]; then
@@ -88,7 +88,7 @@ if [ -z "$BITSIZE" ]; then
 fi
 
 if [ -z "$NBSOLS" ]; then
-   NBSOLS="11 12 13"
+   NBSOLS="11 12"
 fi
 
 if [ -z "$POW" ]; then
@@ -96,7 +96,7 @@ if [ -z "$POW" ]; then
 fi
 
 if [ -z "$ITTS" ]; then
-   ITTS="3 4 5"
+   ITTS="3 4"
 fi
 
 if [ -z "$STOPWHENCOMPACT" ]; then
@@ -115,12 +115,8 @@ fi
 TRUE=1
 FALSE=0
 REP="tableV3V4"
-V3FLAG=7
-V4FLAG=23
-if [ $STOPWHENCOMPACT -eq 1 ]; then
-    V3FLAG=$(( $V3FLAG + 8 ))
-    V4FLAG=$(( $V4FLAG + 8 ))
-fi
+V3FLAG="V3"
+V4FLAG="V4"
 
 if [ -d "$REP" ]; then
   if [ $PURGE -eq 1 ]; then
@@ -146,168 +142,229 @@ make_line()
     LINE=""
     FILE1=$1
     FILE2=$2
-#     N1V3=$(grep "tree size:" $FILE1 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     N1V4=$(grep "tree size:" $FILE2 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     N2V3=$(grep -m 1 "conclusion" $FILE1 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-#     N2V4=$(grep -m 1 "conclusion" $FILE2 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
     N3V3=$(grep -m 1 "total number GR:" $FILE1 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
     N3V4=$(grep -m 1 "total number GR:" $FILE2 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
     TV3=$(grep "total time:" $FILE1 | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     TV4=$(grep "total time:" $FILE2 | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-#     LINE=$LINE"& ($N1V3,$N2V3,$N3V3) & `format_time $TV3`"
-#     LINE=$LINE"& ($N1V4,$N2V4,$N3V4) & `ratio_time $TV4 $TV3`"
     LINE=$LINE"& $N3V3 & `format_time $TV3`"
     LINE=$LINE"& $N3V4 & `ratio_time $TV3 $TV4`"
 }
 
+CCL_CALL="../../bin/ccluster"
+GPL_CALL="../../bin/genPolFile"
+
 #-----------------------------------------------bernoulli-----------------------------------------
 
 POL_NAME="Bernoulli"
-CCL_CALL="../test/bernoulli"
 
 for DEG in $DEGREE; do
-    LINE_TAB="Bernoulli, \$d=$DEG\$"  
-    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
-    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
-    if [ ! -e $FILE1 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
-        $CCL_CALL $DEG $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
+    LINE_TAB="Bernoulli, \$d=$DEG\$" 
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
+    FILEOUTV3=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILEOUTV4=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    CCL_CALLV3=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPSILONCCL" -m "$V3FLAG" -v 3 "  
+    CCL_CALLV4=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPSILONCCL" -m "$V4FLAG" -v 3 "
+    
+    #generate input file
+    $GPL_CALL $POL_NAME $DEG $FILEIN
+
+    if [ ! -e $FILEOUTV3 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILEOUTV3 > /dev/stderr
+        $CCL_CALLV3 > $FILEOUTV3
     fi
-    if [ ! -e $FILE2 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
-        $CCL_CALL $DEG $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
+    if [ ! -e $FILEOUTV4 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILEOUTV4 > /dev/stderr
+        $CCL_CALLV4 > $FILEOUTV4
     fi
-      make_line $FILE1 $FILE2
+      make_line $FILEOUTV3 $FILEOUTV4
       echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
 
 #-----------------------------------------------Mignotte-----------------------------------------
+
 POL_NAME="Mignotte"
-CCL_CALL="../test/mignotte"
 
 for DEG in $DEGREE; do
-    LINE_TAB="Mignotte, \$d=$DEG\$, \$\sigma=$BITSIZE\$"
-    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
-    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
-    if [ ! -e $FILE1 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
-        $CCL_CALL $DEG $BITSIZE $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
-    fi
-    if [ ! -e $FILE2 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
-        $CCL_CALL $DEG $BITSIZE $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
-    fi
-    make_line $FILE1 $FILE2
-    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
-done
-# 
-#-----------------------------------------------Wilkinson-----------------------------------------
-POL_NAME="Wilkinson"
-CCL_CALL="../test/wilkinson"
-
-for DEG in $DEGREE; do
-    LINE_TAB="Wilkinson, \$d=$DEG\$"
-    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
-    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
-    if [ ! -e $FILE1 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
-        $CCL_CALL $DEG $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
-    fi
-    if [ ! -e $FILE2 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
-        $CCL_CALL $DEG $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
-    fi
-    make_line $FILE1 $FILE2
-    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
-done
-
-# #-----------------------------------------------Spiral-----------------------------------------
-POL_NAME="Spiral"
-CCL_CALL="../test/spiral"
-
-for DEG in $DEGREE; do
-    LINE_TAB="Spiral, \$d=$DEG\$"
-    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
-    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
-    if [ ! -e $FILE1 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
-        $CCL_CALL $DEG $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
-    fi
-    if [ ! -e $FILE2 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
-        $CCL_CALL $DEG $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
-    fi
-    make_line $FILE1 $FILE2
-    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
-done
-
-
-# #-----------------------------------------------WilkMul-----------------------------------------
-POL_NAME="WilkMul"
-CCL_CALL="../test/wilkMul"
-
-for NBSOL in $NBSOLS; do
+    LINE_TAB="Mignotte, \$d=$DEG\$" 
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
+    FILEOUTV3=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILEOUTV4=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    CCL_CALLV3=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPSILONCCL" -m "$V3FLAG" -v 3 "  
+    CCL_CALLV4=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPSILONCCL" -m "$V4FLAG" -v 3 "
     
-    DEG=$(( $NBSOL * $(( $NBSOL + 1 )) ))
-    DEG=$(( $DEG / 2 ))
+    #generate input file
+    $GPL_CALL $POL_NAME $DEG $FILEIN -b $BITSIZE
 
-    LINE_TAB="Wilkinson Mult., \$nbSols=$NBSOL\$, \$d=$DEG\$"
-    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
-    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
-    if [ ! -e $FILE1 ]; then
-        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V3 output in "$FILE1 > /dev/stderr
-        $CCL_CALL $NBSOL $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
+    if [ ! -e $FILEOUTV3 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILEOUTV3 > /dev/stderr
+        $CCL_CALLV3 > $FILEOUTV3
     fi
-    if [ ! -e $FILE2 ]; then
-        echo  "Clustering roots for $POL_NAME, $NBSOL sols version V4 output in "$FILE2 > /dev/stderr
-        $CCL_CALL $NBSOL $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
+    if [ ! -e $FILEOUTV4 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILEOUTV4 > /dev/stderr
+        $CCL_CALLV4 > $FILEOUTV4
     fi
-    make_line $FILE1 $FILE2
-    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
+      make_line $FILEOUTV3 $FILEOUTV4
+      echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
 
 #-----------------------------------------------MignotteGen-----------------------------------------
+
 POL_NAME="MignotteGen"
-CCL_CALL="../test/mignotteGen"
 
 for DEG in $DEGREE; do
-    LINE_TAB="Mignotte Mult., \$d=$DEG\$, \$\sigma=$BITSIZE\$, \$k=$POW\$"
-    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
-    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
-    if [ ! -e $FILE1 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
-        $CCL_CALL $DEG $BITSIZE $POW $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
+    LINE_TAB="MignotteGen, \$d=$DEG\$" 
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
+    FILEOUTV3=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILEOUTV4=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    CCL_CALLV3=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPSILONCCL" -m "$V3FLAG" -v 3 "  
+    CCL_CALLV4=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPSILONCCL" -m "$V4FLAG" -v 3 "
+    
+    #generate input file
+    $GPL_CALL $POL_NAME $DEG $FILEIN -b $BITSIZE -p $POW
+
+    if [ ! -e $FILEOUTV3 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILEOUTV3 > /dev/stderr
+        $CCL_CALLV3 > $FILEOUTV3
     fi
-    if [ ! -e $FILE2 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
-        $CCL_CALL $DEG $BITSIZE $POW $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
+    if [ ! -e $FILEOUTV4 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILEOUTV4 > /dev/stderr
+        $CCL_CALLV4 > $FILEOUTV4
     fi
-    make_line $FILE1 $FILE2
-    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
+      make_line $FILEOUTV3 $FILEOUTV4
+      echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
-# 
-# #-----------------------------------------------Cluster-----------------------------------------
-POL_NAME="NestedClusters"
-CCL_CALL="../test/cluster"
+
+
+#-----------------------------------------------Wilkinson-----------------------------------------
+
+POL_NAME="Wilkinson"
+
+for DEG in $DEGREE; do
+    LINE_TAB="Wilkinson, \$d=$DEG\$" 
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
+    FILEOUTV3=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILEOUTV4=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    CCL_CALLV3=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPSILONCCL" -m "$V3FLAG" -v 3 "  
+    CCL_CALLV4=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPSILONCCL" -m "$V4FLAG" -v 3 "
+    
+    #generate input file
+    $GPL_CALL $POL_NAME $DEG $FILEIN
+
+    if [ ! -e $FILEOUTV3 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILEOUTV3 > /dev/stderr
+        $CCL_CALLV3 > $FILEOUTV3
+    fi
+    if [ ! -e $FILEOUTV4 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILEOUTV4 > /dev/stderr
+        $CCL_CALLV4 > $FILEOUTV4
+    fi
+      make_line $FILEOUTV3 $FILEOUTV4
+      echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
+done
+
+#-----------------------------------------------WilkMul-----------------------------------------
+
+POL_NAME="WilkMul"
+
+for NBSOL in $NBSOLS; do
+    DEG=$(( $NBSOL * $(( $NBSOL + 1 )) ))
+    DEG=$(( $DEG / 2 ))
+    
+    LINE_TAB="WilkMul, \$d=$DEG\$" 
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
+    FILEOUTV3=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILEOUTV4=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    CCL_CALLV3=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPSILONCCL" -m "$V3FLAG" -v 3 "  
+    CCL_CALLV4=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPSILONCCL" -m "$V4FLAG" -v 3 "
+    
+    #generate input file
+    $GPL_CALL $POL_NAME $NBSOL $FILEIN
+
+    if [ ! -e $FILEOUTV3 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILEOUTV3 > /dev/stderr
+        $CCL_CALLV3 > $FILEOUTV3
+    fi
+    if [ ! -e $FILEOUTV4 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILEOUTV4 > /dev/stderr
+        $CCL_CALLV4 > $FILEOUTV4
+    fi
+      make_line $FILEOUTV3 $FILEOUTV4
+      echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
+done
+
+#-----------------------------------------------Spiral-----------------------------------------
+
+POL_NAME="Spiral"
+
+for DEG in $DEGREE; do
+    LINE_TAB="Spiral, \$d=$DEG\$" 
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
+    FILEOUTV3=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILEOUTV4=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    CCL_CALLV3=$CCL_CALL"_spiral "$DEG" -d "$BOX" -e "$EPSILONCCL" -m "$V3FLAG" -v 3 "  
+    CCL_CALLV4=$CCL_CALL"_spiral "$DEG" -d "$BOX" -e "$EPSILONCCL" -m "$V4FLAG" -v 3 "
+
+    if [ ! -e $FILEOUTV3 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILEOUTV3 > /dev/stderr
+        $CCL_CALLV3 > $FILEOUTV3
+    fi
+    if [ ! -e $FILEOUTV4 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILEOUTV4 > /dev/stderr
+        $CCL_CALLV4 > $FILEOUTV4
+    fi
+      make_line $FILEOUTV3 $FILEOUTV4
+      echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
+done
+
+#-----------------------------------------------Cluster-----------------------------------------
+
+POL_NAME="Cluster"
 
 for ITT in $ITTS; do
-    
     DEG=$(( 3 ** $ITT ))
+    
+    LINE_TAB="Cluster, \$d=$DEG\$" 
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
+    FILEOUTV3=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+    FILEOUTV4=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+    CCL_CALLV3=$CCL_CALL"_nested "$ITT" -d "$BOX" -e "$EPSILONCCL" -m "$V3FLAG" -v 3 "  
+    CCL_CALLV4=$CCL_CALL"_nested "$ITT" -d "$BOX" -e "$EPSILONCCL" -m "$V4FLAG" -v 3 "
 
-    LINE_TAB="Nested Clusters, \$d=$DEG\$"
-    FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
-    FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
-    if [ ! -e $FILE1 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
-        $CCL_CALL $ITT $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
+    if [ ! -e $FILEOUTV3 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILEOUTV3 > /dev/stderr
+        $CCL_CALLV3 > $FILEOUTV3
     fi
-    if [ ! -e $FILE2 ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
-        $CCL_CALL $ITT $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
+    if [ ! -e $FILEOUTV4 ]; then
+        echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILEOUTV4 > /dev/stderr
+        $CCL_CALLV4 > $FILEOUTV4
     fi
-    make_line $FILE1 $FILE2
-    echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
+      make_line $FILEOUTV3 $FILEOUTV4
+      echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
+
+# # 
+# # #-----------------------------------------------Cluster-----------------------------------------
+# POL_NAME="NestedClusters"
+# CCL_CALL="../test/cluster"
+# 
+# for ITT in $ITTS; do
+#     
+#     DEG=$(( 3 ** $ITT ))
+# 
+#     LINE_TAB="Nested Clusters, \$d=$DEG\$"
+#     FILE1=$REP"/"$POL_NAME"_"$DEG"_v3.out"
+#     FILE2=$REP"/"$POL_NAME"_"$DEG"_v4.out"
+#     if [ ! -e $FILE1 ]; then
+#         echo  "Clustering roots for $POL_NAME, degree $DEG version V3 output in "$FILE1 > /dev/stderr
+#         $CCL_CALL $ITT $BOX $EPSILONCCL $V3FLAG "3" > $FILE1
+#     fi
+#     if [ ! -e $FILE2 ]; then
+#         echo  "Clustering roots for $POL_NAME, degree $DEG version V4 output in "$FILE2 > /dev/stderr
+#         $CCL_CALL $ITT $BOX $EPSILONCCL $V4FLAG "3" > $FILE2
+#     fi
+#     make_line $FILE1 $FILE2
+#     echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
+# done
 
 echo $HEAD_TABLE
 echo $FIRST_LINE_TABLE

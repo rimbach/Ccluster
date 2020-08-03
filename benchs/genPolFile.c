@@ -407,7 +407,7 @@ void genSpiralPolFile( FILE * file, slong degree, slong prec){
     compApp_poly_set_coeff_si(temp, 1, 1);
     
     compApp_poly_one(dest);
-    slong prectemp = 10000;
+    slong prectemp = degree*prec;
     
     for(int i=1; i<=degree; i++){
         realRat_set_si(modu, -i, (ulong) degree);

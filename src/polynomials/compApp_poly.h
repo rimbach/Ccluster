@@ -52,10 +52,11 @@ POLYNOMIALS_INLINE void compApp_poly_printd(const compApp_poly_t poly, slong dig
 }
 
 /* accuracy */
-int compApp_poly_checkAccuracy( const compApp_poly_t poly, slong prec);
+/* for a coeff m +/- r, relative accuracy of [max(1,|m|) +/- r]  */
+int compApp_poly_check_relOne_accuracy( const compApp_poly_t poly, slong prec);
 
-slong compApp_poly_getAccuracy_min( const compApp_poly_t poly);
-slong compApp_poly_getAccuracy_max( const compApp_poly_t poly);
+slong compApp_poly_get_relOne_accuracy_min( const compApp_poly_t poly);
+slong compApp_poly_get_relOne_accuracy_max( const compApp_poly_t poly);
 
 /* setting */
 POLYNOMIALS_INLINE void compApp_poly_zero(compApp_poly_t poly) { acb_poly_zero(poly); }

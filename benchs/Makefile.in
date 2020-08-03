@@ -1,16 +1,6 @@
-
-INCLUDE_PATH = $(INCS) -I../src
-LIBRARY_PATH = -L.. $(LIBS)
-LIBRARY_FLAG = -lflint -larb -lccluster -lm
-
-
-SRCS=$(foreach x, $(SRC_DIRS), $(wildcard $(x)/*.c))
-OBJS=$(SRCS:%.c=%.o)
-HEADERS=$(foreach x, $(INC_PATH), $(wildcard $(x)/*.h))
-
-TEST=$(foreach x, ., $(wildcard $(x)/*.c))
-TEST_OBJS=$(TEST:%.c=%.o)
-TEST_EXECS=$(TEST:%.c=%)
+BGREEN = "\e[1;32m"
+BRED = "\e[1;31m"
+NORMAL = "\e[0m"
 
 BENCH_DIRS= ./tableBernoulli\
 	    ./tableLaguerre\
@@ -19,10 +9,6 @@ BENCH_DIRS= ./tableBernoulli\
 	    ./tableMignotteGen\
 	    ./tableNestedClusters\
 	    ./tableSpiral\
-	    ./tableV1V2V3\
-	    ./tableV3V4\
-	    ./tableV4esc_epsilon\
-	    ./tableV4V4esc\
 	    ./tableWilkinson\
 	    ./tableWilkMul\
 	    ./tableWilkRat
@@ -31,65 +17,68 @@ BENCH_DIRS_FILES=$(foreach x, $(BENCH_DIRS), $(wildcard $(x)/*))
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # TARGETS:
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-default: build
+default: benchICMS2018
 
 #==================================================
 # TABLES 
 #==================================================
-
+benchMACIS2019:
+	@echo -e $(BGREEN) "Generate 2 tables of MACIS2019 paper" $(NORMAL)
+	cd MACIS2019 &&\
+	./tableMACIS.sh --degrees="128 191 256 383"\
+	&& cd ..
+	
+cleanMACIS2010:
+	rm -rf MACIS2019/tableMACIS
+	
 tableBernoulliM:
-	./tableBernoulli.sh --purge --degrees="64 128 191 256 383 512 767"\
-	                    --stop-when-compact --anticipate --mpsolve=0\
-	                    2>/dev/null
+	@echo -e $(BGREEN) "Generate table Bernoulli (table 1) of ICMS2018 paper" $(NORMAL)
+	cd ICMS2018 &&\
+	./tableBernoulli.sh --degrees="64 128 191 256 383 512 767"\
+	&& cd ..
 	
 tableV1V2V3M:
-	./tableV1V2V3.sh --purge --degree=64\
-	--bitsize=14 --nbSols=11 --pow=3 --itts=4\ 
-	2>/dev/null
+	@echo -e $(BGREEN) "Generate table V1V2V3 (table 2) of ICMS2018 paper" $(NORMAL)
+	@echo -e $(BRED) "Version 2 does not exist anymore in Ccluster: doing only V1V3" $(NORMAL)
+	cd ICMS2018 &&\
+	./tableV1V3.sh\
+	&& cd ..
 	
 tableV3V4M:
-	./tableV3V4.sh --purge --degree="64 128 256 512" \
+	@echo -e $(BGREEN) "Generate table V3V4 (table 3) of ICMS2018 paper" $(NORMAL)
+	cd ICMS2018 &&\
+	./tableV3V4.sh --degrees="64 128 256 512" \
 	--bitsize=14 --nbSols="11 12 13 14" --pow=3 --itts="3 4 5"\
-	2>/dev/null
+	&& cd ..
 	
 tableV4V4escM:
-	./tableV4V4esc.sh --degree=64\
-	--bitsize=14 --epsilon=-53 --eps1=-53 --eps2=-530 --eps3=-5300\
-	--nbSols=11 --pow=3 --itts=4\
-	2>/dev/null
+	@echo -e $(BGREEN) "Generate table 4 of ICMS2018 paper" $(NORMAL)
+	@echo -e $(BRED) "eps as an escape bound is not an option anymore: doing only without" $(NORMAL)
+	cd ICMS2018 &&\
+	./tableV4epsilon.sh --eps1=-53 --eps2=-530 --eps3=-5300\
+	&& cd ..
 
-tableICMS: tableBernoulliM\
+benchICMS2018: tableBernoulliM\
            tableV1V2V3M\
            tableV3V4M\
            tableV4V4escM
-           
-           
-#==================================================
-# COMPILING 
-#==================================================
-build: genPolFile
 
-#==================================================
-# HOUSEKEEPING 
-#==================================================
-print: 
-	@echo $(BENCH_DIRS_FILES)
-# 
-clean :
-	rm -rf $(TEST_OBJS) $(TEST_EXECS)
-# 	
-cleanBenchs : 
-	rm -rf $(BENCH_DIRS)
+cleantableBernoulli:
+	rm -rf ICMS2018/tableBernoulli
 
-.c.o :
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CCFLAGS) -o $@ -c $< $(INCLUDE_PATH)
+cleantableV1V3: 
+	rm -rf ICMS2018/tableV1V3
 	
+cleantableV3V4: 
+	rm -rf ICMS2018/tableV3V4
 	
-genPolFile: genPolFile.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+cleantableV4V4esc: 
+	rm -rf ICMS2018/tableV4epsilon
+	
+clean: cleantableBernoulli\
+       cleantableV1V3\
+       cleantableV3V4\
+       cleantableV4V4esc
 
 #==================================================
 # END 

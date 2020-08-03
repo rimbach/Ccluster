@@ -195,7 +195,7 @@ void getApprox_Spiral(compApp_poly_t dest, slong prec){
     slong prectemp = 2*prec;
     getApprox_temp( dest, prectemp );
     
-    while (!compApp_poly_checkAccuracy( dest, prec)){
+    while (!compApp_poly_check_relOne_accuracy( dest, prec)){
         prectemp = 2*prectemp;
         getApprox_temp( dest, prectemp );
     }

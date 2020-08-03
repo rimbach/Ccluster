@@ -11,7 +11,8 @@ TEST_EXECS=$(TEST:%.c=%)
 build: ccluster\
        risolate\
        genPolFile\
-       ccluster_spiral
+       ccluster_spiral\
+       ccluster_nested
 
 # TESTING VARIABLES
 degree=64
@@ -40,12 +41,6 @@ ccluster: ccluster.o parseArgs.h
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
-	    	
-ccluster_expe: ccluster_expe.o parseArgs.h
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) \
-	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 
 risolate: risolate.o parseArgs.h
 # 	@echo "Building $@"
@@ -60,6 +55,12 @@ genPolFile: genPolFile.o
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 	    	
 ccluster_spiral: ccluster_spiral.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+
+ccluster_nested: ccluster_nested.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \

@@ -113,7 +113,7 @@ int main(int argc, char **argv){
         
         if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mode" ) == 0) ) {
             if (argc>arg+1) {
-//                 parse = parse*scan_strategy( argv[arg+1], st );
+                parse = parse*scan_strategy( argv[arg+1], st );
                 st = argv[arg+1];
                 arg++;
             }

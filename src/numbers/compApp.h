@@ -101,13 +101,15 @@ NUMBERS_INLINE int compApp_intersection(compApp_t z, const compApp_t x, const co
     else return 0; 
 }
 
-/* accuracy */
-NUMBERS_INLINE int compApp_checkAccuracy( const compApp_t z, slong prec) {
-    return ( (-acb_rel_error_bits(z)) >= prec );
+/* for a ball m +/- r, relative accuracy of [max(1,|m|) +/- r]  */
+NUMBERS_INLINE int compApp_check_relOne_accuracy( const compApp_t z, slong prec) {
+//     return ( (-acb_rel_error_bits(z)) >= prec );
+    return ( acb_rel_one_accuracy_bits(z) >= prec );
 }
 
-NUMBERS_INLINE slong compApp_getAccuracy( const compApp_t z) {
-    return -acb_rel_error_bits(z);
+NUMBERS_INLINE slong compApp_get_relOne_accuracy( const compApp_t z) {
+//     return -acb_rel_error_bits(z);
+    return acb_rel_one_accuracy_bits(z);
 }
 
 #ifdef __cplusplus

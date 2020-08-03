@@ -108,6 +108,12 @@ testBernoulli: library bins genBernoulli
 test: testMandelbrot testMignotte testBernoulli
 
 ################## End tests ######################################################
+################## Generate benchs of papers ######################################
+benchICMS2018: library bins
+	cd benchs && make benchICMS2018 && cd ..
+	
+benchMACIS2019: library bins MACIS19
+	cd benchs && make benchMACIS2019 && cd ..
 
 
 quiet: library
@@ -196,8 +202,11 @@ comptest: library
 bins: library
 	cd bin && make && cd ..
 	
-ISSAC: bins
+ISSAC20: library bins
 	cd bin/ISSAC20 && make && make test && cd ../..
+	
+MACIS19: library bins
+	cd bin/MACIS19 && make && make test && cd ../..
 	
 benchICMS: compbenchs
 	cd benchs && make tableICMS && cd ..

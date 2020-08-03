@@ -1,5 +1,5 @@
 
-  Copyright (C) 2018 Remi Imbach
+  Copyright (C) 2018-2020 Remi Imbach
 
   This file is part of Ccluster.
 
@@ -7,6 +7,16 @@
   the terms of the GNU Lesser General Public License (LGPL) as published
   by the Free Software Foundation; either version 2.1 of the License, or
   (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+  
+*************************************************************
+
+README FILE: TABLE OF CONTENTS
+
+    0) Introduction
+    1) Installation and getting started
+    2) More details
+
+*************************************************************  
 
 0/ Introduction
 ===============
@@ -68,3 +78,7 @@ and Ccluster can be used in Singular (see README.md for more informations).
     --------------------------------------------------------------------------
     
     make test
+
+2/ More details
+===============
+    See the file README.md

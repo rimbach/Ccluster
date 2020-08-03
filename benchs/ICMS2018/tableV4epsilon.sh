@@ -94,9 +94,6 @@ while [ "$1" != "" ]; do
       --itts)
         ITTS=$VALUE
         ;;
-#       --stop-when-compact)
-#         STOPWHENCOMPACT=1
-#         ;;
       --box)
         BOX="$VALUE"
         ;;
@@ -148,10 +145,6 @@ if [ -z "$ITTS" ]; then
    ITTS="4"
 fi
 
-# if [ -z "$STOPWHENCOMPACT" ]; then
-#    STOPWHENCOMPACT=0
-# fi
-
 if [ -z "$BOX" ]; then
    BOX="0,1,0,1,100,1"
 fi
@@ -169,12 +162,7 @@ fi
 TRUE=1
 FALSE=0
 REP="tableV4epsilon"
-V4FLAG=23
-V4PFLAG=31
-# if [ $STOPWHENCOMPACT -eq 1 ]; then
-#     V3FLAG=$(( $V3FLAG + 8 ))
-#     V4FLAG=$(( $V4FLAG + 8 ))
-# fi
+V4FLAG="V4"
 
 if [ -d "$REP" ]; then
   if [ $PURGE -eq 1 ]; then
@@ -204,164 +192,316 @@ TEMPTABFILE="temptabfile.txt"
 rm -rf $TEMPTABFILE
 touch $TEMPTABFILE
 
+make_line()
+{
+    LINE=""
+    FILEOUTE1=$1
+    FILEOUTE2=$2
+    FILEOUTE3=$3
+    
+TSV41=$(grep "tree size:" $FILEOUTE1| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+TSV42=$(grep "tree size:" $FILEOUTE2| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+TSV43=$(grep "tree size:" $FILEOUTE3| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+TDV41=$(grep -m 1 "tree depth:" $FILEOUTE1 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+TDV42=$(grep -m 1 "tree depth:" $FILEOUTE2 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+TDV43=$(grep -m 1 "tree depth:" $FILEOUTE3 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+N4V41=$(grep -m 1 "total number NE:" $FILEOUTE1 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+N4V42=$(grep -m 1 "total number NE:" $FILEOUTE2 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+N4V43=$(grep -m 1 "total number NE:" $FILEOUTE3 | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+
+TV41=$(grep "total time:" $FILEOUTE1 | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+TV42=$(grep "total time:" $FILEOUTE2 | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+TV43=$(grep "total time:" $FILEOUTE3 | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+
+LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
+LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
+LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
+
+}
+
+CCL_CALL="../../bin/ccluster"
+GPL_CALL="../../bin/genPolFile"
+
 #-----------------------------------------------bernoulli-----------------------------------------
 POL_NAME="Bernoulli"
-LINE_TAB="$POL_NAME, \$d=$DEGREE\$"  
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
-    ./benchBernoulli $DEGREE $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+LINE_TAB="$POL_NAME, \$d=$DEGREE\$" 
+FILEIN=$REP"/"$POL_NAME"_"$DEGREE".ccl"
+FILEOUTE1=$REP"/"$POL_NAME"_e1.out"
+FILEOUTE2=$REP"/"$POL_NAME"_e2.out"
+FILEOUTE3=$REP"/"$POL_NAME"_e3.out"
+CCL_CALLE1=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS1" -m "$V4FLAG" -v 3 " 
+CCL_CALLE2=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS2" -m "$V4FLAG" -v 3 "
+CCL_CALLE3=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS3" -m "$V4FLAG" -v 3 "
+
+#generate input file
+$GPL_CALL $POL_NAME $DEGREE $FILEIN
+
+if [ ! -e $FILEOUTE1 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V1 output in "$FILEOUTE1 > /dev/stderr
+    $CCL_CALLE1 > $FILEOUTE1
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
-    ./benchBernoulli $DEGREE $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+if [ ! -e $FILEOUTE2 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V2 output in "$FILEOUTE2 > /dev/stderr
+    $CCL_CALLE2 > $FILEOUTE2
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
-    ./benchBernoulli $DEGREE $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+if [ ! -e $FILEOUTE3 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V3 output in "$FILEOUTE3 > /dev/stderr
+    $CCL_CALLE3 > $FILEOUTE3
 fi
 
-TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+make_line $FILEOUTE1 $FILEOUTE2 $FILEOUTE3
+echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 
-TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# #-----------------------------------------------bernoulli-----------------------------------------
+# POL_NAME="Bernoulli"
+# LINE_TAB="$POL_NAME, \$d=$DEGREE\$"  
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
+#     ./benchBernoulli $DEGREE $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
+#     ./benchBernoulli $DEGREE $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
+#     ./benchBernoulli $DEGREE $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+# fi
+# 
+# TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# 
+# LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
+# 
+# LINE_TAB=$LINE_TAB"\\\\\\hline"
+# echo $LINE_TAB >> $TEMPTABFILE
 
-N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-
-LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
-
-LINE_TAB=$LINE_TAB"\\\\\\hline"
-echo $LINE_TAB >> $TEMPTABFILE
-
-#-----------------------------------------------mignotte-----------------------------------------
+#-----------------------------------------------Mignotte-----------------------------------------
 POL_NAME="Mignotte"
-LINE_TAB="$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE\$"
+LINE_TAB="$POL_NAME, \$d=$DEGREE\$" 
+FILEIN=$REP"/"$POL_NAME"_"$DEGREE".ccl"
+FILEOUTE1=$REP"/"$POL_NAME"_e1.out"
+FILEOUTE2=$REP"/"$POL_NAME"_e2.out"
+FILEOUTE3=$REP"/"$POL_NAME"_e3.out"
+CCL_CALLE1=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS1" -m "$V4FLAG" -v 3 " 
+CCL_CALLE2=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS2" -m "$V4FLAG" -v 3 "
+CCL_CALLE3=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS3" -m "$V4FLAG" -v 3 "
 
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
-    ./benchMignotte $DEGREE $BITSIZE $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+#generate input file
+$GPL_CALL $POL_NAME $DEGREE $FILEIN -b $BITSIZE
+
+if [ ! -e $FILEOUTE1 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V1 output in "$FILEOUTE1 > /dev/stderr
+    $CCL_CALLE1 > $FILEOUTE1
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
-    ./benchMignotte $DEGREE $BITSIZE $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+if [ ! -e $FILEOUTE2 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V2 output in "$FILEOUTE2 > /dev/stderr
+    $CCL_CALLE2 > $FILEOUTE2
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
-    ./benchMignotte $DEGREE $BITSIZE $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+if [ ! -e $FILEOUTE3 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V3 output in "$FILEOUTE3 > /dev/stderr
+    $CCL_CALLE3 > $FILEOUTE3
 fi
 
-TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+make_line $FILEOUTE1 $FILEOUTE2 $FILEOUTE3
+echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 
-TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# #-----------------------------------------------mignotte-----------------------------------------
+# POL_NAME="Mignotte"
+# LINE_TAB="$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE\$"
+# 
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
+#     ./benchMignotte $DEGREE $BITSIZE $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
+#     ./benchMignotte $DEGREE $BITSIZE $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
+#     ./benchMignotte $DEGREE $BITSIZE $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+# fi
+# 
+# TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# 
+# LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
+# 
+# LINE_TAB=$LINE_TAB"\\\\\\hline"
+# echo $LINE_TAB >> $TEMPTABFILE
 
-N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+#-----------------------------------------------MignotteGen-----------------------------------------
+POL_NAME="MignotteGen"
+LINE_TAB="$POL_NAME, \$d=$DEGREE\$" 
+FILEIN=$REP"/"$POL_NAME"_"$DEGREE".ccl"
+FILEOUTE1=$REP"/"$POL_NAME"_e1.out"
+FILEOUTE2=$REP"/"$POL_NAME"_e2.out"
+FILEOUTE3=$REP"/"$POL_NAME"_e3.out"
+CCL_CALLE1=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS1" -m "$V4FLAG" -v 3 " 
+CCL_CALLE2=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS2" -m "$V4FLAG" -v 3 "
+CCL_CALLE3=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS3" -m "$V4FLAG" -v 3 "
 
-TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+#generate input file
+$GPL_CALL $POL_NAME $DEGREE $FILEIN -b $BITSIZE -p $POW
 
-LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
+if [ ! -e $FILEOUTE1 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V1 output in "$FILEOUTE1 > /dev/stderr
+    $CCL_CALLE1 > $FILEOUTE1
+fi
+if [ ! -e $FILEOUTE2 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V2 output in "$FILEOUTE2 > /dev/stderr
+    $CCL_CALLE2 > $FILEOUTE2
+fi
+if [ ! -e $FILEOUTE3 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V3 output in "$FILEOUTE3 > /dev/stderr
+    $CCL_CALLE3 > $FILEOUTE3
+fi
 
-LINE_TAB=$LINE_TAB"\\\\\\hline"
-echo $LINE_TAB >> $TEMPTABFILE
+make_line $FILEOUTE1 $FILEOUTE2 $FILEOUTE3
+echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
+
+# #-----------------------------------------------MignotteGen-----------------------------------------
+# POL_NAME="MignotteGen"
+# LINE_TAB="$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE\$, \$k=$POW\$"
+# 
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE, pow $POW version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
+#     ./benchMignotteGen $DEGREE $BITSIZE $POW $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE, pow $POW version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
+#     ./benchMignotteGen $DEGREE $BITSIZE $POW $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE, pow $POW version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
+#     ./benchMignotteGen $DEGREE $BITSIZE $POW $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+# fi
+# 
+# TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# 
+# LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
+# 
+# LINE_TAB=$LINE_TAB"\\\\\\hline"
+# echo $LINE_TAB >> $TEMPTABFILE
 
 #-----------------------------------------------Wilkinson-----------------------------------------
 POL_NAME="Wilkinson"
-LINE_TAB="$POL_NAME, \$d=$DEGREE\$"
+LINE_TAB="$POL_NAME, \$d=$DEGREE\$" 
+FILEIN=$REP"/"$POL_NAME"_"$DEGREE".ccl"
+FILEOUTE1=$REP"/"$POL_NAME"_e1.out"
+FILEOUTE2=$REP"/"$POL_NAME"_e2.out"
+FILEOUTE3=$REP"/"$POL_NAME"_e3.out"
+CCL_CALLE1=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS1" -m "$V4FLAG" -v 3 " 
+CCL_CALLE2=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS2" -m "$V4FLAG" -v 3 "
+CCL_CALLE3=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS3" -m "$V4FLAG" -v 3 "
 
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
-    ./benchWilkinson $DEGREE $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+#generate input file
+$GPL_CALL $POL_NAME $DEGREE $FILEIN
+
+if [ ! -e $FILEOUTE1 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V1 output in "$FILEOUTE1 > /dev/stderr
+    $CCL_CALLE1 > $FILEOUTE1
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
-    ./benchWilkinson $DEGREE $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+if [ ! -e $FILEOUTE2 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V2 output in "$FILEOUTE2 > /dev/stderr
+    $CCL_CALLE2 > $FILEOUTE2
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
-    ./benchWilkinson $DEGREE $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
-fi
-
-TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-
-LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
-
-LINE_TAB=$LINE_TAB"\\\\\\hline"
-echo $LINE_TAB >> $TEMPTABFILE
-
-#-----------------------------------------------Spiral-----------------------------------------
-POL_NAME="Spiral"
-LINE_TAB="$POL_NAME, \$d=$DEGREE\$"
-
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
-    ./benchSpiral $DEGREE $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
-fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
-    ./benchSpiral $DEGREE $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
-fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
-    ./benchSpiral $DEGREE $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+if [ ! -e $FILEOUTE3 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V3 output in "$FILEOUTE3 > /dev/stderr
+    $CCL_CALLE3 > $FILEOUTE3
 fi
 
-TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+make_line $FILEOUTE1 $FILEOUTE2 $FILEOUTE3
+echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 
-TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-
-LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
-
-LINE_TAB=$LINE_TAB"\\\\\\hline"
-echo $LINE_TAB >> $TEMPTABFILE
+# #-----------------------------------------------Wilkinson-----------------------------------------
+# POL_NAME="Wilkinson"
+# LINE_TAB="$POL_NAME, \$d=$DEGREE\$"
+# 
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
+#     ./benchWilkinson $DEGREE $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
+#     ./benchWilkinson $DEGREE $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
+#     ./benchWilkinson $DEGREE $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+# fi
+# 
+# TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# 
+# LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
+# 
+# LINE_TAB=$LINE_TAB"\\\\\\hline"
+# echo $LINE_TAB >> $TEMPTABFILE
 
 #-----------------------------------------------WilkMul-----------------------------------------
 DEGSAVE=$DEGREE
@@ -369,128 +509,221 @@ DEGREE=$(( $NBSOLS * $(( $NBSOLS + 1 )) ))
 DEGREE=$(( $DEGREE / 2 ))
 
 POL_NAME="WilkMul"
-LINE_TAB="$POL_NAME, \$nbSols=$NBSOLS\$, \$d=$DEGREE\$"
+LINE_TAB="$POL_NAME, \$d=$DEGREE\$" 
+FILEIN=$REP"/"$POL_NAME"_"$DEGREE".ccl"
+FILEOUTE1=$REP"/"$POL_NAME"_e1.out"
+FILEOUTE2=$REP"/"$POL_NAME"_e2.out"
+FILEOUTE3=$REP"/"$POL_NAME"_e3.out"
+CCL_CALLE1=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS1" -m "$V4FLAG" -v 3 " 
+CCL_CALLE2=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS2" -m "$V4FLAG" -v 3 "
+CCL_CALLE3=$CCL_CALL" "$FILEIN" -d "$BOX" -e "$EPS3" -m "$V4FLAG" -v 3 "
 
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
-    echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
-    ./benchWilkMul $NBSOLS $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+#generate input file
+$GPL_CALL $POL_NAME $NBSOLS $FILEIN
+
+if [ ! -e $FILEOUTE1 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V1 output in "$FILEOUTE1 > /dev/stderr
+    $CCL_CALLE1 > $FILEOUTE1
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
-    echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
-    ./benchWilkMul $NBSOLS $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+if [ ! -e $FILEOUTE2 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V2 output in "$FILEOUTE2 > /dev/stderr
+    $CCL_CALLE2 > $FILEOUTE2
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
-    echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
-    ./benchWilkMul $NBSOLS $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+if [ ! -e $FILEOUTE3 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V3 output in "$FILEOUTE3 > /dev/stderr
+    $CCL_CALLE3 > $FILEOUTE3
 fi
 
-TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-
-LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
-
-LINE_TAB=$LINE_TAB"\\\\\\hline"
-echo $LINE_TAB >> $TEMPTABFILE
+make_line $FILEOUTE1 $FILEOUTE2 $FILEOUTE3
+echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 DEGREE=$DEGSAVE
 
-#-----------------------------------------------MignotteGen-----------------------------------------
-POL_NAME="MignotteGen"
-LINE_TAB="$POL_NAME, \$d=$DEGREE\$, $\sigma=$BITSIZE\$, \$k=$POW\$"
+#-----------------------------------------------WilkMul-----------------------------------------
+# DEGSAVE=$DEGREE
+# DEGREE=$(( $NBSOLS * $(( $NBSOLS + 1 )) ))
+# DEGREE=$(( $DEGREE / 2 ))
+# 
+# POL_NAME="WilkMul"
+# LINE_TAB="$POL_NAME, \$nbSols=$NBSOLS\$, \$d=$DEGREE\$"
+# 
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
+#     ./benchWilkMul $NBSOLS $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
+#     ./benchWilkMul $NBSOLS $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
+#     ./benchWilkMul $NBSOLS $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+# fi
+# 
+# TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# 
+# LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
+# 
+# LINE_TAB=$LINE_TAB"\\\\\\hline"
+# echo $LINE_TAB >> $TEMPTABFILE
+# DEGREE=$DEGSAVE
 
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE, pow $POW version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
-    ./benchMignotteGen $DEGREE $BITSIZE $POW $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+#-----------------------------------------------Spiral-----------------------------------------
+POL_NAME="Spiral"
+LINE_TAB="$POL_NAME, \$d=$DEGREE\$" 
+FILEIN=$REP"/"$POL_NAME"_"$DEGREE".ccl"
+FILEOUTE1=$REP"/"$POL_NAME"_e1.out"
+FILEOUTE2=$REP"/"$POL_NAME"_e2.out"
+FILEOUTE3=$REP"/"$POL_NAME"_e3.out"
+CCL_CALLE1=$CCL_CALL"_spiral "$DEGREE" -d "$BOX" -e "$EPS1" -m "$V4FLAG" -v 3 " 
+CCL_CALLE2=$CCL_CALL"_spiral "$DEGREE" -d "$BOX" -e "$EPS2" -m "$V4FLAG" -v 3 "
+CCL_CALLE3=$CCL_CALL"_spiral "$DEGREE" -d "$BOX" -e "$EPS3" -m "$V4FLAG" -v 3 "
+
+if [ ! -e $FILEOUTE1 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V1 output in "$FILEOUTE1 > /dev/stderr
+    $CCL_CALLE1 > $FILEOUTE1
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE, pow $POW version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
-    ./benchMignotteGen $DEGREE $BITSIZE $POW $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+if [ ! -e $FILEOUTE2 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V2 output in "$FILEOUTE2 > /dev/stderr
+    $CCL_CALLE2 > $FILEOUTE2
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
-    echo  "Clustering roots for $POL_NAME, degree $DEGREE, bitsize $BITSIZE, pow $POW version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
-    ./benchMignotteGen $DEGREE $BITSIZE $POW $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+if [ ! -e $FILEOUTE3 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V3 output in "$FILEOUTE3 > /dev/stderr
+    $CCL_CALLE3 > $FILEOUTE3
 fi
 
-TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+make_line $FILEOUTE1 $FILEOUTE2 $FILEOUTE3
+echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 
-TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# #-----------------------------------------------Spiral-----------------------------------------
+# POL_NAME="Spiral"
+# LINE_TAB="$POL_NAME, \$d=$DEGREE\$"
+# 
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
+#     ./benchSpiral $DEGREE $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
+#     ./benchSpiral $DEGREE $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, degree $DEGREE version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
+#     ./benchSpiral $DEGREE $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+# fi
+# 
+# TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# 
+# LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
+# 
+# LINE_TAB=$LINE_TAB"\\\\\\hline"
+# echo $LINE_TAB >> $TEMPTABFILE
 
-N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-
-LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
-
-LINE_TAB=$LINE_TAB"\\\\\\hline"
-echo $LINE_TAB >> $TEMPTABFILE
-
-#-----------------------------------------------Cluster-----------------------------------------
+#-----------------------------------------------Spiral-----------------------------------------
 DEGSAVE=$DEGREE
 DEGREE=$(( 3 ** $ITTS ))
 
-POL_NAME="Cluster"
-LINE_TAB="$POL_NAME, \$d=$DEGREE\$"  
+POL_NAME="Spiral"
+LINE_TAB="$POL_NAME, \$d=$DEGREE\$" 
+FILEIN=$REP"/"$POL_NAME"_"$DEGREE".ccl"
+FILEOUTE1=$REP"/"$POL_NAME"_e1.out"
+FILEOUTE2=$REP"/"$POL_NAME"_e2.out"
+FILEOUTE3=$REP"/"$POL_NAME"_e3.out"
+CCL_CALLE1=$CCL_CALL"_nested "$ITTS" -d "$BOX" -e "$EPS1" -m "$V4FLAG" -v 3 " 
+CCL_CALLE2=$CCL_CALL"_nested "$ITTS" -d "$BOX" -e "$EPS2" -m "$V4FLAG" -v 3 "
+CCL_CALLE3=$CCL_CALL"_nested "$ITTS" -d "$BOX" -e "$EPS3" -m "$V4FLAG" -v 3 "
 
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
-    echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
-    ./benchCluster $ITTS $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+if [ ! -e $FILEOUTE1 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V1 output in "$FILEOUTE1 > /dev/stderr
+    $CCL_CALLE1 > $FILEOUTE1
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
-    echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
-    ./benchCluster $ITTS $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+if [ ! -e $FILEOUTE2 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V2 output in "$FILEOUTE2 > /dev/stderr
+    $CCL_CALLE2 > $FILEOUTE2
 fi
-if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
-    echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
-    ./benchCluster $ITTS $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+if [ ! -e $FILEOUTE3 ]; then
+    echo  "Clustering roots for $POL_NAME, degree $DEGREE version V3 output in "$FILEOUTE3 > /dev/stderr
+    $CCL_CALLE3 > $FILEOUTE3
 fi
 
-TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-
-TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-
-LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
-LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
-
-LINE_TAB=$LINE_TAB"\\\\\\hline"
-echo $LINE_TAB >> $TEMPTABFILE
+make_line $FILEOUTE1 $FILEOUTE2 $FILEOUTE3
+echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 DEGREE=$DEGSAVE
+
+# #-----------------------------------------------Cluster-----------------------------------------
+# DEGSAVE=$DEGREE
+# DEGREE=$(( 3 ** $ITTS ))
+# 
+# POL_NAME="Cluster"
+# LINE_TAB="$POL_NAME, \$d=$DEGREE\$"  
+# 
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v41.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS1 output in "$REP"/"$POL_NAME"_"$DEGREE"_v41.out" > /dev/stderr
+#     ./benchCluster $ITTS $BOX $EPS1 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v41.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v42.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS2 output in "$REP"/"$POL_NAME"_"$DEGREE"_v42.out" > /dev/stderr
+#     ./benchCluster $ITTS $BOX $EPS2 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v42.out"
+# fi
+# if [ ! -e $REP"/"$POL_NAME"_"$DEGREE"_v43.out" ]; then
+#     echo  "Clustering roots for $POL_NAME, $NBSOLS sols version V4 eps=2^$EPS3 output in "$REP"/"$POL_NAME"_"$DEGREE"_v43.out" > /dev/stderr
+#     ./benchCluster $ITTS $BOX $EPS3 $V4FLAG "3" > $REP"/"$POL_NAME"_"$DEGREE"_v43.out"
+# fi
+# 
+# TSV41=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV42=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TSV43=$(grep "tree size:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out"| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TDV41=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV42=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# TDV43=$(grep -m 1 "tree depth:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# N4V41=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V42=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# N4V43=$(grep -m 1 "total number NE:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
+# 
+# TV41=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v41.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV42=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v42.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# TV43=$(grep "total time:" $REP"/"$POL_NAME"_"$DEGREE"_v43.out" | cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+# 
+# LINE_TAB=$LINE_TAB"& ($TSV41,$TDV41,$N4V41) & `format_time $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV42,$TDV42,$N4V42) & `ratio_time $TV42 $TV41`"
+# LINE_TAB=$LINE_TAB"& ($TSV43,$TDV43,$N4V43) & `ratio_time $TV43 $TV41`"
+# 
+# LINE_TAB=$LINE_TAB"\\\\\\hline"
+# echo $LINE_TAB >> $TEMPTABFILE
+# DEGREE=$DEGSAVE
 # 
 echo $HEAD_TABLE
 echo $FIRST_LINE_TABLE
