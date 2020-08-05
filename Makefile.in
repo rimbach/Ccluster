@@ -134,7 +134,7 @@ clean:
 	rm -rf build
 	cd bin && make clean && cd ..
 
-distclean: clean benchsclean testclean
+distclean: clean testclean
 	rm -f Makefile
 	rm -f test/Makefile
 	rm -f bin/Makefile
@@ -211,9 +211,6 @@ benchICMS: compbenchs
 	
 testclean: 
 	cd test && make clean && cd ..
-	
-benchsclean: 
-	cd benchs && make clean && make cleanBenchs && cd ..
 	
 print-%:
 	@echo '$*=$($*)'
