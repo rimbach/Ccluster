@@ -9,6 +9,8 @@
   (at your option) any later version.  See <http://www.gnu.org/licenses/>.
   
 *************************************************************
+CCLUSTER version v1.1.0
+*************************************************************
 
 README FILE: TABLE OF CONTENTS
 
@@ -30,7 +32,7 @@ a file .ccl (containing the definition of a polynomial)
 and respectively compute clusters of complex roots and isolate real roots
 of the input polynomial.
 See bin/ccluster_spiral.c for example of use within a C program for 
-input polynomials given as oracles
+input polynomials given as oracles.
 
 The implemented algorithm for complex root clustering is described here:
 https://dl.acm.org/doi/10.1145/2930889.2930939
@@ -59,6 +61,9 @@ and Ccluster can be used in Singular (see README.md for more informations).
    - download and install MPFR, version 4.0.0 or later: https://www.mpfr.org/mpfr-current/
    - download and install FLINT, version 2.6.1 or later: http://flintlib.org/downloads.html
    - download and install ARB, version 2.18.0 or later: http://arblib.org/setup.html#download
+   
+   On linux OS, a proper installation place for those libraries is /usr/local
+   If your GMP and MPFR have been installed 
    
    2 Compile Ccluster
    ------------------
