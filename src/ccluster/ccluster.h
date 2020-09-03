@@ -39,6 +39,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+// /* for profiling */
+// double timeIn_actualize_annulii_real;
+// double timeIn_is_compApp_in_box;
+// double timeIn_is_compApp_in_compAnn;
+// double timeIn_connCmp_intersects_only_one;
+double timeIn_discard_compBox_list;
+double timeIn_bisect_connCmp;
+double timeIn_is_imaginary_positive;
+double timeIn_while_loop;
 
 slong ccluster_discard_compBox_list( compBox_list_t boxes, 
                                      compBox_list_t bDiscarded,
