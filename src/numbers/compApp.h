@@ -52,6 +52,10 @@ NUMBERS_INLINE void compApp_one (compApp_t z                   ) { acb_one (z); 
 NUMBERS_INLINE void compApp_onei(compApp_t z                   ) { acb_onei(z); }
 NUMBERS_INLINE void compApp_set (compApp_t z, const compApp_t x) { acb_set (z, x); }
 NUMBERS_INLINE void compApp_set_si (compApp_t z, slong x) { acb_set_si (z, x); }
+NUMBERS_INLINE void compApp_set_sisi (compApp_t z, slong re, slong im) { 
+    arb_set_si (acb_realref(z), re);
+    arb_set_si (acb_imagref(z), im);
+}
 NUMBERS_INLINE void compApp_set_real_realApp(compApp_t x, const realApp_t re) { arb_set(acb_realref(x), re);}
 NUMBERS_INLINE void compApp_set_imag_realApp(compApp_t x, const realApp_t im) { arb_set(acb_imagref(x), im);}
 
@@ -60,8 +64,16 @@ NUMBERS_INLINE void compApp_abs   ( realApp_t dest, const compApp_t x, slong pre
 NUMBERS_INLINE void compApp_neg   ( compApp_t dest, const compApp_t x )                               { acb_neg   (dest, x ); }
 NUMBERS_INLINE void compApp_sub   ( compApp_t dest, const compApp_t x, const compApp_t y, slong prec) { acb_sub   (dest, x, y, prec); }
 NUMBERS_INLINE void compApp_sub_ui( compApp_t dest, const compApp_t x, ulong y, slong prec)           { acb_sub_ui(dest, x, y, prec); }
+NUMBERS_INLINE void compApp_sub_si( compApp_t z, const compApp_t x, slong c, slong prec)           { 
+    arb_sub_si(acb_realref(z), acb_realref(x), c, prec);
+    arb_set_round(acb_imagref(z), acb_imagref(x), prec);
+}
 NUMBERS_INLINE void compApp_add   ( compApp_t dest, const compApp_t x, const compApp_t y, slong prec) { acb_add   (dest, x, y, prec); }
 NUMBERS_INLINE void compApp_add_ui( compApp_t dest, const compApp_t x, ulong y, slong prec)           { acb_add_ui(dest, x, y, prec); }
+NUMBERS_INLINE void compApp_add_si( compApp_t z, const compApp_t x, slong c, slong prec)           { 
+    arb_add_si(acb_realref(z), acb_realref(x), c, prec);
+    arb_set_round(acb_imagref(z), acb_imagref(x), prec);
+}
 NUMBERS_INLINE void compApp_mul   ( compApp_t dest, const compApp_t x, const compApp_t y, slong prec) { acb_mul   (dest, x, y, prec); }
 NUMBERS_INLINE void compApp_div   ( compApp_t dest, const compApp_t x, const compApp_t y, slong prec) { acb_div   (dest, x, y, prec); }
 NUMBERS_INLINE void compApp_mul_si( compApp_t dest, const compApp_t x, slong y,           slong prec) { acb_mul_si(dest, x, y, prec); }

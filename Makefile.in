@@ -29,6 +29,7 @@ BUILD_DIRS = $(SRC_PATH)\
 	     $(SRC_PATH)/ccluster\
 	     $(SRC_PATH)/risolate\
 	     $(SRC_PATH)/powerSums\
+	     $(SRC_PATH)/rootRadii\
 	     $(SRC_PATH)/doubApp
 
 TEMPLATE_DIRS = 

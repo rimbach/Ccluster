@@ -22,16 +22,28 @@ void connCmp_union_compBox( connCmp_list_t ccs, compBox_t b){
     
     connCmp_ptr cctemp;
     
+    clock_t start, start2;
+    double temp = 0;
+    start = clock();
+    
     while (!connCmp_list_is_empty(ccs)){
         cctemp = connCmp_list_pop(ccs);
         if (connCmp_are_8connected(cctemp, b)){
+            
+            start2 = clock();
             connCmp_merge_2_connCmp(cb, cctemp);
+            temp += ( (float) clock() - start2 )/CLOCKS_PER_SEC ;
+            
             connCmp_clear(cctemp);
             ccluster_free(cctemp);
         }
         else 
             connCmp_list_push(ltemp, cctemp);
     }
+    
+    timeIn_merge_2_connCmp += temp;
+    timeIn_are_8connected  += ( ( (float) clock() - start )/CLOCKS_PER_SEC - temp );
+    
     connCmp_list_push(ltemp, cb);
     connCmp_list_swap(ltemp, ccs);
     connCmp_list_clear(ltemp);

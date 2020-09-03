@@ -105,6 +105,21 @@ void connCmp_gnuplot(FILE * f,
     compDsk_clear(containingDisk);
 }
 
+void compAnn_gnuplot(FILE * f, 
+                     const compAnn_t c, 
+                     metadatas_t meta){
+    
+    int prec = 53;
+    int nbdigits = (int) ceil( prec/4 ) ;
+    
+    fprintf(f, "%ld   %ld   ", compAnn_centerReref(c), compAnn_centerImref(c));
+    realApp_fprintn(f, compAnn_radSupref(c), nbdigits, ARB_STR_NO_RADIUS);
+    fprintf(f, "\n");
+    fprintf(f, "%ld   %ld   ", compAnn_centerReref(c), compAnn_centerImref(c));
+    realApp_fprintn(f, compAnn_radInfref(c), nbdigits, ARB_STR_NO_RADIUS);
+    
+}
+
 void connCmp_list_gnuplot(FILE * f, 
                           const connCmp_list_t l, 
                           metadatas_t meta,
@@ -313,6 +328,202 @@ void connCmp_list_gnuplot_drawSubdiv(FILE * f,
         fprintf(f, "\n");
     }
     fprintf(f, "e\n");
+    
+    /* initial box */
+    realRat_set_si(factor, 1, 2);
+    realRat_mul(factor, factor, compBox_bwidthref(metadatas_initBref(meta)));
+    realRat_sub(xinf, compRat_realref(compBox_centerref(metadatas_initBref(meta))), factor);
+    realRat_add(xsup, compRat_realref(compBox_centerref(metadatas_initBref(meta))), factor);
+    realRat_sub(yinf, compRat_imagref(compBox_centerref(metadatas_initBref(meta))), factor);
+    realRat_add(ysup, compRat_imagref(compBox_centerref(metadatas_initBref(meta))), factor);
+    realApp_set_realRat(xinfa, xinf, prec);
+    realApp_set_realRat(xsupa, xsup, prec);
+    realApp_set_realRat(yinfa, yinf, prec);
+    realApp_set_realRat(ysupa, ysup, prec);
+    
+    realApp_fprintn(f, xinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "   ");
+    realApp_fprintn(f, yinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "\n");
+    realApp_fprintn(f, xsupa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "   ");
+    realApp_fprintn(f, yinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "\n");
+    realApp_fprintn(f, xsupa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "   ");
+    realApp_fprintn(f, ysupa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "\n");
+    realApp_fprintn(f, xinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "   ");
+    realApp_fprintn(f, ysupa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "\n");
+    realApp_fprintn(f, xinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "   ");
+    realApp_fprintn(f, yinfa, nbdigits, ARB_STR_NO_RADIUS); fprintf(f, "\n");
+    
+    fprintf(f, "e\n");
+    
+    /* boxes in res */
+    it = connCmp_list_begin(l);
+    while (it!=connCmp_list_end() ) {
+        compBox_list_iterator itb = compBox_list_begin( connCmp_boxesref( connCmp_list_elmt(it)) );
+        while (itb!= compBox_list_end() ){
+            compBox_gnuplot(f, compBox_list_elmt(itb));
+            itb = compBox_list_next( itb );
+            fprintf(f, "e\n");
+        }
+        it = connCmp_list_next(it);
+    }
+    
+    /* excluded boxes */
+    connCmp_list_iterator itb = compBox_list_begin(lb);
+    
+    while (itb!=compBox_list_end() ) {
+        compBox_gnuplot(f, compBox_list_elmt(itb));
+        itb = compBox_list_next(itb);
+        fprintf(f, "e\n");
+    }
+    
+    fprintf(f, "%s", Ecommand);
+    
+    realRat_clear(factor);
+    realRat_clear(xinf);
+    realRat_clear(xsup);
+    realRat_clear(yinf);
+    realRat_clear(ysup);
+    realApp_clear(xinfa);
+    realApp_clear(xsupa);
+    realApp_clear(yinfa);
+    realApp_clear(ysupa);
+}
+
+void connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f, 
+                          const connCmp_list_t l, 
+                          const compBox_list_t lb,
+                          const compAnn_list_t la,
+                          const compAnn_list_t la1,
+                          const compAnn_list_t la2,
+                          metadatas_t meta){
+    
+    char preamble[100] = "# Ccluster output for GNUPLOT\n#Pipe it to gnuplot!\n";
+//     char Bcommand[100] = "set pointsize 0.3\nplot '-' title 'Computed clusters' with xyerrorbars\n";
+    char Bcommand1[100] = "set size square\nset pointsize 1\n";
+    char Bcommand2[1000] = "plot '-' title 'Computed clusters' with circles lc rgb \"#008080\" fs transparent solid 0.15 noborder,\\\n";
+    char Bcommand3[1000] = "     '-' u 1:2 title 'centers of clusters' pt 2 lc rgb \"#008080\",\\\n";
+    char Bcommand4[1000] = "     '-' title 'root annulii' with circles lc rgb \"#FF00FF\" fs transparent";
+    char Bcommand5[1000] = ",\\\n     '-' title 'root annulii1' with circles lc rgb \"#800080\" fs transparent";
+    char Bcommand6[1000] = ",\\\n     '-' title 'root annulii2' with circles lc rgb \"#800000\" fs transparent";
+    char Ecommand[100] = "\npause mouse close\n";
+    
+    connCmp_list_iterator it;
+    
+    /*set X,Y ranges to (5/4) initbox*/
+    realRat_t xinf, xsup, yinf, ysup;
+    realRat_t factor;
+    realApp_t xinfa, xsupa, yinfa, ysupa;
+    int nbdigits = 12;
+    int prec = 53;
+    
+    realRat_init(factor);
+    realRat_init(xinf);
+    realRat_init(xsup);
+    realRat_init(yinf);
+    realRat_init(ysup);
+    realApp_init(xinfa);
+    realApp_init(xsupa);
+    realApp_init(yinfa);
+    realApp_init(ysupa);
+    
+    realRat_set_si(factor, 5, 8);
+    realRat_mul(factor, factor, compBox_bwidthref(metadatas_initBref(meta)));
+    realRat_sub(xinf, compRat_realref(compBox_centerref(metadatas_initBref(meta))), factor);
+    realRat_add(xsup, compRat_realref(compBox_centerref(metadatas_initBref(meta))), factor);
+    realRat_sub(yinf, compRat_imagref(compBox_centerref(metadatas_initBref(meta))), factor);
+    realRat_add(ysup, compRat_imagref(compBox_centerref(metadatas_initBref(meta))), factor);
+    realApp_set_realRat(xinfa, xinf, prec);
+    realApp_set_realRat(xsupa, xsup, prec);
+    realApp_set_realRat(yinfa, yinf, prec);
+    realApp_set_realRat(ysupa, ysup, prec);
+    
+
+    fprintf(f, "%s", preamble);
+    fprintf(f, "set xrange["); realApp_fprintn(f, xinfa, nbdigits, ARB_STR_NO_RADIUS);
+    fprintf(f, ":");realApp_fprintn(f, xsupa, nbdigits, ARB_STR_NO_RADIUS);
+    fprintf(f, "]\n");
+    fprintf(f, "set yrange["); realApp_fprintn(f, yinfa, nbdigits, ARB_STR_NO_RADIUS);
+    fprintf(f, ":");realApp_fprintn(f, ysupa, nbdigits, ARB_STR_NO_RADIUS);
+    fprintf(f, "]\n");
+    
+//     fprintf(f, "%s", Bcommand);
+    fprintf(f, "%s", Bcommand1);
+    fprintf(f, "%s", Bcommand2);
+    fprintf(f, "%s", Bcommand3);
+    fprintf(f, "%s", Bcommand4);
+    if ( compAnn_list_get_size(la1) >=1 )
+        fprintf(f, "%s", Bcommand5);
+    if ( compAnn_list_get_size(la2) >=1 )
+        fprintf(f, "%s", Bcommand6);
+    fprintf(f, ",\\\n     '-' title 'initial box' with lines lw 2 lc rgb \"black\"");
+    
+    /* iterate on cc in qres */
+    it = connCmp_list_begin(l);
+    while (it!=connCmp_list_end() ) {
+        compBox_list_iterator itb = compBox_list_begin( connCmp_boxesref( connCmp_list_elmt(it)) );
+        while (itb!= compBox_list_end() ){
+            fprintf(f, ",\\\n     '-' title '' with lines lw 2 lc rgb \"#008080\"");
+            itb = compBox_list_next( itb );
+        }
+        it = connCmp_list_next(it);
+    }
+    
+    for (int s=0;s<compBox_list_get_size(lb); s++){
+        fprintf(f, ",\\\n     '-' title '' with lines lw 1 lc rgb \"black\"");
+    }
+    
+    fprintf(f, "\n");
+    
+    /* disks */
+    it = connCmp_list_begin(l);
+    
+    while (it!=connCmp_list_end() ) {
+        connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
+        it = connCmp_list_next(it);
+        fprintf(f, "\n");
+    }
+    fprintf(f, "e\n");
+//     fprintf(f, "%s", Bcommand3);
+    
+    /* centers */
+    it = connCmp_list_begin(l);
+    
+    while (it!=connCmp_list_end() ) {
+        connCmp_gnuplot(f, connCmp_list_elmt(it), meta);
+        it = connCmp_list_next(it);
+        fprintf(f, "\n");
+    }
+    fprintf(f, "e\n");
+    
+    /* rootAnnulii */
+    compAnn_list_iterator ita;
+    ita = compAnn_list_begin(la);
+    while (ita!=connCmp_list_end() ) {
+        compAnn_gnuplot(f, compAnn_list_elmt(ita), meta);
+        ita = compAnn_list_next(ita);
+        fprintf(f, "\n");
+    }
+    fprintf(f, "e\n");
+    /* rootAnnulii1 */
+    if ( compAnn_list_get_size(la1) >=1 ){
+        ita = compAnn_list_begin(la1);
+        while (ita!=connCmp_list_end() ) {
+            compAnn_gnuplot(f, compAnn_list_elmt(ita), meta);
+            ita = compAnn_list_next(ita);
+            fprintf(f, "\n");
+        }
+        fprintf(f, "e\n");
+    }
+    
+        /* rootAnnulii2 */
+    if ( compAnn_list_get_size(la2) >=1 ){
+        ita = compAnn_list_begin(la2);
+        while (ita!=connCmp_list_end() ) {
+            compAnn_gnuplot(f, compAnn_list_elmt(ita), meta);
+            ita = compAnn_list_next(ita);
+            fprintf(f, "\n");
+        }
+        fprintf(f, "e\n");
+    }
     
     /* initial box */
     realRat_set_si(factor, 1, 2);
