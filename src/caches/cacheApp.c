@@ -289,6 +289,16 @@ slong cacheApp_getDegree ( cacheApp_t cache ){
     return compApp_poly_degree((cache->_cache)[0]);
 }
 
+/* returns the number of zero trailing coeffs */
+/* it is assumed that _poly has integer coeffficients */
+slong cacheApp_getMultOfZero ( cacheApp_t cache ){
+    realRat_poly_ptr p = compRat_poly_real_ptr( cache->_poly );
+    int res = 0;
+    while ( (res < realRat_poly_length(p)) && (fmpz_is_zero(p->coeffs + res) ==1 )) 
+        res++;
+    return res;
+}
+
 int cacheApp_is_real ( cacheApp_t cache ){
     
     if (cache->_size == 0)
