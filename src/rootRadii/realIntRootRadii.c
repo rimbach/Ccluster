@@ -56,7 +56,7 @@ void realIntRootRadii_taylor_shift_inplace_comp( compApp_poly_t res, slong cente
 
 /* assume i<j<k */
 /* assume absPi=|pi|, absPj=|pj|, absPk=|pk| are approximations of integers */
-/* decide if [j,log|pj|] lies below of on the line passing trough [i,log|pi|] and [k,log|pk|]*/
+/* decide if [j,log|pj|] lies below the line passing trough [i,log|pi|] and [k,log|pk|]*/
 /* returns 1 if yes */
 /*         0 if no  */
 /*        -1 if it can not be decided */
@@ -73,13 +73,36 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
     /*                left side of inequality is integer                                     */
     
 //     printf( "#realIntRootRadii.c , realIntRootRadii_liesBelow: i: %ld, j:%ld, k:%ld \n", i, j, k);
+    int res=-1;
+    /* check if absPi is 0 */
+    /* in which case j lies ABOVE the line passing trough [i,log|pi|] and [k,log|pk|]*/
+    if ( realApp_contains_zero(absPi) ){
+        realApp_t width, half;
+        realApp_init( width );
+        realApp_init( half );
+        realApp_get_rad_realApp(width, absPi);
+        realApp_set_d(half, 0.5);
+        if (realApp_lt(width, half)==1) {
+            /* with strictly less that 1, contains as unique integer 0*/
+            res = 0;
+//             printf( "#realIntRootRadii.c , realIntRootRadii_liesBelow: absPi is zero \n");
+        }
+        else {/* otherwise can not say if it is zero or not */
+            res = -1;
+//             printf( "#realIntRootRadii.c , realIntRootRadii_liesBelow: absPi may be zero, but need more prec \n");
+        }
+        
+        realApp_clear( width );
+        realApp_clear( half );
+        return res;
+    }
+    
     ulong kmi = k-i;
     ulong jmi = j-i;
     realApp_t leftSide, rightSide, temp;
     realApp_init(leftSide);
     realApp_init(rightSide);
     realApp_init(temp);
-    int res=-1;
     
     realApp_pow_ui(leftSide,  absPj,     kmi,       prec);
     realApp_pow_ui(temp,      absPi,     jmi,       prec);
@@ -221,13 +244,18 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
         compAnn_indMinref(cur) = degree + 1 - (right);
         compAnn_centerReref(cur) = centerRe;
         compAnn_centerImref(cur) = 0;
-        realApp_div( compAnn_radInfref(cur), (pApprox->coeffs) + right, (pApprox->coeffs) + left, nprec );
-        realApp_root_ui( compAnn_radInfref(cur), compAnn_radInfref(cur), shift, nprec );
-        realApp_inv( compAnn_radInfref(cur), compAnn_radInfref(cur), nprec );
-        ulong pow = 0x1<<N;
-        realApp_root_ui( compAnn_radInfref(cur), compAnn_radInfref(cur), pow, nprec );
-        realApp_mul_realRat( compAnn_radSupref(cur), compAnn_radInfref(cur), oneplusdelta, nprec );
-        realApp_mul_realRat_in_place( compAnn_radInfref(cur), oneplusdeltainv, nprec );
+        if ( realApp_contains_zero( (pApprox->coeffs) + left ) ) {
+            realApp_zero( compAnn_radInfref(cur) );
+            realApp_zero( compAnn_radSupref(cur) );
+        } else {
+            realApp_div( compAnn_radInfref(cur), (pApprox->coeffs) + right, (pApprox->coeffs) + left, nprec );
+            realApp_root_ui( compAnn_radInfref(cur), compAnn_radInfref(cur), shift, nprec );
+            realApp_inv( compAnn_radInfref(cur), compAnn_radInfref(cur), nprec );
+            ulong pow = 0x1<<N;
+            realApp_root_ui( compAnn_radInfref(cur), compAnn_radInfref(cur), pow, nprec );
+            realApp_mul_realRat( compAnn_radSupref(cur), compAnn_radInfref(cur), oneplusdelta, nprec );
+            realApp_mul_realRat_in_place( compAnn_radInfref(cur), oneplusdeltainv, nprec );
+        }
         
         left = convexHull[ind];
 //         compAnn_printd(cur, 10); printf("\n");
@@ -401,6 +429,11 @@ void realIntRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache
     it = compAnn_list_begin(annulii);
     while (it!=compAnn_list_end() ) {
         cur = compAnn_list_elmt( it );
+        /* check if is is 0 */
+        if ( realApp_is_zero(compAnn_radInfref(cur)) && realApp_is_zero(compAnn_radSupref(cur)) ){
+            compAnn_rrInPoref(cur) = 1;
+            compAnn_rrInNeref(cur) = 1;
+        } else
         if ( compAnn_indMinref(cur) == compAnn_indMaxref(cur) ) { 
             /*contains a unique root => it is real (otherwise would contain 2)*/
             /* intersection with R+ */

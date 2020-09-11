@@ -54,6 +54,7 @@ NUMBERS_INLINE int realApp_gt(const realApp_t x, const realApp_t y) { return arb
 NUMBERS_INLINE int realApp_ge(const realApp_t x, const realApp_t y) { return arb_ge(x,y); }
 NUMBERS_INLINE int realApp_is_negative(const realApp_t x) { return arb_is_negative(x); }
 NUMBERS_INLINE int realApp_is_positive(const realApp_t x) { return arb_is_positive(x); }
+NUMBERS_INLINE int realApp_is_zero(const realApp_t x) { return arb_is_zero(x); }
 
 /* ball operations */
 NUMBERS_INLINE int  realApp_is_finite(const realApp_t x) { return arb_is_finite( x ); }

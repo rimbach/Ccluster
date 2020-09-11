@@ -82,6 +82,10 @@ LISTS_INLINE connCmp_ptr connCmp_list_pop(connCmp_list_t l){
     return (connCmp_ptr) gen_list_pop(l);
 }
 
+LISTS_INLINE connCmp_ptr connCmp_list_pop_back(connCmp_list_t l){
+    return (connCmp_ptr) gen_list_pop_back(l);
+}
+
 LISTS_INLINE connCmp_ptr connCmp_list_first(connCmp_list_t l){
     return (connCmp_ptr) gen_list_first(l);
 }

@@ -85,23 +85,21 @@ void risolate_prep_loop( compBox_list_t bDiscarded,
 			             cacheApp_t cache, 
 			             metadatas_t meta);
 
-void risolate_prep_loop_rootRadii( compBox_list_t bDiscarded,
-                                   connCmp_list_t qCover, 
-                                   const compBox_t initialBox,
-                                   const compAnn_list_t annulii,
-                                   cacheApp_t cache, 
-                                   metadatas_t meta);
-/*
-void risolate_prep_loop_rootRadii2( connCmp_list_t qCover, 
-                                   const compBox_t initialBox,
-                                   cacheApp_t cache, 
-                                   metadatas_t meta);*/
+int risolate_compBox_intersects_only_one( const compBox_t b, int nbList );
+int risolate_compBox_intersects_atLest_one( const compBox_t b, int nbList );
+
+void risolate_prep_loop_rootRadii( compBox_list_t bDiscarded, 
+                            connCmp_list_t qResult, 
+                           connCmp_list_t qPrepLoop, 
+                           connCmp_list_t discardedCcs, 
+                           cacheApp_t cache, 
+                           metadatas_t meta);
 
 slong risolate_exclusion_rootRadii( connCmp_list_t qCover,
                                    cacheApp_t cache, 
                                    metadatas_t meta);
 
-void risolate_algo_global_rootRadii( connCmp_list_t qResults,
+void risolate_algo_global_rootRadii_old( connCmp_list_t qResults,
                                      compBox_list_t bDiscarded,
                                      compAnn_list_t annulii,
                                      compAnn_list_t annulii1,
@@ -111,11 +109,9 @@ void risolate_algo_global_rootRadii( connCmp_list_t qResults,
                                      cacheApp_t cache, 
                                      metadatas_t meta);
 
-void risolate_algo_global_rootRadii_n( connCmp_list_t qResults,
+void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
                                      compBox_list_t bDiscarded,
                                      compAnn_list_t annulii,
-                                     compAnn_list_t annulii1,
-                                     compAnn_list_t annulii2,
                                      const compBox_t initialBox, 
                                      const realRat_t eps, 
                                      cacheApp_t cache, 

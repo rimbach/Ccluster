@@ -30,6 +30,8 @@ extern "C" {
 struct gen_elmt {
     void            *_elmt;
     struct gen_elmt *_next;
+    /* test for union find in large lists of boxes */
+    struct gen_elmt *_prev;
 };
 
 typedef void (*clear_func)(void *);
@@ -60,6 +62,8 @@ void gen_list_push(gen_list_t l, void * data);
 
 void * gen_list_pop(gen_list_t l);
 
+void * gen_list_pop_back(gen_list_t l);
+
 void * gen_list_first(gen_list_t l);
 
 void * gen_list_last(gen_list_t l);
@@ -82,8 +86,18 @@ LISTS_INLINE gen_list_iterator gen_list_begin(const gen_list_t l){
     return l->_begin;
 }
 
+/* test for union find in large lists of boxes */
+LISTS_INLINE gen_list_iterator gen_list_endEl(const gen_list_t l){
+    return l->_end;
+}
+
 LISTS_INLINE gen_list_iterator gen_list_next(gen_list_iterator it){
     return it->_next;
+}
+
+/* test for union find in large lists of boxes */
+LISTS_INLINE gen_list_iterator gen_list_prev(gen_list_iterator it){
+    return it->_prev;
 }
 
 LISTS_INLINE gen_list_iterator gen_list_end(){

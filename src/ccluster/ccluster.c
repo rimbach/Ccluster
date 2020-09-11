@@ -201,8 +201,8 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
         
         if ( metadatas_useRootRadii(meta) ){
             
-                        /* get rid of annulus containing a real solution if the box    *
-                         * does not intersect real axis                                */
+            /* get rid of annulus containing a real solution if the box    *
+             * does not intersect real axis                                */
             if ( compBox_is_imaginary_positive_strict(btemp)
               || compBox_is_imaginary_negative_strict(btemp) ) {
                 ccluster_actualize_annulii_real( btemp );
@@ -213,12 +213,12 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
                 if (metadatas_haveToCount(meta)){
                     metadatas_add_discarded( meta, depth);
                 }
-//                 if (metadatas_getDrSub(meta)==0){
+                if (metadatas_getDrSub(meta)==0){
                     compBox_clear(btemp);
                     ccluster_free(btemp);
-//                 } else {
-//                     compBox_list_push(bDiscarded, btemp);
-//                 }
+                } else {
+                    compBox_list_push(bDiscarded, btemp);
+                }
                 
                 continue;
             }
@@ -257,12 +257,12 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
                     if (metadatas_haveToCount(meta)){
                         metadatas_add_discarded( meta, depth);
                     }
-//                      if (metadatas_getDrSub(meta)==0){
+                     if (metadatas_getDrSub(meta)==0){
                         compBox_clear(btemp);
                         ccluster_free(btemp);
-//                      } else {
-//                      compBox_list_push(bDiscarded, btemp);
-//                      }
+                     } else {
+                        compBox_list_push(bDiscarded, btemp);
+                     }
                 
                 continue;
                 }
@@ -979,8 +979,8 @@ void ccluster_algo_global( connCmp_list_t qResults,
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
 //     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
-    ccluster_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, meta);
     
+    ccluster_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, meta);
     
 //     realRat_clear(factor);
     connCmp_list_clear(qMainLoop);
@@ -1047,7 +1047,15 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
 //     }
     start2 = clock();
     
-//     printf("#Annulii: ");
+//     printf("#Annulii 0: ");
+//     compAnn_list_printd(annulii, 10);
+//     printf("\n\n");
+//     
+//     printf("#Annulii 1: ");
+//     compAnn_list_printd(annulii1, 10);
+//     printf("\n\n");
+//     
+//     printf("#Annulii 2: ");
 //     compAnn_list_printd(annulii2, 10);
 //     printf("\n\n");
     
