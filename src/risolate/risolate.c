@@ -295,6 +295,17 @@ void risolate_main_loop( connCmp_list_t qResults,
 //             prec = resTstar.appPrec;
         }
         
+        /* special case where zero is a root with mult>1 */
+        /* and current cc is separated and contains zero */
+        if ( (separationFlag) && 
+             (connCmp_nSolsref(ccur) > 1 ) &&
+             (realRat_sgn(connCmp_infReref(ccur)) < 0) &&
+             (realRat_sgn(connCmp_supReref(ccur)) > 0) ) {
+            if ( connCmp_nSolsref(ccur) == cacheApp_getMultOfZero( cache ) )
+                sepBoundFlag = 1;
+        }
+             
+        
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
              ( (!widthFlag) 
                ||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) )
