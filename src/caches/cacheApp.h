@@ -94,6 +94,11 @@ CACHE_INLINE void cacheApp_canonicalise( cacheApp_t cache ){
 compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec );
 realApp_poly_ptr cacheApp_getApproximation_real ( cacheApp_t cache, slong prec );
 slong cacheApp_getDegree ( cacheApp_t cache );
+
+/* returns the number of zero trailing coeffs */
+/* it is assumed that _poly has integer coeffficients */
+slong cacheApp_getMultOfZero ( cacheApp_t cache );
+
 int cacheApp_is_real ( cacheApp_t cache );
 
 void cacheApp_root_bound ( realRat_t bound, cacheApp_t cache );
