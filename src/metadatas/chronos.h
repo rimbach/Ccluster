@@ -52,10 +52,7 @@ typedef struct {
     double  _clicks_Anticip_cumul;
     /* for powerSums */
     double  _clicks_PSTests_cumul;
-#ifdef CCLUSTER_STATS_PS
-    double  _clicks_PSTestV_cumul;
     double  _clicks_Evaluat_cumul;
-#endif
     
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_t _mutex;
@@ -165,18 +162,6 @@ METADATAS_INLINE void   chronos_add_time_PSTests( chronos_t times, double d, int
 // #endif
 }
 
-#ifdef CCLUSTER_STATS_PS
-METADATAS_INLINE void   chronos_add_time_PSTestV( chronos_t times, double d, int nbThreads ){
-// #ifdef CCLUSTER_HAVE_PTHREAD
-//     if (nbThreads>1)
-//         times->_clicks_PSTestV_cumul += d/(nbThreads*CLOCKS_PER_SEC);
-//     else 
-//         times->_clicks_PSTestV_cumul += d/CLOCKS_PER_SEC;
-// #else
-    times->_clicks_PSTestV_cumul += d/CLOCKS_PER_SEC;
-// #endif
-}
-
 METADATAS_INLINE void   chronos_add_time_Evaluat( chronos_t times, double d, int nbThreads ){
 // #ifdef CCLUSTER_HAVE_PTHREAD
 //     if (nbThreads>1)
@@ -187,7 +172,6 @@ METADATAS_INLINE void   chronos_add_time_Evaluat( chronos_t times, double d, int
     times->_clicks_Evaluat_cumul += d/CLOCKS_PER_SEC;
 // #endif
 }
-#endif
 
 METADATAS_INLINE void   chronos_add_time_CclusAl( chronos_t times, double d, int nbThreads ){
 // #ifdef CCLUSTER_HAVE_PTHREAD
@@ -211,10 +195,7 @@ METADATAS_INLINE double chronos_get_time_Derivat ( const chronos_t times ) { ret
 METADATAS_INLINE double chronos_get_time_Anticip ( const chronos_t times ) { return times->_clicks_Anticip_cumul; }
 
 METADATAS_INLINE double chronos_get_time_PSTests ( const chronos_t times ) { return times->_clicks_PSTests_cumul; }
-#ifdef CCLUSTER_STATS_PS
-METADATAS_INLINE double chronos_get_time_PSTestV ( const chronos_t times ) { return times->_clicks_PSTestV_cumul; }
 METADATAS_INLINE double chronos_get_time_Evaluat ( const chronos_t times ) { return times->_clicks_Evaluat_cumul; }
-#endif
 
 /* DEPRECATED */
 // METADATAS_INLINE void   chronos_tic_Approxi      ( chronos_t times ) { times->_clicks_Approxi = clock(); }

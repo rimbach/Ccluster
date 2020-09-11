@@ -2,7 +2,7 @@
 
 usage()
 {
-   echo "Usage: ./tableWilkMul <options> <args>"
+   echo "Usage: ./tableBernoulli <options> <args>"
 }
 
 format_time()
@@ -47,6 +47,9 @@ while [ "$1" != "" ]; do
       --bglobal)
         BGLOBAL="$VALUE"
         ;;
+      --mpsolve)
+        MPSOLVE="$VALUE"
+        ;;
       --purge)
         PURGE=1
         ;;
@@ -60,7 +63,7 @@ done
 
 #default values
 if [ -z "$DEGREES" ]; then
-   DEGREES="9 10"
+   DEGREES="64 128"
 fi
 
 if [ -z "$EPSILONCCL" ]; then
@@ -79,13 +82,17 @@ if [ -z "$BGLOBAL" ]; then
    BGLOBAL="global"
 fi
 
+if [ -z "$MPSOLVE" ]; then
+   MPSOLVE=1
+fi
+
 if [ -z "$PURGE" ]; then
    PURGE=0
 fi
 
-VFLAG="V5"
+VFLAG="V4"
 
-REP="tableWilkMul"
+REP="tableBernoulli"
 
 if [ -d "$REP" ]; then
   if [ $PURGE -eq 1 ]; then
@@ -97,62 +104,63 @@ else
 fi
 
 ##########################solvers
-CCLUSTER_PATH="../"
-CCLUSTER_CALL=$CCLUSTER_PATH"/bin/ccluster"
-GENPOLFILE_CALL=$CCLUSTER_PATH"/bin/genPolFile"
-
+SOLVER_PATH="./"
 MPSOLVE_CALL="mpsolve -au -Gi -o"$EPSILONMPS" -j1"
 MPSOLVE_CALL_S="mpsolve -as -Gi -o"$EPSILONMPS" -j1"
+CCL_CALL="../../bin/ccluster"
+GPL_CALL="../../bin/genPolFile"
 
 ##########################naming
-POL_NAME="WilkMul"
+POL_NAME="Bernoulli"
 
 HEAD_TABLE="\begin{tabular}{l||c|c|c||c|c|c||c|c|}"
 FIRST_LINE="     & \multicolumn{3}{|c||}{\texttt{Ccluster} local (\$[-1,1]^2\$)}"
-FIRST_LINE=$FIRST_LINE"& \multicolumn{3}{|c||}{\texttt{Ccluster} global (\$[-75,75]^2\$)}"
+FIRST_LINE=$FIRST_LINE"& \multicolumn{3}{|c||}{\texttt{Ccluster} global }"
 FIRST_LINE=$FIRST_LINE"& \texttt{unisolve} & \texttt{secsolve} \\\\\\hline"
 SECOND_LINE="d& (\#Sols:\#Clus) & (depth:size) & \$\tau_\ell\$ (s)"
 SECOND_LINE=$SECOND_LINE"& (\#Sols:\#Clus) & (depth:size) & \$\tau_g\$ (s)"
 SECOND_LINE=$SECOND_LINE"& \$\tau_u\$ (s) & \$\tau_s\$ (s)   \\\\\\hline\hline"
 TAIL_TAB="\end{tabular}"
 
-TEMPTABFILE="temptabfileWilM.txt"
+TEMPTABFILE="temptabfileBern.txt"
 touch $TEMPTABFILE
 
 for DEG in $DEGREES; do
-    DEGTEMP=$(( ( ( $DEG + 1 ) * $DEG ) / 2 ))
-    LINE_TAB=$DEGTEMP", "$DEG
-    
-    FILEIN=$REP"/"$POL_NAME"_"$DEGTEMP".ccl"
+    LINE_TAB=$DEG
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
     FILENAME_CCLUSTER_L_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local.out"
     FILENAME_CCLUSTER_G_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global.out"
     FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
     FILENAME_MPSOLVE_U_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_u.out"
     FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
     
-    $GENPOLFILE_CALL $POL_NAME $DEG $FILEIN -f 1
-    $GENPOLFILE_CALL $POL_NAME $DEG $FILENAME_MPSOLVE_IN -f 2
+    $GPL_CALL $POL_NAME $DEG $FILEIN
     
     if [ ! -e $FILENAME_CCLUSTER_L_OUT ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEGTEMP, local, output in "$FILENAME_CCLUSTER_L_OUT > /dev/stderr
-        $CCLUSTER_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAG -v 3 > $FILENAME_CCLUSTER_L_OUT
+        echo  "Clustering roots for $POL_NAME, degree $DEG, local, output in "$FILENAME_CCLUSTER_L_OUT > /dev/stderr
+        $CCL_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAG -v "3" > $FILENAME_CCLUSTER_L_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_OUT ]; then
-        echo  "Clustering roots for $POL_NAME, degree $DEGTEMP, global, output in "$FILENAME_CCLUSTER_G_OUT > /dev/stderr
-        $CCLUSTER_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAG -v 3 > $FILENAME_CCLUSTER_G_OUT
+        echo  "Clustering roots for $POL_NAME, degree $DEG, global, output in "$FILENAME_CCLUSTER_G_OUT > /dev/stderr
+        $CCL_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAG -v "3" > $FILENAME_CCLUSTER_G_OUT
     fi
-     
-    if [ ! -e $FILENAME_MPSOLVE_U_OUT ]; then
-        if [ $(( $DEG < 300 ? 0 : 1 )) -eq 0 ]; then
-            echo "Isolating roots in C with MPSOLVE UNISOLVE........." > /dev/stderr
-            (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_U_OUT) &>> $FILENAME_MPSOLVE_U_OUT
-        else
-            echo "real    \$>1000\$" > $FILENAME_MPSOLVE_U_OUT
+    
+    $GPL_CALL $POL_NAME $DEG $FILENAME_MPSOLVE_IN -f 2
+    
+    if [ $MPSOLVE -eq 1 ]; then
+        if [ ! -e $FILENAME_MPSOLVE_U_OUT ]; then
+            if [ $(( $DEG < 100 ? 0 : 1 )) -eq 0 ]; then
+                echo "Isolating roots in C with MPSOLVE UNISOLVE........." > /dev/stderr
+                (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_U_OUT) &>> $FILENAME_MPSOLVE_U_OUT
+            else
+                echo "real    \$>1000\$" > $FILENAME_MPSOLVE_U_OUT
+            fi
         fi
-    fi
-    if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
-        echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
-        (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL_S $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_S_OUT) &>> $FILENAME_MPSOLVE_S_OUT
+    
+        if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
+            echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
+            (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL_S $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_S_OUT) &>> $FILENAME_MPSOLVE_S_OUT
+        fi
     fi
     TCCLUSTER_L=$(grep "time:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     TDCCLUSTER_L=$(grep "tree depth:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')

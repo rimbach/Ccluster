@@ -89,10 +89,11 @@ POLYNOMIALS_INLINE  void realApp_poly_evaluate(realApp_t y, const realApp_poly_t
 void realApp_poly_sum_abs_coeffs( realApp_t res, const realApp_poly_t f, slong prec );
 
 /* accuracy */
-int realApp_poly_checkAccuracy( const realApp_poly_t poly, slong prec);
+/* for a coeff m +/- r, relative accuracy of [max(1,|m|) +/- r]  */
+int realApp_poly_check_relOne_accuracy( const realApp_poly_t poly, slong prec);
 
-slong realApp_poly_getAccuracy_min( const realApp_poly_t poly);
-slong realApp_poly_getAccuracy_max( const realApp_poly_t poly);
+slong realApp_poly_get_relOne_accuracy_min( const realApp_poly_t poly);
+slong realApp_poly_get_relOne_accuracy_max( const realApp_poly_t poly);
 
 /* derivation */
 POLYNOMIALS_INLINE  void realApp_poly_derivative(realApp_poly_t fp, const realApp_poly_t f, slong prec){

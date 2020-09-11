@@ -1,5 +1,5 @@
 
-  Copyright (C) 2018 Remi Imbach
+  Copyright (C) 2018-2020 Remi Imbach
 
   This file is part of Ccluster.
 
@@ -7,6 +7,18 @@
   the terms of the GNU Lesser General Public License (LGPL) as published
   by the Free Software Foundation; either version 2.1 of the License, or
   (at your option) any later version.  See <http://www.gnu.org/licenses/>.
+  
+*************************************************************
+CCLUSTER version v1.1.3
+*************************************************************
+
+README FILE: TABLE OF CONTENTS
+
+    0) Introduction
+    1) Installation and getting started
+    2) More details
+
+*************************************************************  
 
 0/ Introduction
 ===============
@@ -20,7 +32,7 @@ a file .ccl (containing the definition of a polynomial)
 and respectively compute clusters of complex roots and isolate real roots
 of the input polynomial.
 See bin/ccluster_spiral.c for example of use within a C program for 
-input polynomials given as oracles
+input polynomials given as oracles.
 
 The implemented algorithm for complex root clustering is described here:
 https://dl.acm.org/doi/10.1145/2930889.2930939
@@ -50,6 +62,9 @@ and Ccluster can be used in Singular (see README.md for more informations).
    - download and install FLINT, version 2.6.1 or later: http://flintlib.org/downloads.html
    - download and install ARB, version 2.18.0 or later: http://arblib.org/setup.html#download
    
+   On linux OS, a proper installation place for those libraries is /usr/local
+   If your GMP and MPFR have been installed 
+   
    2 Compile Ccluster
    ------------------
    In ccluster repository:
@@ -68,3 +83,7 @@ and Ccluster can be used in Singular (see README.md for more informations).
     --------------------------------------------------------------------------
     
     make test
+
+2/ More details
+===============
+    See the file README.md

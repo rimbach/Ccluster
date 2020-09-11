@@ -54,12 +54,6 @@ while [ "$1" != "" ]; do
       --bglobal)
         BGLOBAL="$VALUE"
         ;;
-      --stop-when-compact)
-        STOPWHENCOMPACT=1
-        ;;
-      --no-anticipate)
-        ANTICIPATE=0
-        ;;
       --purge)
         PURGE=1
         ;;
@@ -85,32 +79,18 @@ if [ -z "$EPSILONMPS" ]; then
 fi
 
 if [ -z "$BLOCAL" ]; then
-   BLOCAL="-16,10,0,1,1,10"
+   BLOCAL="0,1,0,1,2,1"
 fi
 
 if [ -z "$BGLOBAL" ]; then
-   BGLOBAL="-1,1,0,1,4,1"
-fi
-
-if [ -z "$STOPWHENCOMPACT" ]; then
-   STOPWHENCOMPACT=0
-fi
-
-if [ -z "$ANTICIPATE" ]; then
-   ANTICIPATE=1
+   BGLOBAL="global"
 fi
 
 if [ -z "$PURGE" ]; then
    PURGE=0
 fi
 
-VFLAG=7
-if [ $STOPWHENCOMPACT -eq 1 ]; then
-    VFLAG=$(( $VFLAG + 8 ))
-fi
-if [ $ANTICIPATE -eq 0 ]; then
-    VFLAG=$(( $VFLAG - 16 ))
-fi
+VFLAG="V5"
 
 REP="tableMandelbrot"
 
@@ -124,18 +104,19 @@ else
 fi
 
 ##########################solvers
-SOLVER_PATH="./"
+CCLUSTER_PATH="../"
+CCLUSTER_CALL=$CCLUSTER_PATH"/bin/MACIS19/ccluster"
+GENPOLFILE_CALL=$CCLUSTER_PATH"/bin/genPolFile"
+
 MPSOLVE_CALL="mpsolve -au -Gi -o"$EPSILONMPS" -j1"
 MPSOLVE_CALL_S="mpsolve -as -Gi -o"$EPSILONMPS" -j1"
 
 ##########################naming
 POL_NAME="Mandelbrot"
-CCLUSTER_CALL="../test/mandelbrot"
-GENPOLFILE_CALL="./genPolFile "$POL_NAME
 
 HEAD_TABLE="\begin{tabular}{l||c|c|c||c|c|c||c|c|}"
 FIRST_LINE="     & \multicolumn{3}{|c||}{\texttt{Ccluster} local (\$[-1,1]^2\$)}"
-FIRST_LINE=$FIRST_LINE"& \multicolumn{3}{|c||}{\texttt{Ccluster} global (\$[-75,75]^2\$)}"
+FIRST_LINE=$FIRST_LINE"& \multicolumn{3}{|c||}{\texttt{Ccluster} global}"
 FIRST_LINE=$FIRST_LINE"& \texttt{unisolve} & \texttt{secsolve} \\\\\\hline"
 SECOND_LINE="d& (\#Sols:\#Clus) & (depth:size) & \$\tau_\ell\$ (s)"
 SECOND_LINE=$SECOND_LINE"& (\#Sols:\#Clus) & (depth:size) & \$\tau_g\$ (s)"
@@ -153,17 +134,18 @@ for DEG in $DEGREES; do
     FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
     FILENAME_MPSOLVE_U_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_u.out"
     FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
+    
+    $GENPOLFILE_CALL $POL_NAME $DEG $FILENAME_MPSOLVE_IN -f 2
+    
     if [ ! -e $FILENAME_CCLUSTER_L_OUT ]; then
         echo  "Clustering roots for $POL_NAME, iteration $DEG, local, output in "$FILENAME_CCLUSTER_L_OUT > /dev/stderr
-        $CCLUSTER_CALL $DEG $BLOCAL $EPSILONCCL $VFLAG "3" > $FILENAME_CCLUSTER_L_OUT
+        $CCLUSTER_CALL"_mandelbrot" $DEG -d $BLOCAL -e $EPSILONCCL -m $VFLAG -v 3 > $FILENAME_CCLUSTER_L_OUT
     fi
     if [ ! -e $FILENAME_CCLUSTER_G_OUT ]; then
-        if [ "$DEG" -lt 10 ]; then
-            echo  "Clustering roots for $POL_NAME, iteration $DEG, global, output in "$FILENAME_CCLUSTER_G_OUT > /dev/stderr
-            $CCLUSTER_CALL $DEG $BGLOBAL $EPSILONCCL $VFLAG "3" > $FILENAME_CCLUSTER_G_OUT
-        fi
+        echo  "Clustering roots for $POL_NAME, iteration $DEG, global, output in "$FILENAME_CCLUSTER_G_OUT > /dev/stderr
+        $CCLUSTER_CALL"_mandelbrot" $DEG -e $EPSILONCCL -m $VFLAG -v 3 > $FILENAME_CCLUSTER_G_OUT
     fi
-    $GENPOLFILE_CALL $DEG > $FILENAME_MPSOLVE_IN
+    
     LINE_TAB=$(grep "Degree = " $FILENAME_MPSOLVE_IN | cut -f2 -d'=' | cut -f1 -d';'| tr -d ' ' )
     if [ ! -e $FILENAME_MPSOLVE_U_OUT ]; then
         if [ $(( $DEG < 300 ? 0 : 1 )) -eq 0 ]; then

@@ -93,27 +93,19 @@ if [ -z "$BLOCAL" ]; then
 fi
 
 if [ -z "$BGLOBAL" ]; then
-   BGLOBAL="0,1,0,1,300,1"
+   BGLOBAL="global"
 fi
 
 if [ -z "$MPSOLVE" ]; then
    MPSOLVE=1
 fi
 
-if [ -z "$STOPWHENCOMPACT" ]; then
-   STOPWHENCOMPACT=0
-fi
-
-if [ -z "$ANTICIPATE" ]; then
-   ANTICIPATE=0
-fi
-
 if [ -z "$PURGE" ]; then
    PURGE=0
 fi
 
-VNFLAG=23
-VRFLAG=55
+VNFLAG="V4"
+VRFLAG="V5"
 
 REP="tableRealCoeffs"
 
@@ -154,40 +146,50 @@ make_line()
 TEMPTABFILE="temptabfile.txt"
 touch $TEMPTABFILE
 
+CCLUSTER_PATH="../"
+CCLUSTER_CALL=$CCLUSTER_PATH"/bin/ccluster"
+GENPOLFILE_CALL=$CCLUSTER_PATH"/bin/genPolFile"
+
 POL_NAME="Bernoulli"
-CCL_CALL="../test/bernoulli"
 
 for DEG in $DEGREES; do
     LINE_TAB="Bernoulli, \$d=$DEG\$"  
+    FILEIN=$REP"/"$POL_NAME"_"$DEG".ccl"
     FILE1=$REP"/"$POL_NAME"_"$DEG".out"
     FILE2=$REP"/"$POL_NAME"_"$DEG"_real.out"
+    
+    $GENPOLFILE_CALL $POL_NAME $DEG $FILEIN -f 1
+    
     if [ ! -e $FILE1 ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG output in "$FILE1 > /dev/stderr
-        $CCL_CALL $DEG $BGLOBAL $EPSILONCCL $VNFLAG "3" > $FILE1
+        $CCLUSTER_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VNFLAG -v 3 > $FILE1
     fi
     if [ ! -e $FILE2 ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG with real coeffs output in "$FILE2 > /dev/stderr
-        $CCL_CALL $DEG $BGLOBAL $EPSILONCCL $VRFLAG "3" > $FILE2
+        $CCLUSTER_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VRFLAG -v 3 > $FILE2
     fi
       make_line $FILE1 $FILE2
       echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE
 done
 
 POL_NAME="Mignotte"
-CCL_CALL="../test/mignotte"
 
 for DEG in $DEGREES; do
     BS="8"
     LINE_TAB="Mignotte, bs=$BS, \$d=$DEG\$"  
+    FILEIN=$REP"/"$POL_NAME"_"$DEG"_"$BS".ccl"
     FILE1=$REP"/"$POL_NAME"_"$DEG".out"
     FILE2=$REP"/"$POL_NAME"_"$DEG"_real.out"
+    
+    $GENPOLFILE_CALL $POL_NAME $DEG $FILEIN -f 1 -b $BS
+    
     if [ ! -e $FILE1 ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG output in "$FILE1 > /dev/stderr
-        $CCL_CALL $DEG $BS $BGLOBAL $EPSILONCCL $VNFLAG "3" > $FILE1
+        $CCLUSTER_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VNFLAG -v 3 > $FILE1
     fi
     if [ ! -e $FILE2 ]; then
         echo  "Clustering roots for $POL_NAME, degree $DEG with real coeffs output in "$FILE2 > /dev/stderr
-        $CCL_CALL $DEG $BS $BGLOBAL $EPSILONCCL $VRFLAG "3" > $FILE2
+        $CCLUSTER_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VRFLAG -v 3 > $FILE2
     fi
       make_line $FILE1 $FILE2
       echo $LINE_TAB $LINE"\\\\\\hline">> $TEMPTABFILE

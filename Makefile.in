@@ -36,15 +36,8 @@ TEMPLATE_DIRS =
 SOURCES = 
 LIB_SOURCES = $(wildcard $(patsubst %, %/*.c, $(BUILD_DIRS)))  $(patsubst %, %/*.c, $(TEMPLATE_DIRS))
 LIB_HEADERS = $(foreach x, $(BUILD_DIRS), $(wildcard $(x)/*.h))
-# OBJS =        $(patsubst %.c, build/%.o, $(LIB_SOURCES))
-# LIB_OBJS =    $(patsubst %, build/%/*.o, $(BUILD_DIRS))
 LIB_OBJS=$(LIB_SOURCES:%.c=%.o)
-# LIB_OBJS =    $(patsubst %, build/%/*.o, $(LIB_SOURCES))
-
-# LOBJS = $(patsubst %.c, build/%.lo, $(LIB_SOURCES))
 LIB_LOBJS=$(LIB_SOURCES:%.c=%.lo)
-# LIB_LOBJS = $(patsubst %, build/%/*.lo, $(BUILD_DIRS))
-# LIB_LOBJS = $(patsubst %, build/%/*.lo, $(LIB_SOURCES))
 
 BENCHS_DIR = ./benchs
 BENCHS_SOURCES = $(wildcard $(patsubst %, %/*.c, $(BENCHS_DIR)))
@@ -52,58 +45,81 @@ BENCHS_HEADERS = $(wildcard $(patsubst %, %/*.h, $(BENCHS_DIR)))
 BENCHS_OBJS = $(BENCHS_SOURCES:%.c=%.o)
 BENCHS_EXE = $(BENCHS_SOURCES:%.c=%)
 
-EXAMPLES_DIR = ./examples
-
 export
 
-
-all: library bins autotest
+all: library bins testMignotte
 
 ################## This part runs a bunch of non-trivial tests #########################
 BGREEN = "\e[1;32m"
 BRED = "\e[1;31m"
 NORMAL = "\e[0m"
 
-exampleFiles: library bins
-	bin/genPolFile Mandelbrot 1 7 bin/Mandelbrot_7.ccl >/dev/null
-	bin/genPolFile Mignotte 1 128 14 bin/Mignotte_128_14.ccl >/dev/null
-	bin/genPolFile Mignotte 1 511 14 bin/Mignotte_511_14.ccl >/dev/null
-	bin/genPolFile Bernoulli 1 32 bin/Bernoulli_32.ccl >/dev/null
+# TESTING VARIABLES
+# if you change those values self validating tests will fail
+degree=64
+iteration=7
+bitsize=14
+
+genMandelbrot: library bins
+	@bin/genPolFile Mandelbrot ${iteration}   bin/Mandelbrot_${iteration}.ccl
 	
-test: library bins exampleFiles
+genMignotte: library bins 
+	@bin/genPolFile Mignotte   ${degree} bin/Mignotte_${degree}_${bitsize}.ccl -b ${bitsize}
 	
-	@echo -e $(BGREEN) "Clustering complex roots of a Mandelbrot polynomial of degree 127: should take a few seconds"
-	@echo -e $(BRED) "when calling ccluster with no option, a brief recall of usage is diplayed:" $(NORMAL)
-	bin/ccluster bin/Mandelbrot_7.ccl
+genBernoulli: library bins
+	@bin/genPolFile Bernoulli  ${degree}  bin/Bernoulli_${degree}.ccl
+	
+testMandelbrot: library bins genMandelbrot
+	@echo -e $(BGREEN) "Clustering complex roots of a Mandelbrot polynomial of degree 127: should take a few seconds" $(NORMAL)
+	bin/ccluster bin/Mandelbrot_${iteration}.ccl > temp.txt
+	@cat temp.txt
+	@bin/check_output.sh --nbSols=127 --nbClus=124 --file=temp.txt
 	@echo -e $(BGREEN) "Isolating real roots of a Mandelbrot polynomial of degree 127: should take about a seconds"
-	@echo -e $(BRED) "risolate is the binary for real root isolation" $(NORMAL)
-	@echo -e $(BRED) "with option -o, one can specify the number of digits for displaying the clusters" $(NORMAL)
-	bin/risolate bin/Mandelbrot_7.ccl -o 5
-	@echo -e $(BGREEN) "Clustering complex roots of a Mignotte polynomial of degree 128 and bitsize 14: should take a few seconds" $(NORMAL)
-	@echo -e $(BRED) "by defaults, ccluster computes clusters without size constraints (i.e. option -e +inf)" $(NORMAL)
-	@echo -e $(BRED) "notice the use of option -o with argument 0 for avoiding the output of clusters" $(NORMAL)
-	bin/ccluster bin/Mignotte_128_14.ccl -o 0
-	@echo -e $(BGREEN) "Computing Clusters of complex roots of size less than 2^-1000 of a Mignotte polynomial of degree 128 and bitsize 14: should be a bit slower, and should isolate the roots" $(NORMAL)
-	@echo -e $(BRED) "option -e precision where precision is given as the log in basis 2 of the maximum size of the clusters" $(NORMAL)
-	bin/ccluster bin/Mignotte_128_14.ccl -e -1000 -o 0
-	@echo -e $(BGREEN) "Isolating real roots of a Mignotte polynomial of degree 128 and bitsize 14: should take about a seconds" $(NORMAL)
-	bin/risolate bin/Mignotte_128_14.ccl -o 0
-	@echo -e $(BGREEN) "Isolating real roots of a Mignotte polynomial of degree 511 and bitsize 14: should take less than a minute" $(NORMAL)
-	bin/risolate bin/Mignotte_511_14.ccl -o 0
-	@echo -e $(BGREEN) "Local clustering of complex roots of a Mignotte polynomial of degree 511 and bitsize 14 in [-1,1]+i[-1,1]: should take less than a second" $(NORMAL)
-	@echo -e $(BRED) "option -d to specify a square complex box of interest" $(NORMAL)
-	bin/ccluster bin/Mignotte_511_14.ccl -d 0,1,0,1,1,1
-	@echo -e $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree 32: should take less than a second" $(NORMAL)
-	@echo -e $(BRED) "for a graphical output, use option -o -2 and pipe to gnuplot" $(NORMAL)
+	@echo -e $(BGREEN) "with option -o, one can specify the number of digits for displaying the clusters" $(NORMAL)
+	bin/risolate bin/Mandelbrot_${iteration}.ccl -o 5 > temp.txt
+	@cat temp.txt
+	@bin/check_output.sh --nbSols=19 --nbClus=19 --file=temp.txt
+	
+testMignotte: library bins genMignotte
+	@echo -e $(BGREEN) "Clustering complex roots of a Mignotte polynomial of degree ${degree} and bitsize ${bitsize}: should about a seconds" $(NORMAL)
+	@echo -e $(BGREEN) "by defaults, ccluster computes clusters without size constraints (i.e. option -e +inf)" $(NORMAL)
+	bin/ccluster bin/Mignotte_${degree}_${bitsize}.ccl > temp.txt
+	@cat temp.txt
+	@bin/check_output.sh --nbSols=64 --nbClus=63 --file=temp.txt
+	@echo -e $(BGREEN) "option -e precision where precision is given as the log in basis 2 of the maximum size of the clusters" $(NORMAL)
+	bin/ccluster bin/Mignotte_${degree}_${bitsize}.ccl -e -500 > temp.txt
+	@cat temp.txt 
+	@bin/check_output.sh --nbSols=64 --nbClus=64 --file=temp.txt
+	@echo -e $(BGREEN) "Isolating real roots of a Mignotte polynomial of degree ${degree} and bitsize ${bitsize}: should take less than a seconds" $(NORMAL)
+	bin/risolate bin/Mignotte_${degree}_${bitsize}.ccl > temp.txt
+	@cat temp.txt 
+	@bin/check_output.sh --nbSols=4 --nbClus=4 --file=temp.txt
+	
+testBernoulli: library bins genBernoulli
+	@echo -e $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree ${degree}: should take less than a second" $(NORMAL)
+	bin/ccluster bin/Bernoulli_${degree}.ccl
+	@echo -e $(BGREEN) "for a graphical output, use option -o -2 and pipe to gnuplot" $(NORMAL)
+	bin/ccluster bin/Bernoulli_${degree}.ccl -o -2 | gnuplot
 	@echo -e $(BRED) "this test will stop with an error if you do not have gnuplot installed on your machine" $(NORMAL)
 	@echo -e $(BRED) "if gnuplot opens a window, close the window to continue" $(NORMAL)
-	bin/ccluster bin/Bernoulli_32.ccl -o -2 | gnuplot
-	@echo -e $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree 32: should take less than a second" $(NORMAL)
-	@echo -e $(BRED) "for a graphical output with the subdivision tree, use option -o -3 and pipe to gnuplot" $(NORMAL)
-	bin/ccluster bin/Bernoulli_32.ccl -o -3 | gnuplot
+	@echo -e $(BGREEN) "for a graphical output with the subdivision tree, use option -o -3 and pipe to gnuplot" $(NORMAL)
+	bin/ccluster bin/Bernoulli_${degree}.ccl -o -3 | gnuplot
+	
+test: testMandelbrot testMignotte testBernoulli
 
 ################## End tests ######################################################
-
+################## Generate benchs of papers ######################################
+benchICMS2018: library bins
+	cd benchs && make benchICMS2018 && cd ..
+	
+benchMACIS2019: library bins MACIS19
+	cd benchs && make benchMACIS2019 && cd ..
+	
+benchISSAC2020: library bins ISSAC20
+	cd benchs && make benchISSAC2020 && cd ..
+	
+################## End benchs ######################################################
+################## targets for building##############################################
 
 quiet: library
 
@@ -117,9 +133,8 @@ clean:
 	$(CCLUSTER_LIBNAME) $(CCLUSTER_LIBNAME).$(CCLUSTER_MAJOR) 
 	rm -rf build
 	cd bin && make clean && cd ..
-# 	$(wildcard $(CCLUSTER_LIBNAME)*)
 
-distclean: clean benchsclean testclean
+distclean: clean testclean
 	rm -f Makefile
 	rm -f test/Makefile
 	rm -f bin/Makefile
@@ -133,12 +148,6 @@ $(CCLUSTER_LIB): $(LIB_LOBJS) $(LIB_SOURCES) $(LIB_HEADERS)
 
 libccluster.a: $(LIB_OBJS) $(LIB_SOURCES) $(LIB_HEADERS)
 	$(AR) rcs libccluster.a $(LIB_OBJS)
-	
-# build/%.lo: %.c $(HEADERS) | build
-# 	$(QUIET_CC) $(CC) $(PIC_FLAG) $(CFLAGS) $(INCS) -I$(INC_PATH) -c $< -o $@;
-# 
-# build/%.o: %.c $(HEADERS) | build
-# 	$(QUIET_CC) $(CC) $(CFLAGS) $(INCS) -I$(INC_PATH) -c $< -o $@;
 
 %.lo : %.c $(HEADERS)
 # 	@echo "Building $@"
@@ -191,23 +200,17 @@ comptest: library
 bins: library
 	cd bin && make && cd ..
 	
-# test: comptest bins
-# 	cd test && make tM1 && cd ..
-	
-autotest: bins
-	cd bin && make test && cd ..
-	
-ISSAC: bins
+ISSAC20: library bins
 	cd bin/ISSAC20 && make && make test && cd ../..
+	
+MACIS19: library bins
+	cd bin/MACIS19 && make && make test && cd ../..
 	
 benchICMS: compbenchs
 	cd benchs && make tableICMS && cd ..
 	
 testclean: 
 	cd test && make clean && cd ..
-	
-benchsclean: 
-	cd benchs && make clean && make cleanBenchs && cd ..
 	
 print-%:
 	@echo '$*=$($*)'

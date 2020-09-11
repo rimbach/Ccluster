@@ -11,23 +11,27 @@
 
 #include <string.h>
 #include <stdio.h>
-// #include "polynomials/compRat_poly.h"
-// #include "polynomials/compApp_poly.h"
-// #include "polynomials/app_rat_poly.h"
+#include "polynomials/compRat_poly.h"
+#include "polynomials/compApp_poly.h"
+#include "polynomials/app_rat_poly.h"
 #include "ccluster/ccluster.h"
-// #include "numbers/compApp.h"
 
-#include "./parseArgs.h"
+#include "../parseArgs.h"
 
-/* degree of the spiral polynomial */
-slong p_degree;
-/* writes in dest a prec-bit approximation of the spiral polynomial of degree p_degree*/
-void getApprox_Spiral(compApp_poly_t dest, slong prec);
+compRat_poly_t p_global;
+int d_global;
+
+void getApprox(compApp_poly_t dest, slong prec){
+    compApp_poly_set_compRat_poly(dest, p_global, prec);
+}
+
+void Mandelbrot_polynomial( realRat_poly_t dest, int iterations);
+void Mandelbrot_evaluate( compApp_t dest, compApp_t dest2, const compApp_t point, slong prec );
 
 int main(int argc, char **argv){
     
     if (argc<2){
-        printf("usage: %s degree [OPTIONS]", argv[0]);
+        printf("usage: %s iteration [OPTIONS] ", argv[0]);
         printf("                                 \n");
         printf("      -d , --domain: the initial region of interest\n");
         printf("                     global [default] finds all the roots\n");
@@ -40,8 +44,6 @@ int main(int argc, char **argv){
         printf("                     0: [default] NO OUTPUT\n");
         printf("                     d>0: d digit precision floating point numbers\n");
         printf("                     -1: rational numbers\n");
-        printf("                     -2 or g or G: gnuplot output: can be piped to gnuplot \n");
-        printf("                     -3 or gs or GS: gnuplot output with subdivision tree \n");
         printf("      -m, --mode: the version of the algorithm\n");
         printf("                     default value is \"default\"  \n");
         printf("      -v, --verbose: an integer for verbosity\n");
@@ -49,21 +51,18 @@ int main(int argc, char **argv){
         printf("                     1 [default]: abstract of input and output\n");
         printf("                     2: detailed reports concerning algorithm\n");
         printf("                     >=3: debugging mode\n");
-        printf("      -j, --nbThreads: an positive integer for the number of threads\n");
-        printf("                       1 [default]: one thread is used\n");
-        printf("                       >1: no compatibility with -o -3 option\n");
         return -1;
     }
     
     if (argc<=2){ /* display usage */
-        printf("usage: %s degree [OPTIONS]\n", argv[0]);
+        printf("usage: %s iteration [OPTIONS]\n", argv[0]);
         printf("   or: %s to see options\n", argv[0]);
     }
     
     int parse = 1;
     int degree;
     char * st;
-    int verbosity=1;
+    int verbosity = 1;
     int nbthreads = 1;
     int global = 2; /* by default, search all the roots */
     int infinity = 2;
@@ -79,11 +78,10 @@ int main(int argc, char **argv){
     realRat_init(eps);
     scan_epsilon( "+inf", eps );
     global = scan_initialBox( "global", bInit );
+    
     parse = parse*scan_degree( argv[1], &degree);
-    p_degree = (slong) degree;
     
     /* loop on arguments to figure out options */
-    
     for (int arg = 2; arg< argc; arg++) {
         
         if ( (strcmp( argv[arg], "-v" ) == 0) || (strcmp( argv[arg], "--verbose" ) == 0) ) {
@@ -116,15 +114,9 @@ int main(int argc, char **argv){
             }
         }
         
-        if ( (strcmp( argv[arg], "-j" ) == 0)  ) {
-            if (argc>arg+1) {
-                parse = parse*scan_nbthreads(argv[arg+1], &nbthreads);
-                arg++;
-            }
-        }
-        
         if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mode" ) == 0) ) {
             if (argc>arg+1) {
+//                 parse = parse*scan_strategy( argv[arg+1], st );
                 st = argv[arg+1];
                 arg++;
             }
@@ -132,17 +124,24 @@ int main(int argc, char **argv){
         
     }
     
+    realRat_poly_t pmand;
+    realRat_poly_init(pmand);
     
+    compRat_poly_init(p_global);
+    d_global = degree;
     
-    if (parse) {
-       if (global==2)
-            ccluster_global_interface_func( getApprox_Spiral, eps, st, nbthreads, output, verbosity);
-       else
-            ccluster_interface_func( getApprox_Spiral, bInit, eps, st, nbthreads, output, verbosity);
-
-        
+    Mandelbrot_polynomial( pmand, d_global);
+    compRat_poly_set_realRat_poly(p_global,pmand);
+    
+    if (parse==1) {
+        if (global==2)
+            ccluster_global_interface_func_eval( getApprox, Mandelbrot_evaluate, eps, st, nbthreads, verbosity);
+        else
+            ccluster_interface_func_eval( getApprox, Mandelbrot_evaluate, bInit, eps, st, nbthreads, verbosity);
     }
     
+    realRat_poly_clear(pmand);
+    compRat_poly_clear(p_global);
     realRat_clear(eps);
     compBox_clear(bInit);
     
@@ -151,54 +150,53 @@ int main(int argc, char **argv){
     return 0;
 }
 
-void getApprox_temp(compApp_poly_t dest, slong prec){
+void Mandelbrot_polynomial( realRat_poly_t pmand, int iterations){
     
-    realRat_t modu;
-    realRat_t argu;
-    compApp_t a_modu;
-    compApp_t a_argu;
-    compApp_t coeff;
+    realRat_poly_t pone, px;
+    realRat_poly_init(pone);
+    realRat_poly_init(px);
     
-    realRat_init(modu);
-    realRat_init(argu);
-    compApp_init(a_modu);
-    compApp_init(a_argu);
-    compApp_init(coeff);
+    realRat_poly_one(pmand);
+    realRat_poly_one(pone);
+    realRat_poly_zero(px);
+    realRat_poly_set_coeff_si_ui(px, 1, 1, 1);
     
-    compApp_poly_t temp;
-    compApp_poly_init2(temp,2);
-    compApp_poly_set_coeff_si(temp, 1, 1);
-    
-    compApp_poly_one(dest);
-    
-    for(int i=1; i<=p_degree; i++){
-        realRat_set_si(modu, -i, (ulong) p_degree);
-        realRat_set_si(argu, 4*i, (ulong) p_degree);
-        compApp_set_realRat( a_modu, modu, prec);
-        compApp_set_realRat( a_argu, argu, prec);
-        compApp_exp_pi_i( coeff, a_argu, prec);
-        compApp_mul( coeff, coeff, a_modu, prec);
-        compApp_poly_set_coeff_compApp(temp, 0, coeff);
-        compApp_poly_mul(dest, dest, temp, prec);
+    for (int i = 1; i<=iterations; i++) {
+        realRat_poly_pow(pmand, pmand, 2);
+        realRat_poly_mul(pmand, pmand, px);
+        realRat_poly_add(pmand, pmand, pone);
     }
     
-    realRat_clear(modu);
-    realRat_clear(argu);
-    compApp_clear(a_modu);
-    compApp_clear(a_argu);
-    compApp_clear(coeff);
-    compApp_poly_clear(temp);
+    realRat_poly_clear(pone);
+    realRat_poly_clear(px);    
 }
 
-void getApprox_Spiral(compApp_poly_t dest, slong prec){
+void Mandelbrot_evaluate( compApp_t dest, compApp_t dest2, const compApp_t point, slong prec ){
+    compApp_one(dest);
+    compApp_zero(dest2);
     
-    slong prectemp = 2*prec;
-    getApprox_temp( dest, prectemp );
+    compApp_t temp;
+    compApp_init(temp);
+    compApp_set(temp, dest);
     
-    while (!compApp_poly_check_relOne_accuracy( dest, prec)){
-        prectemp = 2*prectemp;
-        getApprox_temp( dest, prectemp );
+    for (int i = 1; i <= d_global; i++){
+        
+        compApp_pow_si(dest, dest, 2, prec); /* Pk-1(z)*Pk-1(z)*/
+        
+        /*compute value of derivative*/
+        compApp_mul(dest2, temp, dest2, prec); /* P'k-1(z)*Pk-1(z) */
+        compApp_mul(dest2, dest2, point, prec); /* z*P'k-1(z)*Pk-1(z) */
+        compApp_mul_si( dest2, dest2, 2, prec); /* 2*z*P'k-1(z)*Pk-1(z) */
+        compApp_add(dest2, dest2, dest, prec); /* 2*z*P'k-1(z)*Pk-1(z) + Pk-1(z)*Pk-1(z) */
+        
+        /*compute value of poly*/
+//         compApp_pow_si(dest, dest, 2, prec);
+        compApp_mul(dest, dest, point, prec);
+        compApp_add_ui(dest, dest, 1, prec);
+        
+        compApp_set(temp, dest);
     }
+    compApp_clear(temp);
     
-    compApp_poly_set_round( dest, dest, prec);
+    return;
 }

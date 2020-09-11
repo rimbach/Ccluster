@@ -29,31 +29,31 @@
 //     realApp_clear(fvalder);
 // }
 
-int realApp_poly_checkAccuracy( const realApp_poly_t poly, slong prec) {
+int realApp_poly_check_relOne_accuracy( const realApp_poly_t poly, slong prec) {
     int result = 1;
     slong i = 0;
     while ( ( i<=realApp_poly_degree(poly) ) && result ) {
-        result = result && realApp_checkAccuracy( realApp_poly_getCoeff( poly, i) , prec );
+        result = result && realApp_check_relOne_accuracy( realApp_poly_getCoeff( poly, i) , prec );
         i++;
     }
     return result;
 }
 
-slong realApp_poly_getAccuracy_min( const realApp_poly_t poly){
+slong realApp_poly_get_relOne_accuracy_min( const realApp_poly_t poly){
     slong i = 0;
-    slong res = realApp_getAccuracy( realApp_poly_getCoeff( poly, i) );
+    slong res = realApp_get_relOne_accuracy( realApp_poly_getCoeff( poly, i) );
     while ( i<=realApp_poly_degree(poly) ) {
-        res = CCLUSTER_MIN(res, realApp_getAccuracy( realApp_poly_getCoeff( poly, i) ) );
+        res = CCLUSTER_MIN(res, realApp_get_relOne_accuracy( realApp_poly_getCoeff( poly, i) ) );
         i++;
     }
     return res;
 }
 
-slong realApp_poly_getAccuracy_max( const realApp_poly_t poly){
+slong realApp_poly_get_relOne_accuracy_max( const realApp_poly_t poly){
     slong i = 0;
-    slong res = realApp_getAccuracy( realApp_poly_getCoeff( poly, i) );
+    slong res = realApp_get_relOne_accuracy( realApp_poly_getCoeff( poly, i) );
     while ( i<=realApp_poly_degree(poly) ) {
-        res = CCLUSTER_MAX(res, realApp_getAccuracy( realApp_poly_getCoeff( poly, i) ) );
+        res = CCLUSTER_MAX(res, realApp_get_relOne_accuracy( realApp_poly_getCoeff( poly, i) ) );
         i++;
     }
     return res;

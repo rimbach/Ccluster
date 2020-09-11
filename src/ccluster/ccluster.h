@@ -153,7 +153,13 @@ void ccluster_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                 char * stratstr,
                                 int nbThreads,
                                 int verb);
-  
+
+void ccluster_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
+                                   void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong), 
+                                   const realRat_t eps, 
+                                   char * stratstr,
+                                   int nbThreads,
+                                   int verb);
 /* interfaces for Julia */
 
 void ccluster_forJulia_func( connCmp_list_t qResults, 

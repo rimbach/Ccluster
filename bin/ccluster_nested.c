@@ -22,12 +22,12 @@
 /* degree of the spiral polynomial */
 slong p_degree;
 /* writes in dest a prec-bit approximation of the spiral polynomial of degree p_degree*/
-void getApprox_Spiral(compApp_poly_t dest, slong prec);
+void getApprox_Nested(compApp_poly_t dest, slong prec);
 
 int main(int argc, char **argv){
     
     if (argc<2){
-        printf("usage: %s degree [OPTIONS]", argv[0]);
+        printf("usage: %s iteration [OPTIONS]", argv[0]);
         printf("                                 \n");
         printf("      -d , --domain: the initial region of interest\n");
         printf("                     global [default] finds all the roots\n");
@@ -56,7 +56,7 @@ int main(int argc, char **argv){
     }
     
     if (argc<=2){ /* display usage */
-        printf("usage: %s degree [OPTIONS]\n", argv[0]);
+        printf("usage: %s iteration [OPTIONS]\n", argv[0]);
         printf("   or: %s to see options\n", argv[0]);
     }
     
@@ -136,9 +136,9 @@ int main(int argc, char **argv){
     
     if (parse) {
        if (global==2)
-            ccluster_global_interface_func( getApprox_Spiral, eps, st, nbthreads, output, verbosity);
+            ccluster_global_interface_func( getApprox_Nested, eps, st, nbthreads, output, verbosity);
        else
-            ccluster_interface_func( getApprox_Spiral, bInit, eps, st, nbthreads, output, verbosity);
+            ccluster_interface_func( getApprox_Nested, bInit, eps, st, nbthreads, output, verbosity);
 
         
     }
@@ -151,7 +151,9 @@ int main(int argc, char **argv){
     return 0;
 }
 
-void getApprox_temp(compApp_poly_t dest, slong prec){
+void clustersIterate( compApp_poly_ptr tabres, compApp_poly_ptr tabprec, int i, slong prec){
+    // tabres is a table of 3^i compApp_poly
+    // tabres is a table of 3^(i-1) compApp_poly
     
     realRat_t modu;
     realRat_t argu;
@@ -164,33 +166,78 @@ void getApprox_temp(compApp_poly_t dest, slong prec){
     compApp_init(a_modu);
     compApp_init(a_argu);
     compApp_init(coeff);
-    
-    compApp_poly_t temp;
-    compApp_poly_init2(temp,2);
-    compApp_poly_set_coeff_si(temp, 1, 1);
-    
-    compApp_poly_one(dest);
-    
-    for(int i=1; i<=p_degree; i++){
-        realRat_set_si(modu, -i, (ulong) p_degree);
-        realRat_set_si(argu, 4*i, (ulong) p_degree);
+    int indexInTabRes = 0;
+//     printf("pow(3,i-1): %d\n", (int) pow(3,i-1));
+    for (int j = 0; j<((int) pow(3,i-1)); j++){
+//         printf("%d\n", j);
+//         realRat_set_si(modu, -1, (ulong) 0x1<<(4*(i-1)));
+        realRat_set_si(modu, -1, (ulong) pow(4, 2*(i-1)));
         compApp_set_realRat( a_modu, modu, prec);
+        
+        realRat_set_si(argu, 2, 3);
         compApp_set_realRat( a_argu, argu, prec);
         compApp_exp_pi_i( coeff, a_argu, prec);
         compApp_mul( coeff, coeff, a_modu, prec);
-        compApp_poly_set_coeff_compApp(temp, 0, coeff);
-        compApp_poly_mul(dest, dest, temp, prec);
+        compApp_add( coeff, coeff, compApp_poly_getCoeff(tabprec + j, 0), prec);
+        compApp_poly_set( tabres + indexInTabRes, tabprec + j);
+        compApp_poly_set_coeff_compApp(tabres + indexInTabRes, 0, coeff);
+        indexInTabRes +=1;
+        
+        realRat_set_si(argu, 4, 3);
+        compApp_set_realRat( a_argu, argu, prec);
+        compApp_exp_pi_i( coeff, a_argu, prec);
+        compApp_mul( coeff, coeff, a_modu, prec);
+        compApp_add( coeff, coeff, compApp_poly_getCoeff(tabprec + j, 0), prec);
+        compApp_poly_set( tabres + indexInTabRes, tabprec + j);
+        compApp_poly_set_coeff_compApp(tabres + indexInTabRes, 0, coeff);
+        indexInTabRes +=1;
+        
+        realRat_set_si(argu, 6, 3);
+        compApp_set_realRat( a_argu, argu, prec);
+        compApp_exp_pi_i( coeff, a_argu, prec);
+        compApp_mul( coeff, coeff, a_modu, prec);
+        compApp_add( coeff, coeff, compApp_poly_getCoeff(tabprec + j, 0), prec);
+        compApp_poly_set( tabres + indexInTabRes, tabprec + j);
+        compApp_poly_set_coeff_compApp(tabres + indexInTabRes, 0, coeff);
+        indexInTabRes +=1;
+        
     }
-    
     realRat_clear(modu);
     realRat_clear(argu);
     compApp_clear(a_modu);
     compApp_clear(a_argu);
-    compApp_clear(coeff);
-    compApp_poly_clear(temp);
+    compApp_clear(coeff);    
 }
 
-void getApprox_Spiral(compApp_poly_t dest, slong prec){
+void getApprox_temp(compApp_poly_t dest, slong prec){
+    
+    compApp_poly_ptr tabprec;
+    tabprec = (compApp_poly_ptr) malloc (1*sizeof(compApp_poly));
+    compApp_poly_init2( tabprec, 2);
+    compApp_poly_zero(tabprec);
+    compApp_poly_set_coeff_si(tabprec, 1, 1);
+    int degree = 3;
+    
+    for (int i=1; i<=p_degree; i++) {
+        compApp_poly_ptr tabres;
+        tabres = (compApp_poly_ptr) malloc (degree*sizeof(compApp_poly));
+        for(int j = 0; j<degree; j++) compApp_poly_init2( tabres + j, 2);
+        
+        clustersIterate( tabres, tabprec, i, prec);
+        for(int j = 0; j<((int) (degree/3)); j++) compApp_poly_clear( tabprec + j);
+        free(tabprec);
+        tabprec = tabres;
+        degree = degree*3;
+    }
+    
+    degree = (int) degree/3;
+    compApp_poly_one(dest);
+    for(int j = 0; j<degree; j++) compApp_poly_mul(dest, dest, tabprec +j, prec);
+    for(int j = 0; j<degree; j++) compApp_poly_clear( tabprec + j);
+    free(tabprec);
+}
+
+void getApprox_Nested(compApp_poly_t dest, slong prec){
     
     slong prectemp = 2*prec;
     getApprox_temp( dest, prectemp );

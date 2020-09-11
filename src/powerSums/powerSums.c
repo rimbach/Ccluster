@@ -227,15 +227,13 @@ void powerSums_computeS0_prec(     compApp_t s0,
                                    metadatas_t meta, int depth ){
     
     powerSums_getEvaluationPoints( points, pointsShifted, center, radius, nbPoints, prec);
-#ifdef CCLUSTER_STATS_PS
     clock_t start = clock();
-#endif
+    
     powerSums_evaluateAtPoints( f_val, fder_val, pointsShifted, nbPoints, cache, prec, meta);
 //     powerSums_evaluateAtPoints_fast( f_val, fder_val, pointsShifted, nbPoints, cache, prec);
-#ifdef CCLUSTER_STATS_PS
     if (metadatas_haveToCount(meta))
             metadatas_add_Evals( meta, depth, nbPoints, (double) (clock() - start) );
-#endif 
+    
     powerSums_computeS0_fromVals( s0, points, f_val, fder_val, nbPoints, prec );
 }
 
@@ -443,14 +441,10 @@ powerSums_res powerSums_computePsApprox(compApp_ptr ps,
     
     /* compute points and evals at prec res.appPrec*/
     powerSums_getEvaluationPoints( points, pointsShifted, center, radius, nbPoints, res.appPrec);
-#ifdef CCLUSTER_STATS_PS
     clock_t start = clock();
-#endif    
     powerSums_evaluateAtPoints( fvals, fdervals, pointsShifted, nbPoints, cache, res.appPrec, meta);
-#ifdef CCLUSTER_STATS_PS
     if (metadatas_haveToCount(meta))
-            metadatas_add_Evals( meta, depth, nbPoints, (double) (clock() - start) );
-#endif     
+            metadatas_add_Evals( meta, depth, nbPoints, (double) (clock() - start) );   
 
     /* compute approximation of Power sums */
     res.nbOfSol = powerSums_computePsApprox_fromVals(ps, center, radius, lb, ub, points, fvals, fdervals, fdivs, nbPoints, nbPowerSums, res.appPrec, meta);
@@ -459,14 +453,10 @@ powerSums_res powerSums_computePsApprox(compApp_ptr ps,
         res.appPrec = 2*res.appPrec;
         
         powerSums_getEvaluationPoints( points, pointsShifted, center, radius, nbPoints, res.appPrec);
-#ifdef CCLUSTER_STATS_PS
         clock_t start2 = clock();
-#endif        
         powerSums_evaluateAtPoints( fvals, fdervals, pointsShifted, nbPoints, cache, res.appPrec, meta);
-#ifdef CCLUSTER_STATS_PS
         if (metadatas_haveToCount(meta))
             metadatas_add_Evals( meta, depth, nbPoints, (double) (clock() - start2) );
-#endif
         /* compute approximation of Power sums */
         res.nbOfSol = powerSums_computePsApprox_fromVals(ps, center, radius, lb, ub, points, fvals, fdervals, fdivs, nbPoints, nbPowerSums, res.appPrec, meta);
     }

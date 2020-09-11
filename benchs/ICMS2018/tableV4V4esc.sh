@@ -1,4 +1,6 @@
 #!/bin/bash
+echo "EPSILON AS AN ESCAPE BOUND IS A DEPRECATED OPTION"
+exit -1;
 # bernoulli: deg 64, eps = -53 -530 -5300
 # mignotte : deg 64, bitsize = 14, eps = -53, -530, -5300
 # #            deg 128, bitsize = 14, eps = -53, -530, -5300
