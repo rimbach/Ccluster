@@ -11,6 +11,7 @@ TEST_EXECS=$(TEST:%.c=%)
 build: ccluster\
        risolate\
        genPolFile\
+       genRandPolFile\
        ccluster_spiral\
        ccluster_nested
 
@@ -49,6 +50,12 @@ risolate: risolate.o parseArgs.h
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 
 genPolFile: genPolFile.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	
+genRandPolFile: genRandPolFile.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
