@@ -284,6 +284,10 @@ METADATAS_INLINE double metadatas_get_time_Anticip ( const metadatas_t m ) { ret
 METADATAS_INLINE double metadatas_get_time_PSTests ( const metadatas_t m ) { return chronos_get_time_PSTests (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_Evaluat ( const metadatas_t m ) { return chronos_get_time_Evaluat (metadatas_chronref(m)); }
 
+METADATAS_INLINE double metadatas_get_time_RRTaylo ( const metadatas_t m ) { return chronos_get_time_RRTaylo (metadatas_chronref(m)); }
+METADATAS_INLINE double metadatas_get_time_RRGraef ( const metadatas_t m ) { return chronos_get_time_RRGraef (metadatas_chronref(m)); }
+METADATAS_INLINE double metadatas_get_time_rootRad ( const metadatas_t m ) { return chronos_get_time_rootRad (metadatas_chronref(m)); }
+
 METADATAS_INLINE void metadatas_add_time_Approxi(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
@@ -376,6 +380,42 @@ METADATAS_INLINE void metadatas_add_time_CclusAl(metadatas_t m, double d){
                     metadatas_lock(m);
 #endif
     chronos_add_time_CclusAl( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE void metadatas_add_time_RRTaylo(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_RRTaylo( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE void metadatas_add_time_RRGraef(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_RRGraef( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE void metadatas_add_time_rootRad(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_rootRad( metadatas_chronref(m), d, metadatas_useNBThreads(m));
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_unlock(m);

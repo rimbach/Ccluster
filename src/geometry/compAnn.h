@@ -32,8 +32,12 @@ typedef struct {
     slong   centerIm;
     realApp radInf;
     realApp radSup;
-    int     rrInPo; /* 1 if it contains a unique real root in its intersection with R+ */
-    int     rrInNe; /* 1 if it contains a unique real root in its intersection with R- */
+    /* 0 if it contains no           real root in its intersection with R+ or R- */
+    /* 1 if it contains a unique     real root in its intersection with R+ or R- */
+    /* 2 if it contains at least one real root in its intersection with R+ or R- */
+    /* -1 if undetermined */
+    int     rrInPo; 
+    int     rrInNe; 
 } compAnn;
 
 typedef compAnn compAnn_t[1];

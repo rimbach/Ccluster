@@ -149,6 +149,19 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     r = fprintf(file, "#|%-39s %14d %14s|\n", "number of fails:",                    metadatas_getNbFailingNewton(meta),  " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in newton:",         metadatas_get_time_Newtons(meta),    " " );
     }
+    if (metadatas_useRootRadii(meta)){
+    r = fprintf(file, "# -------------------Root Radii       ---------------------------------\n");
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing root radii:",       metadatas_get_time_rootRad(meta),    " " );
+    int nbTaylorsRR = (metadatas_countref(meta))[0].RR_nbTaylors + (metadatas_countref(meta))[0].RR_nbTaylorsRepeted;
+    int nbTaylorsRRR = (metadatas_countref(meta))[0].RR_nbTaylorsRepeted;
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "number of Taylor shifts:",      nbTaylorsRR, nbTaylorsRRR);
+    int nbGraeffeRR = (metadatas_countref(meta))[0].RR_nbGraeffe + (metadatas_countref(meta))[0].RR_nbGraeffeRepeted;
+    int nbGraeffeRRR = (metadatas_countref(meta))[0].RR_nbGraeffeRepeted;
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "number of Greaffe Iterations:",      nbGraeffeRR, nbGraeffeRRR);
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "precision required:",     (metadatas_countref(meta))[0].RR_prec,    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Graeffe iterations:",      metadatas_get_time_RRGraef(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Taylor shifts:",      metadatas_get_time_RRTaylo(meta),    " " );
+    }
     r = fprintf(file, "# -------------------Other---------------------------------------------\n");
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in getApproximation:",           metadatas_get_time_Approxi(meta),    " " );
     if (metadatas_useAnticipate(meta)){
@@ -265,6 +278,17 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     r = fprintf(file, "#|%-39s %14d %14s|\n", "total number NE:",                       metadatas_getNbNewton(meta),         " " );
     r = fprintf(file, "#|%-39s %14d %14s|\n", "number of fails:",                    metadatas_getNbFailingNewton(meta),  " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in newton:",         metadatas_get_time_Newtons(meta),    " " );
+    }
+    if (metadatas_useRootRadii(meta)){
+    r = fprintf(file, "# -------------------Root Radii       ---------------------------------\n");
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing root radii:",       metadatas_get_time_rootRad(meta),    " " );
+//     int nbGraeffeRR = (metadatas_countref(meta))[0].RR_nbGraeffe + (metadatas_countref(meta))[0].RR_nbGraeffeRepeted;
+    int nbGraeffeRR = (metadatas_countref(meta))[0].RR_nbGraeffe;
+    int nbGraeffeRRR = (metadatas_countref(meta))[0].RR_nbGraeffeRepeted;
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "number of Greaffe Iterations:",      nbGraeffeRR, nbGraeffeRRR);
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "precision required/predicted:",    (metadatas_countref(meta))[0].RR_prec, 
+                                                                                   (metadatas_countref(meta))[0].RR_predPrec );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Graeffe iterations:",      metadatas_get_time_RRGraef(meta),    " " );
     }
     r = fprintf(file, "# -------------------Other---------------------------------------------\n");
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in getApproximation:",           metadatas_get_time_Approxi(meta),    " " );

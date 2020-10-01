@@ -257,7 +257,9 @@ void risolate_main_loop( connCmp_list_t qResults,
         prec = connCmp_appPr(ccur);
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
-        separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
+        /* do not need natural clusters */
+//         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
+        separationFlag = ccluster_compDsk_is_separated(ccDisk, qMainLoop, discardedCcs);
       
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);

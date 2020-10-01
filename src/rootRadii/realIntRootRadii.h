@@ -31,8 +31,14 @@
 extern "C" {
 #endif
     
-void realIntRootRadii_getApproximation( realApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta);
-void realIntRootRadii_graeffe_iterations_inplace( realApp_poly_t res, int N, slong prec, metadatas_t meta);
+void realIntRootRadii_getApproximation_real( realApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta);
+void realIntRootRadii_getApproximation_comp( compApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta);
+
+void realIntRootRadii_taylor_shift_inplace_real( realApp_poly_t res, slong centerRe, slong prec, metadatas_t meta);
+void realIntRootRadii_taylor_shift_inplace_comp( compApp_poly_t res, slong centerRe, slong centerIm, slong prec, metadatas_t meta);
+
+void realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta);
+void realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta);
 
 /* assume i<j<k */
 /* assume absPi=|Pi|, absPj=|Pj|, absPk=|Pk| are approximations of integers */
@@ -53,16 +59,18 @@ slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoef
 /* returns the precision used to carry out root radii */
 slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
                                   slong centerRe,
-                               cacheApp_t cache,        /* polynomial */
-                               const realRat_t delta,
-                               slong prec);
+                                  cacheApp_t cache,        /* polynomial */
+                                  const realRat_t delta,
+                                  slong prec,
+                                  metadatas_t meta );
 
 /* returns the precision used to carry out root radii */
 slong realIntRootRadii_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of annulii */
                                   slong centerIm,
-                               cacheApp_t cache,        /* polynomial */
-                               const realRat_t delta,
-                               slong prec);
+                                  cacheApp_t cache,        /* polynomial */
+                                  const realRat_t delta,
+                                  slong prec,
+                                  metadatas_t meta );
 
 void realIntRootRadii_connectedComponents( compAnn_list_t annulii, slong prec );  /* list of annulii */
 

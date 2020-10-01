@@ -149,7 +149,8 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
         compAnn_list_init(qAnn);
         compAnn_list_init(qAnn1);
         compAnn_list_init(qAnn2);
-        risolate_algo_global_rootRadii( qRes, bDis, qAnn, initialBox, eps, cache, meta);
+//         risolate_algo_global_rootRadii( qRes, bDis, qAnn, initialBox, eps, cache, meta);
+        risolate_algo_global_rootRadii2( qRes, bDis, qAnn, initialBox, eps, cache, meta);
     }
     else
         risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);

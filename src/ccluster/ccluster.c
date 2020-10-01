@@ -1018,14 +1018,14 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
     
     /* assume 0 is not a root of the poly */
     slong prec = CCLUSTER_DEFAULT_PREC;
-    prec = realIntRootRadii_rootRadii( annulii, 0, cache, delta, prec );
+    prec = realIntRootRadii_rootRadii( annulii, 0, cache, delta, prec, meta );
     
     /* find two integers that are not a roots of the poly */
     slong centerRe1 = realApp_ceil_si(compAnn_radSupref(compAnn_list_last(annulii)), prec);
 //     slong centerRe2 = centerRe1+1;
 //     slong centerRe3 = - centerRe1;
-    prec = realIntRootRadii_rootRadii( annulii1, centerRe1, cache, delta, prec );
-    prec = realIntRootRadii_rootRadii_imagCenter( annulii2, centerRe1, cache, delta, prec );
+    prec = realIntRootRadii_rootRadii( annulii1, centerRe1, cache, delta, prec, meta );
+    prec = realIntRootRadii_rootRadii_imagCenter( annulii2, centerRe1, cache, delta, prec, meta );
 //     compAnn_list_clear(annulii);
 //     compAnn_list_init(annulii);
 //     prec = realIntRootRadii_rootRadii( annulii , centerRe3, cache, delta );
@@ -1046,6 +1046,8 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
         printf("#time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
 //     }
     start2 = clock();
+    if (metadatas_haveToCount(meta))
+        metadatas_add_time_rootRad(meta, (double) (start2 - start) );
     
 //     printf("#Annulii 0: ");
 //     compAnn_list_printd(annulii, 10);

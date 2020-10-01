@@ -109,6 +109,33 @@ void risolate_algo_global_rootRadii_old( connCmp_list_t qResults,
                                      cacheApp_t cache, 
                                      metadatas_t meta);
 
+slong risolate_discard_compBox_list_rootRadii( compBox_list_t boxes, 
+                                                       compBox_list_t bDiscarded,
+                                                       cacheApp_t cache, 
+                                                       slong prec, 
+                                                       metadatas_t meta);
+
+void risolate_bisect_connCmp_rootRadii( connCmp_list_t dest, 
+                                                 connCmp_t cc, 
+                                                 connCmp_list_t discardedCcs,
+                                                 compBox_list_t bDiscarded, 
+                                                 cacheApp_t cache, 
+                                                 metadatas_t meta, 
+                                                 slong nbThreads);
+
+void risolate_main_loop_rootRadii( connCmp_list_t qResults,  
+                         compBox_list_t bDiscarded,
+                         connCmp_list_t qMainLoop, 
+                         connCmp_list_t discardedCcs, 
+                         const realRat_t eps, 
+                         cacheApp_t cache, 
+                         metadatas_t meta);
+
+void risolate_algo_global_rootRadii2  ( connCmp_list_t qResults, 
+                                       compBox_list_t bDiscarded,
+                                       compAnn_list_t annulii,
+                                       const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta);
+
 void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
                                      compBox_list_t bDiscarded,
                                      compAnn_list_t annulii,

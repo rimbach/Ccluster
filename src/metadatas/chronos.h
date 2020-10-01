@@ -53,6 +53,10 @@ typedef struct {
     /* for powerSums */
     double  _clicks_PSTests_cumul;
     double  _clicks_Evaluat_cumul;
+    /* for rootRadii */
+    double  _clicks_RRTaylo_cumul;
+    double  _clicks_RRGraef_cumul;
+    double  _clicks_rootRad_cumul;
     
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_t _mutex;
@@ -184,6 +188,18 @@ METADATAS_INLINE void   chronos_add_time_CclusAl( chronos_t times, double d, int
 // #endif
 }
 
+METADATAS_INLINE void   chronos_add_time_RRTaylo( chronos_t times, double d, int nbThreads ){
+    times->_clicks_RRTaylo_cumul += d/CLOCKS_PER_SEC;
+}
+
+METADATAS_INLINE void   chronos_add_time_RRGraef( chronos_t times, double d, int nbThreads ){
+    times->_clicks_RRGraef_cumul += d/CLOCKS_PER_SEC;
+}
+
+METADATAS_INLINE void   chronos_add_time_rootRad( chronos_t times, double d, int nbThreads ){
+    times->_clicks_rootRad_cumul += d/CLOCKS_PER_SEC;
+}
+
 METADATAS_INLINE double chronos_get_time_Approxi ( const chronos_t times ) { return times->_clicks_Approxi_cumul; }
 METADATAS_INLINE double chronos_get_time_Graeffe ( const chronos_t times ) { return times->_clicks_Graeffe_cumul; }
 METADATAS_INLINE double chronos_get_time_Taylors ( const chronos_t times ) { return times->_clicks_Taylors_cumul; }
@@ -196,6 +212,10 @@ METADATAS_INLINE double chronos_get_time_Anticip ( const chronos_t times ) { ret
 
 METADATAS_INLINE double chronos_get_time_PSTests ( const chronos_t times ) { return times->_clicks_PSTests_cumul; }
 METADATAS_INLINE double chronos_get_time_Evaluat ( const chronos_t times ) { return times->_clicks_Evaluat_cumul; }
+
+METADATAS_INLINE double chronos_get_time_RRTaylo ( const chronos_t times ) { return times->_clicks_RRTaylo_cumul; }
+METADATAS_INLINE double chronos_get_time_RRGraef ( const chronos_t times ) { return times->_clicks_RRGraef_cumul; }
+METADATAS_INLINE double chronos_get_time_rootRad ( const chronos_t times ) { return times->_clicks_rootRad_cumul; }
 
 /* DEPRECATED */
 // METADATAS_INLINE void   chronos_tic_Approxi      ( chronos_t times ) { times->_clicks_Approxi = clock(); }

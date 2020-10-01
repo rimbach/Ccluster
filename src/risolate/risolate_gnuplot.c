@@ -9,7 +9,8 @@
 /*  (at your option) any later version.  See <http://www.gnu.org/licenses/>.  */
 /* ************************************************************************** */
 
-#include "ccluster/ccluster.h"
+// #include "ccluster/ccluster.h"
+#include "risolate/risolate.h"
 
 void risolate_compBox_gnuplot(FILE * f, 
                      const compBox_t b){
@@ -81,7 +82,7 @@ void risolate_connCmp_gnuplot(FILE * f,
     realApp_init(rad);
     
     connCmp_risolate_componentBox( containingBox, c, metadatas_initBref(meta));
-    compBox_get_containing_dsk( containingDisk, containingBox);
+    risolate_compBox_get_containing_dsk( containingDisk, containingBox);
     
     slong l = fmpz_clog_ui( realRat_denref(compDsk_radiusref(containingDisk)), (ulong) 2);
 //     printf("l: %ld\n", l);
