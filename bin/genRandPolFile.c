@@ -64,7 +64,7 @@ int main(int argc, char **argv){
     parse = parse*sscanf(argv[3], "%s", filename);
     
     /* loop on arguments to figure out options */
-    for (int arg = 4; arg< argc; arg++) {
+    for (int arg = 3; arg< argc; arg++) {
         
         if ( (strcmp( argv[arg], "-f" ) == 0) || (strcmp( argv[arg], "--format" ) == 0) ) {
             if (argc>arg+1) {
@@ -134,7 +134,7 @@ int main(int argc, char **argv){
         return -1;
     }
     
-    printf ("%s PARSING OK\n", argv[0]);
+    printf ("%s PARSING OK, degree: %d, format: %d\n", argv[0], firstArg, format);
     
     realRat_poly_t p;
     realRat_poly_init(p);
@@ -153,6 +153,8 @@ int main(int argc, char **argv){
         } else if (format==3) {
             sprintf(filename, "%s/%s_%d_%d_%d.dsc", location, poly, firstArg, bitsize, nbp );
         }
+        
+        printf("filename: %s \n", filename);
         
         curFile = fopen (filename,"w");
         
@@ -216,7 +218,8 @@ void randomDense_polynomial( realRat_poly_t dest, int degree, int bitsize, flint
     fmpz_randtest_not_zero(dest->coeffs + degree, state, bitsize);
     fmpz_randtest_not_zero(dest->coeffs + 0,      state, bitsize);
     for (int i=1;i<degree; i++){
-        fmpz_randtest(dest->coeffs + i,           state, bitsize);
+        fmpz_randtest_not_zero(dest->coeffs + i,           state, bitsize);
+//         fmpz_randtest(dest->coeffs + i,           state, bitsize);
     }
     dest->length = degree +1;
 }
@@ -247,7 +250,8 @@ void randomSparse_polynomial( realRat_poly_t dest, int degree, int bitsize, int 
         coeff = (rand() % (degree));
         if (!isIntinListInt (coeff, list_coeffs, length)){
             
-            fmpz_randtest(dest->coeffs + coeff,           state, bitsize);
+//             fmpz_randtest(dest->coeffs + coeff,           state, bitsize);
+            fmpz_randtest_not_zero(dest->coeffs + coeff,           state, bitsize);
             list_coeffs[length]=coeff;
             length++;
         }
