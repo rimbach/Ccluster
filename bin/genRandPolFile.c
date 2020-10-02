@@ -134,7 +134,7 @@ int main(int argc, char **argv){
         return -1;
     }
     
-    printf ("%s PARSING OK, degree: %d, format: %d\n", argv[0], firstArg, format);
+//     printf ("%s PARSING OK, degree: %d, format: %d\n", argv[0], firstArg, format);
     
     realRat_poly_t p;
     realRat_poly_init(p);
@@ -154,7 +154,7 @@ int main(int argc, char **argv){
             sprintf(filename, "%s/%s_%d_%d_%d.dsc", location, poly, firstArg, bitsize, nbp );
         }
         
-        printf("filename: %s \n", filename);
+//         printf("filename: %s \n", filename);
         
         curFile = fopen (filename,"w");
         
