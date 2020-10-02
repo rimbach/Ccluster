@@ -448,7 +448,7 @@ POLNAME="randomDense"
 #solve random polynomials with ccluster
 echo $POLNAME >> $TEMPTABFILE1
 echo $POLNAME >> $TEMPTABFILE2
-NBPOLS=1
+
 for DEG in $DEGREES; do
 
 #     REPNAME=$REP"/"$POLNAME"_"$DEG
@@ -512,18 +512,8 @@ for DEG in $DEGREES; do
     DSC_TSIZE=`echo $DSC_TSIZE/$NBPOLS     |bc -l`
     DSC_TTIME=`echo $DSC_TTIME/$NBPOLS     |bc -l`
     
-#     LINE_TAB=" `format_numb $DEG $LENP` & `format_time $NSOLS `"
-#     LINE_TAB=$LINE_TAB" &`format_time $NSOLS ` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
-#     
-#     LINE_TAB=$LINE_TAB" & `format_time $RR_NSOLS` & `format_time $RR_TSIZE` & `format_time $RR_TDEPT`"
-# #     LINE_TAB=$LINE_TAB" & `format_numb $RR_NBVTS` &  `format_time $RR_TIVTS`"
-#     LINE_TAB=$LINE_TAB" & `format_time $RR_PRECN` "
-#     LINE_TAB=$LINE_TAB" & `format_time $RR_TINRR` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
-#     
-#     LINE_TAB=$LINE_TAB" & `format_time $DSC_NSOLS` & `format_time $DSC_TSIZE` &`format_time $DSC_TTIME`"
-#     echo $LINE_TAB >> $TEMPTABFILE
     
-    LINE_TAB1="$DEG & `format_time $NSOLS` & `format_time $BITSI` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
+    LINE_TAB1="$DEG & `format_time $BITSI` & `format_time $NSOLS` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
     LINE_TAB1=$LINE_TAB1" & `format_time $RR_TSIZE` & `format_time $RR_TDEPT` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
     LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`\\\\"
     
@@ -538,98 +528,88 @@ for DEG in $DEGREES; do
     
 done
 
-# POLNAME="randomDense"
-# 
-# #solve random polynomials with ccluster
-# echo $POLNAME >> $TEMPTABFILE1
-# echo $POLNAME >> $TEMPTABFILE2
-# DEGF=256
-# BITSIZES="10 50 100 500 1000 5000"
-# for BIT in $BITSIZES; do
-# 
-#     REPNAME=$REP"/"$POLNAME"_"$DEGF"_"$BIT
-#     FILENAME=$POLNAME"_"$DEG"_"$BIT
-#     
+POLNAME="randomDense"
+
+#solve random polynomials with ccluster
+echo $POLNAME >> $TEMPTABFILE1
+echo $POLNAME >> $TEMPTABFILE2
+DEGF=256
+BITSIZES="10 50 100 500 1000 5000"
+for BIT in $BITSIZES; do
+
+    REPNAME=$REP
+    NAME=$REPNAME"/"$POLNAME"_"$DEGF"_"$BIT
+    
 #     if [ ! -d $REPNAME ]; then
 # #         echo $REPNAME
 #          mkdir -p $REPNAME
 #     fi
-#     
-#     BITSI=0
-#     NSOLS=0
-#     TSIZE=0
-#     TDEPT=0
-#     TTIME=0
-# #     NBTZT=0
-# #     NBTST=0
-#     RR_NSOLS=0
-#     RR_TTIME=0
-#     RR_TSIZE=0
-#     RR_TDEPT=0
-#     RR_PRECN=0
-#     RR_PPREC=0
-#     RR_NBGRA=0
-#     RR_NBGRR=0
-#     RR_TINGR=0
-#     RR_TINRR=0
-#     DSC_NSOLS=0
-#     DSC_TSIZE=0
-#     DSC_TTIME=0
-#     
-#     for CURIND in `seq 1 $NBPOLS`; do
-#         NAME=$REPNAME"/"$FILENAME"_"$CURIND
-#         gen_with_deg_bs $NAME $POLNAME $DEGF $BIT
-#         run_risolate $NAME $POLNAME $DEGF
-#         run_aNewDsc  $NAME $POLNAME $DEGF
-#         stats_pol_rand $NAME
-#     done
-#     
-#     BITSI=`echo     $BITSI    /$NBPOLS     |bc -l`
-#     NSOLS=`echo     $NSOLS    /$NBPOLS     |bc -l`
-#     TSIZE=`echo     $TSIZE    /$NBPOLS     |bc -l`
-#     TDEPT=`echo     $TDEPT    /$NBPOLS     |bc -l`
-#     TTIME=`echo     $TTIME    /$NBPOLS     |bc -l`
-# #     NBTZT=`echo     $NBTZT    /$NBPOLS     |bc -l`
-# #     NBTST=`echo     $NBTST    /$NBPOLS     |bc -l`
-#     RR_NSOLS=`echo  $RR_NSOLS /$NBPOLS     |bc -l`
-#     RR_TTIME=`echo  $RR_TTIME /$NBPOLS     |bc -l`
-#     RR_TSIZE=`echo  $RR_TSIZE /$NBPOLS     |bc -l`
-#     RR_TDEPT=`echo  $RR_TDEPT /$NBPOLS     |bc -l`
-#     RR_PRECN=`echo  $RR_PRECN /$NBPOLS     |bc -l`
-#     RR_PPREC=`echo  $RR_PPREC /$NBPOLS     |bc -l`
-#     RR_NBGRA=`echo  $RR_NBGRA /$NBPOLS     |bc -l`
-#     RR_NBGRR=`echo  $RR_NBGRR /$NBPOLS     |bc -l`
-#     RR_TINGR=`echo  $RR_TINGR /$NBPOLS     |bc -l`
-#     RR_TINRR=`echo  $RR_TINRR /$NBPOLS     |bc -l`
-#     DSC_NSOLS=`echo $DSC_NSOLS/$NBPOLS     |bc -l`
-#     DSC_TSIZE=`echo $DSC_TSIZE/$NBPOLS     |bc -l`
-#     DSC_TTIME=`echo $DSC_TTIME/$NBPOLS     |bc -l`
-#     
-# #     LINE_TAB=" `format_numb $DEG $LENP` & `format_time $NSOLS `"
-# #     LINE_TAB=$LINE_TAB" &`format_time $NSOLS ` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
-# #     
-# #     LINE_TAB=$LINE_TAB" & `format_time $RR_NSOLS` & `format_time $RR_TSIZE` & `format_time $RR_TDEPT`"
-# # #     LINE_TAB=$LINE_TAB" & `format_numb $RR_NBVTS` &  `format_time $RR_TIVTS`"
-# #     LINE_TAB=$LINE_TAB" & `format_time $RR_PRECN` "
-# #     LINE_TAB=$LINE_TAB" & `format_time $RR_TINRR` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
-# #     
-# #     LINE_TAB=$LINE_TAB" & `format_time $DSC_NSOLS` & `format_time $DSC_TSIZE` &`format_time $DSC_TTIME`"
-# #     echo $LINE_TAB >> $TEMPTABFILE
-#     
-#     LINE_TAB1="$DEG & `format_time $NSOLS` & `format_time $BITSI` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
-#     LINE_TAB1=$LINE_TAB1" & `format_time $RR_TSIZE` & `format_time $RR_TDEPT` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
-#     LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`\\\\"
-#     
-# #     LINE_TAB2="$DEG & `format_time $RR_TTIME` & `format_time $RR_PRECN` & `format_time $RR_TINRR` & `percent_time $RR_TINRR $RR_TTIME`\\\\" 
-#     LINE_TAB2="`format_numb $DEG $LENP` & `format_time $BITSI` & `format_time $RR_TTIME` & `percent_time $RR_TINRR $RR_TTIME`"
-#     LINE_TAB2=$LINE_TAB2" & `format_time $RR_PPREC` & `format_time $RR_PRECN`"
-#     LINE_TAB2=$LINE_TAB2" & `format_time $RR_NBGRA` & `format_time $RR_NBGRR`"
-#     LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\"   
-#     
-#     echo $LINE_TAB1 >> $TEMPTABFILE1
-#     echo $LINE_TAB2 >> $TEMPTABFILE2
-#     
-# done
+    
+    BITSI=0
+    NSOLS=0
+    TSIZE=0
+    TDEPT=0
+    TTIME=0
+#     NBTZT=0
+#     NBTST=0
+    RR_NSOLS=0
+    RR_TTIME=0
+    RR_TSIZE=0
+    RR_TDEPT=0
+    RR_PRECN=0
+    RR_PPREC=0
+    RR_NBGRA=0
+    RR_NBGRR=0
+    RR_TINGR=0
+    RR_TINRR=0
+    DSC_NSOLS=0
+    DSC_TSIZE=0
+    DSC_TTIME=0
+    
+    genRand_with_deg_bs $NAME $POLNAME $DEGF $BIT $NBPOLS $REPNAME
+    for CURIND in `seq 1 $NBPOLS`; do
+        NAME=$REPNAME"/"$POLNAME"_"$DEGF"_"$BIT"_"$CURIND
+        run_risolate $NAME $POLNAME $DEGF
+        run_aNewDsc  $NAME $POLNAME $DEGF
+        stats_pol_rand $NAME
+    done
+    
+    BITSI=`echo     $BITSI    /$NBPOLS     |bc -l`
+    NSOLS=`echo     $NSOLS    /$NBPOLS     |bc -l`
+    TSIZE=`echo     $TSIZE    /$NBPOLS     |bc -l`
+    TDEPT=`echo     $TDEPT    /$NBPOLS     |bc -l`
+    TTIME=`echo     $TTIME    /$NBPOLS     |bc -l`
+#     NBTZT=`echo     $NBTZT    /$NBPOLS     |bc -l`
+#     NBTST=`echo     $NBTST    /$NBPOLS     |bc -l`
+    RR_NSOLS=`echo  $RR_NSOLS /$NBPOLS     |bc -l`
+    RR_TTIME=`echo  $RR_TTIME /$NBPOLS     |bc -l`
+    RR_TSIZE=`echo  $RR_TSIZE /$NBPOLS     |bc -l`
+    RR_TDEPT=`echo  $RR_TDEPT /$NBPOLS     |bc -l`
+    RR_PRECN=`echo  $RR_PRECN /$NBPOLS     |bc -l`
+    RR_PPREC=`echo  $RR_PPREC /$NBPOLS     |bc -l`
+    RR_NBGRA=`echo  $RR_NBGRA /$NBPOLS     |bc -l`
+    RR_NBGRR=`echo  $RR_NBGRR /$NBPOLS     |bc -l`
+    RR_TINGR=`echo  $RR_TINGR /$NBPOLS     |bc -l`
+    RR_TINRR=`echo  $RR_TINRR /$NBPOLS     |bc -l`
+    DSC_NSOLS=`echo $DSC_NSOLS/$NBPOLS     |bc -l`
+    DSC_TSIZE=`echo $DSC_TSIZE/$NBPOLS     |bc -l`
+    DSC_TTIME=`echo $DSC_TTIME/$NBPOLS     |bc -l`
+    
+    
+    LINE_TAB1="$DEGF & `format_time $BITSI` & `format_time $NSOLS` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
+    LINE_TAB1=$LINE_TAB1" & `format_time $RR_TSIZE` & `format_time $RR_TDEPT` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
+    LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`\\\\"
+    
+#     LINE_TAB2="$DEG & `format_time $RR_TTIME` & `format_time $RR_PRECN` & `format_time $RR_TINRR` & `percent_time $RR_TINRR $RR_TTIME`\\\\" 
+    LINE_TAB2="`format_numb $DEGF $LENP` & `format_time $BITSI` & `format_time $RR_TTIME` & `percent_time $RR_TINRR $RR_TTIME`"
+    LINE_TAB2=$LINE_TAB2" & `format_time $RR_PPREC` & `format_time $RR_PRECN`"
+    LINE_TAB2=$LINE_TAB2" & `format_time $RR_NBGRA` & `format_time $RR_NBGRR`"
+    LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\"   
+    
+    echo $LINE_TAB1 >> $TEMPTABFILE1
+    echo $LINE_TAB2 >> $TEMPTABFILE2
+    
+done
 
 
 # # 
