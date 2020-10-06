@@ -38,6 +38,9 @@ while [ "$1" != "" ]; do
       --purge)
         PURGE=1
         ;;
+      --purgeRR)
+        PURGERR=1
+        ;;
       --generate)
         GENERATE=1
         ;;
@@ -69,6 +72,10 @@ if [ -z "$PURGE" ]; then
    PURGE=0
 fi
 
+if [ -z "$PURGERR" ]; then
+   PURGERR=0
+fi
+
 if [ -z "$GENERATE" ]; then
    GENERATE=0
 fi
@@ -83,7 +90,8 @@ fi
 
 if [ -z "$SIZEGRID" ]; then
 #    SIZEGRID="5 6"
-   SIZEGRID="5 6 7 8 10 11 12 13 14"
+#    SIZEGRID="5 6 7 8 10 11 12 13 14"
+   SIZEGRID="10 11 12 13 14"
 fi
 
 if [ -z "$NBTERMS" ]; then
@@ -137,7 +145,7 @@ format_numb()
         RES=""
         while [ $SDIFF1 -gt 0 ]
         do
-            RES=$RES" "
+            RES=$RES"_"
             SDIFF1=$(( $SDIFF1-1 ))
         done
         RES="$RES$1"
@@ -212,19 +220,21 @@ genRand_with_deg_bs(){
     BS=$4
     NBPOLS=$5
     LOC=$6
-    NAME_IN=$NAME"_*.ccl"
-    NAME_IN2=$NAME"_*.mpl"
-    NAME_IN3=$NAME"_*.dsc"
+    NAME_IN=$NAME"_nbp.ccl"
+    NAME_IN2=$NAME"_nbp.mpl"
+    NAME_IN3=$NAME"_nbp.dsc"
+    NAME_IN_MAX=$NAME"_"$NBPOLS".ccl"
+    NAME_IN3_MAX=$NAME"_"$NBPOLS".dsc"
     
-#     if [ ! -e $NAME_IN ]; then
+    if [ ! -e $NAME_IN_MAX ]; then
             echo  "Generating $NBPOLS files for $POLNAME degree $DEG bitsize $BS, pol in " $NAME_IN
             $GENRANDPOLFI_CALL $POLNAME $DEG -f 1 -b $BS -p $NBPOLS -l $LOC
-#     fi
+    fi
     
-#     if [ ! -e $NAME_IN3 ]; then
+    if [ ! -e $NAME_IN3_MAX ]; then
             echo  "Generating $NBPOLS files for $POLNAME degree $DEG bitsize $BS, pol in " $NAME_IN3
             $GENRANDPOLFI_CALL $POLNAME $DEG -f 3 -b $BS -p $NBPOLS -l $LOC
-#     fi
+    fi
     
 }
 
@@ -262,6 +272,10 @@ run_risolate()
             $CALL > $NAME_OUT
     fi
     
+    if [ $PURGERR -eq 1 ]; then
+        rm -f $NAME_OUTRR
+    fi
+  
     if [ ! -e $NAME_OUTRR ]; then
             echo  "Clustering roots for $POLNAME degree $DEG, global, root radii, output in " $NAME_OUTRR
 #             ./ccluster $NAME_IN "global" $EPSILONCCL "test" 2 > $NAME_OUT0
@@ -363,7 +377,7 @@ stats_pol()
 #     
 #     LINE_TAB=$LINE_TAB" & `format_numb $DSC_NSOLS $LENP` & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`"
     
-    LINE_TAB1="`format_numb $DEG $LENP` & `format_numb $BITSI $LENP` & `format_numb $NSOLS $LENP` & `format_numb $TSIZE $LENP` & `format_numb $TDEPT 2` & `format_time $TTIME`"
+    LINE_TAB1="`format_numb $DEG $LENP` & `format_numb $BITSI $LENP` & `format_numb $NSOLS $LENP`  & `format_numb $RR_NSOLS $LENP` & `format_numb $TSIZE $LENP` & `format_numb $TDEPT 2` & `format_time $TTIME`"
     LINE_TAB1=$LINE_TAB1" & `format_numb $RR_TSIZE $LENP` & `format_numb $RR_TDEPT 2` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
     LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`\\\\"
     
@@ -372,6 +386,7 @@ stats_pol()
     LINE_TAB2=$LINE_TAB2" & `format_numb $RR_NBGRA $LENP` & `format_numb $RR_NBGRR $LENP`"
     LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\"  
     
+#     echo $LINE_TAB1
     echo $LINE_TAB1 >> $TEMPTABFILE1
     echo $LINE_TAB2 >> $TEMPTABFILE2
 }
@@ -382,6 +397,7 @@ stats_pol_rand()
     NAME_OUT=$NAME".out_riso"
     NAME_OUTRR=$NAME".out_riso_rr"
     NAME_OUTDSC=$NAME".out_dsc"
+    DEG=$2
     
     BITSI_T=$(grep "bitsize of input polynomial:"  $NAME_OUTRR| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     NSOLS_T=$(grep "number of solutions:"          $NAME_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
@@ -430,6 +446,11 @@ stats_pol_rand()
     DSC_TSIZE=`echo $DSC_TSIZE+$DSC_TSIZE_T|bc -l`
     DSC_TTIME=`echo $DSC_TTIME+$DSC_TTIME_T|bc -l`
     
+    LINE_TAB1="`format_numb $DEG $LENP` & `format_numb $BITSI_T $LENP` & `format_numb $NSOLS_T $LENP` & `format_numb $RR_NSOLS_T $LENP` & `format_numb $TSIZE_T $LENP` & `format_numb $TDEPT_T 2` & `format_time $TTIME_T`"
+    LINE_TAB1=$LINE_TAB1" & `format_numb $RR_TSIZE_T $LENP` & `format_numb $RR_TDEPT_T 2` & `format_time $RR_TTIME_T` & `percent_time $RR_TTIME_T $TTIME_T`"
+    LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE_T $LENP` &`format_time $DSC_TTIME_T`\\\\"
+    
+    echo $LINE_TAB1
 }
 
 REP="tab_risolate"
@@ -488,7 +509,7 @@ for DEG in $DEGREES; do
         NAME=$REPNAME"/"$POLNAME"_"$DEG"_"$BITSIZE"_"$CURIND
         run_risolate $NAME $POLNAME $DEG
         run_aNewDsc  $NAME $POLNAME $DEG
-        stats_pol_rand $NAME
+        stats_pol_rand $NAME $DEG
     done
     
     BITSI=`echo     $BITSI    /$NBPOLS     |bc -l`
@@ -513,7 +534,7 @@ for DEG in $DEGREES; do
     DSC_TTIME=`echo $DSC_TTIME/$NBPOLS     |bc -l`
     
     
-    LINE_TAB1="$DEG & `format_time $BITSI` & `format_time $NSOLS` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
+    LINE_TAB1="$DEG & `format_time $BITSI` & `format_time $NSOLS` & `format_time $RR_NSOLS` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
     LINE_TAB1=$LINE_TAB1" & `format_time $RR_TSIZE` & `format_time $RR_TDEPT` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
     LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`\\\\"
     
@@ -534,7 +555,7 @@ POLNAME="randomDense"
 echo $POLNAME >> $TEMPTABFILE1
 echo $POLNAME >> $TEMPTABFILE2
 DEGF=256
-BITSIZES="10 50 100 500 1000 5000"
+BITSIZES="50 100 500 1000 5000"
 for BIT in $BITSIZES; do
 
     REPNAME=$REP
@@ -571,7 +592,7 @@ for BIT in $BITSIZES; do
         NAME=$REPNAME"/"$POLNAME"_"$DEGF"_"$BIT"_"$CURIND
         run_risolate $NAME $POLNAME $DEGF
         run_aNewDsc  $NAME $POLNAME $DEGF
-        stats_pol_rand $NAME
+        stats_pol_rand $NAME $DEGF
     done
     
     BITSI=`echo     $BITSI    /$NBPOLS     |bc -l`
@@ -596,7 +617,7 @@ for BIT in $BITSIZES; do
     DSC_TTIME=`echo $DSC_TTIME/$NBPOLS     |bc -l`
     
     
-    LINE_TAB1="$DEGF & `format_time $BITSI` & `format_time $NSOLS` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
+    LINE_TAB1="$DEGF & `format_time $BITSI` & `format_time $NSOLS` & `format_time $RR_NSOLS` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
     LINE_TAB1=$LINE_TAB1" & `format_time $RR_TSIZE` & `format_time $RR_TDEPT` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
     LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`\\\\"
     
@@ -727,6 +748,8 @@ done
 # #Other polynomials
 # # DEGREES="64 128 191 256 383 512"
 # # DEGREES="64"
+
+
 POLNAMES="Mignotte"
 
 for POLNAME in $POLNAMES; do
@@ -750,6 +773,7 @@ for DEG in $DEGREES; do
 #     stats_pol $NAME
 done 
 done
+
 # 
 # #Procedural polynomials
 # 

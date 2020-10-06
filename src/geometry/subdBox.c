@@ -349,6 +349,48 @@ void subdBox_risolate_bisect_with_compDsk( compBox_list_t res, const compBox_t b
     
 }
 
+/* side is -1 for left, 1 for right */
+void subdBox_risolate_bisect_with_ratio( compBox_list_t res, const compBox_t b, slong ratio, int side){
+    
+    realRat_t shift, width;
+    realRat_init(shift);
+    realRat_init(width);
+    
+    compBox_ptr Nb;
+    Nb = ( compBox_ptr ) ccluster_malloc (sizeof(compBox));
+    compBox_init(Nb);
+    
+    realRat_set_si(width, 1, 2);
+    realRat_mul(width, width, compBox_bwidthref(b) );
+    realRat_set( compRat_realref(compBox_centerref(Nb)), compRat_realref(compBox_centerref(b)) );
+    if (side==-1)
+        realRat_add( compRat_realref(compBox_centerref(Nb)), compRat_realref(compBox_centerref(Nb)), width );
+    else
+        realRat_sub( compRat_realref(compBox_centerref(Nb)), compRat_realref(compBox_centerref(Nb)), width );
+    
+    realRat_set_si(width, 1, 2);
+    realRat_pow_si(width, width, ratio);
+    realRat_mul(width, width, compBox_bwidthref(b) );
+    realRat_set(shift, width);
+    realRat_div_ui(shift, shift, 2);
+    
+    if (side==-1)
+        realRat_sub( compRat_realref(compBox_centerref(Nb)), compRat_realref(compBox_centerref(Nb)), shift );
+    else
+        realRat_add( compRat_realref(compBox_centerref(Nb)), compRat_realref(compBox_centerref(Nb)), shift );
+    
+    compBox_set_compRat_realRat_int(Nb, compBox_centerref(Nb), width, b->nbMSol);
+    
+    /* root radii */
+    compBox_actualize_anulii_risolate( Nb, b);
+    
+    compBox_list_push(res, Nb);
+    
+    
+    realRat_clear(shift);
+    realRat_clear(width);
+}
+
 /* DEPRECATED 
 
 void subdBox_quadrisect_intersect_compDsk( compBox_list_t res, const compBox_t b, const compDsk_t d){

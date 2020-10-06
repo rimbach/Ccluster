@@ -43,26 +43,26 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
         
         //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
         
-        if ( metadatas_useRootRadii(meta) ){
-            
-            if ( risolate_compBox_intersects_atLest_one( btemp, 1 ) == 0 ){
-                if (metadatas_haveToCount(meta)){
-                    metadatas_add_discarded( meta, depth);
-                }
-//                 if (metadatas_getDrSub(meta)==0){
-                    compBox_clear(btemp);
-                    ccluster_free(btemp);
-//                 } else {
-//                     compBox_list_push(bDiscarded, btemp);
+//         if ( metadatas_useRootRadii(meta) ){
+//             
+//             if ( risolate_compBox_intersects_atLest_one( btemp, 1 ) == 0 ){
+//                 if (metadatas_haveToCount(meta)){
+//                     metadatas_add_discarded( meta, depth);
 //                 }
-                continue;
-            }
-            
-//             if (risolate_compBox_intersects_only_one( btemp, 2 ) == 0){
-//                 compBox_list_push(ltemp, btemp);
+// //                 if (metadatas_getDrSub(meta)==0){
+//                     compBox_clear(btemp);
+//                     ccluster_free(btemp);
+// //                 } else {
+// //                     compBox_list_push(bDiscarded, btemp);
+// //                 }
 //                 continue;
 //             }
-        }
+//             
+// //             if (risolate_compBox_intersects_only_one( btemp, 2 ) == 0){
+// //                 compBox_list_push(ltemp, btemp);
+// //                 continue;
+// //             }
+//         }
         
         res = tstar_real_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
         if (res.nbOfSol==0) {
