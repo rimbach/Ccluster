@@ -57,6 +57,7 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
     strat->_useNBThreads          = strat2->_useNBThreads      ;
     strat->_additionalFlags       = strat2->_additionalFlags   ;
     strat->_useRealCoeffs            = strat2->_useRealCoeffs   ;
+    strat->_useDeflation          = strat2->_useDeflation       ;
     strat->_usePowerSums             = strat2->_usePowerSums   ;
     strat->_forTests              = strat2->_forTests   ;
 //     strat->_pwSuTest              = strat2->_pwSuTest   ;
@@ -72,6 +73,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
     strat->_useNBThreads          = 0;
     strat->_additionalFlags       = 0;
     strat->_useRealCoeffs         = 0;
+    strat->_useDeflation          = 0;
     strat->_usePowerSums         = 0;
 //     strat->_pwSuTest             = 0;
     strat->_forTests             = 0;
@@ -142,9 +144,10 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_usePredictPrec        = 1;
         strat->_useAnticipate         = 1;
         strat->_useRealCoeffs         = 1;
-        strat->_usePowerSums          = 1;
+        strat->_useDeflation          = 1;
+        strat->_usePowerSums          = 0;
 //         strat->_forTests              = 1;
-        strat->_pwSuNbPs              = 1;
+        strat->_pwSuNbPs              = 0;
         return;
     }
     if (strcmp( stratName, STRAT_STR_FORTESTS1 ) == 0) {

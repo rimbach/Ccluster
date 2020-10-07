@@ -24,6 +24,10 @@
 #include "lists/compBox_list.h"
 #include "flint/fmpz.h"
 
+/*for deflation*/
+#include "numbers/realApp.h"
+#include "polynomials/compApp_poly.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,8 +42,19 @@ typedef struct {
     int          nSols; /* the number of roots in the connected component */
     fmpz         nwSpd; /* the newton speed                               */
     slong        appPr; /* the number of bit of approximations            */
-    int          newSu; /* a flag set to 1 iff the last newton iteration wa successful*/
+    int          newSu; /* a flag set to 1 iff the last newton iteration was successful*/
+                        /*               2 iff the last newton iteration was unsuccessful*/
+                        /*               0 iff newton has not been tested on the cc*/
     int          isSep; /* a flag set to 1 if the connected component is separated from the other ones*/
+    
+    /* for deflation */
+    int          isDef; /* a flag set to 1 if a deflation has been computed */
+                        /*               0 otherwise */
+    int          degDe; /* nb of sol in the CC when the deflation has been computed */
+    compApp_poly defPo; /* "deflated" polynomial: interval polynomial that contains */
+                        /*                        coeffs pol shifted to any point in the cc */
+    realApp      sumAb; /* sum of absolute values of deg - ( degDe + 1) leading coefficients */
+    /* end for deflation */
 } connCmp;
 
 typedef connCmp connCmp_t[1];

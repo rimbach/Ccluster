@@ -135,6 +135,7 @@ METADATAS_INLINE int metadatas_usePredictPrec    ( const metadatas_t m ) { retur
 METADATAS_INLINE int metadatas_useAnticipate     ( const metadatas_t m ) { return strategies_useAnticipate     (metadatas_stratref(m)); }
 // METADATAS_INLINE int metadatas_useCountSols      ( const metadatas_t m ) { return strategies_useCountSols      (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useNBThreads      ( const metadatas_t m ) { return strategies_useNBThreads      (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_useDeflation      ( const metadatas_t m ) { return strategies_useDeflation     (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useRealCoeffs     ( const metadatas_t m ) { return strategies_useRealCoeffs     (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_usePowerSums      ( const metadatas_t m ) { return strategies_usePowerSums      (metadatas_stratref(m)); }
 // METADATAS_INLINE int metadatas_pwSuTest         ( const metadatas_t m ) { return strategies_pwSuTest           (metadatas_stratref(m)); }

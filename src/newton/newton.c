@@ -410,6 +410,8 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
             tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
             res.appPrec = tres.appPrec;
             res.nflag = (tres.nbOfSol == connCmp_nSolsref(CC));
+            if (metadatas_getVerbo(meta)>3)
+                    printf("------run tstar in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
         
         }
 //         printf("number of sols in ndisk from pellet test: %d\n\n", tres.nbOfSol);

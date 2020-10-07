@@ -264,15 +264,29 @@ void risolate_main_loop( connCmp_list_t qResults,
         
         if (metadatas_getVerbo(meta)>3) {
             printf("---depth: %d\n", (int) depth);
-            printf("------component Box:       "); compBox_print(componentBox); printf("\n");
+//             printf("------component Box:       "); compBox_print(componentBox); printf("\n");
+            compApp_t centerApp;
+            realApp_t widthApp;
+            compApp_init(centerApp);
+            realApp_init(widthApp);
+            compApp_set_compRat(centerApp, compBox_centerref(componentBox), CCLUSTER_DEFAULT_PREC );
+            realApp_set_realRat(widthApp,  compBox_bwidthref(componentBox), CCLUSTER_DEFAULT_PREC );
+            printf("------component Box:       center: ");
+            compApp_printd(centerApp, 10); printf(" width: ");
+            realApp_printd(widthApp, 10); printf("\n");
+            compApp_clear(centerApp);
+            realApp_clear(widthApp);
+            printf("------nb of boxes:         %d\n", compBox_list_get_size(connCmp_boxesref(ccur)));
             printf("------nb of roots:         %d\n", connCmp_nSolsref(ccur));
             printf("------last newton success: %d\n", connCmp_newSuref(ccur));
+            printf("------newton speed       : "); fmpz_print(connCmp_nwSpdref(ccur)); printf("\n");
             printf("------separation Flag:     %d\n", separationFlag);
             printf("------widthFlag:           %d\n", widthFlag); 
             printf("------compactFlag:         %d\n", compactFlag);
             printf("------sepBoundFlag:        %d\n", sepBoundFlag);
-            compBox_list_print( connCmp_boxesref(ccur) );
-            printf("\n");
+            printf("------current prec:        %ld\n",connCmp_appPrref(ccur));
+//             compBox_list_print( connCmp_boxesref(ccur) );
+//             printf("\n");
         }
         
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
@@ -284,8 +298,8 @@ void risolate_main_loop( connCmp_list_t qResults,
 //                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                 resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
-//                 if (metadatas_getVerbo(meta)>3)
-//                     printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));
+                if (metadatas_getVerbo(meta)>3)
+                    printf("------run tstar: nbSols: %d, required precision: %ld\n", (int) connCmp_nSolsref(ccur), resTstar.appPrec);
 //                 ???
                 prec = resTstar.appPrec;
 //             }
@@ -293,6 +307,86 @@ void risolate_main_loop( connCmp_list_t qResults,
 //             printf("validate: prec avant: %d prec apres: %d\n", (int) prec, (int) resTstar.appPrec);
 //             ???
 //             prec = resTstar.appPrec;
+                
+//                 if ( ( (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && (!widthFlag) )
+//                      ||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) )
+//                      ||( !sepBoundFlag && (connCmp_nSols(ccur)>1))   )
+//                 {
+//                     
+//                         compDsk_t nDisk;
+//                         compDsk_init(nDisk);
+//                         realRat_t factor, nwidth;
+//                         realRat_init(factor);
+//                         realRat_init(nwidth);
+//                         printf("Try to DOWNSIZE!!!\n");
+//                         int resDownsize = tstar_real_downsize( nDisk, factor, cache, ccDisk, (int) connCmp_nSolsref(ccur), prec, depth, meta );
+//                         
+//                         if (resDownsize==1) {
+//                             
+//                             printf("res: %d, old disk: ", resDownsize);
+//                             compDsk_print(ccDisk);
+//                             printf(" new disk: ");
+//                             compDsk_print(nDisk);
+//                             printf("\n");
+//                             printf("ratio: "); realRat_print(factor); printf("\n"); 
+//                             
+//                             connCmp_ptr nCC;
+//                             nCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
+//                             connCmp_init(nCC);
+//             
+//                             realRat_mul(nwidth, connCmp_widthref(ccur), factor);
+//                             
+//                             compBox_list_ptr ltemp;
+//                             compBox_ptr btemp;
+//                             ltemp = connCmp_boxesref(ccur);
+//                             
+//                             compBox_list_t ltemp2;
+//                             compBox_list_init(ltemp2);
+//                             
+//                             while (compBox_list_get_size(ltemp)>0){
+//                                 btemp = compBox_list_pop(ltemp);
+//                                 subdBox_risolate_bisect_with_compDsk( ltemp2, btemp, nDisk, nwidth);
+//                                 compBox_clear(btemp);
+//                                 ccluster_free(btemp); /*comment it for julia...*/
+//                             }
+//                             compBox_list_swap(ltemp, ltemp2);
+//                             compBox_list_clear(ltemp2);
+//                             
+// //                             printf("length of list: %d\n", compBox_list_get_size(ltemp));
+// //                             compBox_list_print(ltemp); printf("\n"); 
+//                             
+//                             btemp = compBox_list_pop(ltemp);
+//                             realRat_set(connCmp_widthref(nCC), compBox_bwidthref(btemp));
+//                             connCmp_insert_compBox(nCC, btemp);
+//                             while (!compBox_list_is_empty(ltemp))
+//                                 connCmp_insert_compBox(nCC, compBox_list_pop(ltemp));
+//                             connCmp_nSols(nCC) = connCmp_nSols(ccur);
+//                             fmpz_set(connCmp_nwSpdref(nCC), connCmp_nwSpdref(ccur));
+//                             /* test */
+//                             connCmp_isSep(nCC) = connCmp_isSep(ccur);
+//                             
+//                             connCmp_clear(ccur);
+//                             ccluster_free(ccur);
+//                             ccur = nCC;
+//                             connCmp_newSuref(ccur) = 0;
+//                             connCmp_appPrref(ccur) = prec;
+//                             
+//                             connCmp_risolate_componentBox(componentBox, ccur, metadatas_initBref(meta));
+//                             compBox_get_containing_dsk(ccDisk, componentBox);
+//                             realRat_mul(threeWidth, three, connCmp_widthref(ccur));
+//                             depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
+//         
+//       
+//                             widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
+//                             compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
+//         
+//                             sepBoundFlag   = (realRat_cmp( compBox_bwidthref(componentBox), metadatas_getSepBound(meta))<=0);
+//                         }
+//     
+//                         compDsk_clear(nDisk);
+//                         realRat_clear(factor);
+//                         realRat_clear(nwidth);
+//                 }
         }
         
         /* special case where zero is a root with mult>1 */
@@ -328,18 +422,83 @@ void risolate_main_loop( connCmp_list_t qResults,
             connCmp_init(nCC);
             resNewton = newton_risolate_newton_connCmp( nCC, ccur, cache, initPoint, prec, meta);
 
+            if (metadatas_getVerbo(meta)>3)
+                    printf("------run Newton: res: %d, required precision: %ld\n", resNewton.nflag, resNewton.appPrec);
+            
 //             printf("+++depth: %ld, connCmp_nSolsref(ccur): %d, res_newton: %d \n", depth, connCmp_nSols(ccur), resNewton.nflag);
             if (resNewton.nflag) {
+                
                 connCmp_clear(ccur);
                 ccluster_free(ccur);
                 ccur = nCC;
-                connCmp_increase_nwSpd(ccur);
                 connCmp_newSuref(ccur) = 1;
-                connCmp_appPrref(nCC) = resNewton.appPrec;
+                connCmp_appPrref(ccur) = resNewton.appPrec;
+                
+                connCmp_risolate_componentBox(componentBox, ccur, metadatas_initBref(meta));
+                compBox_get_containing_dsk(ccDisk, componentBox);
+                
+                if (metadatas_useDeflation(meta))
+                if (metadatas_getVerbo(meta)>1) {
+                    if (connCmp_nSolsref(ccur) > 1 ) {
+                        if (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)==0) {
+                            if (realRat_cmp_ui(compDsk_radiusref(ccDisk), 1 ) < 0) {
+                                
+                                printf("\n\n\n ------First Success of Newton Iteration for this Component with a cluster of %d roots------\n", connCmp_nSolsref(ccur) );
+                                compApp_poly_t fApprox;
+                                compApp_poly_init(fApprox);
+                                compApp_poly_set(fApprox, cacheApp_getApproximation ( cache, connCmp_appPrref(ccur)));
+                                
+                                connCmp_risolate_componentBox(componentBox, ccur, metadatas_initBref(meta));
+                                compBox_get_containing_dsk(ccDisk, componentBox);
+                                compApp_poly_taylorShift_interval_in_place( fApprox, compDsk_centerref(ccDisk), compDsk_radiusref(ccDisk), connCmp_appPrref(ccur) );
+                                
+    //                             printf("Poly: ");
+    //                             compApp_poly_printd(fApprox, connCmp_appPrref(ccur));
+    //                             printf("\n");
+                                
+                                realApp_t abs, sumAbs;
+                                realApp_init(abs);
+                                realApp_init(sumAbs);
+                                compApp_abs( sumAbs, fApprox->coeffs + connCmp_nSolsref(ccur) + 1, connCmp_appPrref(ccur) );
+                                
+                                for (slong index = connCmp_nSolsref(ccur) + 2; index < fApprox->length; index++ ){
+                                    compApp_abs( abs, fApprox->coeffs + index, connCmp_appPrref(ccur) );
+                                    realApp_add( sumAbs, sumAbs, abs, connCmp_appPrref(ccur) );
+                                }
+                                    
+                                printf("Sum of %d leading coefficients: ", (int) fApprox->length - connCmp_nSolsref(ccur) );
+                                realApp_printd(sumAbs, connCmp_appPrref(ccur) );
+                                printf("\n");
+                                
+                                realRat_t factor;
+                                realRat_init(factor);
+                                realRat_set(factor, compDsk_radiusref(ccDisk));
+                                printf("radius of disk: "); realRat_print(factor); printf("\n");
+                                realRat_pow_si( factor, factor, connCmp_nSolsref(ccur) + 1);
+                                printf("factor:         "); realRat_print(factor); printf("\n");
+                                realApp_mul_realRat(sumAbs, sumAbs, factor, connCmp_appPrref(ccur) );
+                                printf("scaled sum of abs coeffs: ");
+                                realApp_printd(sumAbs, connCmp_appPrref(ccur) );
+                                printf("\n");
+                                
+                                realApp_clear(sumAbs);
+                                realApp_clear(abs);
+                                
+                                realRat_clear(factor);
+                                
+                                compApp_poly_clear(fApprox);
+                                printf("------\n\n\n");
+                            }
+                        }
+                    }
+                }
+                
+                connCmp_increase_nwSpd(ccur);
     
             }
             else {
-                connCmp_newSuref(ccur) = 0;
+                /* newton has been run but wasn't successful */
+                connCmp_newSuref(ccur) = 2;
                 connCmp_clear(nCC);
                 ccluster_free(nCC);
             }
@@ -377,6 +536,9 @@ void risolate_main_loop( connCmp_list_t qResults,
 //             connCmp_clear(ccur);
 //             ccluster_free(ccur);
 // #else
+            if (metadatas_getVerbo(meta)>3) {
+                printf("------bisect\n" );
+            }
             risolate_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));

@@ -63,6 +63,8 @@ void compApp_poly_taylorShift_in_place( compApp_poly_t f,
                                         const realRat_t radius, 
                                         slong prec );
 
+void compApp_poly_taylorShift_interval_in_place( compApp_poly_t f, const compRat_t center, const realRat_t radius, slong prec );
+
 void realApp_poly_taylorShift( realApp_poly_t res, 
                                const realApp_poly_t f, 
                                const realRat_t center, 

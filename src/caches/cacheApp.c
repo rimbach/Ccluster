@@ -31,8 +31,10 @@ void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, s
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(cache->_mutex), NULL);
 #endif
-/*     compApp_poly_init(cacheApp_workref(cache));    */
-/*     cache->_nbIterations = 0;                      */
+    /* for test: cache the last working polynomial computed and the nb of graeffe iterations */
+//     compApp_poly_init(cacheApp_workCref(cache)); 
+//     realApp_poly_init(cacheApp_workRref(cache));
+//     cache->_nbIterations = 0;                     
 }
 
 void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly){
@@ -52,6 +54,10 @@ void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly){
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(cache->_mutex), NULL);
 #endif
+    /* for test: cache the last working polynomial computed and the nb of graeffe iterations */
+//     compApp_poly_init(cacheApp_workCref(cache)); 
+//     realApp_poly_init(cacheApp_workRref(cache)); 
+//     cache->_nbIterations = 0; 
 }
 
 void cacheApp_init_realRat_poly ( cacheApp_t cache, const realRat_poly_t poly){
@@ -71,6 +77,10 @@ void cacheApp_init_realRat_poly ( cacheApp_t cache, const realRat_poly_t poly){
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(cache->_mutex), NULL);
 #endif
+    /* for test: cache the last working polynomial computed and the nb of graeffe iterations */
+//     compApp_poly_init(cacheApp_workCref(cache)); 
+//     realApp_poly_init(cacheApp_workRref(cache)); 
+//     cache->_nbIterations = 0; 
 }
 
 //requires: prec is 2^n*CCLUSTER_DEFAULT_PREC
@@ -421,5 +431,8 @@ void cacheApp_clear ( cacheApp_t cache ) {
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_destroy( &(cache->_mutex) );
 #endif
+    
+//     compApp_poly_clear(cacheApp_workCref(cache)); 
+//     realApp_poly_clear(cacheApp_workRref(cache));
     
 }
