@@ -22,36 +22,40 @@ void compApp_poly_root_bound_fujiwara(realRat_t bound, compApp_poly_t poly){
 void realApp_poly_scale_realRat_in_place( realApp_ptr fptr, const realRat_t r, slong len, slong prec){
     
     slong i;
-    realRat_t t;
+    realApp_t temp, factor;
     
-    realRat_init(t);
-    realRat_set(t, r);
-/*     realRat_canonicalise(t); */
+    realApp_init(temp);
+    realApp_init(factor);
+    realApp_set_realRat(temp, r, prec);
+    realApp_set(factor, temp);
     
     for (i = 1; i < len; i++){
-        realApp_mul_realRat_in_place( fptr + i, t, prec);
+        realApp_mul( fptr + i, fptr + i, factor, prec);
         if (i + 1 < len)
-            realRat_mul(t, t, r);
+            realApp_mul(factor, factor, temp, prec);
     }
-    realRat_clear(t);
+    realApp_clear(temp);
+    realApp_clear(factor);
     
 }
 
 void compApp_poly_scale_realRat_in_place( compApp_ptr fptr, const realRat_t r, slong len, slong prec ){
     
     slong i;
-    realRat_t t;
+    realApp_t temp, factor;
     
-    realRat_init(t);
-    realRat_set(t, r);
-/*     realRat_canonicalise(t); */
+    realApp_init(temp);
+    realApp_init(factor);
+    realApp_set_realRat(temp, r, prec);
+    realApp_set(factor, temp);
     
     for (i = 1; i < len; i++){
-        compApp_mul_realRat_in_place( fptr + i, t, prec);
+        compApp_mul_realApp( fptr + i, fptr + i, factor, prec);
         if (i + 1 < len)
-            realRat_mul(t, t, r);
+            realApp_mul(factor, factor, temp, prec);
     }
-    realRat_clear(t);
+    realApp_clear(temp);
+    realApp_clear(factor);
 }
 
 /* evaluate at order 1 on an interval geven by center + width */
@@ -224,3 +228,40 @@ void compApp_poly_taylorShift( compApp_poly_t res,
     
     compApp_clear(c);
 }
+
+///DEPRECATED
+// old versions of scale where the rational number is used (instead of a flot. point approx)
+// void realApp_poly_scale_realRat_in_place( realApp_ptr fptr, const realRat_t r, slong len, slong prec){
+//     
+//     slong i;
+//     realRat_t t;
+//     
+//     realRat_init(t);
+//     realRat_set(t, r);
+// /*     realRat_canonicalise(t); */
+//     
+//     for (i = 1; i < len; i++){
+//         realApp_mul_realRat_in_place( fptr + i, t, prec);
+//         if (i + 1 < len)
+//             realRat_mul(t, t, r);
+//     }
+//     realRat_clear(t);
+//     
+// }
+// 
+// void compApp_poly_scale_realRat_in_place( compApp_ptr fptr, const realRat_t r, slong len, slong prec ){
+//     
+//     slong i;
+//     realRat_t t;
+//     
+//     realRat_init(t);
+//     realRat_set(t, r);
+// /*     realRat_canonicalise(t); */
+//     
+//     for (i = 1; i < len; i++){
+//         compApp_mul_realRat_in_place( fptr + i, t, prec);
+//         if (i + 1 < len)
+//             realRat_mul(t, t, r);
+//     }
+//     realRat_clear(t);
+// }
