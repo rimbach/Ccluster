@@ -38,6 +38,9 @@ while [ "$1" != "" ]; do
       --purge)
         PURGE=1
         ;;
+      --purgeRiso)
+        PURGERISO=1
+        ;;
       --purgeRR)
         PURGERR=1
         ;;
@@ -70,6 +73,10 @@ fi
 
 if [ -z "$PURGE" ]; then
    PURGE=0
+fi
+
+if [ -z "$PURGERISO" ]; then
+   PURGERISO=0
 fi
 
 if [ -z "$PURGERR" ]; then
@@ -264,6 +271,10 @@ run_risolate()
     NAME_IN=$NAME".ccl"
     NAME_OUT=$NAME".out_riso"
     NAME_OUTRR=$NAME".out_riso_rr"
+    
+    if [ $PURGERISO -eq 1 ]; then
+        rm -f $NAME_OUT
+    fi
     
     if [ ! -e $NAME_OUT ]; then
             echo  "Isolating real roots for $POLNAME degree $DEG, global, default, output in " $NAME_OUT
