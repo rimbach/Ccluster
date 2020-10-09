@@ -89,11 +89,11 @@ NUMBERS_INLINE void realRat_add(realRat_t dest, const realRat_t x, const realRat
 NUMBERS_INLINE void realRat_add_si(realRat_t dest, const realRat_t x, slong y) { fmpq_add_si(dest, x, y); }
 NUMBERS_INLINE void realRat_div(realRat_t dest, const realRat_t x, const realRat_t y) { fmpq_div(dest, x, y); }
 
-/*
+
 NUMBERS_INLINE void realRat_div_ui(realRat_t dest, const realRat_t x, ulong y) { 
     fmpz_mul_si(realRat_denref(dest), realRat_denref(dest), y);
     realRat_canonicalise(dest);}
-*/
+
 
 NUMBERS_INLINE void realRat_pow_si(realRat_t dest, const realRat_t x, slong e) { fmpq_pow_si(dest, x, e); }
 NUMBERS_INLINE void realRat_div_fmpz(realRat_t dest, const realRat_t x, const fmpz_t y) { fmpq_div_fmpz(dest, x, y); }

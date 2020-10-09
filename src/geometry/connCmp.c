@@ -24,6 +24,10 @@ void connCmp_init(connCmp_t x){
     connCmp_appPrref(x) = CCLUSTER_DEFAULT_PREC;
     connCmp_newSuref(x) = 0;
     connCmp_isSepref(x) = 0;
+    
+    /* for deflation */
+    connCmp_isDefref(x) = 0;
+    connCmp_degDeref(x) = 0;
 }
 
 void connCmp_init_compBox(connCmp_t x, compBox_t b){
@@ -42,6 +46,10 @@ void connCmp_init_compBox(connCmp_t x, compBox_t b){
     realRat_add(connCmp_supImref(x), compRat_imagref(compBox_centerref(b)), halfwidth);
     
     realRat_clear(halfwidth);
+    
+    /* for deflation */
+    connCmp_isDefref(x) = 0;
+    connCmp_degDeref(x) = 0;
 }
 
 void connCmp_clear(connCmp_t x){
@@ -52,6 +60,12 @@ void connCmp_clear(connCmp_t x){
     realRat_clear(connCmp_infImref(x));
     realRat_clear(connCmp_supImref(x));
     fmpz_clear(connCmp_nwSpdref(x));
+    
+    /* for deflation */
+    if (connCmp_isDefref(x) != 0) {
+        compApp_poly_clear( connCmp_defPoref(x) );
+        realApp_clear     ( connCmp_sumAbref(x) );
+    }
 }
 
 void connCmp_clear_for_tables(connCmp_t x){
@@ -62,6 +76,12 @@ void connCmp_clear_for_tables(connCmp_t x){
     realRat_clear(connCmp_infImref(x));
     realRat_clear(connCmp_supImref(x));
     fmpz_clear(connCmp_nwSpdref(x));
+    
+    /* for deflation */
+    if (connCmp_isDefref(x) != 0) {
+        compApp_poly_clear( connCmp_defPoref(x) );
+        realApp_clear     ( connCmp_sumAbref(x) );
+    }
 }
 
 void connCmp_set(connCmp_t dest, const connCmp_t src){
@@ -88,6 +108,14 @@ void connCmp_set(connCmp_t dest, const connCmp_t src){
         compBox_list_push(connCmp_boxesref (dest), nBox);
         
         it = compBox_list_next(it);
+    }
+    
+    /* for deflation */
+    if (connCmp_isDefref(src) != 0) {
+        connCmp_isDefref(dest) = connCmp_isDefref(src);
+        connCmp_degDeref(dest) = connCmp_degDeref(src);
+        compApp_poly_set( connCmp_defPoref(dest), connCmp_defPoref(src) );
+        realApp_set     ( connCmp_sumAbref(dest), connCmp_sumAbref(src) );
     }
 }
 

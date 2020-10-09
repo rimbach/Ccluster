@@ -440,53 +440,17 @@ void risolate_main_loop( connCmp_list_t qResults,
                 if (metadatas_useDeflation(meta))
                 if (metadatas_getVerbo(meta)>1) {
                     if (connCmp_nSolsref(ccur) > 1 ) {
-                        if (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)==0) {
+//                         if (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)==0) {
+                        if (connCmp_isDefref(ccur)==0) {
                             if (realRat_cmp_ui(compDsk_radiusref(ccDisk), 1 ) < 0) {
                                 
-                                printf("\n\n\n ------First Success of Newton Iteration for this Component with a cluster of %d roots------\n", connCmp_nSolsref(ccur) );
-                                compApp_poly_t fApprox;
-                                compApp_poly_init(fApprox);
-                                compApp_poly_set(fApprox, cacheApp_getApproximation ( cache, connCmp_appPrref(ccur)));
-                                
-                                connCmp_risolate_componentBox(componentBox, ccur, metadatas_initBref(meta));
-                                compBox_get_containing_dsk(ccDisk, componentBox);
-                                compApp_poly_taylorShift_interval_in_place( fApprox, compDsk_centerref(ccDisk), compDsk_radiusref(ccDisk), connCmp_appPrref(ccur) );
-                                
-    //                             printf("Poly: ");
-    //                             compApp_poly_printd(fApprox, connCmp_appPrref(ccur));
-    //                             printf("\n");
-                                
-                                realApp_t abs, sumAbs;
-                                realApp_init(abs);
-                                realApp_init(sumAbs);
-                                compApp_abs( sumAbs, fApprox->coeffs + connCmp_nSolsref(ccur) + 1, connCmp_appPrref(ccur) );
-                                
-                                for (slong index = connCmp_nSolsref(ccur) + 2; index < fApprox->length; index++ ){
-                                    compApp_abs( abs, fApprox->coeffs + index, connCmp_appPrref(ccur) );
-                                    realApp_add( sumAbs, sumAbs, abs, connCmp_appPrref(ccur) );
-                                }
-                                    
-                                printf("Sum of %d leading coefficients: ", (int) fApprox->length - connCmp_nSolsref(ccur) );
-                                realApp_printd(sumAbs, connCmp_appPrref(ccur) );
-                                printf("\n");
-                                
-                                realRat_t factor;
-                                realRat_init(factor);
-                                realRat_set(factor, compDsk_radiusref(ccDisk));
-                                printf("radius of disk: "); realRat_print(factor); printf("\n");
-                                realRat_pow_si( factor, factor, connCmp_nSolsref(ccur) + 1);
-                                printf("factor:         "); realRat_print(factor); printf("\n");
-                                realApp_mul_realRat(sumAbs, sumAbs, factor, connCmp_appPrref(ccur) );
-                                printf("scaled sum of abs coeffs: ");
-                                realApp_printd(sumAbs, connCmp_appPrref(ccur) );
-                                printf("\n");
-                                
-                                realApp_clear(sumAbs);
-                                realApp_clear(abs);
-                                
-                                realRat_clear(factor);
-                                
-                                compApp_poly_clear(fApprox);
+                                printf("\n\n\n ------Success of Newton Iteration for this Component with a cluster of %d roots------\n", connCmp_nSolsref(ccur) );
+//                                 printf("------Compute new deflation, newton speed: ");
+//                                 fmpz_print(connCmp_nwSpdref(ccur));
+//                                 printf("\n");
+                                deflate_connCmp_init(ccur);
+                                deflate_set( ccur, cache, ccDisk, connCmp_nSolsref(ccur), connCmp_appPrref(ccur), meta );
+                                printf("precision: %ld\n", connCmp_appPrref(ccur) );
                                 printf("------\n\n\n");
                             }
                         }

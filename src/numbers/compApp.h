@@ -71,6 +71,8 @@ NUMBERS_INLINE void compApp_exp_pi_i( compApp_t dest, const compApp_t x, slong p
 NUMBERS_INLINE void compApp_pow_si( compApp_t dest, const compApp_t x, slong l, slong prec) { acb_pow_si(dest, x, l, prec); }
 NUMBERS_INLINE void compApp_sqrt  ( compApp_t dest, const compApp_t x, slong prec) { acb_sqrt(dest, x, prec); }
 
+NUMBERS_INLINE void compApp_mul_realApp   ( compApp_t dest, const compApp_t x, const realApp_t y, slong prec) { acb_mul_arb   (dest, x, y, prec); }
+
 /* printing */
 NUMBERS_INLINE void compApp_fprint (FILE * file, const compApp_t x)                           { acb_fprint (file, x               ); }
 NUMBERS_INLINE void compApp_fprintd(FILE * file, const compApp_t x, slong digits)             { acb_fprintd(file, x, digits       ); }

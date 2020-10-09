@@ -26,6 +26,7 @@
 #include "lists/connCmp_list.h"
 #include "tstar/tstar.h"
 #include "newton/newton.h"
+#include "deflation/deflate.h"
 // #include "powerSums/powerSums.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD

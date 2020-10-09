@@ -18,7 +18,12 @@
 #define DEFLATE_INLINE static __inline__
 #endif
 
+#include "metadatas/metadatas.h"
 #include "geometry/connCmp.h"
+#include "geometry/compDsk.h"
+#include "caches/cacheApp.h"
+
+#include "tstar/tstar.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +33,17 @@ extern "C" {
 #define connCmp_degDeref(X) ( (X)->degDe)
 #define connCmp_defPoref(X) (&(X)->defPo)
 #define connCmp_sumAbref(X) (&(X)->sumAb)
+    
+/* memory managment */
+void deflate_connCmp_init  (connCmp_t x);
 
+void deflate_connCmp_clear (connCmp_t x);
+
+/* setting */
+void deflate_set( connCmp_t x, cacheApp_t cache, const compDsk_t disk, int nbSols, slong prec, metadatas_t meta );
+void deflate_copy( connCmp_t dest, const connCmp_t src );
+
+tstar_res deflate_tstar_test( const connCmp_t CC, cacheApp_t cache, const compDsk_t d, int max_nb_sols, slong prec, metadatas_t meta);
 
 #ifdef __cplusplus
 }

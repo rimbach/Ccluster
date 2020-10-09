@@ -263,7 +263,15 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     r = fprintf(file, "# -------------------Newton Iterations---------------------------------\n");
     r = fprintf(file, "#|%-39s %14d %14s|\n", "total number NE:",                       metadatas_getNbNewton(meta),         " " );
     r = fprintf(file, "#|%-39s %14d %14s|\n", "number of fails:",                    metadatas_getNbFailingNewton(meta),  " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in TSTests:",              metadatas_get_time_NeTSTes(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in newton:",         metadatas_get_time_Newtons(meta),    " " );
+    if (metadatas_useDeflation(meta)){
+    r = fprintf(file, "# -------------------Deflation        ---------------------------------\n");
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in interval TS:",         metadatas_get_time_DefTayl(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in derivatives:",         metadatas_get_time_DefDeri(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in evaluations:",         metadatas_get_time_DefEval(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in scaling    :",         metadatas_get_time_DefScal(meta),    " " );
+    }
     }
     r = fprintf(file, "# -------------------Other---------------------------------------------\n");
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in getApproximation:",           metadatas_get_time_Approxi(meta),    " " );

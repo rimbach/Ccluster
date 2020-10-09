@@ -72,6 +72,11 @@ typedef connCmp * connCmp_ptr;
 #define connCmp_newSuref(X) ( (X)->newSu)
 #define connCmp_isSepref(X) ( (X)->isSep)
 
+#define connCmp_isDefref(X) ( (X)->isDef)
+#define connCmp_degDeref(X) ( (X)->degDe)
+#define connCmp_defPoref(X) (&(X)->defPo)
+#define connCmp_sumAbref(X) (&(X)->sumAb)
+
 /* memory managment */
 void connCmp_init(connCmp_t x);
 void connCmp_init_compBox(connCmp_t x, compBox_t b);
