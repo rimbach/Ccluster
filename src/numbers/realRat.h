@@ -97,6 +97,7 @@ NUMBERS_INLINE void realRat_div_ui(realRat_t dest, const realRat_t x, ulong y) {
 
 NUMBERS_INLINE void realRat_pow_si(realRat_t dest, const realRat_t x, slong e) { fmpq_pow_si(dest, x, e); }
 NUMBERS_INLINE void realRat_div_fmpz(realRat_t dest, const realRat_t x, const fmpz_t y) { fmpq_div_fmpz(dest, x, y); }
+NUMBERS_INLINE void realRat_mul_fmpz(realRat_t dest, const realRat_t x, const fmpz_t y) { fmpq_mul_fmpz(dest, x, y); }
 NUMBERS_INLINE void realRat_inv(realRat_t dest, const realRat_t x) { fmpq_inv(dest, x); }
 
 /* printing */

@@ -74,6 +74,7 @@ typedef struct {
     int _additionalFlags;
     int _useRealCoeffs;
     int _useDeflation;
+    int _useDeflation2;
     int _usePowerSums;
     int _forTests;
 //     int _pwSuTest;
@@ -117,6 +118,9 @@ METADATAS_INLINE void strategies_set_realCoeffs   ( strategies_t strat, int flag
 
 METADATAS_INLINE int strategies_useDeflation        ( const strategies_t strat ) { return strat->_useDeflation      ; }
 METADATAS_INLINE void strategies_set_Deflation   ( strategies_t strat, int flag ) { strat->_useDeflation=flag      ; }
+
+METADATAS_INLINE int strategies_useDeflation2        ( const strategies_t strat ) { return strat->_useDeflation2      ; }
+METADATAS_INLINE void strategies_set_Deflation2   ( strategies_t strat, int flag ) { strat->_useDeflation2=flag      ; }
 
 METADATAS_INLINE int strategies_usePowerSums        ( const strategies_t strat ) { return strat->_usePowerSums      ; }
 METADATAS_INLINE void strategies_set_powerSums   ( strategies_t strat, int flag ) { strat->_usePowerSums=flag      ; }

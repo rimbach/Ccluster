@@ -27,6 +27,7 @@
 /*for deflation*/
 #include "numbers/realApp.h"
 #include "polynomials/compApp_poly.h"
+#include "geometry/compDsk.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,9 +52,11 @@ typedef struct {
     int          isDef; /* a flag set to 1 if a deflation has been computed */
                         /*               0 otherwise */
     int          degDe; /* nb of sol in the CC when the deflation has been computed */
-    compApp_poly defPo; /* "deflated" polynomial: interval polynomial that contains */
+    int          isDFG; /* a flag set to 1 if last terms of the first Graeffe iteration has been computed */
+                        /*               0 otherwise */
+    realApp_poly defPo; /* "deflated" polynomial: interval polynomial that contains */
                         /*                        coeffs pol shifted to any point in the cc */
-    realApp      sumAb; /* sum of absolute values of deg - ( degDe + 1) leading coefficients */
+    realApp_poly defFG; /* last terms of the first Graeffe iteration, unscaled */
     /* end for deflation */
 } connCmp;
 
@@ -74,8 +77,9 @@ typedef connCmp * connCmp_ptr;
 
 #define connCmp_isDefref(X) ( (X)->isDef)
 #define connCmp_degDeref(X) ( (X)->degDe)
+#define connCmp_isDFGref(X) ( (X)->isDFG)
 #define connCmp_defPoref(X) (&(X)->defPo)
-#define connCmp_sumAbref(X) (&(X)->sumAb)
+#define connCmp_defFGref(X) (&(X)->defFG)
 
 /* memory managment */
 void connCmp_init(connCmp_t x);

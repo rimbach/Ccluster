@@ -207,8 +207,10 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
             realApp_abs( coeffn, realApp_poly_getCoeff(pApprox, realApp_poly_degree(pApprox)) );
             restemp = realApp_soft_compare( coeff0, coeffn, res.appPrec );
         }
-            if (restemp==0)
+            if (restemp==0) {
+//                 printf("ici, nbMSol = %d, depth = %d\n", max_nb_sols, depth);
                 restemp = -1;
+            }
             else
                 restemp = 0;
         
@@ -264,8 +266,10 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
                 realApp_add(coeffn, coeffn, coeff1, res.appPrec);
                 restemp = realApp_soft_compare( coeff0, coeffn, res.appPrec );
                 
-                if (restemp==0)
+                if (restemp==0){
+//                      printf("la, nbMSol = %d, %i-th Graeffe, depth = %d\n", max_nb_sols, iteration, depth);
                     restemp = -1;
+                }
                 else
                     restemp = 0;
         
@@ -298,6 +302,10 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
 //         printf(" prec for discarding test: %d\n", (int) res.appPrec );
 //     else
 //         printf(" --- prec for validating test: %d\n", (int) res.appPrec );
+    
+//     if ((inNewton==0)&&(metadatas_getVerbo(meta)>=3))
+//         printf(" number of Graeffe iterations: %d\n", (int) nbGraeffe );
+        
     return res;
     
 }

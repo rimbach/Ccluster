@@ -32,9 +32,9 @@ void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, s
     pthread_mutex_init ( &(cache->_mutex), NULL);
 #endif
     /* for test: cache the last working polynomial computed and the nb of graeffe iterations */
-//     compApp_poly_init(cacheApp_workCref(cache)); 
-//     realApp_poly_init(cacheApp_workRref(cache));
-//     cache->_nbIterations = 0;                     
+/*    compApp_poly_init(cacheApp_workCref(cache)); 
+    realApp_poly_init(cacheApp_workRref(cache));
+    cache->_nbIterations = 0; */                    
 }
 
 void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly){

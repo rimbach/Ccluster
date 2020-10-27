@@ -227,6 +227,7 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
         if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
     }
     if (metadatas_useDeflation(meta)) len += sprintf( temp + len, " + deflation");
+    if (metadatas_useDeflation2(meta)) len += sprintf( temp + len, " + deflation2");
     if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -271,6 +272,7 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in derivatives:",         metadatas_get_time_DefDeri(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in evaluations:",         metadatas_get_time_DefEval(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in scaling    :",         metadatas_get_time_DefScal(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in first Gr.It:",         metadatas_get_time_DefGrae(meta),    " " );
     }
     }
     r = fprintf(file, "# -------------------Other---------------------------------------------\n");
