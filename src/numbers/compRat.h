@@ -94,6 +94,11 @@ NUMBERS_INLINE void compRat_set(compRat_t dest, const compRat_t src) {
 /*arithmetic*/
 void compRat_mul(compRat_t dest, const compRat_t x, const compRat_t y);
 
+NUMBERS_INLINE void compRat_neg(compRat_t dest, const compRat_t src) { 
+    realRat_neg(compRat_realref(dest), compRat_realref(src)); 
+    realRat_neg(compRat_imagref(dest), compRat_imagref(src));
+}
+
 /* geometric operations */
 /* sets dest to abs(x.real-y.real) + i*abs(x.imag-y.imag) */
 void compRat_comp_distance( compRat_t dest, const compRat_t x, const compRat_t y );

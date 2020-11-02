@@ -26,6 +26,7 @@
 #include "caches/cacheApp.h"
 #include "metadatas/metadatas.h"
 #include "tstar/tstar.h"
+#include "deflation/deflate.h"
 
 #ifdef __cplusplus
 extern "C" {

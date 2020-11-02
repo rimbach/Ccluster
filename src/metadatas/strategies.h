@@ -80,6 +80,7 @@ typedef struct {
     int _useNBThreads;
     int _additionalFlags;
     int _useRealCoeffs;
+    int _useDeflation;
     int _usePowerSums;
     int _forTests;
 //     int _pwSuTest;
@@ -121,6 +122,9 @@ METADATAS_INLINE int strategies_useNBThreads      ( const strategies_t strat ) {
 
 METADATAS_INLINE int strategies_useRealCoeffs        ( const strategies_t strat ) { return strat->_useRealCoeffs      ; }
 METADATAS_INLINE void strategies_set_realCoeffs   ( strategies_t strat, int flag ) { strat->_useRealCoeffs=flag      ; }
+
+METADATAS_INLINE int strategies_useDeflation        ( const strategies_t strat ) { return strat->_useDeflation      ; }
+METADATAS_INLINE void strategies_set_Deflation   ( strategies_t strat, int flag ) { strat->_useDeflation=flag      ; }
 
 METADATAS_INLINE int strategies_usePowerSums        ( const strategies_t strat ) { return strat->_usePowerSums      ; }
 METADATAS_INLINE void strategies_set_powerSums   ( strategies_t strat, int flag ) { strat->_usePowerSums=flag      ; }

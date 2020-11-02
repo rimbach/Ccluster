@@ -120,21 +120,25 @@ tstar_res tstar_real_asInPaper( cacheApp_t cache,
     N = (int) 4+ceil(log2(1+log2(deg)));
     
     tstar_real_getApproximation( pApprox, cache, res.appPrec, meta);
+    
     tstar_real_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
+    
     tstar_real_graeffe_iterations_inplace( pApprox, N, res.appPrec, meta);
+    
     realApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
     
     while( (res.nbOfSol < max_nb_sols)&&(restemp==0) ){
         res.nbOfSol += 1;
         restemp = realApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
-        
         while( restemp == -2 ){
             res.appPrec *=2;
             tstar_real_getApproximation( pApprox, cache, res.appPrec, meta);
             tstar_real_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
+            
             tstar_real_graeffe_iterations_inplace( pApprox, N, res.appPrec, meta);
             realApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
             restemp = realApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
+            
             nbTaylorsRepeted +=1;
             nbGraeffeRepeted +=N;
         }
@@ -151,6 +155,7 @@ tstar_res tstar_real_asInPaper( cacheApp_t cache,
     if (metadatas_haveToCount(meta))
         metadatas_add_Test( meta, depth, (restemp==1), discard, inNewton, 1, nbTaylorsRepeted, N, 
                             nbGraeffeRepeted, (int) res.appPrec, (double) (clock() - start) );
+    
     return res;
 }
 
@@ -207,8 +212,10 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
             realApp_abs( coeffn, realApp_poly_getCoeff(pApprox, realApp_poly_degree(pApprox)) );
             restemp = realApp_soft_compare( coeff0, coeffn, res.appPrec );
         }
-            if (restemp==0)
+            if (restemp==0) {
+//                 printf("ici, nbMSol = %d, depth = %d\n", max_nb_sols, depth);
                 restemp = -1;
+            }
             else
                 restemp = 0;
         
@@ -264,8 +271,10 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
                 realApp_add(coeffn, coeffn, coeff1, res.appPrec);
                 restemp = realApp_soft_compare( coeff0, coeffn, res.appPrec );
                 
-                if (restemp==0)
+                if (restemp==0){
+//                      printf("la, nbMSol = %d, %i-th Graeffe, depth = %d\n", max_nb_sols, iteration, depth);
                     restemp = -1;
+                }
                 else
                     restemp = 0;
         
@@ -281,19 +290,103 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
         iteration +=1;
     }
     
-    realApp_poly_clear(pApprox);
-    realApp_clear(sum);
-    
     if ((restemp==0)||(restemp==-1)) res.nbOfSol = -1;
     if (metadatas_haveToCount(meta))
         metadatas_add_Test( meta, depth, (restemp==1), discard, inNewton, 1, nbTaylorsRepeted, nbGraeffe, 
                             nbGraeffeRepeted, (int) res.appPrec, (double) (clock() - start) );
-        
+    
+//     if ( (!discard)&&(res.nbOfSol > 0)) {
+//         /* save working polynomial in cache */
+//         realApp_poly_set( cacheApp_workRref(cache), pApprox );
+//         cacheApp_nbItref(cache) = nbGraeffe;
+//     }
+    
+    realApp_poly_clear(pApprox);
+    realApp_clear(sum);
 //     if (discard)
 //         printf(" prec for discarding test: %d\n", (int) res.appPrec );
 //     else
 //         printf(" --- prec for validating test: %d\n", (int) res.appPrec );
+    
+//     if ((inNewton==0)&&(metadatas_getVerbo(meta)>=3))
+//         printf(" number of Graeffe iterations: %d\n", (int) nbGraeffe );
+        
     return res;
     
 }
+
+// int  tstar_real_downsize( compDsk_t nd,       /* if res==1, the disk containing the same sols */  
+//                           realRat_t cumul,   /* the ratio of new disk radius / old disk radius */
+//                           cacheApp_t cache,
+//                           const compDsk_t d,  /*disk for which last pol has been computed          */
+//                           int nb_sols,        /*the number of sols in the disk          */
+//                           slong prec,        /*the "default" arithmetic precision              */
+//                           int depth,         /*the depth for counter                           */
+//                           metadatas_t meta ) {
+//     
+//     printf("DOWNSIZE: begin \n");
+//     
+//     int res=0;
+//     
+//     realRat_t factor, scale;
+//     realRat_init(factor);
+// //     realRat_init(nRad);
+//     realRat_init(scale);
+//     
+//     realApp_t sum, coeff;
+//     realApp_init(sum);
+//     realApp_init(coeff);
+//     
+//     realRat_set_si(factor, 1,2);
+//     realRat_set(cumul, factor);
+// //     realRat_mul(nRad, compDsk_radiusref(d), factor);
+//     slong pow = 0x1<<cacheApp_nbItref(cache);
+// //     printf("Nb G itts: %d, pow: %ld \n", cacheApp_nbItref(cache), pow );
+//     realRat_pow_si(scale, factor, pow);
+//     realApp_poly_scale_realRat_in_place( cacheApp_workRref(cache)->coeffs, scale, cacheApp_workRref(cache)->length, prec);
+//     
+//     realApp_poly_sum_abs_coeffs( sum, cacheApp_workRref(cache), prec );
+//     realApp_abs(coeff, cacheApp_workRref(cache)->coeffs + nb_sols);
+//     realApp_sub(sum, sum, coeff, prec);
+//     
+//     int resCompare = realApp_soft_compare( coeff, sum, prec);
+//     
+//     printf(" factor "); realRat_print(cumul);
+//     printf(": res: %d (-2: not enough prec, -1: two close, 0: No, 1: yes) \n", resCompare );
+//     
+//     if (resCompare==1)
+//         res = 1;
+//     
+//     while ( resCompare==1 ) {
+//         realRat_mul(cumul, cumul, factor);
+// //         realRat_mul(nRad, compDsk_radiusref(d), cumul);
+// //         realRat_pow_si(scale, factor, pow);
+//         
+//         realApp_poly_scale_realRat_in_place( cacheApp_workRref(cache)->coeffs, scale, cacheApp_workRref(cache)->length, prec);
+//     
+//         realApp_poly_sum_abs_coeffs( sum, cacheApp_workRref(cache), prec );
+//         realApp_abs(coeff, cacheApp_workRref(cache)->coeffs + nb_sols);
+//         realApp_sub(sum, sum, coeff, prec);
+//     
+//         resCompare = realApp_soft_compare( coeff, sum, prec);
+//         printf(" factor "); realRat_print(cumul);
+//         printf(": res: %d (-2: not enough prec, -1: two close, 0: No, 1: yes) \n", resCompare );
+//     }
+//     
+//     if (res){
+//         compDsk_set(nd, d);
+//         realRat_mul( compDsk_radiusref(nd), compDsk_radiusref(d), cumul);
+//     }
+//     
+//     realRat_clear(factor);
+//     realRat_clear(scale);
+//     
+//     realApp_clear(sum);
+//     realApp_clear(coeff);
+//     
+//     printf("DOWNSIZE: end \n");
+//     
+//     return res;
+//     
+// }
 

@@ -26,6 +26,7 @@
 #include "lists/connCmp_list.h"
 #include "tstar/tstar.h"
 #include "newton/newton.h"
+#include "deflation/deflate.h"
 // #include "powerSums/powerSums.h"
 #include "geometry/compAnn.h"
 #include "rootRadii/realIntRootRadii.h"
@@ -44,6 +45,7 @@ void risolate_compBox_get_containing_dsk( compDsk_t d, const compBox_t b);
 
 slong risolate_discard_compBox_list( compBox_list_t boxes,
                                      compBox_list_t bDiscarded,
+                                     connCmp_t cc,
                                      cacheApp_t cache, 
                                      slong prec, 
                                      metadatas_t meta);

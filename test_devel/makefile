@@ -13,16 +13,17 @@
 CC=gcc
 # CCFLAGS = -Wall -ansi -O3  -fPIC
 CCFLAGS = -Wall -g -std=c99 -O3 -fno-stack-protector
+# CCFLAGS =-std=c99 -pedantic -Wall -O2 -funroll-loops -g -mpopcnt
 
 SRC_PATH = ../src
 INC_PATH = ../src
 SRC_DIRS= $(SRC_PATH)
 
-FLINT_INCLUDE_PATH = /home/imbach/Ccluster/build/include
-ARB_INCLUDE_PATH = /home/imbach/libs/arb
+FLINT_INCLUDE_PATH = /work/Ccluster/build/include
+ARB_INCLUDE_PATH = /work/libs/arb
 
 INCLUDE_PATH = -I$(FLINT_INCLUDE_PATH) -I$(ARB_INCLUDE_PATH) -I$(INC_PATH)
-LIBRARY_PATH = -L/home/imbach/libs/flint2 -L/home/imbach/libs/arb -L/home/imbach/Ccluster
+LIBRARY_PATH = -L/work/libs/flint2 -L/work/libs/arb -L/work/Ccluster
 LIBRARY_FLAG = -lgmp -lflint -larb -lccluster -lm
 
 

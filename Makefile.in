@@ -28,6 +28,7 @@ BUILD_DIRS = $(SRC_PATH)\
 	     $(SRC_PATH)/newton\
 	     $(SRC_PATH)/ccluster\
 	     $(SRC_PATH)/risolate\
+	     $(SRC_PATH)/deflation\
 	     $(SRC_PATH)/powerSums\
 	     $(SRC_PATH)/rootRadii\
 	     $(SRC_PATH)/doubApp

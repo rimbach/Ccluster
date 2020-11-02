@@ -30,9 +30,7 @@ void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, s
     
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(cache->_mutex), NULL);
-#endif
-/*     compApp_poly_init(cacheApp_workref(cache));    */
-/*     cache->_nbIterations = 0;                      */
+#endif                   
 }
 
 void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly){

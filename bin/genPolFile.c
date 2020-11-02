@@ -26,6 +26,7 @@ void MignotteGen_polynomial( realRat_poly_t dest, int degree, int bitsize, int p
 void MignotteMul_polynomial( realRat_poly_t dest, int degree, int bitsize, int power);
 void WilkRat_polynomial(  realRat_poly_t dest, int degree);
 void WilkMul_polynomial(  realRat_poly_t dest, int degree);
+void WilkMulF_polynomial(  realRat_poly_t dest, int degree, int power);
 void Laguerre_polynomial(  realRat_poly_t dest, int degree);
 
 void genSpiralPolFile( FILE * file, int degree, int prec);
@@ -50,6 +51,7 @@ int main(int argc, char **argv){
         printf("       %s Wilkinson      degree    filename [OPTIONS: format] \n", argv[0]);
         printf("       %s WilkRat        degree    filename [OPTIONS: format] \n", argv[0]);
         printf("       %s WilkMul        nbOfRoots filename [OPTIONS: format] \n", argv[0]);
+        printf("       %s WilkMulF       nbOfRoots filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Mandelbrot     iteration filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Runnels        iteration filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Laguerre       degree    filename [OPTIONS: format] \n", argv[0]);
@@ -65,7 +67,7 @@ int main(int argc, char **argv){
         printf("       -n , --nbterms: the number of non-zero coeffs (for randomSparse)\n");
         printf("                      10: [default] or a positive integer            \n");
         printf("       -p , --power: (for MignotteGen: nb of roots in the cluster, \n");
-        printf("                     (for MignotteMul: multiplicity of the roots, \n");
+        printf("                     (for MignotteMul and WilkMulF: multiplicity of the roots, \n");
         printf("                      2: [default] or a positive integer            \n");
         printf("       -L , --precision: (for NestedClusters and Spiral)            \n"); 
         printf("                      53: [default] or a positive integer            \n");
@@ -96,6 +98,7 @@ int main(int argc, char **argv){
     char Wilkinson[] = "Wilkinson\0";
     char WilkMul[] = "WilkMul\0";
     char WilkRat[] = "WilkRat\0";
+    char WilkMulF[] = "WilkMulF\0";
     char Mandelbrot[] = "Mandelbrot\0";
     char Runnels[] = "Runnels\0";
     char Laguerre[] = "Laguerre\0";
@@ -235,6 +238,10 @@ int main(int argc, char **argv){
         
     if (strcmp(poly, WilkMul)==0) {
         WilkMul_polynomial( p, firstArg);
+    } else
+        
+    if (strcmp(poly, WilkMulF)==0) {
+        WilkMulF_polynomial( p, firstArg, power);
     } else
         
     if (strcmp(poly, WilkRat)==0) {
@@ -633,6 +640,23 @@ void WilkMul_polynomial(  realRat_poly_t dest, int degree){
         realRat_poly_set_coeff_si_ui(ptemp, 1, 1, 1);
         realRat_poly_set_coeff_si_ui(ptemp, 0, -i, 1);
         realRat_poly_pow(ptemp, ptemp, (ulong) i);
+//         realRat_poly_pow(wilkptemp, ptemp, (ulong) (degree-i)+1);
+        realRat_poly_mul(dest, dest, ptemp);
+    }
+    
+    realRat_poly_clear(ptemp);
+}
+
+void WilkMulF_polynomial(  realRat_poly_t dest, int degree, int power){
+    realRat_poly_t ptemp;
+    realRat_poly_init2(ptemp,degree+1);
+    realRat_poly_one(dest);
+    
+    for (int i=1; i<=degree; i++){
+        realRat_poly_zero(ptemp);
+        realRat_poly_set_coeff_si_ui(ptemp, 1, 1, 1);
+        realRat_poly_set_coeff_si_ui(ptemp, 0, -i, 1);
+        realRat_poly_pow(ptemp, ptemp, (ulong) power);
 //         realRat_poly_pow(wilkptemp, ptemp, (ulong) (degree-i)+1);
         realRat_poly_mul(dest, dest, ptemp);
     }
