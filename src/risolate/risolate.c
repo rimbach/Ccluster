@@ -38,16 +38,33 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
     while (!compBox_list_is_empty(boxes)){
         
         btemp = compBox_list_pop(boxes);
-        compBox_get_containing_dsk(bdisk, btemp);
+        risolate_compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
         metadatas_add_explored( meta, depth);
         
-//         /* Real Coeffs */
-//         if (( metadatas_realCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
-//             compBox_clear(btemp);
-//             ccluster_free(btemp);
-//             continue;
+        //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
+        
+//         if ( metadatas_useRootRadii(meta) ){
+//             
+//             if ( risolate_compBox_intersects_atLest_one( btemp, 1 ) == 0 ){
+//                 if (metadatas_haveToCount(meta)){
+//                     metadatas_add_discarded( meta, depth);
+//                 }
+// //                 if (metadatas_getDrSub(meta)==0){
+//                     compBox_clear(btemp);
+//                     ccluster_free(btemp);
+// //                 } else {
+// //                     compBox_list_push(bDiscarded, btemp);
+// //                 }
+//                 continue;
+//             }
+//             
+// //             if (risolate_compBox_intersects_only_one( btemp, 2 ) == 0){
+// //                 compBox_list_push(ltemp, btemp);
+// //                 continue;
+// //             }
 //         }
+
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
         
         res.nbOfSol = -2;
@@ -75,7 +92,6 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
 //                 }
 //             }
         }
-            
             
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
@@ -308,15 +324,18 @@ void risolate_main_loop( connCmp_list_t qResults,
         ccur = connCmp_list_pop(qMainLoop);
         
         connCmp_risolate_componentBox(componentBox, ccur, metadatas_initBref(meta));
-//         compBox_get_containing_dsk(ccDisk, componentBox);
         risolate_compBox_get_containing_dsk(ccDisk, componentBox);
-//         compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
+        compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
+
         realRat_mul(threeWidth, three, connCmp_widthref(ccur));
         prec = connCmp_appPr(ccur);
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
+
+        /* do not need natural clusters */
 //         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
-        separationFlag = 1;
+        separationFlag = ccluster_compDsk_is_separated(ccDisk, qMainLoop, discardedCcs);
+
       
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
@@ -324,6 +343,7 @@ void risolate_main_loop( connCmp_list_t qResults,
         sepBoundFlag   = (realRat_cmp( compBox_bwidthref(componentBox), metadatas_getSepBound(meta))<=0);
         
         if (metadatas_getVerbo(meta)>3) {
+
             printf("---depth: %d\n", (int) depth);
 //             printf("------component Box:       "); compBox_print(componentBox); printf("\n");
             compApp_t centerApp;
@@ -346,6 +366,7 @@ void risolate_main_loop( connCmp_list_t qResults,
             printf("------compactFlag:         %d\n", compactFlag);
             printf("------sepBoundFlag:        %d\n", sepBoundFlag);
             printf("------current prec:        %ld\n",connCmp_appPrref(ccur));
+
 //             compBox_list_print( connCmp_boxesref(ccur) );
 //             printf("\n");
         }
@@ -373,12 +394,16 @@ void risolate_main_loop( connCmp_list_t qResults,
         
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
              ( (!widthFlag) 
-               ||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) )
-               ||( !sepBoundFlag && (connCmp_nSols(ccur)>1))   
+               ||( connCmp_nSols(ccur) == cacheApp_getDegree(cache) )
+               ||( (!sepBoundFlag) && (connCmp_nSols(ccur)>1))   
             )  )
 //             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) 
         ) {
-        
+            
+            if (metadatas_getVerbo(meta)>3) {
+                    printf("#--- Newton iteration\n");
+            }
+                
             if (metadatas_haveToCount(meta)){
                 start = clock();
             }
@@ -441,20 +466,37 @@ void risolate_main_loop( connCmp_list_t qResults,
             }
         }
         
+        if ( (connCmp_nSols(ccur)==1) && widthFlag && compactFlag ) {
+            metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
+            connCmp_list_push(qResults, ccur);
+            if (metadatas_getVerbo(meta)>3) {
+                printf("#------validated with %d roots\n", connCmp_nSols(ccur));
+            }
+        } else
         if ( (connCmp_nSols(ccur)>0) && (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) 
              && separationFlag && widthFlag && compactFlag
              && ( sepBoundFlag || (connCmp_nSols(ccur)==1)) ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
             if (metadatas_getVerbo(meta)>3) {
-                printf("------validated with %d roots\n", connCmp_nSols(ccur));
+                printf("#------validated with %d roots\n", connCmp_nSols(ccur));
             }
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
+            
+            if (metadatas_getVerbo(meta)>3) {
+                    printf("#--- insert in queue\n");
+            }
+            
             connCmp_list_insert_sorted(qMainLoop, ccur);
         }
         
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && (resNewton.nflag==0) && (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)>0) ){
+            
+            if (metadatas_getVerbo(meta)>3) {
+                    printf("#--- insert in queue and decreas Newton speed\n");
+            }
+            
             connCmp_decrease_nwSpd(ccur);
 //             if (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)>0)
 //                 connCmp_decrease_nwSpd(ccur);
@@ -471,7 +513,8 @@ void risolate_main_loop( connCmp_list_t qResults,
 //             ccluster_free(ccur);
 // #else
             if (metadatas_getVerbo(meta)>3) {
-                printf("------bisect\n" );
+
+                    printf("#--- bisect\n");
             }
             risolate_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
@@ -586,7 +629,7 @@ void connCmp_risolate_print_for_results(FILE * f, const connCmp_t c, metadatas_t
     fprintf(f, "--solution with mult. %5d: ", connCmp_nSols(c));
     
     connCmp_risolate_componentBox( containingBox, c, metadatas_initBref(meta));
-    compBox_get_containing_dsk( containingDisk, containingBox);
+    risolate_compBox_get_containing_dsk( containingDisk, containingBox);
     
     slong d = fmpz_clog_ui(realRat_denref(compDsk_radiusref(containingDisk)),10) - fmpz_clog_ui(realRat_numref(compDsk_radiusref(containingDisk)),10); 
     slong p = fmpz_clog_ui(realRat_denref(compDsk_radiusref(containingDisk)),2) - fmpz_clog_ui(realRat_numref(compDsk_radiusref(containingDisk)),2)+50; 
@@ -633,7 +676,7 @@ void connCmp_risolate_print_for_results_withOutput(FILE * f, const connCmp_t c, 
         fprintf(f, "#--solution with mult. %5d: ", connCmp_nSols(c));
     
     connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
-    compBox_get_containing_dsk( containingDisk, containingBox);
+    risolate_compBox_get_containing_dsk( containingDisk, containingBox);
     
     if (output == -1) { /* rational output */
         fprintf(f, "center: ");

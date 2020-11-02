@@ -81,7 +81,8 @@ NUMBERS_INLINE void realRat_max_2_realRat(realRat_t x, const realRat_t y) {
 NUMBERS_INLINE void realRat_abs(realRat_t dest, const realRat_t x)                    { fmpq_abs(dest, x); }
 NUMBERS_INLINE void realRat_neg(realRat_t dest, const realRat_t x)                    { fmpq_neg(dest, x); }
 NUMBERS_INLINE void realRat_mul(realRat_t dest, const realRat_t x, const realRat_t y) { fmpq_mul(dest, x, y); }
-NUMBERS_INLINE void realRat_mul_si(realRat_t dest, const realRat_t x, slong y) { 
+NUMBERS_INLINE void realRat_mul_si(realRat_t dest, const realRat_t x, slong y) {
+    realRat_set(dest, x);
     fmpz_mul_si(realRat_numref(dest), realRat_numref(dest), y);
     realRat_canonicalise(dest);}
 NUMBERS_INLINE void realRat_sub(realRat_t dest, const realRat_t x, const realRat_t y) { fmpq_sub(dest, x, y); }
@@ -91,7 +92,8 @@ NUMBERS_INLINE void realRat_div(realRat_t dest, const realRat_t x, const realRat
 
 
 NUMBERS_INLINE void realRat_div_ui(realRat_t dest, const realRat_t x, ulong y) { 
-    fmpz_mul_si(realRat_denref(dest), realRat_denref(dest), y);
+    realRat_set(dest, x);
+    fmpz_mul_si(realRat_denref(dest), realRat_denref(x), y);
     realRat_canonicalise(dest);}
 
 

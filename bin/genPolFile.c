@@ -5,6 +5,7 @@
 #include "base/base.h"
 #include "polynomials/app_rat_poly.h"
 #include "flint/fmpq_poly.h"
+#include "flint/flint.h"
 
 /* intermediate functions for random generation */
 int  isIntinListInt (int el, int * lis, int length);

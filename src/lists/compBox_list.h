@@ -69,6 +69,10 @@ LISTS_INLINE compBox_ptr compBox_list_first(compBox_list_t l){
     return (compBox_ptr) gen_list_first(l);
 }
 
+LISTS_INLINE compBox_ptr compBox_list_last(compBox_list_t l){
+    return (compBox_ptr) gen_list_last(l);
+}
+
 /* do not check bound!!! */
 LISTS_INLINE compBox_ptr compBox_list_compBox_at_index(compBox_list_t l, int index){
     return (compBox_ptr) gen_list_data_at_index(l, index);
@@ -98,9 +102,21 @@ typedef gen_list_iterator compBox_list_iterator;
 LISTS_INLINE compBox_list_iterator compBox_list_begin(const compBox_list_t l){
     return gen_list_begin(l);
 }
+
+/* test for union find in large lists of boxes */
+LISTS_INLINE compBox_list_iterator compBox_list_endEl(const compBox_list_t l){
+    return gen_list_endEl(l);
+}
+
 LISTS_INLINE compBox_list_iterator compBox_list_next(compBox_list_iterator it){
     return gen_list_next(it);
 }
+
+LISTS_INLINE compBox_list_iterator compBox_list_prev(compBox_list_iterator it){
+    return gen_list_prev(it);
+}
+
+
 LISTS_INLINE compBox_list_iterator compBox_list_end(){
     return gen_list_end();
 }

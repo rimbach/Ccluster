@@ -36,7 +36,8 @@ extern "C" {
 #define STRAT_ANTICIPA 16
 #define STRAT_REALCOEF 32
 #define STRAT_PWSUTEST 64
-#define STRAT_FORTESTS 128
+#define STRAT_ROOTRADI 128
+#define STRAT_FORTESTS 256
 
 #define STRAT_INT_DEFAULT 55
 #define STRAT_STR_DEFAULT "default"
@@ -61,6 +62,12 @@ extern "C" {
 
 #define STRAT_INT_FORTESTS 247
 #define STRAT_STR_FORTESTS "test"
+
+#define STRAT_INT_V7 183
+#define STRAT_STR_V7 "V7"
+
+#define STRAT_STR_V8 "V8"
+
 #define STRAT_STR_FORTESTS1 "test1"
 #define STRAT_STR_FORTESTS2 "test2"
 
@@ -79,6 +86,7 @@ typedef struct {
 //     int _pwSuTest;
     int _pwSuNbPs;
 //     realRat _pwSuIsoRatio;
+    int _useRootRadii;
 } strategies;
 
 typedef strategies strategies_t[1];
@@ -129,6 +137,9 @@ METADATAS_INLINE void strategies_set_forTests   ( strategies_t strat, int flag )
 
 METADATAS_INLINE int strategies_pwSuNbPs       ( const strategies_t strat ) { return strat->_pwSuNbPs      ; }
 METADATAS_INLINE void strategies_set_pwSuNbPs   ( strategies_t strat, int nb ) { strat->_pwSuNbPs=nb      ; }
+
+METADATAS_INLINE int strategies_useRootRadii        ( const strategies_t strat ) { return strat->_useRootRadii      ; }
+METADATAS_INLINE void strategies_set_RootRadii   ( strategies_t strat, int flag ) { strat->_useRootRadii=flag      ; }
 
 #ifdef __cplusplus
 }

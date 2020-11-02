@@ -74,6 +74,18 @@ NUMBERS_INLINE void compApp_mul_fmpz( compApp_t x, const compApp_t y, const fmpz
     acb_mul_fmpz( x, y, z, prec );
 }
 
+NUMBERS_INLINE void realApp_ceil_realRat(realRat_t ceil, const realApp_t x, slong prec){
+    
+    realRat_set_si(ceil, 0, 1);
+    
+    arf_t ubound;
+    arf_init(ubound);
+    arb_get_ubound_arf(ubound, x, prec);
+    arf_get_fmpz(realRat_numref(ceil), ubound, ARF_RND_CEIL);
+    arf_clear(ubound);
+    return;
+}
+
 #ifdef __cplusplus
 }
 #endif

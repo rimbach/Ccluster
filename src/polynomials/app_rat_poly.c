@@ -58,6 +58,35 @@ void compApp_poly_scale_realRat_in_place( compApp_ptr fptr, const realRat_t r, s
     realApp_clear(factor);
 }
 
+/* evaluate at order 1 on an interval geven by center + width */
+void realApp_poly_evaluate_order_one( realApp_t y, const realApp_poly_t f, const realApp_poly_t fder, const realRat_t c, const realRat_t w, slong prec){
+    
+    realApp_t center, error, fderval;
+    
+    realApp_init(center);
+    realApp_init(error);
+    realApp_init(fderval);
+    
+    realApp_set_realRat(center, c, prec);
+    realApp_set_realRat(error, w, prec);
+    realApp_div_ui(     error, error, 2, prec );
+    /*evaluate f at center*/
+    realApp_poly_evaluate(y, f, center, prec);
+    /*evaluate fder at interval*/
+    realApp_add_error(center, error);
+    realApp_poly_evaluate(fderval, fder, center, prec);
+    /*compute interval - center */
+    realApp_zero(center);
+    realApp_add_error(center, error);
+    realApp_mul(fderval, fderval, center, prec);
+    realApp_add(y, y, fderval, prec);
+    
+    
+    realApp_clear(center);
+    realApp_clear(error);
+    realApp_init(fderval);
+}
+
 /*
 void compApp_poly_taylorShift_in_place_new( compApp_poly_t f, const realRat_t creal, const realRat_t cimag, const realRat_t radius, slong prec ) {
     
@@ -145,6 +174,7 @@ void compApp_poly_taylorShift_in_place( compApp_poly_t f, const compRat_t center
     compApp_clear(c);
 }
 
+
 void compApp_poly_taylorShift_in_place_noscale( compApp_poly_t f, 
                                         const compRat_t center, 
                                         slong prec ){
@@ -211,6 +241,31 @@ void realApp_poly_taylorShift_interval_in_place( realApp_poly_t f, const realRat
     
     realApp_clear(c);
     realApp_clear(error);
+
+void realApp_poly_taylorShift_in_place_slong( realApp_poly_t f, 
+                                              slong centerRe, 
+                                              slong prec ){
+    realApp_t c;
+    realApp_init(c);
+    realApp_set_si(c, centerRe);
+    realApp_ptr fptr = f->coeffs;
+    const slong len  = f->length;
+    _arb_poly_taylor_shift_convolution(fptr, c, len, prec);
+    realApp_clear(c);
+}
+
+void compApp_poly_taylorShift_in_place_slong( compApp_poly_t f, 
+                                              slong centerRe, 
+                                              slong centerIm,
+                                              slong prec ){
+    compApp_t c;
+    compApp_init(c);
+    compApp_set_sisi(c, centerRe, centerIm);
+    compApp_ptr fptr = f->coeffs;
+    const slong len  = f->length;
+    _acb_poly_taylor_shift_convolution(fptr, c, len, prec);
+    compApp_clear(c);
+
 }
 
 void realApp_poly_taylorShift( realApp_poly_t res, 
