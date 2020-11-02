@@ -26,6 +26,7 @@
 #include "lists/connCmp_list.h"
 #include "tstar/tstar.h"
 #include "newton/newton.h"
+#include "deflation/deflate.h"
 // #include "powerSums/powerSums.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -40,6 +41,7 @@ extern "C" {
 
 slong risolate_discard_compBox_list( compBox_list_t boxes,
                                      compBox_list_t bDiscarded,
+                                     connCmp_t cc,
                                      cacheApp_t cache, 
                                      slong prec, 
                                      metadatas_t meta);

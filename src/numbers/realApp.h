@@ -42,7 +42,9 @@ NUMBERS_INLINE void realApp_zero      (realApp_t x                              
 NUMBERS_INLINE void realApp_one       (realApp_t x                                ) { arb_one      (x); }
 NUMBERS_INLINE void realApp_set       (realApp_t y, const realApp_t x             ) { arb_set      (y, x); }
 NUMBERS_INLINE void realApp_set_fmpq  (realApp_t y, const fmpq_t    x, slong prec ) { arb_set_fmpq (y, x, prec); }
+NUMBERS_INLINE void realApp_set_fmpz  (realApp_t y, const fmpz_t    x, slong prec ) { arb_set_fmpz (y, x); }
 NUMBERS_INLINE void realApp_set_d     (realApp_t y, const double    x )             { arb_set_d (y, x); }
+NUMBERS_INLINE void realApp_set_si     (realApp_t y, const slong    x )             { arb_set_si (y, x); }
 
 /* comparisons */
 NUMBERS_INLINE int realApp_eq(const realApp_t x, const realApp_t y) { return arb_eq(x,y); }
@@ -83,6 +85,7 @@ NUMBERS_INLINE int realApp_contains_zero (const realApp_t x) {
 
 /* arithmetic operations */
 NUMBERS_INLINE void realApp_abs   ( realApp_t dest, const realApp_t x )                   { arb_abs   (dest, x); }
+NUMBERS_INLINE void realApp_inv   ( realApp_t dest, const realApp_t x, slong prec )       { arb_inv   (dest, x, prec); }
 NUMBERS_INLINE void realApp_add(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_add(z, x, y, prec); }
 NUMBERS_INLINE void realApp_add_si(realApp_t z, const realApp_t x, slong y, slong prec) { arb_add_si(z, x, y, prec); }
 NUMBERS_INLINE void realApp_sub(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_sub(z, x, y, prec); }
@@ -96,6 +99,8 @@ NUMBERS_INLINE void realApp_mul_2exp_si(realApp_t y, const realApp_t x, slong e)
 
 /* logarithm */
 NUMBERS_INLINE void realApp_log(realApp_t z, const realApp_t x, slong prec) { arb_log(z, x, prec); }
+NUMBERS_INLINE void realApp_log_base_ui(realApp_t z, const realApp_t x, ulong base, slong prec) { arb_log_base_ui(z, x, base, prec); }
+
 /* other */
 NUMBERS_INLINE slong realApp_ceil_si(const realApp_t x, slong prec){
     slong res;
@@ -105,6 +110,22 @@ NUMBERS_INLINE slong realApp_ceil_si(const realApp_t x, slong prec){
     res = (slong) ceil(arf_get_d(ubound,  ARF_RND_CEIL));
     arf_clear(ubound);
     return res;
+}
+
+NUMBERS_INLINE void realApp_ceil_fmpz(fmpz_t res, const realApp_t x, slong prec){
+    arb_t f;
+    arb_init(f);
+    arb_ceil(f, x, prec);
+    arb_get_unique_fmpz(res, f);
+    arb_clear(f);
+}
+
+NUMBERS_INLINE void realApp_floor_fmpz(fmpz_t res, const realApp_t x, slong prec){
+    arb_t f;
+    arb_init(f);
+    arb_floor(f, x, prec);
+    arb_get_unique_fmpz(res, f);
+    arb_clear(f);
 }
 
 /* printing */

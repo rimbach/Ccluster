@@ -111,6 +111,15 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
                            int depth,         /*the depth for counter                           */
                            metadatas_t meta);
 
+// int  tstar_real_downsize( compDsk_t nd,       /* if res==1, the disk containing the same sols */  
+//                           realRat_t factor,   /* the ratio of new disk radius / old disk radius */
+//                           cacheApp_t cache,
+//                           const compDsk_t d,  /*disk for which last pol has been computed          */
+//                           int nb_sols,        /*the number of sols in the disk          */
+//                           slong prec,        /*the "default" arithmetic precision              */
+//                           int depth,         /*the depth for counter                           */
+//                           metadatas_t meta );
+
 /*EXPERIMENTAL*/
 #ifdef CCLUSTER_EXPERIMENTAL
 void tstar_getDerivative( compApp_poly_t res, cacheApp_t cache, slong prec, slong order, metadatas_t meta);

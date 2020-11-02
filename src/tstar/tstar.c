@@ -336,8 +336,8 @@ tstar_res tstar_optimized( cacheApp_t cache,
         metadatas_add_Test( meta, depth, (restemp==1), discard, inNewton, 1, nbTaylorsRepeted, nbGraeffe, 
                             nbGraeffeRepeted, (int) res.appPrec, (double) (clock() - start) );
         
-//     if (discard)
-//         printf(" prec for discarding test: %d\n", (int) res.appPrec );
+//     if (inNewton)
+//         printf(" number of graeffe iterations: %d\n", (int) nbGraeffe );
 //     else
 //         printf(" --- prec for validating test: %d\n", (int) res.appPrec );
     return res;

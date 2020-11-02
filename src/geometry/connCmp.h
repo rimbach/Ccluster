@@ -24,6 +24,11 @@
 #include "lists/compBox_list.h"
 #include "flint/fmpz.h"
 
+/*for deflation*/
+#include "numbers/realApp.h"
+#include "polynomials/compApp_poly.h"
+#include "geometry/compDsk.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,8 +43,22 @@ typedef struct {
     int          nSols; /* the number of roots in the connected component */
     fmpz         nwSpd; /* the newton speed                               */
     slong        appPr; /* the number of bit of approximations            */
-    int          newSu; /* a flag set to 1 iff the last newton iteration wa successful*/
+    int          newSu; /* a flag set to 1 iff the last newton iteration was successful*/
+                        /*               2 iff the last newton iteration was unsuccessful*/
+                        /*               0 iff newton has not been tested on the cc*/
     int          isSep; /* a flag set to 1 if the connected component is separated from the other ones*/
+    
+    /* for deflation */
+    int          isDef; /* a flag set to 1 if a deflation has been computed */
+                        /*               0 otherwise */
+    int          degDe; /* nb of sol in the CC when the deflation has been computed */
+    int          isDFG; /* a flag set to 1 if last terms of the first Graeffe iteration has been computed */
+                        /*               0 otherwise */
+    realApp_poly defPo; /* "deflated" polynomial: interval polynomial that contains */
+                        /*                        coeffs pol shifted to any point in the cc */
+    realApp_poly defFG; /* last terms of the first Graeffe iteration, unscaled */
+    
+    /* end for deflation */
 } connCmp;
 
 typedef connCmp connCmp_t[1];
@@ -56,6 +75,12 @@ typedef connCmp * connCmp_ptr;
 #define connCmp_appPrref(X) ( (X)->appPr)
 #define connCmp_newSuref(X) ( (X)->newSu)
 #define connCmp_isSepref(X) ( (X)->isSep)
+
+#define connCmp_isDefref(X) ( (X)->isDef)
+#define connCmp_degDeref(X) ( (X)->degDe)
+#define connCmp_isDFGref(X) ( (X)->isDFG)
+#define connCmp_defPoref(X) (&(X)->defPo)
+#define connCmp_defFGref(X) (&(X)->defFG)
 
 /* memory managment */
 void connCmp_init(connCmp_t x);

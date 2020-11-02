@@ -11,8 +11,14 @@
 
 #include "risolate/risolate.h"
 
+void risolate_compBox_get_containing_dsk( compDsk_t d, const compBox_t b) {
+    compDsk_set_compRat_realRat(d, compBox_centerref(b), compBox_bwidthref(b) );
+    realRat_div_ui( compDsk_radiusref(d), compDsk_radiusref(d), 2 );
+}
+
 slong risolate_discard_compBox_list( compBox_list_t boxes, 
                                      compBox_list_t bDiscarded,
+                                     connCmp_t cc,
                                      cacheApp_t cache, 
                                      slong prec, 
                                      metadatas_t meta){
@@ -43,9 +49,34 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
 //             continue;
 //         }
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
-           
-//             res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
-            res = tstar_real_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
+        
+        res.nbOfSol = -2;
+        /* deflation */
+            if (metadatas_useDeflation(meta)) {
+                if (connCmp_isDefref(cc)==1) {
+                    slong precsave = res.appPrec;
+                    
+//                     if (metadatas_getVerbo(meta)>=3)
+//                         printf("---bisect compBox list: deflation is defined\n");
+                    
+                    res = deflate_tstar_test( cc, cache, bdisk, connCmp_nSolsref(cc), 1, res.appPrec, meta);
+//                     if (metadatas_getVerbo(meta)>=3)
+//                         printf("---tstar with deflation        : nbSols: %d, prec: %ld \n", res.nbOfSol, res.appPrec);
+                    if (res.nbOfSol == -2)
+                        res.appPrec = precsave;
+                }
+            }
+//             res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta); 
+        if (res.nbOfSol == -2) {
+            res = tstar_real_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta); 
+//             if (metadatas_useDeflation(meta)) {
+//                 if ((connCmp_isDefref(cc)==1)&&(metadatas_getVerbo(meta)>=3)) {
+//                     printf("---tstar without deflation     : nbSols: %d, prec: %ld \n", res.nbOfSol, res.appPrec);
+//                 }
+//             }
+        }
+            
+            
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
                 metadatas_add_discarded( meta, depth);
@@ -89,13 +120,6 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
     compBox_ptr btemp;
     connCmp_ptr ctemp;
     
-//     /* RealCoeffs */
-//     int cc_contains_real_line = 0;
-//     /* Check if cc contains the real line */
-//     if ( (metadatas_realCoeffs(meta)) && (!connCmp_is_imaginary_positive(cc)) )
-//         cc_contains_real_line = 1;
-//     /* end RealCoeffs */
-    
     while (!connCmp_is_empty(cc)) {
         btemp = connCmp_pop(cc);
         subdBox_risolate_bisect( subBoxes, btemp );
@@ -103,7 +127,7 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
         ccluster_free(btemp);
     }
 
-    prec = risolate_discard_compBox_list( subBoxes, bDiscarded, cache, prec, meta);
+    prec = risolate_discard_compBox_list( subBoxes, bDiscarded, cc, cache, prec, meta);
     
     while (!compBox_list_is_empty(subBoxes)) {
         btemp = compBox_list_pop(subBoxes);
@@ -112,16 +136,6 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
     int specialFlag = 1;
     if (connCmp_list_get_size(ltemp) == 1)
         specialFlag = 0;
-    
-//     /* RealCoeffs */
-//     if ( (metadatas_realCoeffs(meta)) && (connCmp_list_get_size(ltemp) == 1) && (cc_contains_real_line == 1) ){
-//         ctemp = connCmp_list_first(ltemp);
-//         /* test if cc has been separated from real case;
-//          in which case reset everything*/
-//         if ( connCmp_is_imaginary_positive(ctemp) )
-//             specialFlag = 1;
-//     }
-//     /* end RealCoeffs */
     
     slong nprec; 
     if (prec == connCmp_appPrref(cc)) {
@@ -147,6 +161,16 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
                 /* test */
                 connCmp_isSep(ctemp) = connCmp_isSep(cc);
                 /*end test */
+                
+                if (metadatas_useDeflation(meta)) {
+                    if (connCmp_isDefref(cc)==1) {
+//                         printf("---bisect conn comp: deflation is defined; copy deflation data\n");
+                        deflate_connCmp_init(ctemp);
+                        deflate_copy(ctemp, cc);
+                    }
+                }
+                
+                
             }
             connCmp_list_push(dest, ctemp);
         }
@@ -200,6 +224,41 @@ void risolate_prep_loop( compBox_list_t bDiscarded,
     realRat_clear(diam);
 }
 
+void compDsk_find_Well_Isolated_Disk( compDsk_t diskE, fmpz_t isoRatio, const compDsk_t disk, const compDsk_t clearance, slong prec){
+    
+    realRat_t ratio;
+    realRat_init(ratio);
+    realApp_t temp;
+    realApp_init(temp);
+    
+    compDsk_set(diskE, disk);
+    /* assume the 2 disks have real centers */
+    realRat_sub(ratio, compRat_realref( compDsk_centerref(disk) ), compRat_realref( compDsk_centerref(clearance) ) );
+    realRat_abs(ratio, ratio);
+//     realRat_add(ratio, compDsk_radiusref(disk), ratio );
+    realRat_sub(ratio, compDsk_radiusref(clearance), ratio);
+    realRat_div(ratio, ratio, compDsk_radiusref(disk));
+    realApp_set_realRat(temp, ratio, prec);
+    realApp_root_ui(temp, temp, 2, prec);
+    realApp_floor_fmpz(isoRatio, temp, prec);
+    realRat_mul_fmpz( compDsk_radiusref(diskE), compDsk_radiusref(diskE), isoRatio);
+    
+    //check correctness
+    printf("\n\n------ find well isolated disk \n");
+    realRat_t rad;
+    realRat_init(rad);
+    realRat_mul_fmpz( rad, compDsk_radiusref(diskE), isoRatio);
+    realRat_sub(ratio, compRat_realref( compDsk_centerref(disk) ), compRat_realref( compDsk_centerref(clearance) ) );
+    realRat_abs(ratio, ratio);
+    realRat_add(rad, rad, ratio);
+    printf("contains: %d \n", realRat_cmp(compDsk_radiusref(clearance), rad));
+    printf("------ find well isolated disk, end \n");
+    realRat_clear(rad);
+    
+    realApp_clear(temp);
+    realRat_clear(ratio);
+}
+
 void risolate_main_loop( connCmp_list_t qResults,  
                          compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
@@ -249,13 +308,15 @@ void risolate_main_loop( connCmp_list_t qResults,
         ccur = connCmp_list_pop(qMainLoop);
         
         connCmp_risolate_componentBox(componentBox, ccur, metadatas_initBref(meta));
-        compBox_get_containing_dsk(ccDisk, componentBox);
-        compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
+//         compBox_get_containing_dsk(ccDisk, componentBox);
+        risolate_compBox_get_containing_dsk(ccDisk, componentBox);
+//         compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
         realRat_mul(threeWidth, three, connCmp_widthref(ccur));
         prec = connCmp_appPr(ccur);
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
-        separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
+//         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
+        separationFlag = 1;
       
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
@@ -264,35 +325,39 @@ void risolate_main_loop( connCmp_list_t qResults,
         
         if (metadatas_getVerbo(meta)>3) {
             printf("---depth: %d\n", (int) depth);
-            printf("------component Box:       "); compBox_print(componentBox); printf("\n");
+//             printf("------component Box:       "); compBox_print(componentBox); printf("\n");
+            compApp_t centerApp;
+            realApp_t widthApp;
+            compApp_init(centerApp);
+            realApp_init(widthApp);
+            compApp_set_compRat(centerApp, compBox_centerref(componentBox), CCLUSTER_DEFAULT_PREC );
+            realApp_set_realRat(widthApp,  compBox_bwidthref(componentBox), CCLUSTER_DEFAULT_PREC );
+            printf("------component Box:       center: ");
+            compApp_printd(centerApp, 10); printf(" width: ");
+            realApp_printd(widthApp, 10); printf("\n");
+            compApp_clear(centerApp);
+            realApp_clear(widthApp);
+            printf("------nb of boxes:         %d\n", compBox_list_get_size(connCmp_boxesref(ccur)));
             printf("------nb of roots:         %d\n", connCmp_nSolsref(ccur));
             printf("------last newton success: %d\n", connCmp_newSuref(ccur));
+            printf("------newton speed       : "); fmpz_print(connCmp_nwSpdref(ccur)); printf("\n");
             printf("------separation Flag:     %d\n", separationFlag);
             printf("------widthFlag:           %d\n", widthFlag); 
             printf("------compactFlag:         %d\n", compactFlag);
             printf("------sepBoundFlag:        %d\n", sepBoundFlag);
-            compBox_list_print( connCmp_boxesref(ccur) );
-            printf("\n");
+            printf("------current prec:        %ld\n",connCmp_appPrref(ccur));
+//             compBox_list_print( connCmp_boxesref(ccur) );
+//             printf("\n");
         }
         
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
-//         if ((separationFlag)) {
-//             printf("depth: %d, connCmp_nSolsref(ccur): %d, prec: %d\n", (int) depth, (int) connCmp_nSolsref(ccur), (int) prec);
-//             
-//             if (connCmp_nSolsref(ccur)==-1){
                 
 //                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                 resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
-//                 if (metadatas_getVerbo(meta)>3)
-//                     printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));
-//                 ???
+                if (metadatas_getVerbo(meta)>3)
+                    printf("------run tstar: nbSols: %d, required precision: %ld\n", (int) connCmp_nSolsref(ccur), resTstar.appPrec);
                 prec = resTstar.appPrec;
-//             }
-                
-//             printf("validate: prec avant: %d prec apres: %d\n", (int) prec, (int) resTstar.appPrec);
-//             ???
-//             prec = resTstar.appPrec;
         }
         
         /* special case where zero is a root with mult>1 */
@@ -328,18 +393,46 @@ void risolate_main_loop( connCmp_list_t qResults,
             connCmp_init(nCC);
             resNewton = newton_risolate_newton_connCmp( nCC, ccur, cache, initPoint, prec, meta);
 
+            if (metadatas_getVerbo(meta)>3)
+                    printf("------run Newton: res: %d, required precision: %ld\n", resNewton.nflag, resNewton.appPrec);
+            
 //             printf("+++depth: %ld, connCmp_nSolsref(ccur): %d, res_newton: %d \n", depth, connCmp_nSols(ccur), resNewton.nflag);
             if (resNewton.nflag) {
+                
                 connCmp_clear(ccur);
                 ccluster_free(ccur);
                 ccur = nCC;
-                connCmp_increase_nwSpd(ccur);
                 connCmp_newSuref(ccur) = 1;
-                connCmp_appPrref(nCC) = resNewton.appPrec;
+                connCmp_appPrref(ccur) = resNewton.appPrec;
+                
+                connCmp_risolate_componentBox(componentBox, ccur, metadatas_initBref(meta));
+//                 compBox_get_containing_dsk(ccDisk, componentBox);
+                risolate_compBox_get_containing_dsk( ccDisk, componentBox);
+                
+                if (metadatas_useDeflation(meta)) {
+                    if ( (connCmp_nSolsref(ccur) > 1 ) 
+//                         && (connCmp_nSolsref(ccur) < (cacheApp_getDegree(cache)/10)) 
+                       ) {
+//                         if (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)==0) {
+                        if (connCmp_isDefref(ccur)==0) {
+                            if (realRat_cmp_ui(compDsk_radiusref(ccDisk), 1 ) < 0) {
+//                                 if (metadatas_getVerbo(meta)>=3){
+//                                     printf("\n\n\n ------Success of Newton Iteration for this Component with a cluster of %d roots------\n", connCmp_nSolsref(ccur) );
+//                                 }
+                                deflate_connCmp_init(ccur);
+                                deflate_set( ccur, cache, ccDisk, connCmp_nSolsref(ccur), connCmp_appPrref(ccur), meta );
+                                
+                            }
+                        }
+                    }
+                }
+                
+                connCmp_increase_nwSpd(ccur);
     
             }
             else {
-                connCmp_newSuref(ccur) = 0;
+                /* newton has been run but wasn't successful */
+                connCmp_newSuref(ccur) = 2;
                 connCmp_clear(nCC);
                 ccluster_free(nCC);
             }
@@ -377,6 +470,9 @@ void risolate_main_loop( connCmp_list_t qResults,
 //             connCmp_clear(ccur);
 //             ccluster_free(ccur);
 // #else
+            if (metadatas_getVerbo(meta)>3) {
+                printf("------bisect\n" );
+            }
             risolate_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cache, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
