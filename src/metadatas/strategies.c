@@ -58,7 +58,6 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
     strat->_additionalFlags       = strat2->_additionalFlags   ;
     strat->_useRealCoeffs            = strat2->_useRealCoeffs   ;
     strat->_useDeflation          = strat2->_useDeflation       ;
-    strat->_useDeflation2          = strat2->_useDeflation2       ;
     strat->_usePowerSums             = strat2->_usePowerSums   ;
     strat->_forTests              = strat2->_forTests   ;
 //     strat->_pwSuTest              = strat2->_pwSuTest   ;
@@ -75,7 +74,6 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
     strat->_additionalFlags       = 0;
     strat->_useRealCoeffs         = 0;
     strat->_useDeflation          = 0;
-    strat->_useDeflation2          = 0;
     strat->_usePowerSums         = 0;
 //     strat->_pwSuTest             = 0;
     strat->_forTests             = 0;
@@ -89,6 +87,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_usePredictPrec        = 1;
         strat->_useAnticipate         = 1;
         strat->_useRealCoeffs         = 1;
+        strat->_useDeflation          = 1;
         strat->_usePowerSums         = 0;
 //         strat->_pwSuTest              = 0;
         strat->_forTests              = 0;
@@ -152,18 +151,17 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_pwSuNbPs              = 0;
         return;
     }
-    if (strcmp( stratName, STRAT_STR_FORTESTS1 ) == 0) {
-        strat->_useNewton             = 1;
-        strat->_useTstarOptim         = 1;
-        strat->_usePredictPrec        = 1;
-        strat->_useAnticipate         = 1;
-        strat->_useRealCoeffs         = 1;
-        strat->_useDeflation2          = 1;
-        strat->_usePowerSums          = 0;
-//         strat->_forTests              = 1;
-        strat->_pwSuNbPs              = 0;
-        return;
-    }
+//     if (strcmp( stratName, STRAT_STR_FORTESTS1 ) == 0) {
+//         strat->_useNewton             = 1;
+//         strat->_useTstarOptim         = 1;
+//         strat->_usePredictPrec        = 1;
+//         strat->_useAnticipate         = 1;
+//         strat->_useRealCoeffs         = 1;
+//         strat->_usePowerSums          = 0;
+// //         strat->_forTests              = 1;
+//         strat->_pwSuNbPs              = 2;
+//         return;
+//     }
     
 //     if (strcmp( stratName, STRAT_STR_FORTESTS2 ) == 0) {
 //         strat->_useNewton             = 1;

@@ -61,6 +61,7 @@ typedef struct {
     double  _clicks_DefEval_cumul;
     double  _clicks_DefScal_cumul;
     double  _clicks_DefGrae_cumul;
+    double  _clicks_DefTsta_cumul;
     
     
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -225,6 +226,9 @@ METADATAS_INLINE void   chronos_add_time_DefScal( chronos_t times, double d, int
 METADATAS_INLINE void   chronos_add_time_DefGrae( chronos_t times, double d, int nbThreads ){
     times->_clicks_DefGrae_cumul += d/CLOCKS_PER_SEC;
 }
+METADATAS_INLINE void   chronos_add_time_DefTsta( chronos_t times, double d, int nbThreads ){
+    times->_clicks_DefTsta_cumul += d/CLOCKS_PER_SEC;
+}
 
 METADATAS_INLINE double chronos_get_time_NeTSTes ( const chronos_t times ) { return times->_clicks_NeTSTes_cumul; }
 METADATAS_INLINE double chronos_get_time_DefTayl ( const chronos_t times ) { return times->_clicks_DefTayl_cumul; }
@@ -232,6 +236,7 @@ METADATAS_INLINE double chronos_get_time_DefDeri ( const chronos_t times ) { ret
 METADATAS_INLINE double chronos_get_time_DefEval ( const chronos_t times ) { return times->_clicks_DefEval_cumul; }
 METADATAS_INLINE double chronos_get_time_DefScal ( const chronos_t times ) { return times->_clicks_DefScal_cumul; }
 METADATAS_INLINE double chronos_get_time_DefGrae ( const chronos_t times ) { return times->_clicks_DefGrae_cumul; }
+METADATAS_INLINE double chronos_get_time_DefTsta ( const chronos_t times ) { return times->_clicks_DefTsta_cumul; }
 
 /* DEPRECATED */
 // METADATAS_INLINE void   chronos_tic_Approxi      ( chronos_t times ) { times->_clicks_Approxi = clock(); }

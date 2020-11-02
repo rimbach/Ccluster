@@ -413,12 +413,12 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
             /* try deflation */
             if (metadatas_useDeflation(meta)){
                 if (connCmp_isDefref(CC)){
-                    if (metadatas_getVerbo(meta)>=3)
-                        printf("------deflated connected component: nbSols: %d, prec: %ld, depth: %ld \n", connCmp_degDeref(CC), res.appPrec, depth);
+//                     if (metadatas_getVerbo(meta)>=3)
+//                         printf("------deflated connected component: nbSols: %d, prec: %ld, depth: %ld \n", connCmp_degDeref(CC), res.appPrec, depth);
                     
                     tres = deflate_tstar_test( CC, cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, meta);
-                    if (metadatas_getVerbo(meta)>=3)
-                        printf("------tstar with deflation        : nbSols: %d, prec: %ld \n", tres.nbOfSol, tres.appPrec);
+//                     if (metadatas_getVerbo(meta)>=3)
+//                         printf("------tstar with deflation        : nbSols: %d, prec: %ld \n", tres.nbOfSol, tres.appPrec);
 
                     if (tres.nbOfSol ==-2) {
                         connCmp_isDefref(CC) = 0;
@@ -436,8 +436,8 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
                 if (metadatas_haveToCount(meta))
                     metadatas_add_time_NeTSTes(meta, (double) (clock() - start) );
             
-                if (metadatas_getVerbo(meta)>=3)
-                    printf("------run tstar in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
+//                 if (metadatas_getVerbo(meta)>=3)
+//                     printf("------run tstar in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
             }
             
             res.appPrec = tres.appPrec;

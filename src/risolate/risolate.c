@@ -56,12 +56,12 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
                 if (connCmp_isDefref(cc)==1) {
                     slong precsave = res.appPrec;
                     
-                    if (metadatas_getVerbo(meta)>=3)
-                        printf("---bisect compBox list: deflation is defined\n");
+//                     if (metadatas_getVerbo(meta)>=3)
+//                         printf("---bisect compBox list: deflation is defined\n");
                     
                     res = deflate_tstar_test( cc, cache, bdisk, connCmp_nSolsref(cc), 1, res.appPrec, meta);
-                    if (metadatas_getVerbo(meta)>=3)
-                        printf("---tstar with deflation        : nbSols: %d, prec: %ld \n", res.nbOfSol, res.appPrec);
+//                     if (metadatas_getVerbo(meta)>=3)
+//                         printf("---tstar with deflation        : nbSols: %d, prec: %ld \n", res.nbOfSol, res.appPrec);
                     if (res.nbOfSol == -2)
                         res.appPrec = precsave;
                 }
@@ -69,11 +69,11 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
 //             res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta); 
         if (res.nbOfSol == -2) {
             res = tstar_real_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta); 
-            if (metadatas_useDeflation(meta)) {
-                if ((connCmp_isDefref(cc)==1)&&(metadatas_getVerbo(meta)>=3)) {
-                    printf("---tstar without deflation     : nbSols: %d, prec: %ld \n", res.nbOfSol, res.appPrec);
-                }
-        }
+//             if (metadatas_useDeflation(meta)) {
+//                 if ((connCmp_isDefref(cc)==1)&&(metadatas_getVerbo(meta)>=3)) {
+//                     printf("---tstar without deflation     : nbSols: %d, prec: %ld \n", res.nbOfSol, res.appPrec);
+//                 }
+//             }
         }
             
             
@@ -126,13 +126,6 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
         compBox_clear(btemp);
         ccluster_free(btemp);
     }
-    
-    /* deflation */
-//     if (metadatas_useDeflation(meta)) {
-//         if (connCmp_isDefref(cc)==1) {
-//             printf("---bisect conn comp: deflation is defined; nb of subboxes in the cc: %d\n", compBox_list_get_size(subBoxes));
-//         }
-//     }
 
     prec = risolate_discard_compBox_list( subBoxes, bDiscarded, cc, cache, prec, meta);
     
@@ -417,13 +410,15 @@ void risolate_main_loop( connCmp_list_t qResults,
                 risolate_compBox_get_containing_dsk( ccDisk, componentBox);
                 
                 if (metadatas_useDeflation(meta)) {
-                    if (connCmp_nSolsref(ccur) > 1 ) {
+                    if ( (connCmp_nSolsref(ccur) > 1 ) 
+//                         && (connCmp_nSolsref(ccur) < (cacheApp_getDegree(cache)/10)) 
+                       ) {
 //                         if (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)==0) {
                         if (connCmp_isDefref(ccur)==0) {
                             if (realRat_cmp_ui(compDsk_radiusref(ccDisk), 1 ) < 0) {
-                                if (metadatas_getVerbo(meta)>=3){
-                                    printf("\n\n\n ------Success of Newton Iteration for this Component with a cluster of %d roots------\n", connCmp_nSolsref(ccur) );
-                                }
+//                                 if (metadatas_getVerbo(meta)>=3){
+//                                     printf("\n\n\n ------Success of Newton Iteration for this Component with a cluster of %d roots------\n", connCmp_nSolsref(ccur) );
+//                                 }
                                 deflate_connCmp_init(ccur);
                                 deflate_set( ccur, cache, ccDisk, connCmp_nSolsref(ccur), connCmp_appPrref(ccur), meta );
                                 

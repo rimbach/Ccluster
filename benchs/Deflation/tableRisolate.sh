@@ -238,7 +238,7 @@ gen_with_deg_pow(){
     
     if [ ! -e $NAME_IN3 ]; then
             echo  "Generating file for $POLNAME degree $DEG, pol in " $NAME_IN3
-            $GENPOLFI_CALL $POLNAME $DEG $NAME_IN3 -f 3 -b $POW
+            $GENPOLFI_CALL $POLNAME $DEG $NAME_IN3 -f 3 -p $POW
     fi
     
 }
@@ -380,6 +380,7 @@ stats_pol()
     TSIZE=$(grep "tree size:"                    $NAME_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     TDEPT=$(grep "tree depth:"                   $NAME_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     TTIME=$(grep "total time:"                   $NAME_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TINTS=$(grep "total time spent in Taylor shifts:" $NAME_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     # details on risolate
 #     NBTZT=$(grep "total number DT:"              $NAME_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
 #     NBTST=$(grep "total number VT:"              $NAME_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
@@ -388,13 +389,17 @@ stats_pol()
     TSIZE2=$(grep "tree size:"                    $NAME_OUT2| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     TDEPT2=$(grep "tree depth:"                   $NAME_OUT2| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     TTIME2=$(grep "total time:"                   $NAME_OUT2| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TINTS2=$(grep "total time spent in Taylor shifts:" $NAME_OUT2| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TINEV2=$(grep "time spent in evaluations:"    $NAME_OUT2| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
 
     DSC_NSOLS=$(grep "Number of roots:" $NAME_OUTDSC| cut -f2 -d':'| tr -d ' ')
     DSC_TSIZE=$(grep "TREESIZE=" $NAME_OUTDSC| cut -f2 -d'='| tr -d ' ')
     DSC_TTIME=$(grep "real" $NAME_OUTDSC| cut -f2 -d'l' | tr -d ' ')
     
     LINE_TAB1="`format_numb $DEG $LENP` & `format_numb $NSOLS $LENP`  & `format_numb $TSIZE $LENP` & `format_numb $TDEPT 2` & `format_time $TTIME`"
+    LINE_TAB1=$LINE_TAB1" & `format_time $TINTS`"
     LINE_TAB1=$LINE_TAB1" & `format_numb $NSOLS2 $LENP`  & `format_numb $TSIZE2 $LENP` & `format_numb $TDEPT2 2` & `format_time $TTIME2`"
+    LINE_TAB1=$LINE_TAB1" & `format_time $TINTS2` & `format_time $TINEV2`"
     LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`\\\\"
     
     echo $LINE_TAB1 >> $TEMPTABFILE1
@@ -748,7 +753,7 @@ done
 
 POLNAMES="MignotteGen"
 DEGF="256 391 512 791"
-POWERS="3 4 5 6 7 8"
+POWERS="3 4 5 6 7 8 9 10 11 12"
 
 for POLNAME in $POLNAMES; do
     echo $POLNAME >> $TEMPTABFILE1
@@ -770,6 +775,58 @@ for POW in $POWERS; do
 #     echo $LINE_TAB >> $TEMPTABFILE
 #     stats_pol $NAME
 done
+done 
+done
+
+POLNAMES="WilkMul"
+DEGF="5 10 15"
+
+for POLNAME in $POLNAMES; do
+    echo $POLNAME >> $TEMPTABFILE1
+for DEG in $DEGF; do
+# for POW in $POWERS; do
+    
+    REPNAME=$REP
+    NAME=$REPNAME"/"$POLNAME"_"$DEG
+    
+    gen_with_deg $NAME $POLNAME $DEG
+    run_risolate $NAME $POLNAME $DEG
+    run_aNewDsc  $NAME $POLNAME $DEG
+#     gen_and_run_ccluster $NAME
+    
+    stats_pol $NAME $DEG
+    
+#     LINE_TAB=" `format_numb $DEG $LENP` & "
+#     LINE_TAB=$LINE_TAB"`stats_pol $NAME`\\\\"
+#     echo $LINE_TAB >> $TEMPTABFILE
+#     stats_pol $NAME
+# done
+done 
+done
+
+POLNAMES="WilkMulF"
+DEGF="32 64 128"
+
+for POLNAME in $POLNAMES; do
+    echo $POLNAME >> $TEMPTABFILE1
+for DEG in $DEGF; do
+# for POW in $POWERS; do
+    
+    REPNAME=$REP
+    NAME=$REPNAME"/"$POLNAME"_"$DEG
+    
+    gen_with_deg $NAME $POLNAME $DEG
+    run_risolate $NAME $POLNAME $DEG
+    run_aNewDsc  $NAME $POLNAME $DEG
+#     gen_and_run_ccluster $NAME
+    
+    stats_pol $NAME $DEG
+    
+#     LINE_TAB=" `format_numb $DEG $LENP` & "
+#     LINE_TAB=$LINE_TAB"`stats_pol $NAME`\\\\"
+#     echo $LINE_TAB >> $TEMPTABFILE
+#     stats_pol $NAME
+# done
 done 
 done
 

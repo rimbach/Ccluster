@@ -59,10 +59,11 @@ void deflate_derivative_inplace( realApp_poly_t res, slong prec, metadatas_t met
             metadatas_add_time_DefDeri(meta, (double) (clock() - start) );
 }
 
-void deflate_evaluate(realApp_t y, realApp_poly_t f, const realApp_t x, slong prec, metadatas_t meta){
+void deflate_evaluate(realApp_t y, const realApp_poly_t f, const realApp_t x, slong prec, metadatas_t meta){
     
         clock_t start = clock();
         
+//         arb_poly_evaluate_horner(y, f, x, prec);
         realApp_poly_evaluate(y, f, x, prec);
 
         if (metadatas_haveToCount(meta))
@@ -238,6 +239,7 @@ void deflate_set( connCmp_t x, cacheApp_t cache, const compDsk_t disk, int nbSol
     /* compute the interval taylor shift at any point in the disk */
     realApp_poly_set(connCmp_defPoref(x), cacheApp_getApproximation_real ( cache, prec ));
     deflate_taylor_shift_interval_inplace( connCmp_defPoref(x), disk, prec, meta);
+    
 }
 
 void deflate_copy( connCmp_t dest, const connCmp_t src ){
@@ -246,8 +248,7 @@ void deflate_copy( connCmp_t dest, const connCmp_t src ){
         connCmp_degDeref(dest) = connCmp_degDeref(src);
         connCmp_isDFGref(dest) = connCmp_isDFGref(src);
         realApp_poly_set( connCmp_defPoref(dest), connCmp_defPoref(src) );
-        if (connCmp_defFGref(src) != 0)
-            realApp_poly_set( connCmp_defFGref(dest), connCmp_defFGref(src) );
+        realApp_poly_set( connCmp_defFGref(dest), connCmp_defFGref(src) );
     }
 }
 
@@ -258,6 +259,7 @@ void deflate_compute_trailing_coeffs(realApp_ptr coeffs, const connCmp_t x, cach
     realApp_poly_t fapprox;
     realApp_poly_init(fapprox);
     realApp_poly_set(fapprox, cacheApp_getApproximation_real ( cache, prec ));
+    
     
     realApp_t center, coeff;
     realRat_t factor;
@@ -279,6 +281,11 @@ void deflate_compute_trailing_coeffs(realApp_ptr coeffs, const connCmp_t x, cach
         }
         
     }
+    
+    realApp_poly_clear(fapprox);
+    realApp_clear(center);
+    realApp_clear(coeff);
+    realRat_clear(factor);
 }
 
 void deflate_compute_leading_coeffs(realApp_ptr coeffs, const connCmp_t x, const compDsk_t d, slong prec, metadatas_t meta){
@@ -307,6 +314,8 @@ void deflate_compute_leading_coeffs(realApp_ptr coeffs, const connCmp_t x, const
 }
 
 tstar_res deflate_tstar_test( connCmp_t CC, cacheApp_t cache, const compDsk_t d, int max_nb_sols, int discard, slong prec, metadatas_t meta) {
+    
+    clock_t start = clock();
     
     tstar_res res;
     res.nbOfSol = -1;
@@ -337,17 +346,17 @@ tstar_res deflate_tstar_test( connCmp_t CC, cacheApp_t cache, const compDsk_t d,
         
         if (iteration >= 1) {
             
-            if (iteration==1){
-                
-                if (connCmp_isDFGref(CC) == 0) {
-                    connCmp_isDFGref(CC) =1;
-                    realApp_poly_init2(connCmp_defFGref(CC) , deg+1);
-                    realApp_poly_oneGraeffeIteration_lastTerms(connCmp_defFGref(CC), connCmp_defPoref(CC), connCmp_degDeref(CC)+1, res.appPrec, meta );
-                }
-                realApp_poly_oneGraeffeIteration_with_lastTerms_inPlace(pApprox, connCmp_defFGref(CC), compDsk_radiusref(d),
-                                                                             connCmp_degDeref(CC)+1, res.appPrec, meta);
-            }
-            else
+//             if (iteration==1){
+//                 
+//                 if (connCmp_isDFGref(CC) == 0) {
+//                     connCmp_isDFGref(CC) =1;
+//                     realApp_poly_init2(connCmp_defFGref(CC) , deg+1);
+//                     realApp_poly_oneGraeffeIteration_lastTerms(connCmp_defFGref(CC), connCmp_defPoref(CC), connCmp_degDeref(CC)+1, res.appPrec, meta );
+//                 }
+//                 realApp_poly_oneGraeffeIteration_with_lastTerms_inPlace(pApprox, connCmp_defFGref(CC), compDsk_radiusref(d),
+//                                                                              connCmp_degDeref(CC)+1, res.appPrec, meta);
+//             }
+//             else
                 deflate_real_graeffe_iterations_inplace( pApprox, 1, res.appPrec, meta);
             nbGraeffe +=1;
         }
@@ -417,6 +426,10 @@ tstar_res deflate_tstar_test( connCmp_t CC, cacheApp_t cache, const compDsk_t d,
     
     if ((restemp==0)||(restemp==-2)) res.nbOfSol = -2;
     if ((restemp==-1)) res.nbOfSol = -1;
+    
+    if (metadatas_haveToCount(meta))
+            metadatas_add_time_DefTsta(meta, (double) (clock() - start) );
+    
     return res;
 }
 

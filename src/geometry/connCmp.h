@@ -57,6 +57,7 @@ typedef struct {
     realApp_poly defPo; /* "deflated" polynomial: interval polynomial that contains */
                         /*                        coeffs pol shifted to any point in the cc */
     realApp_poly defFG; /* last terms of the first Graeffe iteration, unscaled */
+    
     /* end for deflation */
 } connCmp;
 

@@ -113,8 +113,7 @@ void connCmp_set(connCmp_t dest, const connCmp_t src){
         connCmp_degDeref(dest) = connCmp_degDeref(src);
         connCmp_isDFGref(dest) = connCmp_isDFGref(src);
         realApp_poly_set( connCmp_defPoref(dest), connCmp_defPoref(src) );
-        if (connCmp_isDFGref(src) != 0)
-            realApp_poly_set( connCmp_defFGref(dest), connCmp_defFGref(src) );
+        realApp_poly_set( connCmp_defFGref(dest), connCmp_defFGref(src) );
     }
 }
 

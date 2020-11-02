@@ -120,21 +120,25 @@ tstar_res tstar_real_asInPaper( cacheApp_t cache,
     N = (int) 4+ceil(log2(1+log2(deg)));
     
     tstar_real_getApproximation( pApprox, cache, res.appPrec, meta);
+    
     tstar_real_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
+    
     tstar_real_graeffe_iterations_inplace( pApprox, N, res.appPrec, meta);
+    
     realApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
     
     while( (res.nbOfSol < max_nb_sols)&&(restemp==0) ){
         res.nbOfSol += 1;
         restemp = realApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
-        
         while( restemp == -2 ){
             res.appPrec *=2;
             tstar_real_getApproximation( pApprox, cache, res.appPrec, meta);
             tstar_real_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
+            
             tstar_real_graeffe_iterations_inplace( pApprox, N, res.appPrec, meta);
             realApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
             restemp = realApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
+            
             nbTaylorsRepeted +=1;
             nbGraeffeRepeted +=N;
         }
@@ -151,6 +155,7 @@ tstar_res tstar_real_asInPaper( cacheApp_t cache,
     if (metadatas_haveToCount(meta))
         metadatas_add_Test( meta, depth, (restemp==1), discard, inNewton, 1, nbTaylorsRepeted, N, 
                             nbGraeffeRepeted, (int) res.appPrec, (double) (clock() - start) );
+    
     return res;
 }
 
