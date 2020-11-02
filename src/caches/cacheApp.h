@@ -57,10 +57,6 @@ typedef struct {
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_t _mutex;
 #endif
-//     /* for test: cache the last working polynomial computed and the nb of graeffe iterations */
-//     compApp_poly _working;
-//     realApp_poly _working_real;
-//     int _nbIterations;
 } cacheApp;
 
 typedef cacheApp cacheApp_t[1];
@@ -77,10 +73,6 @@ CACHE_INLINE void cacheApp_unlock(cacheApp_t cache) {
     pthread_mutex_unlock (&(cache->_mutex));
 #endif
 }
-
-// #define cacheApp_workCref(X) (&(X)->_working)  
-// #define cacheApp_workRref(X) (&(X)->_working_real) 
-// #define cacheApp_nbItref(X) (X->_nbIterations) 
 
 void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, slong) );
 
