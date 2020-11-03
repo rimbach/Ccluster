@@ -186,6 +186,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_usePredictPrec        = 1;
         strat->_useAnticipate         = 1;
         strat->_useRealCoeffs         = 1;
+        strat->_useDeflation          = 1;
         strat->_usePowerSums          = 0;
         strat->_useRootRadii          = 1;
 //         strat->_pwSuNbPs              = 1;

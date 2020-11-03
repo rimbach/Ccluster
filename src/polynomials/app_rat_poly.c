@@ -241,6 +241,7 @@ void realApp_poly_taylorShift_interval_in_place( realApp_poly_t f, const realRat
     
     realApp_clear(c);
     realApp_clear(error);
+}
 
 void realApp_poly_taylorShift_in_place_slong( realApp_poly_t f, 
                                               slong centerRe, 

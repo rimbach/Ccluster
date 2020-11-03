@@ -325,7 +325,7 @@ void risolate_main_loop( connCmp_list_t qResults,
         
         connCmp_risolate_componentBox(componentBox, ccur, metadatas_initBref(meta));
         risolate_compBox_get_containing_dsk(ccDisk, componentBox);
-        compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
+//         compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
 
         realRat_mul(threeWidth, three, connCmp_widthref(ccur));
         prec = connCmp_appPr(ccur);
@@ -374,11 +374,13 @@ void risolate_main_loop( connCmp_list_t qResults,
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
                 
 //                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
-                resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
-                connCmp_nSolsref(ccur) = resTstar.nbOfSol;
-                if (metadatas_getVerbo(meta)>3)
-                    printf("------run tstar: nbSols: %d, required precision: %ld\n", (int) connCmp_nSolsref(ccur), resTstar.appPrec);
-                prec = resTstar.appPrec;
+                if (connCmp_nSolsref(ccur)!=1){
+                    resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
+                    connCmp_nSolsref(ccur) = resTstar.nbOfSol;
+                    if (metadatas_getVerbo(meta)>3)
+                        printf("------run tstar: nbSols: %d, required precision: %ld\n", (int) connCmp_nSolsref(ccur), resTstar.appPrec);
+                    prec = resTstar.appPrec;
+                }
         }
         
         /* special case where zero is a root with mult>1 */
