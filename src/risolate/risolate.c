@@ -315,8 +315,8 @@ void risolate_main_loop( connCmp_list_t qResults,
         prec = connCmp_appPr(ccur);
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
-//         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
-        separationFlag = 1;
+        separationFlag = ccluster_compDsk_is_separated(ccDisk, qMainLoop, discardedCcs);
+//         separationFlag = 1;
       
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
@@ -352,12 +352,14 @@ void risolate_main_loop( connCmp_list_t qResults,
         
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
                 
+            if (connCmp_nSolsref(ccur) != 1 ) {
 //                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                 resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
                 if (metadatas_getVerbo(meta)>3)
                     printf("------run tstar: nbSols: %d, required precision: %ld\n", (int) connCmp_nSolsref(ccur), resTstar.appPrec);
                 prec = resTstar.appPrec;
+            }
         }
         
         /* special case where zero is a root with mult>1 */
@@ -440,7 +442,13 @@ void risolate_main_loop( connCmp_list_t qResults,
                 metadatas_add_Newton   ( meta, depth, resNewton.nflag, (double) (clock() - start) );
             }
         }
-        
+        if ( (connCmp_nSols(ccur)==1) && widthFlag && compactFlag ) {
+            metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
+            connCmp_list_push(qResults, ccur);
+            if (metadatas_getVerbo(meta)>3) {
+                printf("#------validated with %d roots\n", connCmp_nSols(ccur));
+            }
+        } else
         if ( (connCmp_nSols(ccur)>0) && (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) 
              && separationFlag && widthFlag && compactFlag
              && ( sepBoundFlag || (connCmp_nSols(ccur)==1)) ) {
