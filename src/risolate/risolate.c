@@ -39,6 +39,7 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
         
         btemp = compBox_list_pop(boxes);
         risolate_compBox_get_containing_dsk(bdisk, btemp);
+//         compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
         metadatas_add_explored( meta, depth);
         
@@ -315,8 +316,8 @@ void risolate_main_loop( connCmp_list_t qResults,
         prec = connCmp_appPr(ccur);
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
-        separationFlag = ccluster_compDsk_is_separated(ccDisk, qMainLoop, discardedCcs);
-//         separationFlag = 1;
+//         separationFlag = ccluster_compDsk_is_separated(ccDisk, qMainLoop, discardedCcs);
+        separationFlag = 1;
       
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);

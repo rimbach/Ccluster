@@ -269,11 +269,11 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in newton:",         metadatas_get_time_Newtons(meta),    " " );
     if (metadatas_useDeflation(meta)){
     r = fprintf(file, "# -------------------Deflation        ---------------------------------\n");
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in interval TS:",         metadatas_get_time_DefTayl(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in interval TS:",         metadatas_get_time_DefTayl(meta),    " " );
 //     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in derivatives:",         metadatas_get_time_DefDeri(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in evaluations:",         metadatas_get_time_DefEval(meta),    " " );
 //     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in scaling    :",         metadatas_get_time_DefScal(meta),    " " );
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in first Gr.It:",         metadatas_get_time_DefGrae(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in first Gr.It:",         metadatas_get_time_DefGrae(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in Tstar tests:",         metadatas_get_time_DefTsta(meta),    " " );
     }
     }

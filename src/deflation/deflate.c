@@ -346,17 +346,17 @@ tstar_res deflate_tstar_test( connCmp_t CC, cacheApp_t cache, const compDsk_t d,
         
         if (iteration >= 1) {
             
-//             if (iteration==1){
-//                 
-//                 if (connCmp_isDFGref(CC) == 0) {
-//                     connCmp_isDFGref(CC) =1;
-//                     realApp_poly_init2(connCmp_defFGref(CC) , deg+1);
-//                     realApp_poly_oneGraeffeIteration_lastTerms(connCmp_defFGref(CC), connCmp_defPoref(CC), connCmp_degDeref(CC)+1, res.appPrec, meta );
-//                 }
-//                 realApp_poly_oneGraeffeIteration_with_lastTerms_inPlace(pApprox, connCmp_defFGref(CC), compDsk_radiusref(d),
-//                                                                              connCmp_degDeref(CC)+1, res.appPrec, meta);
-//             }
-//             else
+            if (iteration==1){
+                
+                if (connCmp_isDFGref(CC) == 0) {
+                    connCmp_isDFGref(CC) =1;
+                    realApp_poly_init2(connCmp_defFGref(CC) , deg+1);
+                    realApp_poly_oneGraeffeIteration_lastTerms(connCmp_defFGref(CC), connCmp_defPoref(CC), connCmp_degDeref(CC)+1, res.appPrec, meta );
+                }
+                realApp_poly_oneGraeffeIteration_with_lastTerms_inPlace(pApprox, connCmp_defFGref(CC), compDsk_radiusref(d),
+                                                                             connCmp_degDeref(CC)+1, res.appPrec, meta);
+            }
+            else
                 deflate_real_graeffe_iterations_inplace( pApprox, 1, res.appPrec, meta);
             nbGraeffe +=1;
         }

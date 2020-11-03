@@ -535,54 +535,54 @@ fi
 # DEGREES="64 128 191 256 383 512"
 # DEGREES="64"
 # POLNAMES="Bernoulli Chebyshev1 Legendre Wilkinson"
-POLNAMES="Wilkinson"
-
-for POLNAME in $POLNAMES; do
-    echo $POLNAME >> $TEMPTABFILE1
-for DEG in $DEGREES; do
-    
-    REPNAME=$REP
-    NAME=$REPNAME"/"$POLNAME"_"$DEG
-    
-    gen_with_deg $NAME $POLNAME $DEG
-    run_risolate $NAME $POLNAME $DEG
-    run_aNewDsc  $NAME $POLNAME $DEG
-#     gen_and_run_ccluster $NAME
-    
-    stats_pol $NAME $DEG
-#     LINE_TAB=" `format_numb $DEG $LENP` & "
-#     LINE_TAB=$LINE_TAB"`stats_pol $NAME`\\\\"
-#     echo $LINE_TAB >> $TEMPTABFILE
-    
-#     stats_pol $NAME
-done 
-done
+# POLNAMES="Wilkinson"
+# 
+# for POLNAME in $POLNAMES; do
+#     echo $POLNAME >> $TEMPTABFILE1
+# for DEG in $DEGREES; do
+#     
+#     REPNAME=$REP
+#     NAME=$REPNAME"/"$POLNAME"_"$DEG
+#     
+#     gen_with_deg $NAME $POLNAME $DEG
+#     run_risolate $NAME $POLNAME $DEG
+#     run_aNewDsc  $NAME $POLNAME $DEG
+# #     gen_and_run_ccluster $NAME
+#     
+#     stats_pol $NAME $DEG
+# #     LINE_TAB=" `format_numb $DEG $LENP` & "
+# #     LINE_TAB=$LINE_TAB"`stats_pol $NAME`\\\\"
+# #     echo $LINE_TAB >> $TEMPTABFILE
+#     
+# #     stats_pol $NAME
+# done 
+# done
 # 
 
 
-POLNAMES="Mignotte"
-DEGREES="128 191 256 391 512 791 1024"
-
-for POLNAME in $POLNAMES; do
-    echo $POLNAME >> $TEMPTABFILE1
-for DEG in $DEGREES; do
-    
-    REPNAME=$REP
-    NAME=$REPNAME"/"$POLNAME"_"$DEG
-    
-    gen_with_deg_bs $NAME $POLNAME $DEG $BITSIZE
-    run_risolate $NAME $POLNAME $DEG
-    run_aNewDsc  $NAME $POLNAME $DEG
-#     gen_and_run_ccluster $NAME
-    
-    stats_pol $NAME $DEG
-    
-#     LINE_TAB=" `format_numb $DEG $LENP` & "
-#     LINE_TAB=$LINE_TAB"`stats_pol $NAME`\\\\"
-#     echo $LINE_TAB >> $TEMPTABFILE
-#     stats_pol $NAME
-done 
-done
+# POLNAMES="Mignotte"
+# DEGREES="128 191 256 391 512 791 1024"
+# 
+# for POLNAME in $POLNAMES; do
+#     echo $POLNAME >> $TEMPTABFILE1
+# for DEG in $DEGREES; do
+#     
+#     REPNAME=$REP
+#     NAME=$REPNAME"/"$POLNAME"_"$DEG
+#     
+#     gen_with_deg_bs $NAME $POLNAME $DEG $BITSIZE
+#     run_risolate $NAME $POLNAME $DEG
+#     run_aNewDsc  $NAME $POLNAME $DEG
+# #     gen_and_run_ccluster $NAME
+#     
+#     stats_pol $NAME $DEG
+#     
+# #     LINE_TAB=" `format_numb $DEG $LENP` & "
+# #     LINE_TAB=$LINE_TAB"`stats_pol $NAME`\\\\"
+# #     echo $LINE_TAB >> $TEMPTABFILE
+# #     stats_pol $NAME
+# done 
+# done
 
 # POLNAMES="Mignotte"
 # DEGREES="1024"
@@ -612,7 +612,8 @@ done
 # done
 
 # POLNAMES="MignotteGen"
-# DEGF="256 391 512 791"
+# # DEGF="256 391 512 791"
+# DEGF="512"
 # POWERS="3 4 5 6 7 8 9 10 11 12"
 # 
 # for POLNAME in $POLNAMES; do
@@ -637,7 +638,7 @@ done
 # done
 # done 
 # done
-
+# 
 # POLNAMES="WilkMul"
 # DEGF="5 10 15"
 # 
@@ -664,32 +665,32 @@ done
 # done 
 # done
 
-# POLNAMES="WilkMulF"
-# # DEGF="32 64 128"
-# DEGF="32 64"
-# 
-# for POLNAME in $POLNAMES; do
-#     echo $POLNAME >> $TEMPTABFILE1
-# for DEG in $DEGF; do
-# # for POW in $POWERS; do
-#     
-#     REPNAME=$REP
-#     NAME=$REPNAME"/"$POLNAME"_"$DEG
-#     
-#     gen_with_deg $NAME $POLNAME $DEG
-#     run_risolate $NAME $POLNAME $DEG
-#     run_aNewDsc  $NAME $POLNAME $DEG
-# #     gen_and_run_ccluster $NAME
-#     
-#     stats_pol $NAME $DEG
-#     
-# #     LINE_TAB=" `format_numb $DEG $LENP` & "
-# #     LINE_TAB=$LINE_TAB"`stats_pol $NAME`\\\\"
-# #     echo $LINE_TAB >> $TEMPTABFILE
-# #     stats_pol $NAME
-# # done
-# done 
+POLNAMES="WilkMulF"
+# DEGF="32 64 128"
+DEGF="32 64"
+
+for POLNAME in $POLNAMES; do
+    echo $POLNAME >> $TEMPTABFILE1
+for DEG in $DEGF; do
+# for POW in $POWERS; do
+    
+    REPNAME=$REP
+    NAME=$REPNAME"/"$POLNAME"_"$DEG
+    
+    gen_with_deg $NAME $POLNAME $DEG
+    run_risolate $NAME $POLNAME $DEG
+    run_aNewDsc  $NAME $POLNAME $DEG
+#     gen_and_run_ccluster $NAME
+    
+    stats_pol $NAME $DEG
+    
+#     LINE_TAB=" `format_numb $DEG $LENP` & "
+#     LINE_TAB=$LINE_TAB"`stats_pol $NAME`\\\\"
+#     echo $LINE_TAB >> $TEMPTABFILE
+#     stats_pol $NAME
 # done
+done 
+done
 
 # 
 # #Procedural polynomials
