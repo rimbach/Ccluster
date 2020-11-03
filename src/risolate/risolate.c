@@ -38,7 +38,7 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
     while (!compBox_list_is_empty(boxes)){
         
         btemp = compBox_list_pop(boxes);
-        compBox_get_containing_dsk(bdisk, btemp);
+        risolate_compBox_get_containing_dsk(bdisk, btemp);
         depth = compDsk_getDepth(bdisk, metadatas_initBref( meta));
         metadatas_add_explored( meta, depth);
         
