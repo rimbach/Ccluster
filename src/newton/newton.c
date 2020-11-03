@@ -431,7 +431,8 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
             if (tres.nbOfSol == -2) {
                 clock_t start = clock();
                 
-                tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
+//                 tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
+                tres = tstar_real_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
                 
                 if (metadatas_haveToCount(meta))
                     metadatas_add_time_NeTSTes(meta, (double) (clock() - start) );
