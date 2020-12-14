@@ -334,7 +334,8 @@ void risolate_main_loop( connCmp_list_t qResults,
 
         /* do not need natural clusters */
 //         separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
-        separationFlag = ccluster_compDsk_is_separated(ccDisk, qMainLoop, discardedCcs);
+//         separationFlag = ccluster_compDsk_is_separated(ccDisk, qMainLoop, discardedCcs);
+        separationFlag = 1;
 
       
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);

@@ -47,6 +47,10 @@ NUMBERS_INLINE void realApp_set_d     (realApp_t y, const double    x )         
 
 NUMBERS_INLINE void realApp_set_si     (realApp_t y, const slong    x )             { arb_set_si (y, x); }
 
+/* special cases */
+NUMBERS_INLINE void realApp_pos_inf    (realApp_t x                                ) { arb_pos_inf     (x); }
+NUMBERS_INLINE void realApp_neg_inf    (realApp_t x                                ) { arb_neg_inf     (x); }
+
 /* comparisons */
 NUMBERS_INLINE int realApp_eq(const realApp_t x, const realApp_t y) { return arb_eq(x,y); }
 NUMBERS_INLINE int realApp_ne(const realApp_t x, const realApp_t y) { return arb_ne(x,y); }
@@ -153,6 +157,8 @@ NUMBERS_INLINE void realApp_print (const realApp_t x)                           
 NUMBERS_INLINE void realApp_printd(const realApp_t x, slong digits)             { arb_printd(x, digits       ); }
 NUMBERS_INLINE void realApp_printn(const realApp_t x, slong digits, ulong flags){ arb_printn(x, digits, flags); }
 
+NUMBERS_INLINE int realApp_is_exact(const realApp_t x) { return arb_is_exact(x); }
+
 /* for a ball m +/- r, relative accuracy of [max(1,|m|) +/- r]  */
 NUMBERS_INLINE int realApp_check_relOne_accuracy( const realApp_t z, slong prec) {
     return ( arb_rel_one_accuracy_bits(z) >= prec );
@@ -160,6 +166,10 @@ NUMBERS_INLINE int realApp_check_relOne_accuracy( const realApp_t z, slong prec)
 
 NUMBERS_INLINE slong realApp_get_relOne_accuracy( const realApp_t z) {
     return arb_rel_one_accuracy_bits(z);
+}
+
+NUMBERS_INLINE int realApp_check_absolute_accuracy( const realApp_t z, slong prec) {
+    return mag_cmp_2exp_si(arb_radref((z)), prec)<=0;
 }
 
 #ifdef __cplusplus

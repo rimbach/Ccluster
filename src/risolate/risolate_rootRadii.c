@@ -896,8 +896,8 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     
     slong degree = cacheApp_getDegree( cache );
 //     realRat_set_si(delta, 1, 1);
-//     realRat_set_si(delta, 1, degree);
-    realRat_set_si(delta, 1, degree*degree);
+    realRat_set_si(delta, 1, degree);
+//     realRat_set_si(delta, 1, degree*degree);
 //     realRat_set_si(delta, 1, degree*degree*degree);
     
     slong bitsize = cacheApp_getBitsize (cache);
@@ -908,32 +908,71 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     /* heuristic to predict the precision: at least the degree */
     while (prec<degree)
         prec = 2*prec;
+    slong precpred = prec;
     /* */
+    start2 = clock();
     prec = realIntRootRadii_rootRadii( annulii, 0, cache, delta, prec, meta );
     
     /* use annulii to get a sharp upper bound on the roots */
 //     slong upperBound = realApp_ceil_si(compAnn_radSupref(compAnn_list_last(annulii)), prec);
     realApp_ceil_realRat(upperBound, compAnn_radSupref(compAnn_list_last(annulii)), prec);
-    start2 = clock();
     
     if (metadatas_getVerbo(meta)>=2) {
         printf("#time in computing 1st RootRadii       : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
         printf("#precision needed                      : %ld\n", prec);
-        if (metadatas_getVerbo(meta)>=3) {
+        printf("#precision predicted                   : %ld\n", precpred);
+        if (metadatas_getVerbo(meta)>=2) {
             printf("#Annulii: ");
             compAnn_list_printd(annulii, 10);
             printf("\n\n");
         }
-        printf("#upperBound on the norm of the roots:");
-        realRat_print(upperBound);
-        printf("\n");
+//         printf("#upperBound on the norm of the roots:");
+//         realRat_print(upperBound);
+//         printf("\n");
     }
     
+    start2 = clock();
     realIntRootRadii_connectedComponents( annulii, prec );
     
     if (metadatas_getVerbo(meta)>=2) {
         printf("#time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+        printf("#Annulii: ");
+        compAnn_list_printd(annulii, 10);
+        printf("\n\n");
     }
+    
+//     /* approximated version */
+//     start2 = clock();
+//     slong prec2 = CCLUSTER_DEFAULT_PREC;
+// //     slong prec2 = 424;
+//     compAnn_list_t annuliiApp;
+//     compAnn_list_init(annuliiApp);
+// //     realRat_set_si(delta, 2*degree, 1);
+//     prec2 = realApp_rootRadii_fromZero( annuliiApp, cache, delta, prec2, meta );
+//     
+//     if (metadatas_getVerbo(meta)>=2) {
+//         printf("#time in computing 1st RootRadii       : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+//         printf("#precision needed                      : %ld\n", prec2);
+// //         if (metadatas_getVerbo(meta)>=3) {
+//             printf("#Annulii: ");
+//             compAnn_list_printd(annuliiApp, 10);
+//             printf("\n\n");
+// //         }
+// //         printf("#upperBound on the norm of the roots:");
+// //         realRat_print(upperBound);
+// //         printf("\n");
+//     }
+//     start2 = clock();
+//     realApp_rootRadii_connectedComponents( annuliiApp, prec );
+//     
+//     if (metadatas_getVerbo(meta)>=2) {
+//         printf("#time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+//         printf("#Annulii: ");
+//         compAnn_list_printd(annuliiApp, 10);
+//         printf("\n\n");
+//     }
+//     compAnn_list_clear(annuliiApp);
+    
     start2 = clock();
     
     realIntRootRadii_containsRealRoot( annulii, cache, prec );

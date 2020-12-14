@@ -30,6 +30,7 @@
 // #include "powerSums/powerSums.h"
 #include "geometry/compAnn.h"
 #include "rootRadii/realIntRootRadii.h"
+#include "rootRadii/realApp_rootRadii.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include "ccluster/parallel_discard.h"

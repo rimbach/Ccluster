@@ -229,6 +229,16 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
     double log2_1pdelta = fmpz_dlog( realRat_numref(oneplusdelta) ) - fmpz_dlog( realRat_denref(oneplusdelta) );
     log2_1pdelta = log2_1pdelta / log(2);
     int N = (int) ceil( log2( log2(2*degree)/log2_1pdelta ) );
+//     N = N+8;
+    ulong pow = 0x1<<N;
+    /* test */
+    realApp_t relError, relErrorInv;
+    realApp_init(relError);
+    realApp_init(relErrorInv);
+    realApp_set_si(relError, 2*degree);
+    realApp_root_ui(relError, relError, pow, prec);
+    realApp_inv(relErrorInv, relError, prec);
+    /* fin test*/
     
     printf("#realIntRootRadii.c; realIntRootRadii_rootRadii : number of Graeffe iterations: %d \n", N);
     
@@ -273,10 +283,12 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
         (metadatas_countref(meta))[0].RR_predPrec      = prec;
     }
     
-//     printf("# Convex hull: %ld vertices: ", lenCh );
-//     for (slong ind = 0; ind < lenCh; ind++)
-//         printf("%ld, ", convexHull[ind]);
-//     printf("\n");
+//     if (metadatas_getVerbo(meta)>=3){
+//         printf("# Convex hull: %ld vertices: ", lenCh );
+//         for (slong ind = 0; ind < lenCh; ind++)
+//             printf("%ld, ", convexHull[ind]);
+//         printf("\n");
+//     }
     
     /* create list of annulii */
     compAnn_ptr cur;
@@ -301,16 +313,21 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
             realApp_div( compAnn_radInfref(cur), (pApprox->coeffs) + right, (pApprox->coeffs) + left, nprec );
             realApp_root_ui( compAnn_radInfref(cur), compAnn_radInfref(cur), shift, nprec );
             realApp_inv( compAnn_radInfref(cur), compAnn_radInfref(cur), nprec );
-            ulong pow = 0x1<<N;
+//             ulong pow = 0x1<<N;
             realApp_root_ui( compAnn_radInfref(cur), compAnn_radInfref(cur), pow, nprec );
-            realApp_mul_realRat( compAnn_radSupref(cur), compAnn_radInfref(cur), oneplusdelta, nprec );
-            realApp_mul_realRat_in_place( compAnn_radInfref(cur), oneplusdeltainv, nprec );
+//             realApp_mul_realRat( compAnn_radSupref(cur), compAnn_radInfref(cur), oneplusdelta, nprec );
+//             realApp_mul_realRat_in_place( compAnn_radInfref(cur), oneplusdeltainv, nprec );
+            realApp_mul( compAnn_radSupref(cur), compAnn_radInfref(cur), relError, nprec );
+            realApp_mul( compAnn_radInfref(cur), compAnn_radInfref(cur), relErrorInv, nprec );
         }
         
         left = convexHull[ind];
 //         compAnn_printd(cur, 10); printf("\n");
         compAnn_list_push(annulii, cur);
     }
+    
+    realApp_clear(relError);
+    realApp_clear(relErrorInv);
     
     realApp_poly_clear(pApprox);
     realRat_clear(oneplusdelta);

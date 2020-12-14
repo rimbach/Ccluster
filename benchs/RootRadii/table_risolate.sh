@@ -560,96 +560,96 @@ for DEG in $DEGREES; do
     
 done
 
-POLNAME="randomDense"
-
-#solve random polynomials with ccluster
-echo $POLNAME >> $TEMPTABFILE1
-echo $POLNAME >> $TEMPTABFILE2
-DEGF=256
-BITSIZES="50 100 500 1000 5000"
-for BIT in $BITSIZES; do
-
-    REPNAME=$REP
-    NAME=$REPNAME"/"$POLNAME"_"$DEGF"_"$BIT
-    
-#     if [ ! -d $REPNAME ]; then
-# #         echo $REPNAME
-#          mkdir -p $REPNAME
-#     fi
-    
-    BITSI=0
-    NSOLS=0
-    TSIZE=0
-    TDEPT=0
-    TTIME=0
-#     NBTZT=0
-#     NBTST=0
-    RR_NSOLS=0
-    RR_TTIME=0
-    RR_TSIZE=0
-    RR_TDEPT=0
-    RR_PRECN=0
-    RR_PPREC=0
-    RR_NBGRA=0
-    RR_NBGRR=0
-    RR_TINGR=0
-    RR_TINRR=0
-    DSC_NSOLS=0
-    DSC_TSIZE=0
-    DSC_TTIME=0
-    
-    genRand_with_deg_bs $NAME $POLNAME $DEGF $BIT $NBPOLS $REPNAME
-    for CURIND in `seq 1 $NBPOLS`; do
-        NAME=$REPNAME"/"$POLNAME"_"$DEGF"_"$BIT"_"$CURIND
-        run_risolate $NAME $POLNAME $DEGF
-        run_aNewDsc  $NAME $POLNAME $DEGF
-        stats_pol_rand $NAME $DEGF
-    done
-    
-    BITSI=`echo     $BITSI    /$NBPOLS     |bc -l`
-    NSOLS=`echo     $NSOLS    /$NBPOLS     |bc -l`
-    TSIZE=`echo     $TSIZE    /$NBPOLS     |bc -l`
-    TDEPT=`echo     $TDEPT    /$NBPOLS     |bc -l`
-    TTIME=`echo     $TTIME    /$NBPOLS     |bc -l`
-#     NBTZT=`echo     $NBTZT    /$NBPOLS     |bc -l`
-#     NBTST=`echo     $NBTST    /$NBPOLS     |bc -l`
-    RR_NSOLS=`echo  $RR_NSOLS /$NBPOLS     |bc -l`
-    RR_TTIME=`echo  $RR_TTIME /$NBPOLS     |bc -l`
-    RR_TSIZE=`echo  $RR_TSIZE /$NBPOLS     |bc -l`
-    RR_TDEPT=`echo  $RR_TDEPT /$NBPOLS     |bc -l`
-    RR_PRECN=`echo  $RR_PRECN /$NBPOLS     |bc -l`
-    RR_PPREC=`echo  $RR_PPREC /$NBPOLS     |bc -l`
-    RR_NBGRA=`echo  $RR_NBGRA /$NBPOLS     |bc -l`
-    RR_NBGRR=`echo  $RR_NBGRR /$NBPOLS     |bc -l`
-    RR_TINGR=`echo  $RR_TINGR /$NBPOLS     |bc -l`
-    RR_TINRR=`echo  $RR_TINRR /$NBPOLS     |bc -l`
-    DSC_NSOLS=`echo $DSC_NSOLS/$NBPOLS     |bc -l`
-    DSC_TSIZE=`echo $DSC_TSIZE/$NBPOLS     |bc -l`
-    DSC_TTIME=`echo $DSC_TTIME/$NBPOLS     |bc -l`
-    
-    
-    LINE_TAB1="$DEGF & `format_time $BITSI` & `format_time $NSOLS` & `format_time $RR_NSOLS` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
-    LINE_TAB1=$LINE_TAB1" & `format_time $RR_TSIZE` & `format_time $RR_TDEPT` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
-    LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`\\\\"
-    
-#     LINE_TAB2="$DEG & `format_time $RR_TTIME` & `format_time $RR_PRECN` & `format_time $RR_TINRR` & `percent_time $RR_TINRR $RR_TTIME`\\\\" 
-    LINE_TAB2="`format_numb $DEGF $LENP` & `format_time $BITSI` & `format_time $RR_TTIME` & `percent_time $RR_TINRR $RR_TTIME`"
-    LINE_TAB2=$LINE_TAB2" & `format_time $RR_PPREC` & `format_time $RR_PRECN`"
-    LINE_TAB2=$LINE_TAB2" & `format_time $RR_NBGRA` & `format_time $RR_NBGRR`"
-    LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\"   
-    
-    echo $LINE_TAB1 >> $TEMPTABFILE1
-    echo $LINE_TAB2 >> $TEMPTABFILE2
-    
-done
-
-
-# # 
+# POLNAME="randomDense"
+# 
+# #solve random polynomials with ccluster
+# echo $POLNAME >> $TEMPTABFILE1
+# echo $POLNAME >> $TEMPTABFILE2
+# DEGF=256
+# BITSIZES="50 100 500 1000 5000"
+# for BIT in $BITSIZES; do
+# 
+#     REPNAME=$REP
+#     NAME=$REPNAME"/"$POLNAME"_"$DEGF"_"$BIT
+#     
+# #     if [ ! -d $REPNAME ]; then
+# # #         echo $REPNAME
+# #          mkdir -p $REPNAME
+# #     fi
+#     
+#     BITSI=0
+#     NSOLS=0
+#     TSIZE=0
+#     TDEPT=0
+#     TTIME=0
+# #     NBTZT=0
+# #     NBTST=0
+#     RR_NSOLS=0
+#     RR_TTIME=0
+#     RR_TSIZE=0
+#     RR_TDEPT=0
+#     RR_PRECN=0
+#     RR_PPREC=0
+#     RR_NBGRA=0
+#     RR_NBGRR=0
+#     RR_TINGR=0
+#     RR_TINRR=0
+#     DSC_NSOLS=0
+#     DSC_TSIZE=0
+#     DSC_TTIME=0
+#     
+#     genRand_with_deg_bs $NAME $POLNAME $DEGF $BIT $NBPOLS $REPNAME
+#     for CURIND in `seq 1 $NBPOLS`; do
+#         NAME=$REPNAME"/"$POLNAME"_"$DEGF"_"$BIT"_"$CURIND
+#         run_risolate $NAME $POLNAME $DEGF
+#         run_aNewDsc  $NAME $POLNAME $DEGF
+#         stats_pol_rand $NAME $DEGF
+#     done
+#     
+#     BITSI=`echo     $BITSI    /$NBPOLS     |bc -l`
+#     NSOLS=`echo     $NSOLS    /$NBPOLS     |bc -l`
+#     TSIZE=`echo     $TSIZE    /$NBPOLS     |bc -l`
+#     TDEPT=`echo     $TDEPT    /$NBPOLS     |bc -l`
+#     TTIME=`echo     $TTIME    /$NBPOLS     |bc -l`
+# #     NBTZT=`echo     $NBTZT    /$NBPOLS     |bc -l`
+# #     NBTST=`echo     $NBTST    /$NBPOLS     |bc -l`
+#     RR_NSOLS=`echo  $RR_NSOLS /$NBPOLS     |bc -l`
+#     RR_TTIME=`echo  $RR_TTIME /$NBPOLS     |bc -l`
+#     RR_TSIZE=`echo  $RR_TSIZE /$NBPOLS     |bc -l`
+#     RR_TDEPT=`echo  $RR_TDEPT /$NBPOLS     |bc -l`
+#     RR_PRECN=`echo  $RR_PRECN /$NBPOLS     |bc -l`
+#     RR_PPREC=`echo  $RR_PPREC /$NBPOLS     |bc -l`
+#     RR_NBGRA=`echo  $RR_NBGRA /$NBPOLS     |bc -l`
+#     RR_NBGRR=`echo  $RR_NBGRR /$NBPOLS     |bc -l`
+#     RR_TINGR=`echo  $RR_TINGR /$NBPOLS     |bc -l`
+#     RR_TINRR=`echo  $RR_TINRR /$NBPOLS     |bc -l`
+#     DSC_NSOLS=`echo $DSC_NSOLS/$NBPOLS     |bc -l`
+#     DSC_TSIZE=`echo $DSC_TSIZE/$NBPOLS     |bc -l`
+#     DSC_TTIME=`echo $DSC_TTIME/$NBPOLS     |bc -l`
+#     
+#     
+#     LINE_TAB1="$DEGF & `format_time $BITSI` & `format_time $NSOLS` & `format_time $RR_NSOLS` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
+#     LINE_TAB1=$LINE_TAB1" & `format_time $RR_TSIZE` & `format_time $RR_TDEPT` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
+#     LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`\\\\"
+#     
+# #     LINE_TAB2="$DEG & `format_time $RR_TTIME` & `format_time $RR_PRECN` & `format_time $RR_TINRR` & `percent_time $RR_TINRR $RR_TTIME`\\\\" 
+#     LINE_TAB2="`format_numb $DEGF $LENP` & `format_time $BITSI` & `format_time $RR_TTIME` & `percent_time $RR_TINRR $RR_TTIME`"
+#     LINE_TAB2=$LINE_TAB2" & `format_time $RR_PPREC` & `format_time $RR_PRECN`"
+#     LINE_TAB2=$LINE_TAB2" & `format_time $RR_NBGRA` & `format_time $RR_NBGRR`"
+#     LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\"   
+#     
+#     echo $LINE_TAB1 >> $TEMPTABFILE1
+#     echo $LINE_TAB2 >> $TEMPTABFILE2
+#     
+# done
+# 
+# 
+# # # 
 #Other polynomials
 # DEGREES="64 128 191 256 383 512"
 # DEGREES="64"
-POLNAMES="Bernoulli Chebyshev1 Legendre Wilkinson"
-# POLNAMES="Bernoulli"
+# POLNAMES="Bernoulli Chebyshev1 Legendre Wilkinson"
+POLNAMES="Bernoulli Chebyshev1 Legendre"
 
 for POLNAME in $POLNAMES; do
     echo $POLNAME >> $TEMPTABFILE1
@@ -672,9 +672,9 @@ for DEG in $DEGREES; do
 #     stats_pol $NAME
 done 
 done
+# # 
 # 
-
-
+# 
 POLNAME="RegularGrid"
 
 echo $POLNAME >> $TEMPTABFILE1
@@ -700,67 +700,67 @@ for SIZ in $SIZEGRID; do
     
 #     stats_pol $REPNAME"/"$POLNAME"_"$DEG
 done
-# 
-# POLNAME="randomSparse"
-# 
-# #solve random sparse polynomials with ccluster
-# echo $POLNAME >> $TEMPTABFILE
-# for DEG in $DEGREES; do
-# 
-#     REPNAME=$REP"/"$POLNAME"_"$DEG
-#     FILENAME=$POLNAME"_"$DEG
-#     
-#     if [ ! -d $REPNAME ]; then
-# #         echo $REPNAME
-#          mkdir -p $REPNAME
-#     fi
-#     
-#     TSIZE=0
-#     TDEPT=0
-#     TTIME=0
-#     EXPE_NBFAILS=0
-#     EXPE_TTIME=0
-#     EXPE_TSIZE=0
-#     EXPE_TDEPT=0
-#     EXPE_TINEVAL=0
-#     EXPE_TINPOST=0
-#     
-# #     REP2="tableISSAC1sparse_IR43"
-#     
-#     for CURIND in `seq 1 $NBPOLS`; do
-#         NAME=$REPNAME"/"$FILENAME"_"$CURIND
-#         gen_with_deg_bs_nbterms $NAME $POLNAME $DEG $BITSIZE $NBTERMS
-#         run_ccluster $NAME $POLNAME $DEG
-# #         cp $REP2"/randsparse_"$DEG"/randsparse_"$DEG"_"$CURIND".ccl" $NAME."ccl"
-# #         cp $REP2"/randsparse_"$DEG"/randsparse_"$DEG"_"$CURIND".out" $NAME."out"
-# #         cp $REP2"/randsparse_"$DEG"/randsparse_"$DEG"_"$CURIND".out0" $NAME."out0"
-# #         cp $REP2"/randsparse_"$DEG"/randsparse_"$DEG"_"$CURIND".out1" $NAME."out1"
-# #         cp $REP2"/randsparse_"$DEG"/randsparse_"$DEG"_"$CURIND".out2" $NAME."out2"
-# 
-#         stats_pol_rand $NAME
-#     done
-#     
-#     LINE_TAB=" "$DEG" & "$TSIZE" & "$TDEPT" & `format_time $TTIME`"
-#     LINE_TAB=$LINE_TAB" & "$EXPE_NBFAILS" & "$EXPE_TSIZE" & "$EXPE_TDEPT" & `format_time $EXPE_TTIME` & `percent_time $EXPE_TTIME $TTIME`"
-#     LINE_TAB=$LINE_TAB" & `percent_time $EXPE_TINEVAL $EXPE_TTIME` & `percent_time $EXPE_TINPOST $EXPE_TTIME`"
-#     LINE_TAB=$LINE_TAB" & `percent_time $EXPE_TINPOST $EXPE_TTIME`"
-#     LINE_TAB=$LINE_TAB"\\\\"
-#     echo $LINE_TAB >> $TEMPTABFILE
-#     
-# #     LINE_TAB=" "$DEG" & "$NUMDISTESTS" & `percent_time $TTIMEINDIST $TTIMEINCCLU`"
-# #     LINE_TAB=$LINE_TAB" & "$NUMTN0" & "$NUMFP0" & `ratio_time $TTIME0 $TTIMEINDIST`"
-# #     LINE_TAB=$LINE_TAB" & "$NUMTN1" & "$NUMFP1" & `ratio_time $TTIME1 $TTIMEINDIST`"
-# #     LINE_TAB=$LINE_TAB" & "$NUMTN2" & "$NUMFP2" & `ratio_time $TTIME2 $TTIMEINDIST`"
+# # 
+# # POLNAME="randomSparse"
+# # 
+# # #solve random sparse polynomials with ccluster
+# # echo $POLNAME >> $TEMPTABFILE
+# # for DEG in $DEGREES; do
+# # 
+# #     REPNAME=$REP"/"$POLNAME"_"$DEG
+# #     FILENAME=$POLNAME"_"$DEG
+# #     
+# #     if [ ! -d $REPNAME ]; then
+# # #         echo $REPNAME
+# #          mkdir -p $REPNAME
+# #     fi
+# #     
+# #     TSIZE=0
+# #     TDEPT=0
+# #     TTIME=0
+# #     EXPE_NBFAILS=0
+# #     EXPE_TTIME=0
+# #     EXPE_TSIZE=0
+# #     EXPE_TDEPT=0
+# #     EXPE_TINEVAL=0
+# #     EXPE_TINPOST=0
+# #     
+# # #     REP2="tableISSAC1sparse_IR43"
+# #     
+# #     for CURIND in `seq 1 $NBPOLS`; do
+# #         NAME=$REPNAME"/"$FILENAME"_"$CURIND
+# #         gen_with_deg_bs_nbterms $NAME $POLNAME $DEG $BITSIZE $NBTERMS
+# #         run_ccluster $NAME $POLNAME $DEG
+# # #         cp $REP2"/randsparse_"$DEG"/randsparse_"$DEG"_"$CURIND".ccl" $NAME."ccl"
+# # #         cp $REP2"/randsparse_"$DEG"/randsparse_"$DEG"_"$CURIND".out" $NAME."out"
+# # #         cp $REP2"/randsparse_"$DEG"/randsparse_"$DEG"_"$CURIND".out0" $NAME."out0"
+# # #         cp $REP2"/randsparse_"$DEG"/randsparse_"$DEG"_"$CURIND".out1" $NAME."out1"
+# # #         cp $REP2"/randsparse_"$DEG"/randsparse_"$DEG"_"$CURIND".out2" $NAME."out2"
+# # 
+# #         stats_pol_rand $NAME
+# #     done
+# #     
+# #     LINE_TAB=" "$DEG" & "$TSIZE" & "$TDEPT" & `format_time $TTIME`"
+# #     LINE_TAB=$LINE_TAB" & "$EXPE_NBFAILS" & "$EXPE_TSIZE" & "$EXPE_TDEPT" & `format_time $EXPE_TTIME` & `percent_time $EXPE_TTIME $TTIME`"
+# #     LINE_TAB=$LINE_TAB" & `percent_time $EXPE_TINEVAL $EXPE_TTIME` & `percent_time $EXPE_TINPOST $EXPE_TTIME`"
+# #     LINE_TAB=$LINE_TAB" & `percent_time $EXPE_TINPOST $EXPE_TTIME`"
 # #     LINE_TAB=$LINE_TAB"\\\\"
-# # #     echo $LINE_TAB
 # #     echo $LINE_TAB >> $TEMPTABFILE
-# done
+# #     
+# # #     LINE_TAB=" "$DEG" & "$NUMDISTESTS" & `percent_time $TTIMEINDIST $TTIMEINCCLU`"
+# # #     LINE_TAB=$LINE_TAB" & "$NUMTN0" & "$NUMFP0" & `ratio_time $TTIME0 $TTIMEINDIST`"
+# # #     LINE_TAB=$LINE_TAB" & "$NUMTN1" & "$NUMFP1" & `ratio_time $TTIME1 $TTIMEINDIST`"
+# # #     LINE_TAB=$LINE_TAB" & "$NUMTN2" & "$NUMFP2" & `ratio_time $TTIME2 $TTIMEINDIST`"
+# # #     LINE_TAB=$LINE_TAB"\\\\"
+# # # #     echo $LINE_TAB
+# # #     echo $LINE_TAB >> $TEMPTABFILE
+# # done
+# # 
+# # #Other polynomials
+# # # DEGREES="64 128 191 256 383 512"
+# # # DEGREES="64"
 # 
-# #Other polynomials
-# # DEGREES="64 128 191 256 383 512"
-# # DEGREES="64"
-
-
+# 
 POLNAMES="Mignotte"
 
 for POLNAME in $POLNAMES; do
@@ -784,7 +784,7 @@ for DEG in $DEGREES; do
 #     stats_pol $NAME
 done 
 done
-
+# 
 # 
 # #Procedural polynomials
 # 

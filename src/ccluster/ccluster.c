@@ -1018,12 +1018,18 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
     
     /* assume 0 is not a root of the poly */
     slong prec = CCLUSTER_DEFAULT_PREC;
+    /* heuristic to predict the precision: at least the degree */
+    while (prec<degree)
+        prec = 2*prec;
+//     slong precpred = prec;
+    /* */
     prec = realIntRootRadii_rootRadii( annulii, 0, cache, delta, prec, meta );
     
     /* find two integers that are not a roots of the poly */
     slong centerRe1 = realApp_ceil_si(compAnn_radSupref(compAnn_list_last(annulii)), prec);
 //     slong centerRe2 = centerRe1+1;
 //     slong centerRe3 = - centerRe1;
+    prec = 2*prec;
     prec = realIntRootRadii_rootRadii( annulii1, centerRe1, cache, delta, prec, meta );
     prec = realIntRootRadii_rootRadii_imagCenter( annulii2, centerRe1, cache, delta, prec, meta );
 //     compAnn_list_clear(annulii);
