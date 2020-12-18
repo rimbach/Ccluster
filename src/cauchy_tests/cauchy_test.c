@@ -232,6 +232,7 @@ cauchyTest_res cauchyTest_computeS0Approx(compApp_t ps,
 cauchyTest_res cauchyTest_exclusionTest( const compRat_t center,
                                           const realRat_t radius,
                                           cacheApp_t cache,
+                                          cacheCauchy_t cacheCau,
 //                                         slong nbPoints,
 //                                         slong nbPowerSums,
                                           slong prec,
@@ -244,7 +245,8 @@ cauchyTest_res cauchyTest_exclusionTest( const compRat_t center,
     
     if (metadatas_getVerbo(meta)>=3) {
         printf("---cauchy exclusion test: \n");
-        printf("------ isoRatio: "); realRat_print(metadatas_getIsoRatio(meta)); printf("\n");
+//         printf("------ isoRatio: "); realRat_print(metadatas_getIsoRatio(meta)); printf("\n");
+        printf("------ isoRatio: "); realRat_print(cacheCauchy_isoRatioref(cacheCau)); printf("\n");
     }
     
     /* compute q1 = log_theta (2*degree +1) */
@@ -295,10 +297,14 @@ cauchyTest_res cauchyTest_exclusionTest( const compRat_t center,
     realApp_mul_si(wP2, wP2, cacheApp_getDegree(cache), CCLUSTER_DEFAULT_PREC);
     
     if (metadatas_getVerbo(meta)>=3) {
-        printf("------ number of eval points q1: %ld\n", q1);
-        printf("------ number of eval points q2: %ld\n", q2);
-        printf("------ error wP1: "); realApp_printd(wP, 10); printf("\n");
-        printf("------ error wP2: "); realApp_printd(wP2, 10); printf("\n");
+//         printf("------ number of eval points q1: %ld\n", q1);
+        printf("------ number of eval points q1: %ld\n", cacheCauchy_nbEvalCoref(cacheCau));
+//         printf("------ number of eval points q2: %ld\n", q2);
+        printf("------ number of eval points q2: %ld\n", cacheCauchy_nbEvalCeref(cacheCau));
+//         printf("------ error wP1: "); realApp_printd(wP, 10); printf("\n");
+        printf("------ error wP1: "); realApp_printd(cacheCauchy_wanErrCoref(cacheCau), 10); printf("\n");
+//         printf("------ error wP2: "); realApp_printd(wP2, 10); printf("\n");
+        printf("------ error wP2: "); realApp_printd(cacheCauchy_wanErrCeref(cacheCau), 10); printf("\n");
     }
     
     /* evaluation points */

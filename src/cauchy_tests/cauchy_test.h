@@ -18,6 +18,7 @@
 #include "numbers/realApp.h"
 #include "numbers/app_rat.h"
 #include "caches/cacheApp.h"
+#include "caches/cacheCauchy.h"
 #include "metadatas/metadatas.h"
 
 #include "acb_poly.h"
@@ -34,6 +35,7 @@ typedef struct {
 cauchyTest_res cauchyTest_exclusionTest( const compRat_t center,
                                           const realRat_t radius,
                                           cacheApp_t cache,
+                                          cacheCauchy_t cacheCau,
                                           slong prec,
                                           metadatas_t meta, int depth);
 

@@ -14,6 +14,7 @@
 slong cauchy_discard_compBox_list( compBox_list_t boxes, 
                                      compBox_list_t bDiscarded,
                                      cacheApp_t cache, 
+                                     cacheCauchy_t cacheCau,
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta){
     
@@ -81,7 +82,7 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
         cauchyTest_res resCauchy;
         resCauchy.appPrec = CCLUSTER_DEFAULT_PREC;
         resCauchy = cauchyTest_exclusionTest( compDsk_centerref(bdisk), compDsk_radiusref(bdisk),
-                                                       cache, resCauchy.appPrec, meta, depth);
+                                                       cache, cacheCau, resCauchy.appPrec, meta, depth);
         
         res.appPrec = resCauchy.appPrec;
         res.nbOfSol = resCauchy.nbOfSol;
@@ -123,6 +124,7 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
                               connCmp_list_t discardedCcs, 
                               compBox_list_t bDiscarded, 
                               cacheApp_t cache, 
+                              cacheCauchy_t cacheCau,
                               metadatas_t meta, 
                               slong nbThreads){
     
@@ -148,31 +150,8 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
         compBox_clear(btemp);
         ccluster_free(btemp);
     }
-     
-#ifdef CCLUSTER_HAVE_PTHREAD
-    if (nbThreads>1) {
-//         if (metadatas_getVerbo(meta)>1) {
-//             slong depth = compBox_getDepth(compBox_list_first(subBoxes), metadatas_initBref( meta));
-//             printf("--ccluster_parallel_bisect_connCmp: depth: %d, nb threads: %d, nbboxes: %d\n", (int) depth, (int) nbThreads, compBox_list_get_size(subBoxes) );
-//         }
-//         clock_t start=clock();
-        prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta, nbThreads);
-//         if (metadatas_getVerbo(meta)>1)
-//             printf(" nb of clicks multithread: %f\n", ((double) (clock() - start))/(CLOCKS_PER_SEC*nbThreads) );
-    }
-    else {
-//         if (metadatas_getVerbo(meta)>1) {
-//             slong depth = compBox_getDepth(compBox_list_first(subBoxes), metadatas_initBref( meta));
-//             printf("--ccluster_parallel_bisect_connCmp: depth: %d, nb threads: %d, nbboxes: %d\n", (int) depth, (int) nbThreads, compBox_list_get_size(subBoxes) );
-//         }
-//         clock_t start=clock();
-        prec = cauchy_discard_compBox_list( subBoxes, bDiscarded, cache, prec, meta);
-//         if (metadatas_getVerbo(meta)>1)
-//             printf(" nb of clicks            : %f\n", (double) (clock() - start)/CLOCKS_PER_SEC );
-    }
-#else
-    prec = cauchy_discard_compBox_list( subBoxes, bDiscarded, cache, prec, meta);
-#endif
+    
+    prec = cauchy_discard_compBox_list( subBoxes, bDiscarded, cache, cacheCau, prec, meta);
     
     while (!compBox_list_is_empty(subBoxes)) {
         btemp = compBox_list_pop(subBoxes);
@@ -233,7 +212,8 @@ void cauchy_prep_loop( compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t qPrepLoop, 
                          connCmp_list_t discardedCcs, 
-                         cacheApp_t cache, 
+                         cacheApp_t cache,
+                         cacheCauchy_t cacheCau,
                          metadatas_t meta) {
     
     connCmp_list_t ltemp;
@@ -255,7 +235,7 @@ void cauchy_prep_loop( compBox_list_t bDiscarded,
         if ( connCmp_is_confined(ctemp, metadatas_initBref(meta)) && (realRat_cmp(diam, halfwidth)<0) )
             connCmp_list_insert_sorted(qMainLoop, ctemp);
         else {
-            cauchy_bisect_connCmp( ltemp, ctemp, discardedCcs, bDiscarded, cache, meta, metadatas_useNBThreads(meta));
+            cauchy_bisect_connCmp( ltemp, ctemp, discardedCcs, bDiscarded, cache, cacheCau, meta, metadatas_useNBThreads(meta));
             
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
@@ -275,6 +255,7 @@ void cauchy_main_loop( connCmp_list_t qResults,
                          connCmp_list_t discardedCcs, 
                          const realRat_t eps, 
                          cacheApp_t cache, 
+                         cacheCauchy_t cacheCau,
                          metadatas_t meta){
     
     int separationFlag;
@@ -536,19 +517,11 @@ void cauchy_main_loop( connCmp_list_t qResults,
         else {
 //             if (connCmp_nSols(ccur)==0) 
 //                 printf("ici\n");
-#ifdef CCLUSTER_HAVE_PTHREAD
-            cauchy_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cache, meta, metadatas_useNBThreads(meta));
+            cauchy_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cache, cacheCau, meta,1);
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
             connCmp_clear(ccur);
             ccluster_free(ccur);
-#else
-            cauchy_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cache, meta,1);
-            while (!connCmp_list_is_empty(ltemp))
-                connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
-            connCmp_clear(ccur);
-            ccluster_free(ccur);
-#endif
         }
     }
     
@@ -567,6 +540,7 @@ void cauchy_algo_global( connCmp_list_t qResults,
                            const compBox_t initialBox, 
                            const realRat_t eps, 
                            cacheApp_t cache, 
+                           cacheCauchy_t cacheCau,
                            metadatas_t meta){
     
     clock_t start = clock();
@@ -594,7 +568,7 @@ void cauchy_algo_global( connCmp_list_t qResults,
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
 //     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
-    cauchy_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, meta);
+    cauchy_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, cacheCau, meta);
     
     
 //     realRat_clear(factor);

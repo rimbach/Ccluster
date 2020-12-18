@@ -20,6 +20,7 @@
 #include "geometry/subdBox.h"
 #include "geometry/connCmp_union_find.h"
 #include "caches/cacheApp.h"
+#include "caches/cacheCauchy.h"
 #include "metadatas/chronos.h"
 #include "metadatas/metadatas.h"
 #include "lists/compBox_list.h"
@@ -60,6 +61,7 @@ void cauchy_algo_global( connCmp_list_t qResults,
                            const compBox_t initialBox, 
                            const realRat_t eps, 
                            cacheApp_t cache, 
+                           cacheCauchy_t cacheCau,
                            metadatas_t meta);
 
 void cauchy_main_loop( connCmp_list_t qResults, 
@@ -68,13 +70,15 @@ void cauchy_main_loop( connCmp_list_t qResults,
                          connCmp_list_t discardedCcs, 
                          const realRat_t eps, 
                          cacheApp_t cache, 
+                         cacheCauchy_t cacheCau,
                          metadatas_t meta);
 
 void cauchy_prep_loop( compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t qPrepLoop, 
                          connCmp_list_t discardedCcs, 
-                         cacheApp_t cache, 
+                         cacheApp_t cache,
+                         cacheCauchy_t cacheCau,
                          metadatas_t meta);
 
 void cauchy_bisect_connCmp( connCmp_list_t dest, 
@@ -82,12 +86,14 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
                               connCmp_list_t discardedCcs, 
                               compBox_list_t bDiscarded,
                               cacheApp_t cache, 
+                              cacheCauchy_t cacheCau,
                               metadatas_t meta, 
                               slong nbThreads); 
 
 slong cauchy_discard_compBox_list( compBox_list_t boxes, 
                                      compBox_list_t bDiscarded,
-                                     cacheApp_t cache, 
+                                     cacheApp_t cache,
+                                     cacheCauchy_t cacheCau,
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta);
 

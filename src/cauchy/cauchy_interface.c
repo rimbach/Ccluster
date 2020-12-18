@@ -19,6 +19,7 @@ void cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
                                      int verb){
 
     cacheApp_t cache;
+    cacheCauchy_t cacheCau;
     strategies_t strat;
     metadatas_t meta;
     connCmp_list_t qRes;
@@ -26,6 +27,8 @@ void cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     
     cacheApp_init(cache, func);
     strategies_init(strat);
+    
+    cacheCauchy_init(cacheCau, NULL, cacheApp_getDegree(cache), 4, 3);
     
     /* automaticly set initialBox */
     compBox_t initialBox;
@@ -60,7 +63,7 @@ void cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
             metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 4, 3, 1, verb );
 //     }
     
-    cauchy_algo_global( qRes, bDis, initialBox, eps, cache, meta);
+    cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, meta);
     
     metadatas_count(meta);
     metadatas_cauchy_fprint(stdout, meta, eps);
@@ -77,6 +80,7 @@ void cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     }
     
     cacheApp_clear(cache);
+    cacheCauchy_clear(cacheCau);
     strategies_clear(strat);
     metadatas_clear(meta);
     connCmp_list_clear(qRes);
@@ -93,12 +97,15 @@ void cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                    int verb){
 
     cacheApp_t cache;
+    cacheCauchy_t cacheCau;
     strategies_t strat;
     metadatas_t meta;
     connCmp_list_t qRes;
     
     cacheApp_init(cache, func);
     strategies_init(strat);
+    
+    cacheCauchy_init(cacheCau, evalFast, cacheApp_getDegree(cache), 4, 3);
     
     /* automaticly set initialBox */
     compBox_t initialBox;
@@ -125,7 +132,7 @@ void cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     metadatas_set_pwSuDatas( meta, evalFast, cacheApp_getDegree(cache), 4, 3, 1, verb );
 //     metadatas_set_pwSuDatas( meta, evalFast, cacheApp_getDegree(cache), 16, 15, 1, verb );
     
-    cauchy_algo_global( qRes, NULL, initialBox, eps, cache, meta);
+    cauchy_algo_global( qRes, NULL, initialBox, eps, cache, cacheCau, meta);
     
     metadatas_count(meta);
     metadatas_cauchy_fprint(stdout, meta, eps);
@@ -135,6 +142,7 @@ void cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     }
     
     cacheApp_clear(cache);
+    cacheCauchy_clear(cacheCau);
     strategies_clear(strat);
     metadatas_clear(meta);
     connCmp_list_clear(qRes);
