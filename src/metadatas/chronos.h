@@ -57,6 +57,7 @@ typedef struct {
     double  _clicks_RRTaylo_cumul;
     double  _clicks_RRGraef_cumul;
     double  _clicks_rootRad_cumul;
+    double  _clicks_RRT0Tes_cumul;
     
     double  _clicks_NeTSTes_cumul;
     /* deflation */
@@ -210,6 +211,10 @@ METADATAS_INLINE void   chronos_add_time_rootRad( chronos_t times, double d, int
     times->_clicks_rootRad_cumul += d/CLOCKS_PER_SEC;
 }
 
+METADATAS_INLINE void   chronos_add_time_RRT0Tes( chronos_t times, double d, int nbThreads ){
+    times->_clicks_RRT0Tes_cumul += d/CLOCKS_PER_SEC;
+}
+
 METADATAS_INLINE double chronos_get_time_Approxi ( const chronos_t times ) { return times->_clicks_Approxi_cumul; }
 METADATAS_INLINE double chronos_get_time_Graeffe ( const chronos_t times ) { return times->_clicks_Graeffe_cumul; }
 METADATAS_INLINE double chronos_get_time_Taylors ( const chronos_t times ) { return times->_clicks_Taylors_cumul; }
@@ -257,6 +262,7 @@ METADATAS_INLINE double chronos_get_time_DefTsta ( const chronos_t times ) { ret
 METADATAS_INLINE double chronos_get_time_RRTaylo ( const chronos_t times ) { return times->_clicks_RRTaylo_cumul; }
 METADATAS_INLINE double chronos_get_time_RRGraef ( const chronos_t times ) { return times->_clicks_RRGraef_cumul; }
 METADATAS_INLINE double chronos_get_time_rootRad ( const chronos_t times ) { return times->_clicks_rootRad_cumul; }
+METADATAS_INLINE double chronos_get_time_RRT0Tes ( const chronos_t times ) { return times->_clicks_RRT0Tes_cumul; }
 
 /* DEPRECATED */
 // METADATAS_INLINE void   chronos_tic_Approxi      ( chronos_t times ) { times->_clicks_Approxi = clock(); }

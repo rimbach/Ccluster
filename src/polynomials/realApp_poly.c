@@ -59,6 +59,26 @@ slong realApp_poly_get_relOne_accuracy_max( const realApp_poly_t poly){
     return res;
 }
 
+slong realApp_poly_get_absolute_accuracy_min( const realApp_poly_t poly){
+    slong i = 0;
+    slong res = realApp_get_absolute_accuracy( realApp_poly_getCoeff( poly, i) );
+    while ( i<=realApp_poly_degree(poly) ) {
+        res = CCLUSTER_MIN(res, realApp_get_absolute_accuracy( realApp_poly_getCoeff( poly, i) ) );
+        i++;
+    }
+    return res;
+}
+
+slong realApp_poly_get_absolute_accuracy_max( const realApp_poly_t poly){
+    slong i = 0;
+    slong res = realApp_get_absolute_accuracy( realApp_poly_getCoeff( poly, i) );
+    while ( i<=realApp_poly_degree(poly) ) {
+        res = CCLUSTER_MAX(res, realApp_get_absolute_accuracy( realApp_poly_getCoeff( poly, i) ) );
+        i++;
+    }
+    return res;
+}
+
 void realApp_poly_sum_abs_coeffs( realApp_t res, const realApp_poly_t f, slong prec ) {
     
     realApp_srcptr fptr = f->coeffs;

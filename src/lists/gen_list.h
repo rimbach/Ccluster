@@ -72,6 +72,8 @@ void * gen_list_last(gen_list_t l);
 void * gen_list_data_at_index(const gen_list_t l, int index);
 
 void gen_list_insert_sorted(gen_list_t l, void * data, int (isless_func)(const void * d1, const void * d2));
+void gen_list_insert_sorted_unique(gen_list_t l, void * data, int (isless_func)(const void * d1, const void * d2),
+                                                              int (isequal_func)(const void * d1, const void * d2));
 
 void gen_list_fprint(FILE * file, const gen_list_t l, void (* print_func)(FILE *, const void *) );
 void gen_list_fprintd(FILE * file, const gen_list_t l, slong digits, void (* print_func)(FILE *, const void *, slong digits) );

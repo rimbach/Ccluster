@@ -64,20 +64,11 @@ void risolate_interface_poly( const realRat_poly_t poly,
     metadatas_count(meta);
     metadatas_risolate_fprint(stdout, meta, eps);
     
-//     if (verb>=3) {
-//         connCmp_list_risolate_print_for_results(stdout, qRes, meta);
-//     }
     if (output==-2) {
-//         printf("gnuplot output: not yet implemented\n");
         risolate_connCmp_list_gnuplot(stdout, qRes, meta, 1);
     } else if (output==-3){
-//         printf("gnuplot output: not yet implemented\n");
-//         connCmp_list_gnuplot(stdout, qRes, meta, 1);
         risolate_connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
     } else if (output!=0) {
-//         printf("cluster output: not yet implemented\n");
-//         connCmp_list_risolate_print_for_results(stdout, qRes, meta);
-//         connCmp_list_print_for_results_withOutput(stdout, qRes, output, meta);
         connCmp_list_risolate_print_for_results_withOutput(stdout, qRes, output, meta);
     }
     
@@ -104,8 +95,6 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     compBox_list_t bDis;
     
     compAnn_list_t qAnn;
-    compAnn_list_t qAnn1;
-    compAnn_list_t qAnn2;
     
     cacheApp_init_realRat_poly ( cache, poly);
     cacheApp_canonicalise( cache );
@@ -143,27 +132,21 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-//     risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);
-    
     if (metadatas_useRootRadii(meta)) {
         compAnn_list_init(qAnn);
-        compAnn_list_init(qAnn1);
-        compAnn_list_init(qAnn2);
         risolate_algo_global_rootRadii( qRes, bDis, qAnn, initialBox, eps, cache, meta);
     }
     else
         risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-//     metadatas_fprint(stdout, meta, eps);
     metadatas_risolate_fprint(stdout, meta, eps);
     
     if (output==-2) {
-//         printf("gnuplot output: not yet implemented\n");
         risolate_connCmp_list_gnuplot(stdout, qRes, meta, 1);
     } else if (output==-3){
         if (metadatas_useRootRadii(meta)) 
-            risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(stdout, qRes, bDis, qAnn, qAnn1, qAnn2, meta);
+            risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(stdout, qRes, bDis, qAnn, meta);
         else
             risolate_connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
     } else if (output!=0) {
@@ -172,8 +155,6 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     
     if (metadatas_useRootRadii(meta)){
         compAnn_list_clear(qAnn);
-        compAnn_list_clear(qAnn1);
-        compAnn_list_clear(qAnn2);
     }
     
     realRat_clear(sepBound);

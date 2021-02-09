@@ -172,6 +172,11 @@ NUMBERS_INLINE int realApp_check_absolute_accuracy( const realApp_t z, slong pre
     return mag_cmp_2exp_si(arb_radref((z)), prec)<=0;
 }
 
+NUMBERS_INLINE slong realApp_get_absolute_accuracy( const realApp_t z) {
+    double logerror = mag_get_d_log2_approx(arb_radref((z)));
+    return - ( (slong) logerror ) -1;
+}
+
 #ifdef __cplusplus
 }
 #endif

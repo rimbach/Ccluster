@@ -130,13 +130,11 @@ int main(int argc, char **argv){
         curFile = fopen (filename,"r");
         if (curFile!=NULL) {
             realRat_poly_fread(curFile, p);
-            /* for rootRadii: check when to use */
-            realRat_poly_canonicalise(p);
             
             compRat_poly_set_realRat_poly(p_global,p);
             
             if (global==2)
-                ccluster_global_interface_func( getApprox, eps, st, nbthreads, output, verbosity);
+                ccluster_global_interface_realRat_poly( p, eps, st, nbthreads, output, verbosity);
             else
                 ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, output, verbosity);
             

@@ -13,153 +13,13 @@
 
 // #include <pthread.h>
 
-/* assume b does not intersect real axis:
- * can get rid of all annulii with only one root */
-void ccluster_actualize_annulii_real( compBox_t b ) {
-    
-//     clock_t start = clock();
-    
-    compAnn_list_t ltemp;
-    compAnn_list_init(ltemp);
-    
-    for (int ind = 0; ind < GEOMETRY_NB_ANN_PER_BOX; ind++){
-        if (compAnn_list_get_size( compBox_annuliref( b, ind ) ) >=1 ){
-            compAnn_list_iterator it = compAnn_list_begin( compBox_annuliref( b, ind ) );
-            if ( compAnn_centerImref(compAnn_list_elmt( it )) == 0 ) {
-                while (it!=compAnn_list_end() ) {
-                    if ( compAnn_indMaxref(compAnn_list_elmt( it )) > compAnn_indMinref(compAnn_list_elmt( it )) )
-                        compAnn_list_push( ltemp, compAnn_list_elmt( it ) );
-                    it = compAnn_list_next(it);
-                }
-                compAnn_list_swap(  compBox_annuliref( b, ind ), ltemp );
-                compAnn_list_empty(  ltemp );
-            }
-        }
-    }
-                
-    compAnn_list_clear(ltemp);
-    
-//     timeIn_actualize_annulii_real += ( (float) clock() - start )/CLOCKS_PER_SEC ;
-}
-
-int ccluster_compBox_intersects_atLest_one( const compBox_t b, int nbList ){
-    
-    int ind = 0;
-    while ( ( ind < nbList)
-        &&  (compAnn_list_get_size( compBox_annuliref( b,ind ) )>0 ) )
-        ind ++;
-    return (ind==nbList);
-}
-
-int ccluster_compBox_intersects_atMost_one( const compBox_t b, int nbList ){
-    int ind = 0;
-    while ( ( ind < nbList)
-        &&  (compAnn_list_get_size( compBox_annuliref( b,ind ) )<=1 ) )
-        ind ++;
-    return (ind==nbList);
-}
-
-/* Precondition:                                                                  */
-/* Specification: returns false only if p is not in b                             */
-int ccluster_is_compApp_in_box                     ( const compApp_t p,  const compBox_t b, slong prec  ){
-    
-//     clock_t start = clock();
-    
-    int res = 1;
-    compApp_t dist;
-    realApp_t halfwidth;
-    compApp_init(dist);
-    realApp_init(halfwidth);
-    
-    realApp_set_realRat( halfwidth, compBox_bwidthref(b), prec );
-    realApp_div_ui( halfwidth, halfwidth, 2, prec );
-    compApp_set_compRat( dist, compBox_centerref(b), prec );
-    compApp_sub( dist, dist, p, prec);
-    realApp_abs( compApp_realref( dist ), compApp_realref( dist ) );
-    realApp_abs( compApp_imagref( dist ), compApp_imagref( dist ) );
-    
-    if ( ( realApp_gt( compApp_realref( dist ), halfwidth ) == 1 )
-      || ( realApp_gt( compApp_imagref( dist ), halfwidth ) == 1 ) )
-        res = 0;
-    
-    compApp_clear(dist);
-    realApp_clear(halfwidth);
-    
-//     timeIn_is_compApp_in_box += ( (float) clock() - start )/CLOCKS_PER_SEC ;
-    
-    return res;
-}
-
-int ccluster_is_compApp_in_compAnn (const compApp_t p, const compAnn_t ann, slong prec ){
-    
-//     clock_t start = clock();
-    
-    int res = 1;
-    compApp_t dist;
-    realApp_t mod;
-    
-    compApp_init(dist);
-    realApp_init(mod);
-    
-    compApp_set( dist, p );
-    realApp_add_si( compApp_realref(dist), compApp_realref(dist), -compAnn_centerReref(ann), prec );
-    realApp_add_si( compApp_imagref(dist), compApp_imagref(dist), -compAnn_centerImref(ann), prec );
-    compApp_abs( mod, dist, prec );
-    
-    if ( ( realApp_gt( mod, compAnn_radSupref( ann ) ) == 1 )
-      || ( realApp_lt( mod, compAnn_radInfref( ann ) ) == 1 ) )
-        res = 0;
-        
-    compApp_clear(dist);
-    realApp_clear(mod);
-    
-//     timeIn_is_compApp_in_box += ( (float) clock() - start )/CLOCKS_PER_SEC ;
-    
-    return res;
-}
-
-int ccluster_connCmp_intersects_only_one( const connCmp_t cc, int nbList ){
-    
-//     clock_t start = clock();
-    
-    int res = 1;
-    slong indMins[GEOMETRY_NB_ANN_PER_BOX];
-    compBox_ptr bcur;
-    compBox_list_iterator itb;
-    
-    itb = compBox_list_begin( connCmp_boxesref( cc ) );
-    bcur= compBox_list_elmt(itb);
-    /* each list of annulii contains at least one annulus */
-    for (int ind = 0; ind < nbList; ind++) {
-        /* check if only one annulus */
-        if ( compAnn_list_get_size(compBox_annuliref(bcur, ind))>1 )
-            res = 0;
-        indMins[ind] = compAnn_indMinref(compAnn_list_first(compBox_annuliref(bcur, ind)));
-    }
-    itb = compBox_list_next(itb);
-    while ( (res==1) && ( itb != compBox_list_end() ) ){
-        bcur= compBox_list_elmt(itb);
-        for (int ind = 0; ind < nbList; ind++) {
-            if ( compAnn_list_get_size(compBox_annuliref(bcur, ind))>1 )
-                res = 0;
-            if ( compAnn_indMinref(compAnn_list_first(compBox_annuliref(bcur, ind))) != indMins[ind] )
-                res = 0;
-        }
-        itb = compBox_list_next(itb);
-    }
-    
-//     timeIn_connCmp_intersects_only_one += ( (float) clock() - start )/CLOCKS_PER_SEC ;
-    
-    return res;
-}
-
 slong ccluster_discard_compBox_list( compBox_list_t boxes, 
                                      compBox_list_t bDiscarded,
                                      cacheApp_t cache, 
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta){
     
-    clock_t start = clock();
+//     clock_t start = clock();
     
     tstar_res res;
     res.appPrec = prec;
@@ -179,6 +39,14 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
 //     compBox_list_init(ltempDetermined);
     /* End For test */
     
+    slong degree = cacheApp_getDegree(cache);
+    slong dtemp = 1;
+    int log2d = 0;
+    while (degree>=dtemp){
+        dtemp = 2*dtemp;
+        log2d++;
+    }
+    
     while (!compBox_list_is_empty(boxes)){
         
         btemp = compBox_list_pop(boxes);
@@ -188,7 +56,6 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
         
         /* Real Coeffs */
         if (( metadatas_useRealCoeffs(meta) ) && ( compBox_is_imaginary_negative_strict(btemp) ) ) {
-//             printf("ici\n");
 //             if (metadatas_getDrSub(meta)==0){
                 compBox_clear(btemp);
                 ccluster_free(btemp);
@@ -197,79 +64,31 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
 //             }
             continue;
         }
-//         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
         
+        /* Root Radii */
         if ( metadatas_useRootRadii(meta) ){
-            
-            /* get rid of annulus containing a real solution if the box    *
-             * does not intersect real axis                                */
-            if ( compBox_is_imaginary_positive_strict(btemp)
-              || compBox_is_imaginary_negative_strict(btemp) ) {
-                ccluster_actualize_annulii_real( btemp );
-            }
-//             
-            /* check if btemp intersects at least an annulus of each list */
-            if ( ccluster_compBox_intersects_atLest_one( btemp, 3 ) == 0 ){
+/* returns 1 => 2*box contains at least one root */
+/*         0 => box contains no root */
+/*        -1 => can not decide */
+            int RRExcl = ccluster_rootRadii_exclusion_test( btemp, CCLUSTER_DEFAULT_PREC, meta );
+            if (RRExcl==0) {
                 if (metadatas_haveToCount(meta)){
                     metadatas_add_discarded( meta, depth);
                 }
-                if (metadatas_getDrSub(meta)==0){
+//                 if (metadatas_getDrSub(meta)==0){
                     compBox_clear(btemp);
                     ccluster_free(btemp);
-                } else {
-                    compBox_list_push(bDiscarded, btemp);
-                }
+//                 } else {
+//                     compBox_list_push(bDiscarded, btemp);
+//                 }
+                
+//                 printf("# do not intersect at least one annulii of each group\n");
                 
                 continue;
-            }
-            
-            /* check if btemp intersects at most one annulus of each list */
-            if ( ccluster_compBox_intersects_atMost_one( btemp, 3 ) == 0 ){
-                
+            } else if (RRExcl==1) {
                 compBox_list_push(ltemp, btemp);
                 continue;
-                
-            } else {
-                
-                compApp_t inter;
-                compApp_init(inter);
-                int intersect = compAnn_intersect_realCenter( inter, compAnn_list_first( compBox_annuliref( btemp, 0 ) ), 
-                                                                     compAnn_list_first( compBox_annuliref( btemp, 1 ) ), 
-                                                              CCLUSTER_DEFAULT_PREC);
-//                 printf("# box: "); compBox_print( btemp ); printf("\n");
-//                 printf("# intersect: %d\n", intersect );
-//                 printf("# intersection: ");
-//                 compApp_printd( inter, 10 );
-//                 printf("\n");
-                
-                if (intersect)
-                    intersect = ccluster_is_compApp_in_box (inter,  btemp, CCLUSTER_DEFAULT_PREC);
-//                 printf("# intersection is in box: %d\n", intersect);
-                
-                /* check if the intersection intersects the third annulus */
-                if (intersect) 
-                    intersect = ccluster_is_compApp_in_compAnn( inter, compAnn_list_first( compBox_annuliref( btemp, 2 ) ), CCLUSTER_DEFAULT_PREC);
-//                 printf("# intersect third annulus: %d\n\n", intersect);
-                
-                compApp_clear(inter);
-                
-                if (intersect==0) {
-                    if (metadatas_haveToCount(meta)){
-                        metadatas_add_discarded( meta, depth);
-                    }
-                     if (metadatas_getDrSub(meta)==0){
-                        compBox_clear(btemp);
-                        ccluster_free(btemp);
-                     } else {
-                        compBox_list_push(bDiscarded, btemp);
-                     }
-                
-                continue;
-                }
-                
-                
             }
-                       
         }
         
         if ( metadatas_usePowerSums(meta) ){
@@ -298,8 +117,11 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
             else
                 res.nbOfSol = -1;
         }
-        else    
+        else {
+  
             res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
+//             printf("## tstar result: %d \n", res.nbOfSol);
+        }
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
                 metadatas_add_discarded( meta, depth);
@@ -371,8 +193,6 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
 //     compBox_list_clear(ltempDetermined);
     /* End For test */
     
-    timeIn_discard_compBox_list += ( (float) clock() - start )/CLOCKS_PER_SEC ;
-    
     return res.appPrec;
 }
 
@@ -384,8 +204,6 @@ void ccluster_bisect_connCmp( connCmp_list_t dest,
                               metadatas_t meta, 
                               slong nbThreads){
     
-    clock_t start = clock();
-    
     slong prec = connCmp_appPr(cc);
     compBox_list_t subBoxes;
     connCmp_list_t ltemp;
@@ -395,16 +213,12 @@ void ccluster_bisect_connCmp( connCmp_list_t dest,
     compBox_ptr btemp;
     connCmp_ptr ctemp;
     
-    clock_t start2 = clock();
-    
     /* RealCoeffs */
     int cc_contains_real_line = 0;
     /* Check if cc contains the real line */
     if ( (metadatas_useRealCoeffs(meta)) && (!connCmp_is_imaginary_positive(cc)) )
         cc_contains_real_line = 1;
     /* end RealCoeffs */
-    
-    timeIn_is_imaginary_positive += ( (float) clock() - start2 )/CLOCKS_PER_SEC ;
     
     while (!connCmp_is_empty(cc)) {
         btemp = connCmp_pop(cc);
@@ -413,61 +227,25 @@ void ccluster_bisect_connCmp( connCmp_list_t dest,
         ccluster_free(btemp);
     }
     
-// #ifdef CCLUSTER_EXPERIMENTAL
-//     if CCLUSTER_V5(meta) {
-//         compBox_list_t subBoxes2;
-//         compBox_list_init(subBoxes2);
-//         
-//         while (!compBox_list_is_empty(subBoxes)){
-//             btemp = compBox_list_pop(subBoxes);
-//             subdBox_quadrisect( subBoxes2, btemp );
-//             compBox_clear(btemp);
-//             ccluster_free(btemp);
-//         }
-//         
-//         compBox_list_swap(subBoxes, subBoxes2);
-//         compBox_list_clear(subBoxes2);
-//     }
-// #endif 
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (nbThreads>1) {
-//         if (metadatas_getVerbo(meta)>1) {
-//             slong depth = compBox_getDepth(compBox_list_first(subBoxes), metadatas_initBref( meta));
-//             printf("--ccluster_parallel_bisect_connCmp: depth: %d, nb threads: %d, nbboxes: %d\n", (int) depth, (int) nbThreads, compBox_list_get_size(subBoxes) );
-//         }
-//         clock_t start=clock();
         prec = ccluster_parallel_discard_compBox_list( subBoxes, cache, prec, meta, nbThreads);
-//         if (metadatas_getVerbo(meta)>1)
-//             printf(" nb of clicks multithread: %f\n", ((double) (clock() - start))/(CLOCKS_PER_SEC*nbThreads) );
     }
     else {
-//         if (metadatas_getVerbo(meta)>1) {
-//             slong depth = compBox_getDepth(compBox_list_first(subBoxes), metadatas_initBref( meta));
-//             printf("--ccluster_parallel_bisect_connCmp: depth: %d, nb threads: %d, nbboxes: %d\n", (int) depth, (int) nbThreads, compBox_list_get_size(subBoxes) );
-//         }
-//         clock_t start=clock();
         prec = ccluster_discard_compBox_list( subBoxes, bDiscarded, cache, prec, meta);
-//         if (metadatas_getVerbo(meta)>1)
-//             printf(" nb of clicks            : %f\n", (double) (clock() - start)/CLOCKS_PER_SEC );
     }
 #else
     prec = ccluster_discard_compBox_list( subBoxes, bDiscarded, cache, prec, meta);
 #endif
-    
-    start2 = clock();
     
     while (!compBox_list_is_empty(subBoxes)) {
         btemp = compBox_list_pop(subBoxes);
         connCmp_union_compBox( ltemp, btemp);
     }
     
-    timeIn_while_loop += ( (float) clock() - start2 )/CLOCKS_PER_SEC ;
-    
     int specialFlag = 1;
     if (connCmp_list_get_size(ltemp) == 1)
         specialFlag = 0;
-    
-    start2 = clock();
     
     /* RealCoeffs */
     if ( (metadatas_useRealCoeffs(meta)) && (connCmp_list_get_size(ltemp) == 1) && (cc_contains_real_line == 1) ){
@@ -479,12 +257,9 @@ void ccluster_bisect_connCmp( connCmp_list_t dest,
     }
     /* end RealCoeffs */
     
-    timeIn_is_imaginary_positive += ( (float) clock() - start2 )/CLOCKS_PER_SEC ;
-    
     slong nprec; 
     if (prec == connCmp_appPrref(cc)) {
         nprec = CCLUSTER_MAX(prec/2,CCLUSTER_DEFAULT_PREC);
-//         printf("decrease precision\n");
     }
     else 
         nprec = prec;
@@ -516,39 +291,6 @@ void ccluster_bisect_connCmp( connCmp_list_t dest,
     compBox_list_clear(subBoxes);
     connCmp_list_clear(ltemp);
     
-    timeIn_bisect_connCmp += ( (float) clock() - start )/CLOCKS_PER_SEC ;
-}
-
-void ccluster_prep_loop_rootRadii( compBox_list_t bDiscarded,
-                         connCmp_list_t qMainLoop, 
-                         connCmp_list_t qPrepLoop, 
-                         connCmp_list_t discardedCcs, 
-                         cacheApp_t cache, 
-                         metadatas_t meta) {
-    
-    connCmp_list_t ltemp;
-    connCmp_list_init(ltemp);
-    
-    connCmp_ptr ctemp;
-    
-    while (!connCmp_list_is_empty(qPrepLoop)) {
-        
-        ctemp = connCmp_list_pop(qPrepLoop);
-        int intersectOnlyOneFlag = ccluster_connCmp_intersects_only_one( ctemp, 3);
-        
-        if ( intersectOnlyOneFlag )
-            connCmp_list_insert_sorted(qMainLoop, ctemp);
-        else {
-            ccluster_bisect_connCmp( ltemp, ctemp, discardedCcs, bDiscarded, cache, meta, metadatas_useNBThreads(meta));
-            
-            while (!connCmp_list_is_empty(ltemp))
-                connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
-            connCmp_clear(ctemp);
-            ccluster_free(ctemp);
-        }        
-    }
-    
-    connCmp_list_clear(ltemp);
 }
 
 void ccluster_prep_loop( compBox_list_t bDiscarded,
@@ -651,7 +393,7 @@ void ccluster_main_loop( connCmp_list_t qResults,
     
     while (!connCmp_list_is_empty(qMainLoop)) {
         
-        //         if (metadatas_getVerbo(meta)>0) {
+//         if (metadatas_getVerbo(meta)>=2) {
 //             printf("ccluster.c, ccluster_main_loop, size of queue: %d \n", connCmp_list_get_size(qMainLoop) );
 //         }
 
@@ -991,154 +733,193 @@ void ccluster_algo_global( connCmp_list_t qResults,
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
-void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
-                                     compBox_list_t bDiscarded,
-                                     compAnn_list_t annulii,
-                                     compAnn_list_t annulii1,
-                                     compAnn_list_t annulii2,
-                                     const compBox_t initialBox, 
-                                     const realRat_t eps, 
-                                     cacheApp_t cache, 
-                                     metadatas_t meta){
-    clock_t start = clock();
-    clock_t start2 = clock();
-    
-//     compAnn_list_t annulii;
-//     connCmp_list_t qCover;
-    realRat_t delta;
-    
-//     compAnn_list_init(annulii);
-//     connCmp_list_init(qCover);
-    realRat_init(delta);
-    
-    slong degree = cacheApp_getDegree( cache );
-//     realRat_set_si(delta, 1, degree);
-    realRat_set_si(delta, 1, degree*degree);
-//     realRat_set_si(delta, 1, degree*degree*degree);
-    
-    /* assume 0 is not a root of the poly */
-    slong prec = CCLUSTER_DEFAULT_PREC;
-    /* heuristic to predict the precision: at least the degree */
-    while (prec<degree)
-        prec = 2*prec;
-//     slong precpred = prec;
-    /* */
-    prec = realIntRootRadii_rootRadii( annulii, 0, cache, delta, prec, meta );
-    
-    /* find two integers that are not a roots of the poly */
-    slong centerRe1 = realApp_ceil_si(compAnn_radSupref(compAnn_list_last(annulii)), prec);
-//     slong centerRe2 = centerRe1+1;
-//     slong centerRe3 = - centerRe1;
-    prec = 2*prec;
-    prec = realIntRootRadii_rootRadii( annulii1, centerRe1, cache, delta, prec, meta );
-    prec = realIntRootRadii_rootRadii_imagCenter( annulii2, centerRe1, cache, delta, prec, meta );
-//     compAnn_list_clear(annulii);
-//     compAnn_list_init(annulii);
-//     prec = realIntRootRadii_rootRadii( annulii , centerRe3, cache, delta );
-    
-//     if (metadatas_getVerbo(meta)>3) {
-        printf("#time in computing RootRadii           : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-        printf("#precision needed: %ld\n", prec);
-//     }
-    start2 = clock();
-    
-    realIntRootRadii_connectedComponents( annulii, prec );
-    realIntRootRadii_connectedComponents( annulii1, prec );
-    realIntRootRadii_connectedComponents( annulii2, prec );
-    
-//     compAnn_list_empty(annulii2);
-    
-//     if (metadatas_getVerbo(meta)>3) {
-        printf("#time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-//     }
-    start2 = clock();
-    if (metadatas_haveToCount(meta))
-        metadatas_add_time_rootRad(meta, (double) (start2 - start) );
-    
-//     printf("#Annulii 0: ");
-//     compAnn_list_printd(annulii, 10);
-//     printf("\n\n");
+// void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
+//                                      compBox_list_t bDiscarded,
+//                                      compAnn_list_t annulii,
+//                                      compAnn_list_t annulii1,
+//                                      compAnn_list_t annulii2,
+//                                      const compBox_t initialBox, 
+//                                      const realRat_t eps, 
+//                                      cacheApp_t cache, 
+//                                      metadatas_t meta){
+//     clock_t start = clock();
+//     clock_t start2 = clock();
 //     
-//     printf("#Annulii 1: ");
-//     compAnn_list_printd(annulii1, 10);
-//     printf("\n\n");
+//     realRat_t delta;
+//     realRat_init(delta);
 //     
-//     printf("#Annulii 2: ");
-//     compAnn_list_printd(annulii2, 10);
-//     printf("\n\n");
-    
-    compBox_ptr box;
-    box = (compBox_ptr) ccluster_malloc (sizeof(compBox));
-    compBox_init(box);
-    compBox_set(box, initialBox);
-    compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
-    /* set width to 2*centerRe1 */
-    realRat_set_si( compBox_bwidthref(box), 2*centerRe1, 1 );
-    
-    compBox_copy_annulii(box, 0, annulii);
-    compBox_copy_annulii(box, 1, annulii1);
-    compBox_copy_annulii(box, 2, annulii2);
-    
-//     printf("#Annulii: ");
-//     compAnn_list_printd(compBox_annuliref(box, 0), 10);
-//     printf("\n\n");
-    
-    connCmp_ptr initialCC;
-    initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
-    connCmp_init_compBox(initialCC, box);
-    
-    connCmp_list_t qPrepLoop;
-    connCmp_list_init(qPrepLoop);
-    
-    connCmp_list_t qMainLoop, discardedCcs;
-    connCmp_list_init(qMainLoop);
-    connCmp_list_init(discardedCcs);
-    
-    connCmp_list_push(qPrepLoop, initialCC);
-//     /* for profiling */
-//     timeIn_actualize_annulii_real       =0;
-//     timeIn_is_compApp_in_box            =0;
-//     timeIn_is_compApp_in_compAnn        =0;
-//     timeIn_connCmp_intersects_only_one  =0;
-    timeIn_quadrisect = 0;
-    timeIn_actualize_anulii = 0;
-    timeIn_discard_compBox_list = 0;
-    timeIn_bisect_connCmp = 0;
-    timeIn_is_imaginary_positive = 0;
-    timeIn_are_8connected = 0;
-    timeIn_merge_2_connCmp = 0;
-    timeIn_while_loop = 0;
-
-    ccluster_prep_loop_rootRadii(bDiscarded, qMainLoop, qPrepLoop, discardedCcs, cache, meta);
-    
-    printf("#time in prep loop:                  %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-//     printf("#time in actualize_annulii_real      %f \n", timeIn_actualize_annulii_real      );
-//     printf("#time in is_compApp_in_box           %f \n", timeIn_is_compApp_in_box           );
-//     printf("#time in is_compApp_in_compAnn       %f \n", timeIn_is_compApp_in_compAnn       );
-//     printf("#time in connCmp_intersects_only_one %f \n", timeIn_connCmp_intersects_only_one );
-    printf("#time in bisect_connCmp              %f \n", timeIn_bisect_connCmp );
-    printf("#time in --is_imaginary_positive     %f \n", timeIn_is_imaginary_positive       );
-    printf("#time in --quadrisect                %f \n", timeIn_quadrisect       );
-    printf("#time in ----actualize_anulii        %f \n", timeIn_actualize_anulii );
-    printf("#time in --discard_compBox_list      %f \n", timeIn_discard_compBox_list );
-    printf("#time in --union find                %f \n", timeIn_while_loop );
-    printf("#time in ----are_8connected          %f \n", timeIn_are_8connected );
-    printf("#time in ----merge_2_connCmp         %f \n", timeIn_merge_2_connCmp );
-    printf("#time before main loop:              %f \n", ((double) (clock() - start))/CLOCKS_PER_SEC );
-    
+//     slong degree = cacheApp_getDegree( cache );
+// //     realRat_set_si(delta, 1, degree);
+//     realRat_set_si(delta, 1, degree*degree);
+// //     realRat_set_si(delta, 1, degree*degree*degree);
+//     
+//     slong bitsize = cacheApp_getBitsize (cache);
+//     if (metadatas_getVerbo(meta)>=2) {
+//         printf("#bitsize of input polynomial: %ld\n", bitsize);
+//     }
+//     
+//     /* assume 0 is not a root of the poly */
+//     slong prec = CCLUSTER_DEFAULT_PREC;
+//     /* heuristic to predict the precision: at least the degree */
+//     while (prec<degree/2)
+//         prec = 2*prec;
+//     /* */
+//     slong prec1 = realIntRootRadii_rootRadii( annulii, 0, cache, delta, prec, meta );
+//     
+//     /* derive upper bound for the norm of the roots */
+//     slong centerRe1 = realApp_ceil_si(compAnn_radSupref(compAnn_list_last(annulii)), prec);
+//     prec = 2*prec1;
+//     slong prec2 = realIntRootRadii_rootRadii( annulii1, 1, cache, delta, prec, meta );
+//     slong prec3 = realIntRootRadii_rootRadii_imagCenter( annulii2, 1, cache, delta, prec, meta );
+//     
+//     prec3 = CCLUSTER_MAX( prec2, prec3);
+//     prec3 = CCLUSTER_MAX( prec1, prec3);
+//     
+// //     if (metadatas_getVerbo(meta)>3) {
+// //         printf("#time in computing RootRadii           : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+// //         printf("#precision needed: %ld\n", prec3 );
+// //     }
+// //     start2 = clock();
+//     
+//     realIntRootRadii_connectedComponents( annulii, prec );
+//     realIntRootRadii_connectedComponents( annulii1, prec );
+//     realIntRootRadii_connectedComponents( annulii2, prec );
+//     
+// //     compAnn_list_empty(annulii2);
+//     
+// //     if (metadatas_getVerbo(meta)>3) {
+// //         printf("#time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+// //     }
+//         
+// //     start2 = clock();
+//     
+//     realIntRootRadii_containsRealRoot( annulii, cache, prec );
+// //     if (metadatas_getVerbo(meta)>=2) {
+// //         printf("#time in discarding real intervals     : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+//         if (metadatas_getVerbo(meta)>=3) {
+//             printf("#Annulii: ");
+//             compAnn_list_printd(annulii, 10);
+//             printf("\n\n");
+//         }
+// //     }
+//     
+//     start2 = clock();
+//     if (metadatas_haveToCount(meta))
+//         metadatas_add_time_rootRad(meta, (double) (start2 - start) );
+//     
+// //     printf("#Annulii 0: ");
+// //     compAnn_list_printd(annulii, 10);
+// //     printf("\n\n");
+// // //     
+// //     printf("#Annulii 1: ");
+// //     compAnn_list_printd(annulii1, 10);
+// //     printf("\n\n");
+// //     
+// //     printf("#Annulii 2: ");
+// //     compAnn_list_printd(annulii2, 10);
+// //     printf("\n\n");
+//     
+//     /* test: compute all the intersections */
+// //     int nbInt = 0;
+// //     compApp_t inter, interConj;
+// //     compApp_init(inter);
+// //     compApp_init(interConj);
+// //     compAnn_list_iterator it = compAnn_list_begin( annulii );
+// //     while ( it!=compAnn_list_end() ) {
+// //         
+// //         int intersect = 0;
+// //         int nbInterA0 = 0;
+// //         /* find first annulus of annulii1 intersecting that annulus */
+// //         compAnn_list_iterator it1 = compAnn_list_begin( annulii1 );
+// //         while ( it1!=compAnn_list_end() ) {
+// //             
+// //             intersect = compAnn_intersect_realCenter( inter, compAnn_list_elmt( it ), compAnn_list_elmt( it1 ),
+// //                                                                        CCLUSTER_DEFAULT_PREC);
+// //             if (intersect) {
+// //                 int containsRealLine = realApp_contains_zero ( compApp_imagref( inter ) );
+// //                 int nbSolsInIt = compAnn_indMaxref(compAnn_list_elmt( it )) - compAnn_indMinref(compAnn_list_elmt( it )) + 1;
+// //                 int nbSolsInIt1 = compAnn_indMaxref(compAnn_list_elmt( it1 )) - compAnn_indMinref(compAnn_list_elmt( it1 )) + 1;
+// //                 if ( (containsRealLine==0) && ( (nbSolsInIt == 1) || (nbSolsInIt1 == 1) ) ) {
+// //                     it1 = compAnn_list_next(it1);
+// //                     continue;
+// //                 }
+// //                 
+// //                 /* check if the intersection intersects at least one annulus of the third group */
+// //                 /*   and if the conjugate of the intersection intersects at least one annulus of the third group */
+// //                 
+// //                 /* find first annulus of annulii2 intersecting that annulus of annulii1 */
+// //                 compAnn_list_iterator it2 = compAnn_list_begin( annulii2 );
+// //                 
+// //                 intersect = 0;
+// //                 int intersectConj = 1;
+// //                 compApp_set(interConj, inter);
+// //                 realApp_neg(compApp_imagref(interConj), compApp_imagref(interConj));
+// //                 
+// //                 while ( (it2!=compAnn_list_end() )&& ( (intersect==0) || (intersectConj==0) ) ) {
+// //                     if (intersect == 0)
+// //                         intersect = ccluster_is_compApp_in_compAnn( inter, compAnn_list_elmt( it2 ), CCLUSTER_DEFAULT_PREC);
+// //                     if (intersectConj == 0)
+// //                         intersectConj = ccluster_is_compApp_in_compAnn( interConj, compAnn_list_elmt( it2 ), CCLUSTER_DEFAULT_PREC);
+// //                     it2 = compAnn_list_next(it2);
+// //                 }
+// //                 if (intersect && intersectConj) {
+// //                     nbInt ++;
+// //                     nbInterA0++;
+// //                 }
+// //             }
+// //             it1 = compAnn_list_next(it1);
+// //         }
+// //         printf("### number of intersections: %d\n", nbInterA0);
+// //         it = compAnn_list_next(it);
+// //     }
+// //     
+// //     compApp_clear(inter);
+// //     compApp_clear(interConj);
+// //     
+// //     printf("# number of intersections: %d\n", nbInt);
+// //     printf("#time in computing intersections: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+//     /* fin test */
+//     
+//     compBox_ptr box;
+//     box = (compBox_ptr) ccluster_malloc (sizeof(compBox));
+//     compBox_init(box);
+//     compBox_set(box, initialBox);
+//     compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
+//     /* set width to 2*centerRe1 */
+//     realRat_set_si( compBox_bwidthref(box), 2*centerRe1, 1 );
+//     compBox_set(metadatas_initBref(meta), box);
+//     
+//     compBox_copy_annulii(box, 0, annulii);
+//     compBox_copy_annulii(box, 1, annulii1);
+//     compBox_copy_annulii(box, 2, annulii2);
+//     /* fourth list of annulii contains annulii from i having intersection with the */
+//     /* complex conjugate of the box */
+//     compBox_copy_annulii(box, 3, annulii2);
+//     
+//     connCmp_ptr initialCC;
+//     initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
+//     connCmp_init_compBox(initialCC, box);
+//     
+//     connCmp_list_t qPrepLoop;
+//     connCmp_list_init(qPrepLoop);
+//     
+//     connCmp_list_t qMainLoop, discardedCcs;
+//     connCmp_list_init(qMainLoop);
+//     connCmp_list_init(discardedCcs);
+//     
+//     connCmp_list_push(qPrepLoop, initialCC);
+//     
 //     connCmp_list_push(qMainLoop, initialCC);
-    ccluster_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, meta);
-    
-    
-    connCmp_list_clear(qMainLoop);
-    connCmp_list_clear(discardedCcs);
-    
-//     connCmp_list_clear(qCover);
-    realRat_clear(delta);
-//     compAnn_list_clear(annulii);
-    
-    metadatas_add_time_CclusAl(meta, (double) (clock() - start));
-}
+//     ccluster_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, meta);
+//     
+//     
+//     connCmp_list_clear(qMainLoop);
+//     connCmp_list_clear(discardedCcs);
+//     
+//     realRat_clear(delta);
+//     
+//     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
+// }
 
 void ccluster_refine( connCmp_list_t qResults, 
                       connCmp_list_t qMainLoop,

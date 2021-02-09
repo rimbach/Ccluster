@@ -21,6 +21,8 @@
 #include "numbers/realApp.h"
 #include "numbers/compApp.h"
 
+#include "lists/gen_list.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,6 +40,8 @@ typedef struct {
     /* -1 if undetermined */
     int     rrInPo; 
     int     rrInNe; 
+    
+//     struct gen_list interList;
 } compAnn;
 
 typedef compAnn compAnn_t[1];
@@ -51,6 +55,8 @@ typedef compAnn * compAnn_ptr;
 #define compAnn_radSupref(X) (&(X)->radSup)
 #define compAnn_rrInPoref(X) (X->rrInPo)
 #define compAnn_rrInNeref(X) (X->rrInNe)
+
+// #define compAnn_intLisref(X) (&(X)->interList)
 
 GEOMETRY_INLINE void compAnn_init( compAnn_t x ){
     realApp_init( compAnn_radInfref(x) );
@@ -87,6 +93,10 @@ GEOMETRY_INLINE slong compAnn_getCenterIm( const compAnn_t x ){
 
 GEOMETRY_INLINE int compAnn_isless ( const compAnn_t a1, const compAnn_t a2 ) {
     return (compAnn_indMaxref( a1 ) > compAnn_indMaxref( a2 ));
+}
+
+GEOMETRY_INLINE int compAnn_isequal ( const compAnn_t a1, const compAnn_t a2 ) {
+    return (compAnn_indMaxref( a1 ) == compAnn_indMaxref( a2 ));
 }
 
 void compAnn_fprintd( FILE * file, const compAnn_t x, slong digits );

@@ -34,8 +34,11 @@ LISTS_INLINE void compAnn_clear_for_list(void * b){
 }
 
 LISTS_INLINE int compAnn_isless_for_list(const void * b1, const void * b2){
-//     return (compAnn_indMaxref( (compAnn_ptr) b1 ) > compAnn_indMaxref( (compAnn_ptr) b2 ));
     return compAnn_isless( (compAnn_ptr) b1, (compAnn_ptr) b2 );
+}
+
+LISTS_INLINE int compAnn_isequal_for_list(const void * b1, const void * b2){
+    return compAnn_isequal( (compAnn_ptr) b1, (compAnn_ptr) b2 );
 }
 
 LISTS_INLINE void compAnn_fprint_for_list(FILE * file, const void * b){
@@ -94,6 +97,10 @@ LISTS_INLINE compAnn_ptr compAnn_list_compAnn_at_index(compAnn_list_t l, int ind
 
 LISTS_INLINE void compAnn_list_insert_sorted(compAnn_list_t l, compAnn_ptr b){
     gen_list_insert_sorted(l, b, compAnn_isless_for_list);
+}
+
+LISTS_INLINE void compAnn_list_insert_sorted_unique(compAnn_list_t l, compAnn_ptr b){
+    gen_list_insert_sorted_unique(l, b, compAnn_isless_for_list, compAnn_isequal_for_list);
 }
 
 LISTS_INLINE void compAnn_list_fprint(FILE * file, const compAnn_list_t l){

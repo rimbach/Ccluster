@@ -164,8 +164,6 @@ void risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f,
                           const connCmp_list_t l, 
                           const compBox_list_t lb,
                           const compAnn_list_t la,
-                          const compAnn_list_t la1,
-                          const compAnn_list_t la2,
                           metadatas_t meta);
 
 /* DEPRECATED */

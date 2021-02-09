@@ -23,6 +23,9 @@ void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_
     
     pwSuDatas_init( metadatas_pwSumref(m) );
     m->drSub = 0;
+    
+    realRat_init( metadatas_relPrref(m) );
+    m->nbGIt = 0;
 
     realRat_init( metadatas_spBndref(m) );
 }
@@ -34,6 +37,8 @@ void metadatas_clear(metadatas_t m) {
     chronos_clear( metadatas_chronref(m) );
     
     pwSuDatas_clear( metadatas_pwSumref(m) );
+    
+    realRat_clear( metadatas_relPrref(m) );
     
     realRat_clear( metadatas_spBndref(m) );
 }
@@ -157,10 +162,12 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     r = fprintf(file, "#|%-39s %14d |%13d|\n", "number of Taylor shifts:",      nbTaylorsRR, nbTaylorsRRR);
     int nbGraeffeRR = (metadatas_countref(meta))[0].RR_nbGraeffe + (metadatas_countref(meta))[0].RR_nbGraeffeRepeted;
     int nbGraeffeRRR = (metadatas_countref(meta))[0].RR_nbGraeffeRepeted;
-    r = fprintf(file, "#|%-39s %14d |%13d|\n", "number of Greaffe Iterations:",      nbGraeffeRR, nbGraeffeRRR);
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "precision required:",     (metadatas_countref(meta))[0].RR_prec,    " " );
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "number of Graeffe Iterations:",      nbGraeffeRR, nbGraeffeRRR);
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "precision required/predicted:",    (metadatas_countref(meta))[0].RR_prec, 
+                                                                                   (metadatas_countref(meta))[0].RR_predPrec );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Graeffe iterations:",      metadatas_get_time_RRGraef(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Taylor shifts:",      metadatas_get_time_RRTaylo(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in checking sol. contain.:",       metadatas_get_time_RRT0Tes(meta),    " " );
     }
     r = fprintf(file, "# -------------------Other---------------------------------------------\n");
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in getApproximation:",           metadatas_get_time_Approxi(meta),    " " );

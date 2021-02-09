@@ -366,8 +366,8 @@ tstar_res deflate_tstar_test( connCmp_t CC, cacheApp_t cache, const compDsk_t d,
         while( (res.nbOfSol < connCmp_degDeref(CC))&&(restemp==0) ){
             res.nbOfSol += 1;
             restemp = realApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
-            if (metadatas_getVerbo(meta)>=3)
-                printf("Pellet test, discard: %d, %d-th coeff: %d, %i-th Graeffe it\n", discard, res.nbOfSol, restemp, iteration);
+//             if (metadatas_getVerbo(meta)>=3)
+//                 printf("Pellet test, discard: %d, %d-th coeff: %d, %i-th Graeffe it\n", discard, res.nbOfSol, restemp, iteration);
             if (restemp==-2){
                 if (res.appPrec == prec) {
                     res.appPrec *=2;

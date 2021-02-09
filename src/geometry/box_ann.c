@@ -258,6 +258,99 @@ void compBox_actualize_anulii_compAnn_list_imag( compBox_t x, int ind, const com
 //         printf("#actualize anulii: length of list: %d\n", compAnn_list_get_size(compBox_annuliref(x)) );
 //     }
 }
+
+void compBox_actualize_anulii_compAnn_list_imag_conj( compBox_t x, int ind, const compAnn_list_t lmother ){
+    
+//     if (compAnn_list_get_size(lmother) >= 1) {
+        compRat_t shiftedCenter;
+        compApp_t temp;
+        realApp_t left, right;
+        compRat_t closest, furthest;
+        realRat_t halfwidth;
+        compApp_init(temp);
+        realApp_init(left);
+        realApp_init(right);
+        compRat_init(shiftedCenter);
+        compRat_init(closest);
+        compRat_init(furthest);
+        realRat_init(halfwidth);
+        
+        
+        compAnn_list_iterator it;
+        it = compAnn_list_begin( lmother );
+        
+        compRat_set(shiftedCenter, compBox_centerref(x));
+        realRat_neg( compRat_imagref(shiftedCenter), compRat_imagref(shiftedCenter) );
+        realRat_add_si(compRat_imagref(shiftedCenter), compRat_imagref(shiftedCenter), -compAnn_getCenterIm(compAnn_list_elmt( it )));
+        realRat_set(halfwidth, compBox_bwidthref(x));
+        realRat_div_ui(halfwidth, halfwidth, 2 );
+        
+        realRat_sub( compRat_imagref(closest), compRat_imagref(shiftedCenter), halfwidth );
+        realRat_add( compRat_imagref(furthest), compRat_imagref(shiftedCenter), halfwidth );
+        
+        /* if (realRat_sgn( compRat_realref(closest) )>=0) do nothing */
+        if (realRat_sgn( compRat_imagref(closest) )<0) {
+            if (realRat_sgn( compRat_imagref(furthest) )<=0) {
+                /* swap closest and furthest*/
+                realRat_add( compRat_imagref(closest), compRat_imagref(shiftedCenter), halfwidth );
+                realRat_sub( compRat_imagref(furthest), compRat_imagref(shiftedCenter), halfwidth );
+            } else {
+                /* check which one is farthest from zero */
+                realRat_abs( compRat_imagref(closest), compRat_imagref(closest) );
+                if (realRat_cmp( compRat_imagref(closest), compRat_imagref(furthest) ) >0)
+                    realRat_neg( compRat_imagref(furthest), compRat_imagref(closest) );
+                realRat_set_si( compRat_imagref(closest), 0, 1);
+            }
+        }
+        
+        realRat_sub( compRat_realref(closest), compRat_realref(shiftedCenter), halfwidth );
+        realRat_add( compRat_realref(furthest), compRat_realref(shiftedCenter), halfwidth );
+        
+        /* if (realRat_sgn( compRat_imagref(closest) )>=0) do nothing */
+        if (realRat_sgn( compRat_realref(closest) )<0) {
+            if (realRat_sgn( compRat_realref(furthest) )<=0) {
+                /* swap closest and furthest*/
+                realRat_add( compRat_realref(closest), compRat_realref(shiftedCenter), halfwidth );
+                realRat_sub( compRat_realref(furthest), compRat_realref(shiftedCenter), halfwidth );
+            } else {
+                /* check which one is farthest from zero */
+                realRat_abs( compRat_realref(closest), compRat_realref(closest) );
+                if (realRat_cmp( compRat_realref(closest), compRat_realref(furthest) ) >0)
+                    realRat_neg( compRat_realref(furthest), compRat_realref(closest) );
+                realRat_set_si( compRat_realref(closest), 0, 1);
+            }
+        }
+        
+        compApp_set_compRat(temp, closest, CCLUSTER_DEFAULT_PREC );
+        compApp_abs        (left, temp,    CCLUSTER_DEFAULT_PREC );
+        compApp_set_compRat(temp, furthest, CCLUSTER_DEFAULT_PREC );
+        compApp_abs        (right, temp,    CCLUSTER_DEFAULT_PREC );
+        
+        /* go to the first annulus with rsup >= left */
+        while ( (it!=compAnn_list_end()) && (realApp_lt( compAnn_radSupref(compAnn_list_elmt( it )), left )==1)  ){
+            it = compAnn_list_next(it);
+        }
+        
+        /* push annulii satisfying rinf <= right (and rsup >= left) */
+        while ( (it!=compAnn_list_end()) 
+            && (!(realApp_gt( compAnn_radInfref(compAnn_list_elmt( it )), right )==1))
+            ) {
+            compAnn_list_push( compBox_annuliref(x,ind), compAnn_list_elmt( it ) );
+            it = compAnn_list_next(it);
+        }
+        
+        
+        compApp_clear(temp);
+        realApp_clear(left);
+        realApp_clear(right);
+        compRat_clear(shiftedCenter);
+        compRat_clear(closest);
+        compRat_clear(furthest);
+        realRat_clear(halfwidth);
+        
+//         printf("#actualize anulii: length of list: %d\n", compAnn_list_get_size(compBox_annuliref(x)) );
+//     }
+}
     
 /* assume compBox_annuliref(x) contains anulii in increasing order of their radii */
 void compBox_actualize_anulii( compBox_t x, const compBox_t bmother ){
@@ -268,8 +361,19 @@ void compBox_actualize_anulii( compBox_t x, const compBox_t bmother ){
             if ( compAnn_centerImref( compAnn_list_elmt(it) )==0 ) {
                 compBox_actualize_anulii_compAnn_list_real( x, ind, compBox_annuliref(bmother, ind) );
             } else {
-                compBox_actualize_anulii_compAnn_list_imag( x, ind, compBox_annuliref(bmother, ind) );
+                if (ind==3)
+                    compBox_actualize_anulii_compAnn_list_imag_conj( x, ind, compBox_annuliref(bmother, ind) );
+                else
+                    compBox_actualize_anulii_compAnn_list_imag( x, ind, compBox_annuliref(bmother, ind) );
             }
         }
-
+        
+//     if (compAnn_list_get_size(compBox_annuliref(bmother,0))>=1)
+//         compBox_actualize_anulii_compAnn_list_real( x, 0, compBox_annuliref(bmother, 0) );
+//     if (compAnn_list_get_size(compBox_annuliref(bmother,1))>=1)
+//         compBox_actualize_anulii_compAnn_list_real( x, 1, compBox_annuliref(bmother, 1) );
+//     if (compAnn_list_get_size(compBox_annuliref(bmother,2))>=1)
+//         compBox_actualize_anulii_compAnn_list_imag( x, 2, compBox_annuliref(bmother, 2) );
+//     if (compAnn_list_get_size(compBox_annuliref(bmother,3))>=1)
+//         compBox_actualize_anulii_compAnn_list_imag_conj( x, 3, compBox_annuliref(bmother, 3) );
 }

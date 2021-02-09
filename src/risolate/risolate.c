@@ -43,27 +43,6 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
         metadatas_add_explored( meta, depth);
         
         //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
-        
-//         if ( metadatas_useRootRadii(meta) ){
-//             
-//             if ( risolate_compBox_intersects_atLest_one( btemp, 1 ) == 0 ){
-//                 if (metadatas_haveToCount(meta)){
-//                     metadatas_add_discarded( meta, depth);
-//                 }
-// //                 if (metadatas_getDrSub(meta)==0){
-//                     compBox_clear(btemp);
-//                     ccluster_free(btemp);
-// //                 } else {
-// //                     compBox_list_push(bDiscarded, btemp);
-// //                 }
-//                 continue;
-//             }
-//             
-// //             if (risolate_compBox_intersects_only_one( btemp, 2 ) == 0){
-// //                 compBox_list_push(ltemp, btemp);
-// //                 continue;
-// //             }
-//         }
 
 //         printf("nbMSol: %d\n", (int) compBox_get_nbMSol(btemp) );
         
@@ -77,8 +56,8 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
 //                         printf("---bisect compBox list: deflation is defined\n");
                     
                     res = deflate_tstar_test( cc, cache, bdisk, connCmp_nSolsref(cc), 1, res.appPrec, meta);
-//                     if (metadatas_getVerbo(meta)>=3)
-//                         printf("---tstar with deflation        : nbSols: %d, prec: %ld \n", res.nbOfSol, res.appPrec);
+                    if (metadatas_getVerbo(meta)>=3)
+                        printf("---tstar with deflation        : nbSols: %d, prec: %ld \n", res.nbOfSol, res.appPrec);
                     if (res.nbOfSol == -2)
                         res.appPrec = precsave;
                 }
@@ -343,6 +322,12 @@ void risolate_main_loop( connCmp_list_t qResults,
         
         sepBoundFlag   = (realRat_cmp( compBox_bwidthref(componentBox), metadatas_getSepBound(meta))<=0);
         
+//         if (metadatas_getVerbo(meta)>3) {
+//             printf("#---depth: %d\n", (int) depth);
+//             printf("#------separation Flag:     %d\n", separationFlag);
+//             printf("#------sepBoundFlag:        %d\n", sepBoundFlag);
+//         }
+        
         if (metadatas_getVerbo(meta)>3) {
 
             printf("---depth: %d\n", (int) depth);
@@ -497,7 +482,7 @@ void risolate_main_loop( connCmp_list_t qResults,
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && (resNewton.nflag==0) && (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)>0) ){
             
             if (metadatas_getVerbo(meta)>3) {
-                    printf("#--- insert in queue and decreas Newton speed\n");
+                    printf("#--- insert in queue and decrease Newton speed\n");
             }
             
             connCmp_decrease_nwSpd(ccur);

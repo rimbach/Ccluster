@@ -38,16 +38,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
-// /* for profiling */
-// double timeIn_actualize_annulii_real;
-// double timeIn_is_compApp_in_box;
-// double timeIn_is_compApp_in_compAnn;
-// double timeIn_connCmp_intersects_only_one;
-double timeIn_discard_compBox_list;
-double timeIn_bisect_connCmp;
-double timeIn_is_imaginary_positive;
-double timeIn_while_loop;
 
 slong ccluster_discard_compBox_list( compBox_list_t boxes, 
                                      compBox_list_t bDiscarded,
@@ -102,12 +92,18 @@ void ccluster_refine( connCmp_list_t qResults,
                       cacheApp_t cache, 
                       metadatas_t meta);
 
-/* rootRadii */
+/* rootRadii: implemented in ccluster_rootRadii.c */
+
+/* returns 1 => 2*box contains at least one root */
+/*         0 => box contains no root */
+/*        -1 => can not decide */
+int ccluster_rootRadii_exclusion_test( compBox_t box, slong prec, metadatas_t meta );
+
 void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
                                      compBox_list_t bDiscarded,
-                                     compAnn_list_t qAnnulii,
-                                     compAnn_list_t qAnnulii1,
-                                     compAnn_list_t qAnnulii2,
+                                     compAnn_list_t annulii,
+                                     compAnn_list_t annulii1,
+                                     compAnn_list_t annulii2,
                                      const compBox_t initialBox, 
                                      const realRat_t eps, 
                                      cacheApp_t cache, 
@@ -175,6 +171,14 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
                                      int nbThreads,
                                      int output,
                                      int verb);
+
+/* name ccluster_global_interface_poly is for singular */
+void ccluster_global_interface_realRat_poly( const realRat_poly_t poly,
+                                             const realRat_t eps, 
+                                             char * stratstr,
+                                             int nbThreads,
+                                             int output,
+                                             int verb);
 
 void ccluster_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                 void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),

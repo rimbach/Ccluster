@@ -164,6 +164,100 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     compBox_clear(initialBox);
 }
 
+/* name ccluster_global_interface_poly is for singular */
+void ccluster_global_interface_realRat_poly( const realRat_poly_t poly,
+                                             const realRat_t eps, 
+                                             char * stratstr,
+                                             int nbThreads,
+                                             int output,
+                                             int verb){
+
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    connCmp_list_t qRes;
+    compBox_list_t bDis;
+    
+    compAnn_list_t qAnn;
+    compAnn_list_t qAnn1;
+    compAnn_list_t qAnn2;
+    
+    /* set cache and strategy */
+    cacheApp_init_realRat_poly ( cache, poly);
+    cacheApp_canonicalise( cache );
+    strategies_init(strat);
+    strategies_set_str( strat, stratstr, nbThreads );
+    /* automaticly set realCoeffs: */
+    /*                             input poly IS real */
+    /*                             input initial box is centered in 0 */
+    strategies_set_realCoeffs(strat, 1);
+    
+    /* automaticaly set initialBox */
+    compBox_t initialBox;
+    compBox_init(initialBox);
+    compBox_set_si(initialBox, 0,1,0,1,0,1);
+    cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
+    if (verb>=3) {
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+    }
+    realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
+    
+    connCmp_list_init(qRes);
+    compBox_list_init(bDis);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    
+    if (output==-3) 
+        metadatas_setDrSub(meta, 1);
+    
+    /* initialize power sums */
+    if (metadatas_usePowerSums(meta)) {
+        if (strat->_pwSuNbPs>1)
+            metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, strat->_pwSuNbPs, verb );
+        else 
+            metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
+    }
+    
+    if (metadatas_useRootRadii(meta)){
+        compAnn_list_init(qAnn);
+        compAnn_list_init(qAnn1);
+        compAnn_list_init(qAnn2);
+        ccluster_algo_global_rootRadii( qRes, bDis, qAnn, qAnn1, qAnn2, initialBox, eps, cache, meta);
+    }
+    else
+        ccluster_algo_global( qRes, bDis, initialBox, eps, cache, meta);
+    
+    
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    
+    if (output==-2) {
+//         printf("gnuplot output: not yet implemented\n");
+        connCmp_list_gnuplot(stdout, qRes, meta, 0);
+    } else if (output==-3){
+        if (metadatas_useRootRadii(meta))
+            connCmp_list_gnuplot_drawSubdiv_rootRadii(stdout, qRes, bDis, qAnn, qAnn1, qAnn2, meta);
+        else
+            connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
+    } else if (output!=0) {
+//         printf("cluster output: not yet implemented\n");
+        connCmp_list_print_for_results_withOutput(stdout, qRes, output, meta);
+    }
+    
+    if (metadatas_useRootRadii(meta)){
+        compAnn_list_clear(qAnn);
+        compAnn_list_clear(qAnn1);
+        compAnn_list_clear(qAnn2);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
+    connCmp_list_clear(qRes);
+    compBox_list_clear(bDis);
+    compBox_clear(initialBox);
+}
+
 /* version with function for fast evaluation */
 void ccluster_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                    void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),

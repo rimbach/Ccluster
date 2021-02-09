@@ -256,6 +256,64 @@ void gen_list_insert_sorted(gen_list_t l, void * data, int (isless_func)(const v
     l->_size +=1;
 }
 
+void gen_list_insert_sorted_unique(gen_list_t l, void * data, int (isless_func)(const void * d1, const void * d2),
+                                                              int (isequal_func)(const void * d1, const void * d2)){
+    struct gen_elmt * voyager = l->_begin;
+    struct gen_elmt * nelmt = (struct gen_elmt *) ccluster_malloc (sizeof(struct gen_elmt));
+    nelmt->_elmt = data;
+    nelmt->_next = NULL;
+    /* test for union find in large lists of boxes */
+    nelmt->_prev = NULL;
+    
+    /* empty list */
+    if (voyager == NULL) {
+        l->_begin = l->_end = nelmt;
+    }
+    else{
+        if ( isless_func( data, voyager->_elmt ) ){ /* insert at the beginning */
+            
+            /* test for union find in large lists of boxes */
+            l->_begin->_prev = nelmt;
+            nelmt->_next = l->_begin;
+            l->_begin = nelmt;
+        }
+        else if ( isless_func( l->_end->_elmt, data ) ){ /* insert at the end */
+            
+            nelmt->_prev = l->_end;
+            l->_end->_next = nelmt;
+            l->_end = nelmt;
+            
+        }
+        else if ( isequal_func( data, voyager->_elmt )
+                ||isequal_func( l->_end->_elmt, data ) ) {
+            return;
+        }
+        else {
+                while (voyager->_next!=NULL && isless_func( (voyager->_next->_elmt), data ))
+                    voyager = voyager->_next;
+            
+            if (voyager->_next == NULL) { /* insert at the end */
+                
+                nelmt->_prev = l->_end;
+                l->_end->_next = nelmt;
+                l->_end = nelmt;
+                
+            }
+            else {
+                
+                if (isequal_func( data, voyager->_next->_elmt )) {
+                    return;
+                }
+                nelmt->_next = voyager->_next;
+                nelmt->_prev = voyager;
+                voyager->_next->_prev = nelmt;
+                voyager->_next = nelmt;
+            }
+        }
+    }
+    l->_size +=1;
+}
+
 
 void gen_list_fprint(FILE * file, const gen_list_t l, void (* print_func)(FILE *, const void *) ){
     fprintf(file, "length: %d, elements: [", l->_size);

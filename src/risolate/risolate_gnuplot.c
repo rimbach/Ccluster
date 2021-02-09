@@ -393,8 +393,6 @@ void risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f,
                           const connCmp_list_t l, 
                           const compBox_list_t lb,
                           const compAnn_list_t la,
-                          const compAnn_list_t la1,
-                          const compAnn_list_t la2,
                           metadatas_t meta){
     
     char preamble[100] = "# Ccluster output for GNUPLOT\n#Pipe it to gnuplot!\n";
@@ -403,8 +401,6 @@ void risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f,
     char Bcommand2[1000] = "plot '-' title 'Computed clusters' with circles lc rgb \"#008080\" fs transparent solid 0.15 noborder,\\\n";
     char Bcommand3[1000] = "     '-' u 1:2 title 'centers of clusters' pt 2 lc rgb \"#008080\"";
     char Bcommand4[1000] = ",\\\n     '-' title 'root annulii' with circles lc rgb \"#FF00FF\" fs transparent";
-    char Bcommand5[1000] = ",\\\n     '-' title 'root annulii1' with circles lc rgb \"#800080\" fs transparent";
-    char Bcommand6[1000] = ",\\\n     '-' title 'root annulii2' with circles lc rgb \"#800000\" fs transparent";
     char Ecommand[100] = "\npause mouse close\n";
     
     connCmp_list_iterator it;
@@ -451,10 +447,6 @@ void risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f,
     fprintf(f, "%s", Bcommand2);
     fprintf(f, "%s", Bcommand3);
     fprintf(f, "%s", Bcommand4);
-    if ( compAnn_list_get_size(la1) >=1 )
-        fprintf(f, "%s", Bcommand5);
-    if ( compAnn_list_get_size(la2) >=1 )
-        fprintf(f, "%s", Bcommand6);
     fprintf(f, ",\\\n     '-' title 'initial box' with lines lw 2 lc rgb \"black\"");
     
     /* iterate on cc in qres */
@@ -483,7 +475,6 @@ void risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f,
         fprintf(f, "\n");
     }
     fprintf(f, "e\n");
-//     fprintf(f, "%s", Bcommand3);
     
     /* centers */
     it = connCmp_list_begin(l);
@@ -504,27 +495,6 @@ void risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f,
         fprintf(f, "\n");
     }
     fprintf(f, "e\n");
-    /* rootAnnulii1 */
-    if ( compAnn_list_get_size(la1) >=1 ){
-        ita = compAnn_list_begin(la1);
-        while (ita!=connCmp_list_end() ) {
-            risolate_compAnn_gnuplot(f, compAnn_list_elmt(ita), meta);
-            ita = compAnn_list_next(ita);
-            fprintf(f, "\n");
-        }
-        fprintf(f, "e\n");
-    }
-    
-        /* rootAnnulii2 */
-    if ( compAnn_list_get_size(la2) >=1 ){
-        ita = compAnn_list_begin(la2);
-        while (ita!=connCmp_list_end() ) {
-            risolate_compAnn_gnuplot(f, compAnn_list_elmt(ita), meta);
-            ita = compAnn_list_next(ita);
-            fprintf(f, "\n");
-        }
-        fprintf(f, "e\n");
-    }
     
     /* initial box */
     realRat_set_si(factor, 1, 2);

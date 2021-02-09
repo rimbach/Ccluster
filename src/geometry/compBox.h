@@ -28,7 +28,7 @@
 extern "C" {
 #endif
     
-#define GEOMETRY_NB_ANN_PER_BOX 3
+#define GEOMETRY_NB_ANN_PER_BOX 4
     
 typedef struct {
     compRat center;
@@ -50,6 +50,7 @@ typedef compBox * compBox_ptr;
 #define compBox_annuli0ref(X) (&(X)->annuli[0])
 #define compBox_annuli1ref(X) (&(X)->annuli[1])
 #define compBox_annuli2ref(X) (&(X)->annuli[2])
+#define compBox_annuli3ref(X) (&(X)->annuli[3])
 
 slong compBox_getDepth(const compBox_t b, const compBox_t initialBox);
 

@@ -60,25 +60,67 @@ void realIntRootRadii_taylor_shift_inplace_comp( compApp_poly_t res, slong cente
         }
 }
 
-void realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta){
+/* returns 0 if after some iterations, the relative accuracy is less than 1 */
+int realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta){
     
         clock_t start = clock();
-        for(int i = 0; i < N; i++)
-            realApp_poly_oneGraeffeIteration_in_place( res, prec );
+        int ret = 1;
+        slong lastAcc=prec;
+        slong curAcc;
+        for(int i = 0; (i < N) && (ret == 1); i++) {
+            curAcc = realApp_poly_get_relOne_accuracy_min(res);
+//             printf("#Working precision: %ld, max relative acc: %ld, min relative acc: %ld\n",
+//                     prec, realApp_poly_get_relOne_accuracy_max(res), 
+//                     realApp_poly_get_relOne_accuracy_min(res)
+//                   );
+//             if ( ( ( i == (int) N/4 ) || ( i == (int) N/2 ) || ( i == (int) 3*N/4 ) ) && (prec > CCLUSTER_DEFAULT_PREC) ) {
+            if ( ( curAcc < prec/2 ) && ( lastAcc < prec/2 ) && (prec > CCLUSTER_DEFAULT_PREC) ) {
+//                 printf("old prec: %ld, ", prec);
+                prec = prec/2;
+//                 printf("new prec: %ld \n", prec);
+            }
+            if ( (lastAcc< -prec) && (curAcc<lastAcc) )
+                ret = 0;
+            else
+                realApp_poly_oneGraeffeIteration_in_place( res, prec );
+            lastAcc=curAcc;
+        }
         
         if (metadatas_haveToCount(meta)) {
             clock_t end = clock();
             metadatas_add_time_Graeffe(meta, (double) (end - start) );
             metadatas_add_time_RRGraef(meta, (double) (end - start) );
         }
+        
+        return ret;
         
 }
 
-void realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta){
+/* returns 0 if after some iterations, the relative accuracy is less than 1 */
+int realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta){
     
         clock_t start = clock();
-        for(int i = 0; i < N; i++)
-            compApp_poly_oneGraeffeIteration_in_place( res, prec );
+        int ret = 1;
+        slong lastAcc=prec;
+        slong curAcc;
+        
+        for(int i = 0; i < N && (ret == 1); i++) {
+            curAcc = compApp_poly_get_relOne_accuracy_min(res);
+//             printf("Working precision: %ld, max relative acc: %ld, min relative acc: %ld\n",
+//                     prec, compApp_poly_get_relOne_accuracy_max(res), compApp_poly_get_relOne_accuracy_min(res));
+//             if ( ( ( i == (int) N/4 ) || ( i == (int) N/2 ) || ( i == (int) 3*N/4 ) )  && (prec > CCLUSTER_DEFAULT_PREC) ) {
+            if ( ( curAcc < prec/2 ) && ( lastAcc < prec/2 ) && (prec > CCLUSTER_DEFAULT_PREC) ) {
+//                 printf("old prec: %ld, ", prec);
+                prec = prec/2;
+//                 printf("new prec: %ld \n", prec);
+            }
+            if ( (lastAcc< -prec) && (curAcc<lastAcc) )
+                ret = 0;
+            else
+                compApp_poly_oneGraeffeIteration_in_place( res, prec );
+            
+            lastAcc=curAcc;
+        }
         
         if (metadatas_haveToCount(meta)) {
             clock_t end = clock();
@@ -86,6 +128,7 @@ void realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int 
             metadatas_add_time_RRGraef(meta, (double) (end - start) );
         }
         
+        return ret;
 }
 
 /* assume i<j<k */
@@ -212,24 +255,25 @@ slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoef
 slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
                                   slong centerRe,
                                   cacheApp_t cache,        /* polynomial */
-                                  const realRat_t delta,
+//                                   const realRat_t delta,
                                   slong prec,
                                   metadatas_t meta ){
     
     slong degree = cacheApp_getDegree(cache);
     
-    realRat_t oneplusdelta, oneplusdeltainv;
+//     realRat_t oneplusdelta, oneplusdeltainv;
+//     
+//     realRat_init(oneplusdelta);
+//     realRat_init(oneplusdeltainv);
+//     
+//     realRat_add_si(oneplusdelta, delta, 1);
+//     realRat_inv( oneplusdeltainv, oneplusdelta );
+//     
+//     double log2_1pdelta = fmpz_dlog( realRat_numref(oneplusdelta) ) - fmpz_dlog( realRat_denref(oneplusdelta) );
+//     log2_1pdelta = log2_1pdelta / log(2);
+//     int N = (int) ceil( log2( log2(2*degree)/log2_1pdelta ) );
     
-    realRat_init(oneplusdelta);
-    realRat_init(oneplusdeltainv);
-    
-    realRat_add_si(oneplusdelta, delta, 1);
-    realRat_inv( oneplusdeltainv, oneplusdelta );
-    
-    double log2_1pdelta = fmpz_dlog( realRat_numref(oneplusdelta) ) - fmpz_dlog( realRat_denref(oneplusdelta) );
-    log2_1pdelta = log2_1pdelta / log(2);
-    int N = (int) ceil( log2( log2(2*degree)/log2_1pdelta ) );
-//     N = N+8;
+    int N = metadatas_getNbGIt(meta);
     ulong pow = 0x1<<N;
     /* test */
     realApp_t relError, relErrorInv;
@@ -240,7 +284,7 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
     realApp_inv(relErrorInv, relError, prec);
     /* fin test*/
     
-    printf("#realIntRootRadii.c; realIntRootRadii_rootRadii : number of Graeffe iterations: %d \n", N);
+//     printf("#realIntRootRadii.c; realIntRootRadii_rootRadii : number of Graeffe iterations: %d \n", N);
     
     slong lenCh = 0;
     slong * convexHull = (slong *) ccluster_malloc ( (degree+1)*sizeof(slong) );
@@ -257,14 +301,17 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
 //         realApp_poly_set(pApprox, cacheApp_getApproximation_real ( cache, nprec ));
         if (centerRe != 0)
             realIntRootRadii_taylor_shift_inplace_real( pApprox, centerRe, nprec, meta);
-        realIntRootRadii_Ngraeffe_iterations_inplace_real( pApprox, N, nprec, meta);
+        int enoughRelacc = realIntRootRadii_Ngraeffe_iterations_inplace_real( pApprox, N, nprec, meta);
 //         for(int i = 0; i < N; i++)
 //             realApp_poly_oneGraeffeIteration_in_place( pApprox, nprec, meta );
         /* compute abs of coeffs */
-        for(slong i = 0; i <= degree; i++)
-            realApp_abs( (pApprox->coeffs)+i, (pApprox->coeffs)+i );
-        /* compute convex hull */
-        lenCh = realIntRootRadii_convexHull( convexHull, (pApprox->coeffs), degree+1, nprec );
+        
+        if (enoughRelacc==1) {
+            for(slong i = 0; i <= degree; i++)
+                realApp_abs( (pApprox->coeffs)+i, (pApprox->coeffs)+i );
+            /* compute convex hull */
+            lenCh = realIntRootRadii_convexHull( convexHull, (pApprox->coeffs), degree+1, nprec );
+        }
         
         if (lenCh==0) { /* double precision */
             nprec = 2*nprec;
@@ -330,8 +377,8 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
     realApp_clear(relErrorInv);
     
     realApp_poly_clear(pApprox);
-    realRat_clear(oneplusdelta);
-    realRat_clear(oneplusdeltainv);
+//     realRat_clear(oneplusdelta);
+//     realRat_clear(oneplusdeltainv);
     ccluster_free(convexHull);
     
     return nprec;
@@ -340,7 +387,7 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
 slong realIntRootRadii_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of annulii */
                                              slong centerIm,
                                              cacheApp_t cache,        /* polynomial */
-                                             const realRat_t delta,
+//                                              const realRat_t delta,
                                              slong prec,
                                              metadatas_t meta ){
     
@@ -351,14 +398,15 @@ slong realIntRootRadii_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of
     realRat_init(oneplusdelta);
     realRat_init(oneplusdeltainv);
     
-    realRat_add_si(oneplusdelta, delta, 1);
+    realRat_add_si(oneplusdelta, metadatas_getRelPr(meta), 1);
     realRat_inv( oneplusdeltainv, oneplusdelta );
     
-    double log2_1pdelta = fmpz_dlog( realRat_numref(oneplusdelta) ) - fmpz_dlog( realRat_denref(oneplusdelta) );
-    log2_1pdelta = log2_1pdelta / log(2);
-    int N = (int) ceil( log2( log2(2*degree)/log2_1pdelta ) );
+//     double log2_1pdelta = fmpz_dlog( realRat_numref(oneplusdelta) ) - fmpz_dlog( realRat_denref(oneplusdelta) );
+//     log2_1pdelta = log2_1pdelta / log(2);
+//     int N = (int) ceil( log2( log2(2*degree)/log2_1pdelta ) );
     
-    printf("#realIntRootRadii.c; realIntRootRadii_rootRadii : number of Graeffe iterations: %d \n", N);
+    int N = metadatas_getNbGIt(meta);
+//     printf("#realIntRootRadii.c; realIntRootRadii_rootRadii : number of Graeffe iterations: %d \n", N);
     
     slong lenCh = 0;
     slong * convexHull = (slong *) ccluster_malloc ( (degree+1)*sizeof(slong) );
@@ -377,17 +425,19 @@ slong realIntRootRadii_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of
 //         compApp_poly_set(pApprox, cacheApp_getApproximation ( cache, nprec ));
         if (centerIm != 0)
             realIntRootRadii_taylor_shift_inplace_comp( pApprox, 0, centerIm, nprec, meta);
-        realIntRootRadii_Ngraeffe_iterations_inplace_comp( pApprox, N, nprec, meta);
+        int enoughRelacc = realIntRootRadii_Ngraeffe_iterations_inplace_comp( pApprox, N, nprec, meta);
 //         for(int i = 0; i < N; i++)
 //             compApp_poly_oneGraeffeIteration_in_place( pApprox, nprec );
         /* compute sum of squares of real and imaginary parts of coeffs */
-        for(slong i = 0; i <= degree; i++){
-            realApp_sqr( compApp_realref((pApprox->coeffs)+i), compApp_realref((pApprox->coeffs)+i), nprec );
-            realApp_sqr( compApp_imagref((pApprox->coeffs)+i), compApp_imagref((pApprox->coeffs)+i), nprec );
-            realApp_add( (pSquares->coeffs)+i, compApp_realref((pApprox->coeffs)+i), compApp_imagref((pApprox->coeffs)+i), nprec);
+        if (enoughRelacc==1) {
+            for(slong i = 0; i <= degree; i++){
+                realApp_sqr( compApp_realref((pApprox->coeffs)+i), compApp_realref((pApprox->coeffs)+i), nprec );
+                realApp_sqr( compApp_imagref((pApprox->coeffs)+i), compApp_imagref((pApprox->coeffs)+i), nprec );
+                realApp_add( (pSquares->coeffs)+i, compApp_realref((pApprox->coeffs)+i), compApp_imagref((pApprox->coeffs)+i), nprec);
+            }
+            /* compute convex hull */
+            lenCh = realIntRootRadii_convexHull( convexHull, (pSquares->coeffs), degree+1, nprec );
         }
-        /* compute convex hull */
-        lenCh = realIntRootRadii_convexHull( convexHull, (pSquares->coeffs), degree+1, nprec );
         
         if (lenCh==0){ /* double precision */
             nprec = 2*nprec;
@@ -579,7 +629,7 @@ void realIntRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache
 //             printf("--Value on Left : "); realApp_printd(centerLeftVal, 10); printf("\n");
 //             printf("--Value on Right: "); realApp_printd(centerRightVal, 10); printf("\n");
             int prodSgn = realApp_sgn_nonzero(centerLeftVal) * realApp_sgn_nonzero(centerRightVal);
-            if ( prodSgn == -1 ) { /* opposite sign, contains a unique real root*/
+            if ( prodSgn == -1 ) { /* opposite sign, contains at least one real root*/
                 compAnn_rrInPoref(cur) = 2;
             }
             /* intersection with R- */
@@ -591,7 +641,7 @@ void realIntRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache
 //             printf("--Value on Left : "); realApp_printd(centerLeftVal, 10); printf("\n");
 //             printf("--Value on Right: "); realApp_printd(centerRightVal, 10); printf("\n");
             prodSgn = realApp_sgn_nonzero(centerLeftVal) * realApp_sgn_nonzero(centerRightVal);
-            if ( prodSgn == -1 ) { /* opposite sign, contains a unique real root*/
+            if ( prodSgn == -1 ) { /* opposite sign, contains at least one real root*/
                 compAnn_rrInNeref(cur) = 2;
             }
             
