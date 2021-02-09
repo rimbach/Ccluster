@@ -27,8 +27,8 @@ extern "C" {
     
 // /* for profiling */
 #include <time.h>
-double timeIn_quadrisect;
-double timeIn_actualize_anulii;
+// double timeIn_quadrisect;
+// double timeIn_actualize_anulii;
 
 void subdBox_quadrisect( compBox_list_t res, const compBox_t b );
 

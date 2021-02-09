@@ -14,7 +14,7 @@
 
 void subdBox_quadrisect( compBox_list_t res, const compBox_t b ){
     
-    clock_t start = clock();
+//     clock_t start = clock();
     
     realRat_t shift, width;
     realRat_init(shift);
@@ -52,14 +52,14 @@ void subdBox_quadrisect( compBox_list_t res, const compBox_t b ){
     realRat_add( compRat_imagref(compBox_centerref(bNW)), compRat_imagref(compBox_centerref(bNW)), shift);
     
     /* root radii */
-    clock_t start2 = clock();
+//     clock_t start2 = clock();
     
     compBox_actualize_anulii( bNE, b);
     compBox_actualize_anulii( bSE, b);
     compBox_actualize_anulii( bSW, b);
     compBox_actualize_anulii( bNW, b);
     
-    timeIn_actualize_anulii += ( (float) clock() - start2 )/CLOCKS_PER_SEC;
+//     timeIn_actualize_anulii += ( (float) clock() - start2 )/CLOCKS_PER_SEC;
     
     /*printf("bNE: "); compBox_print(bNE); printf("\n");*/
     /*printf("bSE: "); compBox_print(bSE); printf("\n");*/
@@ -75,7 +75,7 @@ void subdBox_quadrisect( compBox_list_t res, const compBox_t b ){
     realRat_clear(shift);
     realRat_clear(width);
     
-    timeIn_quadrisect += ( (float) clock() - start )/CLOCKS_PER_SEC ;
+//     timeIn_quadrisect += ( (float) clock() - start )/CLOCKS_PER_SEC ;
 }
 
 void subdBox_quadrisect_with_compDsk( compBox_list_t res, const compBox_t b, const compDsk_t d, const realRat_t nwidth){
