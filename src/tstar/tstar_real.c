@@ -216,7 +216,7 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
         restemp = realApp_soft_compare( coeff0, coeffn, res.appPrec );
         while( restemp == -2 ){
             res.appPrec *=2;
-            clock_t start2 = clock();
+//             clock_t start2 = clock();
             tstar_real_getApproximation( pApprox, cache, res.appPrec, meta);
             tstar_real_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
 //             if (metadatas_getVerbo(meta)>=2)

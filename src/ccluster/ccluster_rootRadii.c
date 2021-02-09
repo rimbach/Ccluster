@@ -374,14 +374,14 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
     initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
     connCmp_init_compBox(initialCC, box);
     
-    connCmp_list_t qPrepLoop;
-    connCmp_list_init(qPrepLoop);
+//     connCmp_list_t qPrepLoop;
+//     connCmp_list_init(qPrepLoop);
     
     connCmp_list_t qMainLoop, discardedCcs;
     connCmp_list_init(qMainLoop);
     connCmp_list_init(discardedCcs);
     
-    connCmp_list_push(qPrepLoop, initialCC);
+//     connCmp_list_push(qPrepLoop, initialCC);
     
     connCmp_list_push(qMainLoop, initialCC);
     ccluster_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, meta);

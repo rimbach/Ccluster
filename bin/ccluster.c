@@ -29,7 +29,8 @@ int main(int argc, char **argv){
         printf("                     -2 or g or G: gnuplot output: can be piped to gnuplot \n");
         printf("                     -3 or gs or GS: gnuplot output with subdivision tree \n");
         printf("      -m, --mode: the version of the algorithm\n");
-        printf("                     default value is \"default\"  \n");
+        printf("                     default [default]: uses root radii and subdivision  \n");
+        printf("                     onlySubd: uses only subdivision\n");
         printf("      -v, --verbose: an integer for verbosity\n");
         printf("                     0: nothing\n");
         printf("                     1 [default]: abstract of input and output\n");

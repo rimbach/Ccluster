@@ -39,7 +39,10 @@ extern "C" {
 #define STRAT_ROOTRADI 128
 #define STRAT_FORTESTS 256
 
-#define STRAT_INT_DEFAULT 55
+#define STRAT_INT_ONLSUBD 55
+#define STRAT_STR_ONLSUBD "onlySubd"
+
+#define STRAT_INT_DEFAULT 183
 #define STRAT_STR_DEFAULT "default"
 
 #define STRAT_INT_V1 5

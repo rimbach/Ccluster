@@ -107,16 +107,25 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
          metadatas_useTstarOptim(meta) &&
          metadatas_usePredictPrec(meta) &&
          metadatas_useAnticipate(meta) &&
-         metadatas_useRealCoeffs(meta) ) len += sprintf( temp + len, " default");
+         metadatas_useRealCoeffs(meta) &&
+         metadatas_useRootRadii(meta) 
+       ) len += sprintf( temp + len, " default (rootRadii + subdivision)");
+    else if (
+         metadatas_useNewton(meta) &&
+         metadatas_useTstarOptim(meta) &&
+         metadatas_usePredictPrec(meta) &&
+         metadatas_useAnticipate(meta) &&
+         metadatas_useRealCoeffs(meta)
+         ) len += sprintf( temp + len, " default (no rootRadii, subdivision)");
     else {    
         if (metadatas_useNewton(meta)) len += sprintf( temp + len, " newton");
         if (metadatas_useTstarOptim(meta)) len += sprintf( temp + len, " tstarOpt");
         if (metadatas_usePredictPrec(meta)) len += sprintf( temp + len, " predPrec");
         if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
         if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
+        if (metadatas_useRootRadii(meta)) len += sprintf( temp + len, " rootRadii");
     }
     if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
-    if (metadatas_useRootRadii(meta)) len += sprintf( temp + len, " + rootRadii");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));
@@ -240,7 +249,16 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
          metadatas_usePredictPrec(meta) &&
          metadatas_useAnticipate(meta) &&
          metadatas_useRealCoeffs(meta) &&
-         metadatas_useDeflation(meta) ) len += sprintf( temp + len, " default");
+         metadatas_useDeflation(meta)  &&
+         metadatas_useRootRadii(meta)
+       ) len += sprintf( temp + len, " default (rootRadii + subdivision)");
+    else if ( metadatas_useNewton(meta) &&
+         metadatas_useTstarOptim(meta) &&
+         metadatas_usePredictPrec(meta) &&
+         metadatas_useAnticipate(meta) &&
+         metadatas_useRealCoeffs(meta) &&
+         metadatas_useDeflation(meta) 
+       ) len += sprintf( temp + len, " default (no rootRadii, subdivision)");
     else {    
         if (metadatas_useNewton(meta)) len += sprintf( temp + len, " newton");
         if (metadatas_useTstarOptim(meta)) len += sprintf( temp + len, " tstarOpt");
@@ -248,10 +266,9 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
         if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
         if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
         if (metadatas_useDeflation(meta)) len += sprintf( temp + len, " deflation");
+        if (metadatas_useRootRadii(meta)) len += sprintf( temp + len, " rootRadii");
     }
-//     if (metadatas_useDeflation(meta)) len += sprintf( temp + len, " + deflation");
     if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
-    if (metadatas_useRootRadii(meta)) len += sprintf( temp + len, " + rootRadii");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));

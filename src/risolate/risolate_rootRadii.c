@@ -1136,7 +1136,7 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     /* heuristic to predict the precision: at least the degree */
     while (prec<degree/2)
         prec = 2*prec;
-    slong precpred = prec;
+//     slong precpred = prec;
     /* */
     start2 = clock();
     prec = realIntRootRadii_rootRadii( annulii, 0, cache, prec, meta );
