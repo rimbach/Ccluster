@@ -286,6 +286,8 @@ void gen_list_insert_sorted_unique(gen_list_t l, void * data, int (isless_func)(
         }
         else if ( isequal_func( data, voyager->_elmt )
                 ||isequal_func( l->_end->_elmt, data ) ) {
+            /* delete allocated memory and return */
+            ccluster_free( nelmt );
             return;
         }
         else {
@@ -302,6 +304,8 @@ void gen_list_insert_sorted_unique(gen_list_t l, void * data, int (isless_func)(
             else {
                 
                 if (isequal_func( data, voyager->_next->_elmt )) {
+                    /* delete allocated memory and return */
+                    ccluster_free( nelmt );
                     return;
                 }
                 nelmt->_next = voyager->_next;
