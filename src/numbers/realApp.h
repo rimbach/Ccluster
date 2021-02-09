@@ -44,7 +44,12 @@ NUMBERS_INLINE void realApp_set       (realApp_t y, const realApp_t x           
 NUMBERS_INLINE void realApp_set_fmpq  (realApp_t y, const fmpq_t    x, slong prec ) { arb_set_fmpq (y, x, prec); }
 NUMBERS_INLINE void realApp_set_fmpz  (realApp_t y, const fmpz_t    x, slong prec ) { arb_set_fmpz (y, x); }
 NUMBERS_INLINE void realApp_set_d     (realApp_t y, const double    x )             { arb_set_d (y, x); }
+
 NUMBERS_INLINE void realApp_set_si     (realApp_t y, const slong    x )             { arb_set_si (y, x); }
+
+/* special cases */
+NUMBERS_INLINE void realApp_pos_inf    (realApp_t x                                ) { arb_pos_inf     (x); }
+NUMBERS_INLINE void realApp_neg_inf    (realApp_t x                                ) { arb_neg_inf     (x); }
 
 /* comparisons */
 NUMBERS_INLINE int realApp_eq(const realApp_t x, const realApp_t y) { return arb_eq(x,y); }
@@ -53,6 +58,9 @@ NUMBERS_INLINE int realApp_lt(const realApp_t x, const realApp_t y) { return arb
 NUMBERS_INLINE int realApp_le(const realApp_t x, const realApp_t y) { return arb_le(x,y); }
 NUMBERS_INLINE int realApp_gt(const realApp_t x, const realApp_t y) { return arb_gt(x,y); }
 NUMBERS_INLINE int realApp_ge(const realApp_t x, const realApp_t y) { return arb_ge(x,y); }
+NUMBERS_INLINE int realApp_is_negative(const realApp_t x) { return arb_is_negative(x); }
+NUMBERS_INLINE int realApp_is_positive(const realApp_t x) { return arb_is_positive(x); }
+NUMBERS_INLINE int realApp_is_zero(const realApp_t x) { return arb_is_zero(x); }
 
 /* ball operations */
 NUMBERS_INLINE int  realApp_is_finite(const realApp_t x) { return arb_is_finite( x ); }
@@ -76,6 +84,9 @@ NUMBERS_INLINE void realApp_add_error(realApp_t z, const realApp_t x) { arb_add_
 NUMBERS_INLINE int  realApp_intersection(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { 
     return arb_intersection( z, x, y, prec ); 
 }
+NUMBERS_INLINE void  realApp_union(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { 
+    arb_union( z, x, y, prec ); 
+}
 NUMBERS_INLINE int realApp_contains (const realApp_t x, const realApp_t y) {
     return arb_contains(x,y);
 }
@@ -92,10 +103,15 @@ NUMBERS_INLINE void realApp_sub(realApp_t z, const realApp_t x, const realApp_t 
 NUMBERS_INLINE void realApp_mul(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_mul(z, x, y, prec); }
 NUMBERS_INLINE void realApp_neg(realApp_t z, const realApp_t x) { arb_neg(z, x); }
 NUMBERS_INLINE void realApp_div(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_div(z, x, y, prec); }
+NUMBERS_INLINE void realApp_div_si(realApp_t z, const realApp_t x, slong y, slong prec) { arb_div_si(z, x, y, prec); }
+NUMBERS_INLINE void realApp_div_ui(realApp_t z, const realApp_t x, ulong y, slong prec) { arb_div_ui(z, x, y, prec); }
 NUMBERS_INLINE void realApp_mul_si( realApp_t dest, const realApp_t x, slong y,           slong prec) { arb_mul_si(dest, x, y, prec); }
 NUMBERS_INLINE void realApp_pow_ui(realApp_t y, const realApp_t x, ulong e, slong prec) { arb_pow_ui(y, x, e, prec); }
 NUMBERS_INLINE void realApp_root_ui(realApp_t y, const realApp_t x, ulong e, slong prec) { arb_root_ui(y, x, e, prec); }
 NUMBERS_INLINE void realApp_mul_2exp_si(realApp_t y, const realApp_t x, slong e) { arb_mul_2exp_si(y, x, e); }
+
+NUMBERS_INLINE void realApp_sqr (realApp_t z, const realApp_t x, slong prec) { arb_sqr (z, x, prec); }
+NUMBERS_INLINE void realApp_sqrt(realApp_t z, const realApp_t x, slong prec) { arb_sqrt(z, x, prec); }
 
 /* logarithm */
 NUMBERS_INLINE void realApp_log(realApp_t z, const realApp_t x, slong prec) { arb_log(z, x, prec); }
@@ -111,6 +127,7 @@ NUMBERS_INLINE slong realApp_ceil_si(const realApp_t x, slong prec){
     arf_clear(ubound);
     return res;
 }
+
 
 NUMBERS_INLINE void realApp_ceil_fmpz(fmpz_t res, const realApp_t x, slong prec){
     arb_t f;
@@ -128,6 +145,9 @@ NUMBERS_INLINE void realApp_floor_fmpz(fmpz_t res, const realApp_t x, slong prec
     arb_clear(f);
 }
 
+/* Returns 1 if x is strictly positive, -1 if x is strictly negative, and 0 if x is zero or a ball containing zero so that its sign is not determined. */
+NUMBERS_INLINE int realApp_sgn_nonzero(const realApp_t z) { return arb_sgn_nonzero(z); }
+
 /* printing */
 NUMBERS_INLINE void realApp_fprint (FILE * file, const realApp_t x)                           { arb_fprint (file, x               ); }
 NUMBERS_INLINE void realApp_fprintd(FILE * file, const realApp_t x, slong digits)             { arb_fprintd(file, x, digits       ); }
@@ -137,6 +157,8 @@ NUMBERS_INLINE void realApp_print (const realApp_t x)                           
 NUMBERS_INLINE void realApp_printd(const realApp_t x, slong digits)             { arb_printd(x, digits       ); }
 NUMBERS_INLINE void realApp_printn(const realApp_t x, slong digits, ulong flags){ arb_printn(x, digits, flags); }
 
+NUMBERS_INLINE int realApp_is_exact(const realApp_t x) { return arb_is_exact(x); }
+
 /* for a ball m +/- r, relative accuracy of [max(1,|m|) +/- r]  */
 NUMBERS_INLINE int realApp_check_relOne_accuracy( const realApp_t z, slong prec) {
     return ( arb_rel_one_accuracy_bits(z) >= prec );
@@ -144,6 +166,15 @@ NUMBERS_INLINE int realApp_check_relOne_accuracy( const realApp_t z, slong prec)
 
 NUMBERS_INLINE slong realApp_get_relOne_accuracy( const realApp_t z) {
     return arb_rel_one_accuracy_bits(z);
+}
+
+NUMBERS_INLINE int realApp_check_absolute_accuracy( const realApp_t z, slong prec) {
+    return mag_cmp_2exp_si(arb_radref((z)), prec)<=0;
+}
+
+NUMBERS_INLINE slong realApp_get_absolute_accuracy( const realApp_t z) {
+    double logerror = mag_get_d_log2_approx(arb_radref((z)));
+    return - ( (slong) logerror ) -1;
 }
 
 #ifdef __cplusplus

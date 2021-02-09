@@ -28,6 +28,8 @@
 #include "newton/newton.h"
 #include "powerSums/powerSums.h"
 
+#include "geometry/compAnn.h"
+#include "rootRadii/realIntRootRadii.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include "ccluster/parallel_discard.h"
@@ -90,6 +92,23 @@ void ccluster_refine( connCmp_list_t qResults,
                       cacheApp_t cache, 
                       metadatas_t meta);
 
+/* rootRadii: implemented in ccluster_rootRadii.c */
+
+/* returns 1 => 2*box contains at least one root */
+/*         0 => box contains no root */
+/*        -1 => can not decide */
+int ccluster_rootRadii_exclusion_test( compBox_t box, slong prec, metadatas_t meta );
+
+void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
+                                     compBox_list_t bDiscarded,
+                                     compAnn_list_t annulii,
+                                     compAnn_list_t annulii1,
+                                     compAnn_list_t annulii2,
+                                     const compBox_t initialBox, 
+                                     const realRat_t eps, 
+                                     cacheApp_t cache, 
+                                     metadatas_t meta);
+
 void connCmp_print_for_results(FILE * f, 
                                const connCmp_t c, 
                                metadatas_t meta);
@@ -125,6 +144,14 @@ void connCmp_list_gnuplot_drawSubdiv(FILE * f,
                           const compBox_list_t lb,
                           metadatas_t meta);
 
+void connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f, 
+                          const connCmp_list_t l, 
+                          const compBox_list_t lb,
+                          const compAnn_list_t la,
+                          const compAnn_list_t la1,
+                          const compAnn_list_t la2,
+                          metadatas_t meta);
+
 /* INTERFACES */
 
 /* default interfaces */
@@ -144,6 +171,14 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
                                      int nbThreads,
                                      int output,
                                      int verb);
+
+/* name ccluster_global_interface_poly is for singular */
+void ccluster_global_interface_realRat_poly( const realRat_poly_t poly,
+                                             const realRat_t eps, 
+                                             char * stratstr,
+                                             int nbThreads,
+                                             int output,
+                                             int verb);
 
 void ccluster_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                 void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),

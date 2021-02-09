@@ -24,6 +24,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+// /* for profiling */
+#include <time.h>
+// double timeIn_quadrisect;
+// double timeIn_actualize_anulii;
 
 void subdBox_quadrisect( compBox_list_t res, const compBox_t b );
 
@@ -32,6 +37,8 @@ void subdBox_quadrisect_with_compDsk( compBox_list_t res, const compBox_t b, con
 void subdBox_risolate_bisect( compBox_list_t res, const compBox_t b );
 
 void subdBox_risolate_bisect_with_compDsk( compBox_list_t res, const compBox_t b, const compDsk_t d, const realRat_t nwidth);
+
+void subdBox_risolate_bisect_with_ratio( compBox_list_t res, const compBox_t b, slong ratio, int side);
 
 /*DEPRECATED 
 

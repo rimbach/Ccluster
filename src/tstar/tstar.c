@@ -37,6 +37,7 @@ void tstar_taylor_shift_inplace( compApp_poly_t res, const compDsk_t d, slong pr
 void tstar_graeffe_iterations_inplace( compApp_poly_t res, int N, slong prec, metadatas_t meta){
     
         clock_t start = clock();
+        
         for(int i = 0; i < N; i++)
             compApp_poly_oneGraeffeIteration_in_place( res, prec );
         

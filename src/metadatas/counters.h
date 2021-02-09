@@ -95,6 +95,14 @@ typedef struct {
         int size_allocated;
         counters_by_depth_ptr table;
         counters_by_depth_t total;
+        
+        int RR_predPrec; /* predicted precision */
+        int RR_prec;     /* required precision  */
+        int RR_nbGraeffe;
+        int RR_nbGraeffeRepeted;
+        int RR_nbTaylors;
+        int RR_nbTaylorsRepeted;
+        
 #ifdef CCLUSTER_HAVE_PTHREAD
         pthread_mutex_t _mutex;
 #endif

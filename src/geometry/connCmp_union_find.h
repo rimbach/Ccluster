@@ -20,6 +20,11 @@
 extern "C" {
 #endif
     
+/* for profiling */
+#include <time.h>
+double timeIn_are_8connected;
+double timeIn_merge_2_connCmp;
+
 void connCmp_union_compBox( connCmp_list_t ccs, compBox_t b);
 
 #ifdef __cplusplus

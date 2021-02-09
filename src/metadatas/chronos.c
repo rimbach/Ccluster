@@ -34,6 +34,12 @@ void chronos_init( chronos_t times ){
     times->_clicks_DefGrae_cumul = 0.0;
     times->_clicks_DefTsta_cumul = 0.0;
     
+    times->_clicks_RRTaylo_cumul = 0.0;
+    times->_clicks_RRGraef_cumul = 0.0;
+    times->_clicks_rootRad_cumul = 0.0;
+    times->_clicks_RRT0Tes_cumul = 0.0;
+    
+
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(times->_mutex), NULL);
 #endif
