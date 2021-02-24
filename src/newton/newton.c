@@ -481,7 +481,7 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
         /*compBox_list_print(ltemp); printf("\n");                     */
         
         
-        /* printf("Newton: bisectOk (nflag: %d) (nbboxes: %d)--------------------------- \n", res.nflag, compBox_list_get_size(ltemp));*/
+//         printf("Newton: bisectOk (nflag: %d) (nbboxes: %d)--------------------------- \n", res.nflag, compBox_list_get_size(ltemp));
         
         btemp = compBox_list_pop(ltemp);
         realRat_set(connCmp_widthref(nCC), compBox_bwidthref(btemp));

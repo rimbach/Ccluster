@@ -26,6 +26,12 @@ void * _parallel_discard_list_worker( void * arg_ptr ){
     
     flint_cleanup();
     
+    pthread_mutex_lock(&parallel_discard_mdone);
+    parallel_discard_done +=1;
+    pthread_cond_signal(&parallel_discard_cdone);
+    pthread_mutex_unlock(&parallel_discard_mdone);
+
+    
     return NULL;
     
 }
@@ -43,6 +49,11 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
     pthread_t * threads = (pthread_t *) malloc (sizeof(pthread_t) * nb_args);
     
     int nb_boxes_by_thread = ((int) compBox_list_get_size(boxes))/((int) nb_args);
+    
+    /* initialize condition variables */
+    parallel_discard_done = 0;
+    pthread_mutex_init ( &parallel_discard_mdone, NULL);
+    pthread_cond_init ( &parallel_discard_cdone, NULL);
     
     for (int i = 0; i< (int) nb_args; i++) {
         
@@ -62,6 +73,13 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
         pthread_create(&threads[i], NULL, _parallel_discard_list_worker, &args[i]);
     }
     
+    /* wait until all the threads are done */
+    pthread_mutex_lock(&parallel_discard_mdone);
+    while (parallel_discard_done < nb_args)
+    pthread_cond_wait(&parallel_discard_cdone, &parallel_discard_mdone);
+    pthread_mutex_unlock(&parallel_discard_mdone);
+
+    
     for(int i = 0; i< (int) nb_args; i++) {
         pthread_join(threads[i], NULL);
         if (args[i].prec > precres)
@@ -74,6 +92,9 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
     
     free(args);
     free(threads);
+    
+    pthread_mutex_destroy ( &parallel_discard_mdone);
+    pthread_cond_destroy  ( &parallel_discard_cdone);
     
     return precres;
 }

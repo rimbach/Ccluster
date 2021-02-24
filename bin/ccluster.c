@@ -29,7 +29,7 @@ int main(int argc, char **argv){
         printf("                     -2 or g or G: gnuplot output: can be piped to gnuplot \n");
         printf("                     -3 or gs or GS: gnuplot output with subdivision tree \n");
         printf("      -m, --mode: the version of the algorithm\n");
-        printf("                     default [default]: uses root radii and subdivision  \n");
+        printf("                     default [default]: uses root radii and subdivision; no multi-threading  \n");
         printf("                     onlySubd: uses only subdivision\n");
         printf("      -v, --verbose: an integer for verbosity\n");
         printf("                     0: nothing\n");
@@ -39,6 +39,7 @@ int main(int argc, char **argv){
         printf("      -j, --nbThreads: an positive integer for the number of threads\n");
         printf("                       1 [default]: one thread is used\n");
         printf("                       >1: no compatibility with -o -3 option\n");
+        printf("                       >1: no compatibility with -m default\n");
         return -1;
     }
     

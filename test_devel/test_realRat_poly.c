@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "polynomials/realRat_poly.h"
 #include "polynomials/app_rat_poly.h"
-#include "flint.h"
+#include "flint/flint.h"
 
 int main() {
         
