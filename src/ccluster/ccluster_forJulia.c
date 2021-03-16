@@ -206,6 +206,7 @@ void ccluster_forJulia_realRat_poly( connCmp_list_t qResults,
                                     char * stratstr,
                                     int nbThreads,
                                     int verb){
+    printf("ccluster_forJulia.c: ccluster_forJulia_realRat_poly: begin\n");
     /* set the polynomial */
     compRat_poly_t p;
     compRat_poly_init(p);
@@ -216,6 +217,48 @@ void ccluster_forJulia_realRat_poly( connCmp_list_t qResults,
     
     /* clear */
     compRat_poly_clear(p);
+    
+//     cacheApp_t cache;
+//     strategies_t strat;
+//     metadatas_t meta;
+//     
+//     cacheApp_init_compRat_poly(cache, poly);
+//     strategies_init(strat);
+//     
+//     /* automatically set initialBox */
+//     compBox_set_si(initialBox, 0,1,0,1,0,1);
+//     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
+//     if (verb>=3) {
+//         printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+//     }
+//     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
+//     
+//     strategies_set_str( strat, stratstr, nbThreads );
+// /* automatically set realCoeffs */
+//     if (cacheApp_is_real(cache)==0
+//         || compBox_contains_real_line_in_interior(initialBox)==0 )
+//         strategies_set_realCoeffs(strat, 0);
+//     
+//     metadatas_init(meta, initialBox, strat, verb);
+//     /* initialize power sums */
+//     if (metadatas_usePowerSums(meta))
+//         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
+//     
+//     metadatas_init(meta, initialBox, strat, verb);
+//     
+//     ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
+//     
+//     metadatas_count(meta);
+//     metadatas_fprint(stdout, meta, eps);
+//     if (verb>=3) {
+//         connCmp_list_print_for_results(stdout, qResults, meta);
+//     }
+//     
+//     cacheApp_clear(cache);
+//     strategies_clear(strat);
+//     metadatas_clear(meta);
+    
+    printf("ccluster_forJulia.c: ccluster_forJulia_realRat_poly: end\n");
 }
 
 void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults, 
