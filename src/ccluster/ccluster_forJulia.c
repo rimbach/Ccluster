@@ -19,7 +19,7 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
                              int nbThreads,
                              int verb){
     
-//     printf("ccluster.c: ccluster_interface_forJulia_func: begin\n");
+//     printf("ccluster_forJulia.c: ccluster_forJulia_func: begin\n");
     
     cacheApp_t cache;
     strategies_t strat;
@@ -29,7 +29,8 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
     strategies_init(strat);
     
     strategies_set_str( strat, stratstr, nbThreads );
-    
+    /* no root radii */
+    strategies_set_RootRadii( strat, 0 );
     /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
@@ -51,7 +52,7 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
     strategies_clear(strat);
     metadatas_clear(meta);
     
-//     printf("ccluster.c: ccluster_interface_forJulia_func: end\n");
+//     printf("ccluster_forJulia.c: ccluster_forJulia_func: end\n");
 }
 
 void ccluster_global_forJulia_func( connCmp_list_t qResults, 
@@ -62,7 +63,7 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
                                     int nbThreads,
                                     int verb){
     
-//     printf("ccluster.c: ccluster_interface_forJulia_func: begin\n");
+//     printf("ccluster_forJulia.c: ccluster_global_forJulia_func: begin\n");
     
     cacheApp_t cache;
     strategies_t strat;
@@ -80,6 +81,9 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
     strategies_set_str( strat, stratstr, nbThreads );
+    /* no root radii */
+    strategies_set_RootRadii( strat, 0 );
+    
     /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
@@ -102,7 +106,7 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
     strategies_clear(strat);
     metadatas_clear(meta);
     
-//     printf("ccluster.c: ccluster_interface_forJulia_func: end\n");
+//     printf("ccluster_forJulia.c: ccluster_global_forJulia_func: end\n");
 }
 
 void ccluster_forJulia_compRat_poly( connCmp_list_t qResults, 
@@ -112,7 +116,8 @@ void ccluster_forJulia_compRat_poly( connCmp_list_t qResults,
                                      char * stratstr,
                                      int nbThreads,
                                      int verb){
-    printf("ccluster_forJulia.c: ccluster_forJulia_compRat_poly: begin\n");
+    
+//     printf("ccluster_forJulia.c: ccluster_forJulia_compRat_poly: begin\n");
     
     cacheApp_t cache;
     strategies_t strat;
@@ -147,7 +152,7 @@ void ccluster_forJulia_compRat_poly( connCmp_list_t qResults,
     strategies_clear(strat);
     metadatas_clear(meta);
     
-    printf("ccluster_forJulia.c: ccluster_forJulia_compRat_poly: end\n");
+//     printf("ccluster_forJulia.c: ccluster_forJulia_compRat_poly: end\n");
 }
 
 void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults, 
@@ -157,7 +162,8 @@ void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults,
                                      char * stratstr,
                                      int nbThreads,
                                      int verb){
-//     printf("ccluster.c: ccluster_interface_forJulia_func: begin\n");
+ 
+//     printf("ccluster_forJulia.c: ccluster_global_forJulia_compRat_poly: begin\n");
     
     cacheApp_t cache;
     strategies_t strat;
@@ -175,7 +181,10 @@ void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults,
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
     strategies_set_str( strat, stratstr, nbThreads );
-/* automatically set realCoeffs */
+    /* no root radii */
+    strategies_set_RootRadii( strat, 0 );
+    
+    /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
         strategies_set_realCoeffs(strat, 0);
@@ -199,7 +208,7 @@ void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults,
     strategies_clear(strat);
     metadatas_clear(meta);
     
-//     printf("ccluster.c: ccluster_interface_forJulia_func: end\n");
+//     printf("ccluster_forJulia.c: ccluster_global_forJulia_compRat_poly: end\n");
 }
 
 void ccluster_forJulia_realRat_poly( connCmp_list_t qResults, 
@@ -209,6 +218,7 @@ void ccluster_forJulia_realRat_poly( connCmp_list_t qResults,
                                     char * stratstr,
                                     int nbThreads,
                                     int verb){
+//     printf("ccluster_forJulia.c: ccluster_forJulia_realRat_poly: begin\n");
     /* set the polynomial */
     compRat_poly_t p;
     compRat_poly_init(p);
@@ -219,6 +229,7 @@ void ccluster_forJulia_realRat_poly( connCmp_list_t qResults,
     
     /* clear */
     compRat_poly_clear(p);
+//     printf("ccluster_forJulia.c: ccluster_forJulia_realRat_poly: end\n");
 }
 
 void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults, 
@@ -228,18 +239,8 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
                                             char * stratstr,
                                             int nbThreads,
                                             int verb){
-//     /* set the polynomial */
-//     compRat_poly_t p;
-//     compRat_poly_init(p);
-//     compRat_poly_set_realRat_poly(p, poly);
-//     
-//     /* call */
-//     ccluster_global_forJulia_compRat_poly( qResults, p, initialBox, eps, stratstr, nbThreads, verb);
-//     
-//     /* clear */
-//     compRat_poly_clear(p);
     
-    printf("ccluster_forJulia.c: ccluster_global_forJulia_realRat_poly: begin\n");
+//     printf("ccluster_forJulia.c: ccluster_global_forJulia_realRat_poly: begin\n");
     
     cacheApp_t cache;
     strategies_t strat;
@@ -304,7 +305,7 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
     strategies_clear(strat);
     metadatas_clear(meta);
     
-    printf("ccluster_forJulia.c: ccluster_global_forJulia_realRat_poly: end\n");
+//     printf("ccluster_forJulia.c: ccluster_global_forJulia_realRat_poly: end\n");
 }
 
 void ccluster_forJulia_realRat_poly_real_imag( connCmp_list_t qResults, 
@@ -314,6 +315,7 @@ void ccluster_forJulia_realRat_poly_real_imag( connCmp_list_t qResults,
                                                char * stratstr,
                                                int nbThreads,
                                                int verb){
+//     printf("ccluster_forJulia.c: ccluster_forJulia_realRat_poly_real_imag: begin\n");
     /* set the polynomial */
     compRat_poly_t p;
     compRat_poly_init(p);
@@ -324,6 +326,7 @@ void ccluster_forJulia_realRat_poly_real_imag( connCmp_list_t qResults,
     
     /* clear */
     compRat_poly_clear(p);
+//     printf("ccluster_forJulia.c: ccluster_forJulia_realRat_poly_real_imag: end\n");
 }
 
 void ccluster_global_forJulia_realRat_poly_real_imag( connCmp_list_t qResults, 
@@ -333,6 +336,7 @@ void ccluster_global_forJulia_realRat_poly_real_imag( connCmp_list_t qResults,
                                                       char * stratstr,
                                                       int nbThreads,
                                                       int verb){
+//     printf("ccluster_forJulia.c: ccluster_global_forJulia_realRat_poly_real_imag: begin\n");
     /* set the polynomial */
     compRat_poly_t p;
     compRat_poly_init(p);
@@ -343,6 +347,7 @@ void ccluster_global_forJulia_realRat_poly_real_imag( connCmp_list_t qResults,
     
     /* clear */
     compRat_poly_clear(p);
+//     printf("ccluster_forJulia.c: ccluster_global_forJulia_realRat_poly_real_imag: end\n");
 }
 
 void ccluster_forJulia_refine( connCmp_list_t qResults,
@@ -353,6 +358,7 @@ void ccluster_forJulia_refine( connCmp_list_t qResults,
                                char * stratstr,
                                int nbThreads,
                                int verb){
+//     printf("ccluster_forJulia.c: ccluster_forJulia_refine: begin\n");
     cacheApp_t cache;
     strategies_t strat;
     metadatas_t meta;
@@ -364,6 +370,7 @@ void ccluster_forJulia_refine( connCmp_list_t qResults,
     /* automaticly set realCoeffs: realCoeffs not implemented for refine */
     strategies_set_powerSums(strat, 0);
     strategies_set_realCoeffs(strat, 0);
+    strategies_set_RootRadii( strat, 0 );
     
     metadatas_init(meta, initialBox, strat, verb);
     
@@ -377,6 +384,7 @@ void ccluster_forJulia_refine( connCmp_list_t qResults,
     cacheApp_clear(cache);
     strategies_clear(strat);
     metadatas_clear(meta);
+//     printf("ccluster_forJulia.c: ccluster_forJulia_refine: end\n");
 }
 
 /* res = 1: OK */
@@ -389,7 +397,7 @@ int ccluster_global_forJulia_forTcluster_func( connCmp_list_t qResults,
                                                 int nbThreads,
                                                 int verb){
     
-//     printf("ccluster.c: ccluster_global_forJulia_forTcluster_func: begin\n");
+//     printf("ccluster_forJulia.c: ccluster_global_forJulia_forTcluster_func: begin\n");
     
     cacheApp_t cache;
     strategies_t strat;
@@ -407,6 +415,9 @@ int ccluster_global_forJulia_forTcluster_func( connCmp_list_t qResults,
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
     strategies_set_str( strat, stratstr, nbThreads );
+    /* no root radii */
+    strategies_set_RootRadii( strat, 0 );
+    
     /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
@@ -429,8 +440,9 @@ int ccluster_global_forJulia_forTcluster_func( connCmp_list_t qResults,
     strategies_clear(strat);
     metadatas_clear(meta);
     
+//     printf("ccluster_forJulia.c: ccluster_global_forJulia_forTcluster_func: end\n");
+    
     return res;
-//     printf("ccluster.c: ccluster_interface_forJulia_func: end\n");
 }
 
 void ccluster_forJulia_draw( connCmp_list_t qResults, 
@@ -442,7 +454,7 @@ void ccluster_forJulia_draw( connCmp_list_t qResults,
                             int nbThreads,
                             int verb){
     
-    //     printf("ccluster_interface.c: ccluster_interface_forJulia_draw \n");
+    //     printf("ccluster_forJulia.c: ccluster_forJulia_draw: begin\n");
     
     cacheApp_t cache;
     strategies_t strat;
@@ -451,6 +463,8 @@ void ccluster_forJulia_draw( connCmp_list_t qResults,
     cacheApp_init(cache, func);
     strategies_init(strat);
     strategies_set_str( strat, stratstr, nbThreads );
+    /* no root radii */
+    strategies_set_RootRadii( strat, 0 );
     
     /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
@@ -476,6 +490,7 @@ void ccluster_forJulia_draw( connCmp_list_t qResults,
     strategies_clear(strat);
     metadatas_clear(meta);
     
+//     printf("ccluster_forJulia.c: ccluster_forJulia_draw: end\n");
 }
 
 /*DEPRECATED:*/
