@@ -112,7 +112,7 @@ void ccluster_forJulia_compRat_poly( connCmp_list_t qResults,
                                      char * stratstr,
                                      int nbThreads,
                                      int verb){
-//     printf("ccluster.c: ccluster_interface_forJulia_func: begin\n");
+    printf("ccluster_forJulia.c: ccluster_forJulia_compRat_poly: begin\n");
     
     cacheApp_t cache;
     strategies_t strat;
@@ -122,6 +122,9 @@ void ccluster_forJulia_compRat_poly( connCmp_list_t qResults,
     strategies_init(strat);
     
     strategies_set_str( strat, stratstr, nbThreads );
+    /* no root radii */
+    strategies_set_RootRadii( strat, 0 );
+    
     /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
@@ -144,7 +147,7 @@ void ccluster_forJulia_compRat_poly( connCmp_list_t qResults,
     strategies_clear(strat);
     metadatas_clear(meta);
     
-//     printf("ccluster.c: ccluster_interface_forJulia_func: end\n");
+    printf("ccluster_forJulia.c: ccluster_forJulia_compRat_poly: end\n");
 }
 
 void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults, 
