@@ -384,6 +384,7 @@ void ccluster_main_loop( connCmp_list_t qResults,
     realRat_init( epsSave );
     realRat_set_si( epsSave, 2,1  );
     realRat_pow_si( epsSave, epsSave, -53);
+    int widthFlagSave;
     
     clock_t start=clock();
     
@@ -446,6 +447,8 @@ void ccluster_main_loop( connCmp_list_t qResults,
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
         
+        widthFlagSave      = (realRat_cmp( compBox_bwidthref(componentBox), epsSave)<=0);
+        
         if (metadatas_getVerbo(meta)>3) {
             printf("---depth: %d\n", (int) depth);
             printf("------component Box:"); compBox_print(componentBox); printf("\n");
@@ -497,7 +500,7 @@ void ccluster_main_loop( connCmp_list_t qResults,
                  ( (widthFlag)&&
                    (connCmp_nSols(ccur)>1)&&
                    (connCmp_nSols(ccur)== cacheApp_getDegree(cache) )&&
-                   (realRat_cmp( compBox_bwidthref(componentBox), epsSave)>0) )  
+                   (!widtFlagSave) )  
                ) )
 //             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) //this is DEPRECATED: pass eps = 1/0 instead 
            ) {
@@ -600,7 +603,14 @@ void ccluster_main_loop( connCmp_list_t qResults,
 //             }
 //         }
 //         else 
-        if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) ) {
+        if ( (connCmp_nSols(ccur)>0) && 
+             separationFlag && 
+             widthFlag && 
+             compactFlag && 
+             ( ( connCmp_nSols(ccur)==1 ) || 
+               (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) ||
+               ( (connCmp_nSols(ccur)==cacheApp_getDegree(cache)) && widthFlagSave)  
+            ) ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));
