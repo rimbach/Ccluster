@@ -674,11 +674,9 @@ void ccluster_algo( connCmp_list_t qResults,
     connCmp_list_init(discardedCcs);
     
     connCmp_list_push(qPrepLoop, initialCC);
-//     if (metadatas_getVerbo(meta)>3) 
-    printf("Ccluster preploop: \n");
+//     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
     ccluster_prep_loop( bDiscarded, qMainLoop, qPrepLoop, discardedCcs, cache, meta);
-//     if (metadatas_getVerbo(meta)>3) 
-    printf("Ccluster mainloop: \n");
+//     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
     ccluster_main_loop( qResults, bDiscarded, qMainLoop, discardedCcs, eps, cache, meta);
     
     
