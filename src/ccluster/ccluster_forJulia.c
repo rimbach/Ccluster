@@ -19,7 +19,8 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
                              int nbThreads,
                              int verb){
     
-//     printf("ccluster_forJulia.c: ccluster_forJulia_func: begin\n");
+    printf("ccluster_forJulia.c: ccluster_forJulia_func: begin\n");
+    printf("ccluster_forJulia.c: ccluster_forJulia_func: strategy: %s\n", stratstr);
     
     cacheApp_t cache;
     strategies_t strat;
@@ -52,7 +53,7 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
     strategies_clear(strat);
     metadatas_clear(meta);
     
-//     printf("ccluster_forJulia.c: ccluster_forJulia_func: end\n");
+    printf("ccluster_forJulia.c: ccluster_forJulia_func: end\n");
 }
 
 void ccluster_global_forJulia_func( connCmp_list_t qResults, 
