@@ -497,9 +497,8 @@ void ccluster_main_loop( connCmp_list_t qResults,
                  ( (widthFlag)&&
                    (connCmp_nSols(ccur)>1)&&
                    (connCmp_nSols(ccur)== cacheApp_getDegree(cache) )&&
-                   (realRat_cmp( compBox_bwidthref(componentBox), epsSave)>0)
-                )  
-               ) ) )
+                   (realRat_cmp( compBox_bwidthref(componentBox), epsSave)>0) )  
+               ) )
 //             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) //this is DEPRECATED: pass eps = 1/0 instead 
            ) {
         
