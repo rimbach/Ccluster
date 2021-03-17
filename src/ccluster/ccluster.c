@@ -380,6 +380,11 @@ void ccluster_main_loop( connCmp_list_t qResults,
     
     connCmp_ptr ccur;
     
+    realRat_t epsSave;
+    realRat_init( epsSave );
+    realRat_set_si( epsSave, 2,1  );
+    realRat_pow_si( epsSave, epsSave, -53);
+    
     clock_t start=clock();
     
     /* Real Coeff */
@@ -488,7 +493,13 @@ void ccluster_main_loop( connCmp_list_t qResults,
         }
         
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
-               ( (!widthFlag)||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) ) )  )
+               ( (!widthFlag) || 
+                 ( (widthFlag)&&
+                   (connCmp_nSols(ccur)>1)&&
+                   (connCmp_nSols(ccur)== cacheApp_getDegree(cache) )&&
+                   (realRat_cmp( compBox_bwidthref(componentBox), epsSave)>0)
+                )  
+               ) ) )
 //             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) //this is DEPRECATED: pass eps = 1/0 instead 
            ) {
         
@@ -642,6 +653,8 @@ void ccluster_main_loop( connCmp_list_t qResults,
     realRat_clear(threeWidth);
     compRat_clear(initPoint);
     connCmp_list_clear(ltemp);
+    
+    realRat_init( epsSave );
 }
 
 void ccluster_algo( connCmp_list_t qResults, 
