@@ -41,7 +41,9 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
+    printf("ccluster_forJulia.c: ccluster_forJulia_func: call algo\n");
     ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
+    printf("ccluster_forJulia.c: ccluster_forJulia_func: after algo\n");
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
