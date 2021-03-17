@@ -19,8 +19,7 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
                              int nbThreads,
                              int verb){
     
-    printf("ccluster_forJulia.c: ccluster_forJulia_func: begin\n");
-    printf("ccluster_forJulia.c: ccluster_forJulia_func: strategy: %s\n", stratstr);
+//     printf("ccluster_forJulia.c: ccluster_forJulia_func: begin\n");
     
     cacheApp_t cache;
     strategies_t strat;
@@ -40,10 +39,8 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
     /* initialize power sums */
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
-    
-    printf("ccluster_forJulia.c: ccluster_forJulia_func: call algo\n");
+
     ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
-    printf("ccluster_forJulia.c: ccluster_forJulia_func: after algo\n");
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -55,7 +52,7 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
     strategies_clear(strat);
     metadatas_clear(meta);
     
-    printf("ccluster_forJulia.c: ccluster_forJulia_func: end\n");
+//     printf("ccluster_forJulia.c: ccluster_forJulia_func: end\n");
 }
 
 void ccluster_global_forJulia_func( connCmp_list_t qResults, 
