@@ -40,6 +40,10 @@ int scan_initialBox( char * argv, compBox_t target ){
     tokRe = strtok (argv,",");
     tokIm = strtok (NULL,",");
     tokWi = strtok (NULL,",");
+    if ( (tokRe==NULL)||(tokIm==NULL)||(tokWi==NULL) ) {
+        printf("error in parsing initial box!\n");
+        return 0;
+    }
     
     if ( compBox_set_str_pretty(target, tokRe, tokIm, tokWi) == -1 ){
         printf("error in parsing initial box! %s %s %s\n", tokRe, tokIm, tokWi);
@@ -78,6 +82,36 @@ int scan_initialBox( char * argv, compBox_t target ){
 //     }
 //     
 //     return 1;
+}
+
+int scan_initialInterval( char * argv, compBox_t target ){
+    
+    if (strcmp( argv, GLOBAL_STR_NAME ) == 0)
+        return 2;
+    
+    char * tokRe=NULL;
+//     char * tokIm=NULL;
+    char * tokWi=NULL;
+    
+    tokRe = strtok (argv,",");
+//     tokIm = strtok (NULL,",");
+    tokWi = strtok (NULL,",");
+    if ( (tokRe==NULL)||(tokWi==NULL) ) {
+        printf("error in parsing initial interval!\n");
+        return 0;
+    }
+    
+    if ( compBox_set_str_pretty(target, tokRe, "0", tokWi) == -1 ){
+        printf("error in parsing initial interval! %s %s\n", tokRe, tokWi);
+        return 0;
+    }
+    
+    if ( realRat_sgn( compBox_bwidthref(target))<=0 ) {
+        printf("error: width of initial interval should be positive! %s\n", tokWi);
+        return 0;
+    }
+        
+    return 1;
 }
 
 int scan_epsilon( char * argv, realRat_t target ){

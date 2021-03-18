@@ -215,6 +215,23 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     return r;
 }
 
+char * compBox_sprint_for_stat_risolate(char * out, const compBox_t x){
+    char cRe[100];
+//     char cIm[100];
+    char *wid = NULL;
+    fmpq_get_str( cRe, 10, compRat_realref(compBox_centerref(x)));
+//     fmpq_get_str( cIm, 10, compRat_imagref(compBox_centerref(x)));
+    wid = fmpq_get_str( wid, 10, compBox_bwidthref(x));
+    if (strlen(wid)>=15) {
+        slong lnum = fmpz_clog_ui( realRat_numref(compBox_bwidthref(x)), (ulong) 2);
+        slong lden = fmpz_clog_ui( realRat_denref(compBox_bwidthref(x)), (ulong) 2);
+        sprintf(wid, "2^(%d)/2^(%d)", (int) lnum, (int) lden);
+    }
+    sprintf(out, " center: %-30s wid: %-15s|", cRe, wid);
+    ccluster_free(wid);
+    return out;
+}
+
 int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     int r=1;
     int nbTaylorShifts  = metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsInTSTests(meta);
@@ -226,8 +243,8 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     r = fprintf(file, "# -------------------Risolate: ----------------------------------------\n");
     r = fprintf(file, "# -------------------Input:    ----------------------------------------\n");
     char temp[1000];
-    compBox_sprint_for_stat( temp, metadatas_initBref(meta) );
-    r = fprintf(file, "#|box:%-65s\n", temp);
+    compBox_sprint_for_stat_risolate( temp, metadatas_initBref(meta) );
+    r = fprintf(file, "#|interval:%-60s\n", temp);
     
     slong clog2 = fmpz_clog_ui(realRat_denref(metadatas_getSepBound(meta)), 2);
     slong flog2 = fmpz_flog_ui(realRat_denref(metadatas_getSepBound(meta)), 2);
@@ -349,8 +366,8 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     }
    
     r = fprintf(file, "# -------------------Output:   ----------------------------------------\n");
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of clusters:",                 metadatas_getNbValidated(meta),      " " );
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of solutions:",                metadatas_getNbSolutions(meta),      " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of distinct real roots:",                 metadatas_getNbValidated(meta),      " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of real roots:",                metadatas_getNbSolutions(meta),      " " );
     r = fprintf(file, "# -------------------Stats:    ----------------------------------------\n");
     if (metadatas_getVerbo(meta)>=2) {
     r = fprintf(file, "#|%-39s %14d %14s|\n", "tree depth:",                         metadatas_getDepth(meta),            " " );

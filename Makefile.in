@@ -80,7 +80,7 @@ testMandelbrot: library bins genMandelbrot
 	@echo -e $(BGREEN) "with option -o, one can specify the number of digits for displaying the clusters" $(NORMAL)
 	bin/risolate bin/Mandelbrot_${iteration}.ccl -o 5 > temp.txt
 	@cat temp.txt
-	@bin/check_output.sh --nbSols=19 --nbClus=19 --file=temp.txt
+	@bin/check_output_risolate.sh --nbSols=19 --nbClus=19 --file=temp.txt
 	
 testMignotte: library bins genMignotte
 	@echo -e $(BGREEN) "Clustering complex roots of a Mignotte polynomial of degree ${degree} and bitsize ${bitsize}: should about a seconds" $(NORMAL)
@@ -95,7 +95,7 @@ testMignotte: library bins genMignotte
 	@echo -e $(BGREEN) "Isolating real roots of a Mignotte polynomial of degree ${degree} and bitsize ${bitsize}: should take less than a seconds" $(NORMAL)
 	bin/risolate bin/Mignotte_${degree}_${bitsize}.ccl > temp.txt
 	@cat temp.txt 
-	@bin/check_output.sh --nbSols=4 --nbClus=4 --file=temp.txt
+	@bin/check_output_risolate.sh --nbSols=4 --nbClus=4 --file=temp.txt
 	
 testBernoulli: library bins genBernoulli
 	@echo -e $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree ${degree}: should take less than a second" $(NORMAL)
