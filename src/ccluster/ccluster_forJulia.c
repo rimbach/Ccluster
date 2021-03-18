@@ -260,6 +260,9 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
     strategies_t strat;
     metadatas_t meta;
     
+    compBox_t initBox;
+    compBox_init(initBox);
+    
     compAnn_list_t qAnn;
     compAnn_list_t qAnn1;
     compAnn_list_t qAnn2;
@@ -275,7 +278,7 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
     strategies_set_realCoeffs(strat, 1);
     
     /* automatically set initialBox */
-    compBox_set_si(initialBox, 0,1,0,1,0,1);
+    compBox_set_si(initBox, 0,1,0,1,0,1);
     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
         printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
@@ -284,12 +287,15 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
         }
         printf("\n");
     }
-    if (realRat_is_zero(compBox_bwidthref(initialBox))) {
-        realRat_set_si(compBox_bwidthref(initialBox), 1, 1);
+    if (realRat_is_zero(compBox_bwidthref(initBox))) {
+        realRat_set_si(compBox_bwidthref(initBox), 1, 1);
     }
-    realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
+    realRat_mul_si(compBox_bwidthref(initBox), compBox_bwidthref(initBox), 2);
     
-    metadatas_init(meta, initialBox, strat, verb);
+    metadatas_init(meta, initBox, strat, verb);
+    
+    /*copy initBox in initialBox */
+    compBox_set(initialBox, initBox);
     
     
     /* initialize power sums */
@@ -304,10 +310,10 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
         compAnn_list_init(qAnn);
         compAnn_list_init(qAnn1);
         compAnn_list_init(qAnn2);
-        ccluster_algo_global_rootRadii( qResults, NULL, qAnn, qAnn1, qAnn2, initialBox, eps, cache, meta);
+        ccluster_algo_global_rootRadii( qResults, NULL, qAnn, qAnn1, qAnn2, initBox, eps, cache, meta);
     }
     else
-        ccluster_algo_global( qResults, NULL, initialBox, eps, cache, meta);
+        ccluster_algo_global( qResults, NULL, initBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -321,6 +327,8 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
         compAnn_list_clear(qAnn1);
         compAnn_list_clear(qAnn2);
     }
+    
+    compBox_clear(initBox);
     
     cacheApp_clear(cache);
     strategies_clear(strat);
