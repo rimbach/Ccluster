@@ -323,6 +323,16 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
     }
     
     if (metadatas_useRootRadii(meta)){
+        
+        connCmp_list_iterator it = connCmp_list_begin(qResults);
+        while (it != connCmp_list_end()){
+            compBox_list_iterator itb = compBox_list_begin( connCmp_boxesref(connCmp_list_elmt(it)) );
+            while (itb != compBox_list_end() ) {
+                compBox_clear_annulii( compBox_list_elmt(itb) );
+                itb = compBox_list_next(itb);
+            }
+            it = connCmp_list_next(it);
+        }
         compAnn_list_clear(qAnn);
         compAnn_list_clear(qAnn1);
         compAnn_list_clear(qAnn2);
