@@ -358,6 +358,9 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
     compBox_init(box);
     compBox_set(box, initialBox);
     compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
+    /* if upperBound is zero, set it to one */
+    if ( realRat_is_zero(upperBound) )
+        realRat_set_si(upperBound, 1, 1);
     /* set width to 2*upperBound */
     realRat_mul_si( upperBound, upperBound, 2);
     realRat_set( compBox_bwidthref(box), upperBound );

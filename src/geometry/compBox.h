@@ -165,6 +165,17 @@ GEOMETRY_INLINE int compBox_set_str(compBox_t x, const char * strReN, const char
         return -1;
 }
 
+GEOMETRY_INLINE int compBox_set_str_pretty(compBox_t x, const char * strRe, const char * strIm, const char * strWi){
+    if (realRat_set_str_pretty( compRat_realref( compBox_centerref(x) ), strRe ) == 0) {
+        if (realRat_set_str_pretty( compRat_imagref( compBox_centerref(x) ), strIm ) == 0)
+            return realRat_set_str_pretty( compBox_bwidthref(x) , strWi );
+        else
+            return -1;
+    }
+    else
+        return -1;
+}
+
 GEOMETRY_INLINE void compBox_set(compBox_t d, const compBox_t b){
     compRat_set( compBox_centerref(d), compBox_centerref(b));
     realRat_set( compBox_bwidthref(d), compBox_bwidthref(b));

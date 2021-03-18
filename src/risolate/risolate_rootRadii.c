@@ -938,13 +938,12 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
         }
              
         
-        if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
+        if ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
              ( (!widthFlag) 
-               ||( connCmp_nSols(ccur) == cacheApp_getDegree(cache) )
-               ||( (!sepBoundFlag) && (connCmp_nSols(ccur)>1))   
-            )  )
-//             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) 
-        ) {
+               || ( (!sepBoundFlag) &&
+                                    ( (connCmp_nSols(ccur)>1) || (connCmp_nSols(ccur) == cacheApp_getDegree(cache)) )
+                  )
+             ) ) {
             
             if (metadatas_getVerbo(meta)>3) {
                     printf("#--- Newton iteration\n");
@@ -1015,9 +1014,7 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
                 printf("#------validated with %d roots\n", connCmp_nSols(ccur));
             }
         } else
-        if ( (connCmp_nSols(ccur)>0) && (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) 
-             && separationFlag && widthFlag && compactFlag
-             && ( sepBoundFlag || (connCmp_nSols(ccur)==1)) ) {
+        if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && sepBoundFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
             if (metadatas_getVerbo(meta)>3) {
@@ -1222,6 +1219,9 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     compBox_init(box);
     compBox_set(box, initialBox);
     compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
+    /* if upperBound is zero, set it to one */
+    if ( realRat_is_zero(upperBound) )
+        realRat_set_si(upperBound, 1, 1);
     /* set width to 2*upperBound */
     realRat_mul_si( upperBound, upperBound, 2);
     realRat_set( compBox_bwidthref(box), upperBound );
