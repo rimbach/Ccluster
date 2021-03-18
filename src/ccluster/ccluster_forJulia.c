@@ -279,10 +279,10 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
     
     /* automatically set initialBox */
     compBox_set_si(initBox, 0,1,0,1,0,1);
-    cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
+    cacheApp_root_bound ( compBox_bwidthref(initBox), cache );
     if (verb>=3) {
-        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
-        if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+        printf("root bound: "); realRat_print(compBox_bwidthref(initBox)); 
+        if (realRat_is_zero(compBox_bwidthref(initBox))) {
             printf("; use 1 instead");
         }
         printf("\n");
