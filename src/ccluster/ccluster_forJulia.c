@@ -76,7 +76,14 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
-        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
+        if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+            printf("; use 1 instead");
+        }
+        printf("\n");
+    }
+    if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+        realRat_set_si(compBox_bwidthref(initialBox), 1, 1);
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
@@ -176,7 +183,14 @@ void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults,
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
-        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
+        if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+            printf("; use 1 instead");
+        }
+        printf("\n");
+    }
+    if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+        realRat_set_si(compBox_bwidthref(initialBox), 1, 1);
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
@@ -264,7 +278,14 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
-        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
+        if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+            printf("; use 1 instead");
+        }
+        printf("\n");
+    }
+    if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+        realRat_set_si(compBox_bwidthref(initialBox), 1, 1);
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
@@ -410,7 +431,14 @@ int ccluster_global_forJulia_forTcluster_func( connCmp_list_t qResults,
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     int res = cacheApp_root_bound_unsure ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
-        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
+        if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+            printf("; use 1 instead");
+        }
+        printf("\n");
+    }
+    if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+        realRat_set_si(compBox_bwidthref(initialBox), 1, 1);
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     

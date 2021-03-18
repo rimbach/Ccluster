@@ -106,7 +106,14 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
-        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
+        if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+            printf("; use 1 instead");
+        }
+        printf("\n");
+    }
+    if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+        realRat_set_si(compBox_bwidthref(initialBox), 1, 1);
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     

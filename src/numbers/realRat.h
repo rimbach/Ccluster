@@ -52,12 +52,20 @@ NUMBERS_INLINE int realRat_set_str  (realRat_t dest, const char * strN, const ch
         return -1;
 }
 
+NUMBERS_INLINE int realRat_set_str_pretty  (realRat_t dest, const char * str){
+    return fmpq_set_str(dest, str, 10);
+}
+
 NUMBERS_INLINE void realRat_zero   (realRat_t dest ) { fmpq_zero   (dest);  }
 
 /* normalizing */
 NUMBERS_INLINE void realRat_canonicalise(realRat_t dest)    { fmpq_canonicalise(dest); }
 /* check if den is zero */
 NUMBERS_INLINE int realRat_is_den_zero(const realRat_t x) { return fmpz_is_zero(realRat_denref(x)); }
+/* check if x is an integer */
+NUMBERS_INLINE int realRat_is_int(realRat_t x) { realRat_canonicalise(x); return fmpz_is_one(realRat_denref(x)); }
+/* check if x has den 1 */
+NUMBERS_INLINE int realRat_is_den_one(const realRat_t x) { return fmpz_is_one(realRat_denref(x)); }
 /* comparisons */
 NUMBERS_INLINE int  realRat_is_zero(const realRat_t x) { return fmpq_is_zero(x); }
 /* returns negative if x<y, 0 if x==y, positive if x>y */

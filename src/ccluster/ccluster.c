@@ -380,10 +380,13 @@ void ccluster_main_loop( connCmp_list_t qResults,
     
     connCmp_ptr ccur;
     
+    /* for the case where eps is +inf 
+     * compute clusters of < degree roots 
+     *                  or with size < 2^-CCLUSTER_DEFAULT_PREC */   
     realRat_t epsSave;
     realRat_init( epsSave );
     realRat_set_si( epsSave, 2,1  );
-    realRat_pow_si( epsSave, epsSave, -53);
+    realRat_pow_si( epsSave, epsSave, -CCLUSTER_DEFAULT_PREC);
     int widthFlagSave;
     
     clock_t start=clock();
@@ -495,14 +498,9 @@ void ccluster_main_loop( connCmp_list_t qResults,
 //             prec = resTstar.appPrec;
         }
         
-        if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
+        if ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
                ( (!widthFlag) || 
-                 ( (widthFlag)&&
-                   (connCmp_nSols(ccur)>1)&&
-                   (connCmp_nSols(ccur)== cacheApp_getDegree(cache) )&&
-                   (!widthFlagSave) )  
-               ) )
-//             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) //this is DEPRECATED: pass eps = 1/0 instead 
+                 ( (!widthFlagSave)&&( connCmp_nSols(ccur)== cacheApp_getDegree(cache) ) ) )
            ) {
         
             if (metadatas_haveToCount(meta)){
@@ -603,14 +601,9 @@ void ccluster_main_loop( connCmp_list_t qResults,
 //             }
 //         }
 //         else 
-        if ( (connCmp_nSols(ccur)>0) && 
-             separationFlag && 
-             widthFlag && 
-             compactFlag && 
-             ( ( connCmp_nSols(ccur)==1 ) || 
-               (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) ||
-               ( (connCmp_nSols(ccur)==cacheApp_getDegree(cache)) && widthFlagSave)  
-            ) ) {
+        if ( (connCmp_nSols(ccur)>0) && separationFlag && compactFlag && widthFlag && 
+             ( (connCmp_nSols(ccur)<cacheApp_getDegree(cache)) || widthFlagSave)  
+            ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
 //             printf("+++depth: %d, validated with %d roots\n", (int) depth, connCmp_nSols(ccur));

@@ -33,32 +33,51 @@ int scan_initialBox( char * argv, compBox_t target ){
     if (strcmp( argv, GLOBAL_STR_NAME ) == 0)
         return 2;
     
-    char * tok=NULL;
-    char temp[1000];
-    char cReN[100]= "0", cImN[100]= "0", widN[100]= "100";
-    char cReD[100]= "1", cImD[100]= "1", widD[100]="1";
+    char * tokRe=NULL;
+    char * tokIm=NULL;
+    char * tokWi=NULL;
     
-    sscanf(argv, "%s", temp);
-    tok = strtok (temp,",");
-    sprintf(cReN, "%s", tok);
-    tok = strtok (NULL,",");
-    sprintf(cReD, "%s", tok);
-    tok = strtok (NULL,",");
-    sprintf(cImN, "%s", tok);
-    tok = strtok (NULL,",");
-    sprintf(cImD, "%s", tok);
-    tok = strtok (NULL,",");
-    sprintf(widN, "%s", tok);
-    tok = strtok (NULL,",");
-    sprintf(widD, "%s", tok);
-    tok = strtok (NULL,",");
+    tokRe = strtok (argv,",");
+    tokIm = strtok (NULL,",");
+    tokWi = strtok (NULL,",");
     
-    if (compBox_set_str(target, cReN, cReD, cImN, cImD, widN, widD, 10)==-1){
-        printf("error in parsing initial box! %s %s %s %s %s %s\n", cReN, cReD, cImN, cImD, widN, widD);
+    if ( compBox_set_str_pretty(target, tokRe, tokIm, tokWi) == -1 ){
+        printf("error in parsing initial box! %s %s %s\n", tokRe, tokIm, tokWi);
         return 0;
     }
     
+    if ( realRat_sgn( compBox_bwidthref(target))<=0 ) {
+        printf("error: width of initial box should be positive! %s\n", tokWi);
+        return 0;
+    }
+        
     return 1;
+//     char * tok=NULL;
+//     char temp[1000];
+//     char cReN[100]= "0", cImN[100]= "0", widN[100]= "100";
+//     char cReD[100]= "1", cImD[100]= "1", widD[100]="1";
+//     
+//     sscanf(argv, "%s", temp);
+//     tok = strtok (temp,",");
+//     sprintf(cReN, "%s", tok);
+//     tok = strtok (NULL,",");
+//     sprintf(cReD, "%s", tok);
+//     tok = strtok (NULL,",");
+//     sprintf(cImN, "%s", tok);
+//     tok = strtok (NULL,",");
+//     sprintf(cImD, "%s", tok);
+//     tok = strtok (NULL,",");
+//     sprintf(widN, "%s", tok);
+//     tok = strtok (NULL,",");
+//     sprintf(widD, "%s", tok);
+//     tok = strtok (NULL,",");
+//     
+//     if (compBox_set_str(target, cReN, cReD, cImN, cImD, widN, widD, 10)==-1){
+//         printf("error in parsing initial box! %s %s %s %s %s %s\n", cReN, cReD, cImN, cImD, widN, widD);
+//         return 0;
+//     }
+//     
+//     return 1;
 }
 
 int scan_epsilon( char * argv, realRat_t target ){
@@ -70,31 +89,53 @@ int scan_epsilon( char * argv, realRat_t target ){
         return 2;
     }
     
-    char * tok=NULL;
-    char temp[1000];
-    char epsN[100]="1", epsD[100]="100";
-    
-    sscanf(argv, "%s", temp);
-    tok = strtok (temp,",");
-    sprintf(epsN, "%s", tok);
-    tok = strtok (NULL,",");
-    
-    
-    if (tok == NULL){
-        int p;
-        sscanf(epsN, "%d", &p);
-        realRat_set_si(target, 2,1);
-        realRat_pow_si(target, target, p);
-    }
-    else {
-        sprintf(epsD, "%s", tok);
-        if (realRat_set_str(target, epsN, epsD, 10)==-1){
-            printf("error in parsing epsilon ! %s %s\n", epsN, epsD);
+    if ( realRat_set_str_pretty(target, argv) == 0 ) {
+        if (realRat_is_zero(target)) {
+            printf("error epsilon should not be 0 ! %s\n", argv);
             return 0;
         }
+        if (realRat_sgn( target ) < 0) {
+            if ( !(realRat_is_den_one(target)) ) {
+            printf("error epsilon should not be either positive, or a negative integer ! %s\n", argv);
+            return 0;
+            }
+            slong p;
+            realRat_set_si(target, 2,1);
+            sscanf(argv, "%ld", &p);
+            realRat_pow_si(target, target, p);
+        }
+        return 1;
     }
     
-    return 1;
+    printf("error in parsing epsilon ! %s\n", argv);
+    
+    return 0;
+    
+//     char * tok=NULL;
+//     char temp[1000];
+//     char epsN[100]="1", epsD[100]="100";
+//     
+//     sscanf(argv, "%s", temp);
+//     tok = strtok (temp,",");
+//     sprintf(epsN, "%s", tok);
+//     tok = strtok (NULL,",");
+//     
+//     
+//     if (tok == NULL){
+//         int p;
+//         sscanf(epsN, "%d", &p);
+//         realRat_set_si(target, 2,1);
+//         realRat_pow_si(target, target, p);
+//     }
+//     else {
+//         sprintf(epsD, "%s", tok);
+//         if (realRat_set_str(target, epsN, epsD, 10)==-1){
+//             printf("error in parsing epsilon ! %s %s\n", epsN, epsD);
+//             return 0;
+//         }
+//     }
+//     
+//     return 1;
         
 }
 
