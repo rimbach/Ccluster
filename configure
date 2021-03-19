@@ -10,7 +10,7 @@
 # ccluster     => soname
 CCLUSTER_MAJOR=1
 CCLUSTER_MINOR=1
-CCLUSTER_PATCH=4
+CCLUSTER_PATCH=5
 
 PREFIX="/usr/local"
 GMP_DIR="/usr/local"
