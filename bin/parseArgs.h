@@ -133,7 +133,7 @@ int scan_epsilon( char * argv, realRat_t target ){
             printf("error epsilon should not be either positive, or a negative integer ! %s\n", argv);
             return 0;
             }
-            slong p;
+            long int p;
             realRat_set_si(target, 2,1);
             sscanf(argv, "%ld", &p);
             realRat_pow_si(target, target, p);
