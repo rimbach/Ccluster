@@ -339,7 +339,7 @@ LIB_DIRS="${LIB_DIRS} ${ARB_LIB_DIR}"
 INC_DIRS="${INC_DIRS} ${ARB_INC_DIR}"
 LIBS="${LIBS} arb"
 
-LIB_DIRS="${LIB_DIRS} ${LIB_LOC}"
+LIB_DIRS="${LIB_DIRS} ${LIB_LOC} ."
 
 #configure extra libraries
 
