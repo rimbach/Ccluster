@@ -1,127 +1,83 @@
+BGREEN = "\e[1;32m"
+BRED = "\e[1;31m"
+NORMAL = "\e[0m"
 
-INCLUDE_PATH = $(INCS) -I../src
-LIBRARY_PATH = -L.. $(LIBS)
-LIBRARY_FLAG = -lflint -larb -lccluster -lm
+ECHO_ME = @/bin/echo -e
 
-QUIET_CC  = @echo '   ' CC  ' ' $@;
+all: testMignotteVerbose
 
-TEST=$(foreach x, ., $(wildcard $(x)/*.c))
-TEST_OBJS=$(TEST:%.c=%.o)
-TEST_EXECS=$(TEST:%.c=%)
+testMignotteVerbose: genMignotteVerbose MignotteVerbose cleanMignotteVerbose 
 
-#==================================================
-# COMPILING 
-#==================================================
-build: mignotte mignotteMul mignotteGen \
-    bernoulli wilkinson \
-    wilkRat spiral \
-    cluster wilkMul \
-    mandelbrot laguerre\
-    mandelbrotPS mignottePS\
-    runnels runnelsPS\
-    mandelbrot_expe runnels_expe
+testBernoulliVerbose: genBernoulliVerbose BernoulliVerbose cleanBernoulliVerbose 
 
-#==================================================
-# HOUSEKEEPING 
-#==================================================
-print: 
-	@echo $(BENCH_DIRS_FILES)
+testMandelbrotVerbose: genMandelbrotVerbose MandelbrotVerbose cleanMandelbrotVerbose
 
-clean :
-	rm -rf $(TEST_OBJS) $(TEST_EXECS)
+temp_file=temp.txt
 
-.c.o :
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ -c $< $(INCLUDE_PATH)
-	
-mignotte: mignotte.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) \
-	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
-	
-debug: mignotte.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
-	    	-o $@ $< $(INCLUDE_PATH) \
-	
-mignotteMul: mignotteMul.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	    	
-mignotteGen: mignotteGen.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-wilkinson: wilkinson.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-bernoulli: bernoulli.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-wilkRat: wilkRat.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-spiral: spiral.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-cluster: cluster.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	
-wilkMul: wilkMul.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	    	
-mandelbrot: mandelbrot.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	    	
-mandelbrotPS: mandelbrotPS.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	    	
-mignottePS: mignottePS.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	    	
-laguerre: laguerre.o
-# 	@echo "Building $@"
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	    	
-runnels: runnels.o
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	    	
-runnelsPS: runnelsPS.o
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+# tests with Mignotte polynomials
+degree_Mignotte=64
+bitsize_Mignotte=14
+input_Mignotte=Mignotte_${degree_Mignotte}_${bitsize_Mignotte}.ccl
 
-mandelbrot_expe: mandelbrot_expe.o
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
-	    	
-runnels_expe: runnels_expe.o
-	$(QUIET_CC) $(CC) $(CFLAGS) -o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG)
+# tests with Bernoulli polynomials
+degree_Bernoulli=64
+input_Bernoulli=Bernoulli_${degree_Bernoulli}.ccl
 
-#==================================================
-# END 
-#==================================================
+# tests with Mandelbrot polynomials
+iteration_Mandelbrot=7
+degree_Mandelbrot=127
+input_Mandelbrot=Mandelbrot_${iteration_Mandelbrot}.ccl
+
+genMignotteVerbose: 
+	@../bin/genPolFile Mignotte   ${degree_Mignotte} ${input_Mignotte} -b ${bitsize_Mignotte} >/dev/null
+	
+cleanMignotteVerbose:
+	@rm -f ${input_Mignotte} ${temp_file}
+	
+MignotteVerbose: genMignotteVerbose
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of a Mignotte polynomial of degree ${degree_Mignotte} and bitsize ${bitsize_Mignotte}: should about a seconds" $(NORMAL)
+	${ECHO_ME} $(BGREEN) "by defaults, ccluster computes clusters without size constraints (i.e. option -e +inf)" $(NORMAL)
+	../bin/ccluster ${input_Mignotte} > ${temp_file}
+	@cat ${temp_file}
+	@check_output_ccluster.sh --nbSols=64 --nbClus=63 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "option -e precision where precision is given as the log in basis 2 of the maximum size of the clusters" $(NORMAL)
+	../bin/ccluster ${input_Mignotte} -e -500 > ${temp_file}
+	@cat ${temp_file} 
+	@check_output_ccluster.sh --nbSols=64 --nbClus=64 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "Isolating real roots of a Mignotte polynomial of degree ${degree_Mignotte} and bitsize ${bitsize_Mignotte}: should take less than a seconds" $(NORMAL)
+	../bin/risolate ${input_Mignotte} > ${temp_file}
+	@cat ${temp_file} 
+	@check_output_risolate.sh --nbSols=4 --nbClus=4 --file=${temp_file}
+
+genBernoulliVerbose: 
+	@../bin/genPolFile Bernoulli   ${degree_Bernoulli} ${input_Bernoulli} >/dev/null
+	
+cleanBernoulliVerbose:
+	@rm -f ${input_Bernoulli} ${temp_file}
+	
+BernoulliVerbose: genBernoulliVerbose
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree ${degree_Bernoulli}: should take less than a second" $(NORMAL)
+	@../bin/ccluster ${input_Bernoulli}
+	${ECHO_ME} $(BGREEN) "for a graphical output, use option -o -2 and pipe to gnuplot:" $(NORMAL)
+	../bin/ccluster ${input_Bernoulli} -o -2 | gnuplot
+	${ECHO_ME} $(BRED) "this test will stop with an error if you do not have gnuplot installed on your machine" $(NORMAL)
+	${ECHO_ME} $(BRED) "if gnuplot opens a window, close the window to continue" $(NORMAL)
+	${ECHO_ME} $(BGREEN) "for a graphical output with the subdivision tree, use options -m onlySubd -o -3 and pipe to gnuplot" $(NORMAL)
+	../bin/ccluster ${input_Bernoulli} -m onlySubd -o -3 | gnuplot
+	
+genMandelbrotVerbose: 
+	@../bin/genPolFile Mandelbrot   ${iteration_Mandelbrot} ${input_Mandelbrot} >/dev/null
+	
+cleanMandelbrotVerbose:
+	@rm -f ${input_Mandelbrot} ${temp_file}
+	
+MandelbrotVerbose: genMandelbrotVerbose
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of a Mandelbrot polynomial of degree 127: should take about a second" $(NORMAL)
+	../bin/ccluster ${input_Mandelbrot} > ${temp_file}
+	@cat temp.txt
+	@check_output_ccluster.sh --nbSols=127 --nbClus=124 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "Isolating real roots of a Mandelbrot polynomial of degree 127: should take less than a second"
+	${ECHO_ME} $(BGREEN) "with option -o, one can specify the number of digits for displaying the clusters" $(NORMAL)
+	../bin/risolate ${input_Mandelbrot} -o 5 > ${temp_file}
+	@cat temp.txt
+	@check_output_risolate.sh --nbSols=19 --nbClus=19 --file=temp.txt
