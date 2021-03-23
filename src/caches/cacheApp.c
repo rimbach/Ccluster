@@ -348,11 +348,27 @@ int cacheApp_root_bound_unsure ( realRat_t bound, cacheApp_t cache){
     return res;
 }
 
+slong cacheApp_getBitsize (cacheApp_t cache){
+    
+    fmpz_poly_t num;
+    fmpz_poly_init(num);
+    
+    realRat_poly_canonicalise(compRat_poly_realref(cache->_poly));
+    fmpq_poly_get_numerator(num, compRat_poly_realref(cache->_poly) );
+    /* compute the inverse of the norm of the poly*/
+    slong res = fmpz_poly_max_bits(num);
+    
+    fmpz_poly_clear(num);
+    
+    if (res<0) res = -res + 1;
+    return res;
+}
+
 void cacheApp_separation_bound ( realRat_t sepBound, cacheApp_t cache){
     
     slong deg = cacheApp_getDegree ( cache );
     
-    fmpq_poly_canonicalise(compRat_poly_realref(cache->_poly));
+    realRat_poly_canonicalise(compRat_poly_realref(cache->_poly));
     /* compute the inverse of the norm of the poly*/
     fmpz_t norm2;
     fmpz_poly_t num;

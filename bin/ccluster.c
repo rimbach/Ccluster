@@ -17,11 +17,12 @@ int main(int argc, char **argv){
         printf("                                 \n");
         printf("      -d , --domain: the initial region of interest\n");
         printf("                     global [default] finds all the roots\n");
-        printf("                     a box, for instance 0,1,1,2,100,1 i.e. the square centered in 0/1 +i*(1/2) of width 100/1\n");
+        printf("                     a box, for instance 0,1/2,100 i.e. the square centered in 0 +i*(1/2) of width 100\n");
         printf("                     if a bounded box B is given, ccluster finds all natural clusters in B, and possibly some in (5/4)B \n");
         printf("      -e , --epsilon: the size of output clusters\n");
-        printf("                     +inf [default] output natural clusters wits less roots than degree of input polynomial\n");
-        printf("                     a positive number as 1,100 (1/100) or -53 (2^(-53))\n");
+        printf("                     +inf [default] output natural clusters with less roots than degree of input polynomial\n");
+        printf("                                                                 or size less than 2^(-53)\n");
+        printf("                     a positive rational as 1 or 1/100 or a negative power of 2 as -53 for 2^(-53)\n");
         printf("      -o , --output: the way cluster are output; default is NO OUTPUT\n");
         printf("                     0: [default] NO OUTPUT\n");
         printf("                     d>0: d digit precision floating point numbers\n");
@@ -29,7 +30,8 @@ int main(int argc, char **argv){
         printf("                     -2 or g or G: gnuplot output: can be piped to gnuplot \n");
         printf("                     -3 or gs or GS: gnuplot output with subdivision tree \n");
         printf("      -m, --mode: the version of the algorithm\n");
-        printf("                     default value is \"default\"  \n");
+        printf("                     default [default]: uses root radii and subdivision; no multi-threading  \n");
+        printf("                     onlySubd: uses only subdivision\n");
         printf("      -v, --verbose: an integer for verbosity\n");
         printf("                     0: nothing\n");
         printf("                     1 [default]: abstract of input and output\n");
@@ -38,6 +40,7 @@ int main(int argc, char **argv){
         printf("      -j, --nbThreads: an positive integer for the number of threads\n");
         printf("                       1 [default]: one thread is used\n");
         printf("                       >1: no compatibility with -o -3 option\n");
+        printf("                       >1: no compatibility with -m default\n");
         return -1;
     }
     
@@ -130,10 +133,11 @@ int main(int argc, char **argv){
         curFile = fopen (filename,"r");
         if (curFile!=NULL) {
             realRat_poly_fread(curFile, p);
+            
             compRat_poly_set_realRat_poly(p_global,p);
             
             if (global==2)
-                ccluster_global_interface_func( getApprox, eps, st, nbthreads, output, verbosity);
+                ccluster_global_interface_realRat_poly( p, eps, st, nbthreads, output, verbosity);
             else
                 ccluster_interface_func( getApprox, bInit, eps, st, nbthreads, output, verbosity);
             

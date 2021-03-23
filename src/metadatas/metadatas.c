@@ -23,6 +23,9 @@ void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_
     
     pwSuDatas_init( metadatas_pwSumref(m) );
     m->drSub = 0;
+    
+    realRat_init( metadatas_relPrref(m) );
+    m->nbGIt = 0;
 
     realRat_init( metadatas_spBndref(m) );
 }
@@ -34,6 +37,8 @@ void metadatas_clear(metadatas_t m) {
     chronos_clear( metadatas_chronref(m) );
     
     pwSuDatas_clear( metadatas_pwSumref(m) );
+    
+    realRat_clear( metadatas_relPrref(m) );
     
     realRat_clear( metadatas_spBndref(m) );
 }
@@ -102,13 +107,23 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
          metadatas_useTstarOptim(meta) &&
          metadatas_usePredictPrec(meta) &&
          metadatas_useAnticipate(meta) &&
-         metadatas_useRealCoeffs(meta) ) len += sprintf( temp + len, " default");
+         metadatas_useRealCoeffs(meta) &&
+         metadatas_useRootRadii(meta) 
+       ) len += sprintf( temp + len, " default (rootRadii + subdivision)");
+    else if (
+         metadatas_useNewton(meta) &&
+         metadatas_useTstarOptim(meta) &&
+         metadatas_usePredictPrec(meta) &&
+         metadatas_useAnticipate(meta) &&
+         metadatas_useRealCoeffs(meta)
+         ) len += sprintf( temp + len, " default (no rootRadii, subdivision)");
     else {    
         if (metadatas_useNewton(meta)) len += sprintf( temp + len, " newton");
         if (metadatas_useTstarOptim(meta)) len += sprintf( temp + len, " tstarOpt");
         if (metadatas_usePredictPrec(meta)) len += sprintf( temp + len, " predPrec");
         if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
         if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
+        if (metadatas_useRootRadii(meta)) len += sprintf( temp + len, " rootRadii");
     }
     if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
@@ -148,6 +163,21 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     r = fprintf(file, "#|%-39s %14d %14s|\n", "number of fails:",                    metadatas_getNbFailingNewton(meta),  " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in newton:",         metadatas_get_time_Newtons(meta),    " " );
     }
+    if (metadatas_useRootRadii(meta)){
+    r = fprintf(file, "# -------------------Root Radii       ---------------------------------\n");
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing root radii:",       metadatas_get_time_rootRad(meta),    " " );
+    int nbTaylorsRR = (metadatas_countref(meta))[0].RR_nbTaylors + (metadatas_countref(meta))[0].RR_nbTaylorsRepeted;
+    int nbTaylorsRRR = (metadatas_countref(meta))[0].RR_nbTaylorsRepeted;
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "number of Taylor shifts:",      nbTaylorsRR, nbTaylorsRRR);
+    int nbGraeffeRR = (metadatas_countref(meta))[0].RR_nbGraeffe + (metadatas_countref(meta))[0].RR_nbGraeffeRepeted;
+    int nbGraeffeRRR = (metadatas_countref(meta))[0].RR_nbGraeffeRepeted;
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "number of Graeffe Iterations:",      nbGraeffeRR, nbGraeffeRRR);
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "precision required/predicted:",    (metadatas_countref(meta))[0].RR_prec, 
+                                                                                   (metadatas_countref(meta))[0].RR_predPrec );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Graeffe iterations:",      metadatas_get_time_RRGraef(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Taylor shifts:",      metadatas_get_time_RRTaylo(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in checking sol. contain.:",       metadatas_get_time_RRT0Tes(meta),    " " );
+    }
     r = fprintf(file, "# -------------------Other---------------------------------------------\n");
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in getApproximation:",           metadatas_get_time_Approxi(meta),    " " );
     if (metadatas_useAnticipate(meta)){
@@ -185,6 +215,23 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     return r;
 }
 
+char * compBox_sprint_for_stat_risolate(char * out, const compBox_t x){
+    char cRe[100];
+//     char cIm[100];
+    char *wid = NULL;
+    fmpq_get_str( cRe, 10, compRat_realref(compBox_centerref(x)));
+//     fmpq_get_str( cIm, 10, compRat_imagref(compBox_centerref(x)));
+    wid = fmpq_get_str( wid, 10, compBox_bwidthref(x));
+    if (strlen(wid)>=15) {
+        slong lnum = fmpz_clog_ui( realRat_numref(compBox_bwidthref(x)), (ulong) 2);
+        slong lden = fmpz_clog_ui( realRat_denref(compBox_bwidthref(x)), (ulong) 2);
+        sprintf(wid, "2^(%d)/2^(%d)", (int) lnum, (int) lden);
+    }
+    sprintf(out, " center: %-30s wid: %-15s|", cRe, wid);
+    ccluster_free(wid);
+    return out;
+}
+
 int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     int r=1;
     int nbTaylorShifts  = metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsInTSTests(meta);
@@ -196,8 +243,8 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     r = fprintf(file, "# -------------------Risolate: ----------------------------------------\n");
     r = fprintf(file, "# -------------------Input:    ----------------------------------------\n");
     char temp[1000];
-    compBox_sprint_for_stat( temp, metadatas_initBref(meta) );
-    r = fprintf(file, "#|box:%-65s\n", temp);
+    compBox_sprint_for_stat_risolate( temp, metadatas_initBref(meta) );
+    r = fprintf(file, "#|interval:%-60s\n", temp);
     
     slong clog2 = fmpz_clog_ui(realRat_denref(metadatas_getSepBound(meta)), 2);
     slong flog2 = fmpz_flog_ui(realRat_denref(metadatas_getSepBound(meta)), 2);
@@ -219,7 +266,16 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
          metadatas_usePredictPrec(meta) &&
          metadatas_useAnticipate(meta) &&
          metadatas_useRealCoeffs(meta) &&
-         metadatas_useDeflation(meta) ) len += sprintf( temp + len, " default");
+         metadatas_useDeflation(meta)  &&
+         metadatas_useRootRadii(meta)
+       ) len += sprintf( temp + len, " default (rootRadii + subdivision)");
+    else if ( metadatas_useNewton(meta) &&
+         metadatas_useTstarOptim(meta) &&
+         metadatas_usePredictPrec(meta) &&
+         metadatas_useAnticipate(meta) &&
+         metadatas_useRealCoeffs(meta) &&
+         metadatas_useDeflation(meta) 
+       ) len += sprintf( temp + len, " default (no rootRadii, subdivision)");
     else {    
         if (metadatas_useNewton(meta)) len += sprintf( temp + len, " newton");
         if (metadatas_useTstarOptim(meta)) len += sprintf( temp + len, " tstarOpt");
@@ -227,8 +283,8 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
         if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
         if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
         if (metadatas_useDeflation(meta)) len += sprintf( temp + len, " deflation");
+        if (metadatas_useRootRadii(meta)) len += sprintf( temp + len, " rootRadii");
     }
-//     if (metadatas_useDeflation(meta)) len += sprintf( temp + len, " + deflation");
     if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -277,6 +333,17 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in Tstar tests:",         metadatas_get_time_DefTsta(meta),    " " );
     }
     }
+    if (metadatas_useRootRadii(meta)){
+    r = fprintf(file, "# -------------------Root Radii       ---------------------------------\n");
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing root radii:",       metadatas_get_time_rootRad(meta),    " " );
+//     int nbGraeffeRR = (metadatas_countref(meta))[0].RR_nbGraeffe + (metadatas_countref(meta))[0].RR_nbGraeffeRepeted;
+    int nbGraeffeRR = (metadatas_countref(meta))[0].RR_nbGraeffe;
+    int nbGraeffeRRR = (metadatas_countref(meta))[0].RR_nbGraeffeRepeted;
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "number of Greaffe Iterations:",      nbGraeffeRR, nbGraeffeRRR);
+    r = fprintf(file, "#|%-39s %14d |%13d|\n", "precision required/predicted:",    (metadatas_countref(meta))[0].RR_prec, 
+                                                                                   (metadatas_countref(meta))[0].RR_predPrec );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Graeffe iterations:",      metadatas_get_time_RRGraef(meta),    " " );
+    }
     r = fprintf(file, "# -------------------Other---------------------------------------------\n");
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in getApproximation:",           metadatas_get_time_Approxi(meta),    " " );
     if (metadatas_useAnticipate(meta)){
@@ -299,8 +366,8 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     }
    
     r = fprintf(file, "# -------------------Output:   ----------------------------------------\n");
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of clusters:",                 metadatas_getNbValidated(meta),      " " );
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of solutions:",                metadatas_getNbSolutions(meta),      " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of distinct real roots:",                 metadatas_getNbValidated(meta),      " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of real roots:",                metadatas_getNbSolutions(meta),      " " );
     r = fprintf(file, "# -------------------Stats:    ----------------------------------------\n");
     if (metadatas_getVerbo(meta)>=2) {
     r = fprintf(file, "#|%-39s %14d %14s|\n", "tree depth:",                         metadatas_getDepth(meta),            " " );

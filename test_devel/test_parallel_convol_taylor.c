@@ -38,7 +38,7 @@ int main() {
     compApp_poly_t pres;
     compApp_poly_init2(pres, p->length);
     
-    compApp_poly_taylorShift( pres, p, compRat_real_ptr(center), compRat_imag_ptr(center), radius, prec);
+    compApp_poly_taylorShift( pres, p, center, radius, prec);
 //     printf("p shifted in 1+i with radius 1: \n"); compApp_poly_printd(pres, 10); printf("\n\n");
     
     
@@ -60,7 +60,7 @@ int main() {
         
         gettimeofday(&tbegin, NULL);
         for (int j = 0; j<nbtests; j++)
-            compApp_poly_taylorShift( pres, p, compRat_real_ptr(center), compRat_imag_ptr(center), radius, prec);
+            compApp_poly_taylorShift( pres, p, center, radius, prec);
         gettimeofday(&tend, NULL);
         printf ("time for %d taylor shifts, degree %4d: %10ld useconds.\n",nbtests, degs[i], ((tend.tv_sec * 1000000 + tend.tv_usec) - (tbegin.tv_sec * 1000000 + tbegin.tv_usec)));
         

@@ -28,6 +28,9 @@
 #include "newton/newton.h"
 #include "deflation/deflate.h"
 // #include "powerSums/powerSums.h"
+#include "geometry/compAnn.h"
+#include "rootRadii/realIntRootRadii.h"
+#include "rootRadii/realApp_rootRadii.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include "ccluster/parallel_discard.h"
@@ -38,6 +41,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void risolate_compBox_get_containing_dsk( compDsk_t d, const compBox_t b);
 
 slong risolate_discard_compBox_list( compBox_list_t boxes,
                                      compBox_list_t bDiscarded,
@@ -83,6 +88,34 @@ void risolate_prep_loop( compBox_list_t bDiscarded,
 			             cacheApp_t cache, 
 			             metadatas_t meta);
 
+slong risolate_discard_compBox_list_rootRadii( compBox_list_t boxes, 
+                                                       compBox_list_t bDiscarded,
+                                                       connCmp_t cc,
+                                                       cacheApp_t cache, 
+                                                       slong prec, 
+                                                       metadatas_t meta);
+
+void risolate_bisect_connCmp_rootRadii( connCmp_list_t dest, 
+                                                 connCmp_t cc, 
+                                                 connCmp_list_t discardedCcs,
+                                                 compBox_list_t bDiscarded, 
+                                                 cacheApp_t cache, 
+                                                 metadatas_t meta, 
+                                                 slong nbThreads);
+
+void risolate_main_loop_rootRadii( connCmp_list_t qResults,  
+                         compBox_list_t bDiscarded,
+                         connCmp_list_t qMainLoop, 
+                         connCmp_list_t discardedCcs, 
+                         const realRat_t eps, 
+                         cacheApp_t cache, 
+                         metadatas_t meta);
+
+void risolate_algo_global_rootRadii  ( connCmp_list_t qResults, 
+                                       compBox_list_t bDiscarded,
+                                       compAnn_list_t annulii,
+                                       const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta);
+
 /* INTERFACES */
 
 /* default interfaces */
@@ -101,6 +134,23 @@ void risolate_interface_poly( const realRat_poly_t poly,
                               int nbThreads,
                               int output,
                               int verb);
+
+/* interfaces for Julia */
+void risolate_forJulia_realRat_poly( connCmp_list_t qResults, 
+                                    const realRat_poly_t poly, 
+                                    const compBox_t initialBox, 
+                                    const realRat_t eps, 
+                                    char * stratstr,
+                                    int nbThreads,
+                                    int verb);
+
+void risolate_global_forJulia_realRat_poly( connCmp_list_t qResults, 
+                                            const realRat_poly_t poly,  
+                                            compBox_t initialBox,
+                                            const realRat_t eps, 
+                                            char * stratstr,
+                                            int nbThreads,
+                                            int verb);
 
 void connCmp_risolate_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta);
 
@@ -126,6 +176,38 @@ void risolate_connCmp_list_gnuplot_drawSubdiv(FILE * f,
                           const connCmp_list_t l, 
                           const compBox_list_t lb,
                           metadatas_t meta);
+
+void risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(FILE * f, 
+                          const connCmp_list_t l, 
+                          const compBox_list_t lb,
+                          const compAnn_list_t la,
+                          metadatas_t meta);
+
+/* DEPRECATED */
+
+// int risolate_compBox_intersects_only_one( const compBox_t b, int nbList );
+// int risolate_compBox_intersects_atLest_one( const compBox_t b, int nbList );
+
+// void risolate_prep_loop_rootRadii( compBox_list_t bDiscarded, 
+//                             connCmp_list_t qResult, 
+//                            connCmp_list_t qPrepLoop, 
+//                            connCmp_list_t discardedCcs, 
+//                            cacheApp_t cache, 
+//                            metadatas_t meta);
+/*
+slong risolate_exclusion_rootRadii( connCmp_list_t qCover,
+                                   cacheApp_t cache, 
+                                   metadatas_t meta);
+
+void risolate_algo_global_rootRadii_old( connCmp_list_t qResults,
+                                     compBox_list_t bDiscarded,
+                                     compAnn_list_t annulii,
+                                     compAnn_list_t annulii1,
+                                     compAnn_list_t annulii2,
+                                     const compBox_t initialBox, 
+                                     const realRat_t eps, 
+                                     cacheApp_t cache, 
+                                     metadatas_t meta);*/
 
 #ifdef __cplusplus
 }

@@ -238,6 +238,15 @@ void connCmp_merge_2_connCmp( connCmp_t cc1, connCmp_t cc2 ){
     realRat_min_2_realRat(connCmp_infImref(cc1), connCmp_infImref(cc2));
     realRat_max_2_realRat(connCmp_supImref(cc1), connCmp_supImref(cc2));
     
+    /* case where cc1 contains only one box and this box 
+     * is greater than the boxes of cc2 */
+    if ( (compBox_list_get_size(connCmp_boxesref(cc1))==1) && 
+         (compBox_isless( compBox_list_last(connCmp_boxesref(cc2)), compBox_list_first(connCmp_boxesref(cc1)) ) ) ) {
+        compBox_list_push( connCmp_boxesref(cc2), compBox_list_pop( connCmp_boxesref(cc1) ) );
+        compBox_list_swap(connCmp_boxesref(cc2), connCmp_boxesref(cc1));
+        return;
+    }
+    
     /* save cc1.boxes in temp and sets cc1.boxes to an empty list */
     compBox_list_t temp;
     compBox_list_init(temp);
@@ -409,13 +418,91 @@ int connCmp_intersection_is_not_empty( const connCmp_t cc, const compBox_t b ){
 /*Specification: returns true if (cc \cap b)\neq \emptyset */
 /*                       false otherwise                   */
 int connCmp_are_8connected( const connCmp_t cc, const compBox_t b ){
-    compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (cc) );
-    while (it!=compBox_list_end()) {
-        if (compBox_are_8connected(compBox_list_elmt(it) ,b))
-            return 1;
-        it = compBox_list_next(it);
+    
+    /* check with enveloppe */
+    realRat_t halfwidth, side;
+    realRat_init(halfwidth);
+    realRat_init(side);
+    int res = 1;
+    realRat_div_ui(halfwidth, compBox_bwidthref(b), 2);
+    realRat_sub(side, compRat_realref( compBox_centerref(b) ), halfwidth);
+    if ( realRat_cmp( side, connCmp_supReref( cc ) ) > 0 )
+        res = 0;
+    else {
+        realRat_add(side, compRat_realref( compBox_centerref(b) ), halfwidth);
+        if ( realRat_cmp( side, connCmp_infReref( cc ) ) < 0 )
+            res = 0;
+        else {
+            realRat_sub(side, compRat_imagref( compBox_centerref(b) ), halfwidth);
+            if ( realRat_cmp( side, connCmp_supImref( cc ) ) > 0 )
+                res = 0;
+            else {
+                realRat_add(side, compRat_imagref( compBox_centerref(b) ), halfwidth);
+                if ( realRat_cmp( side, connCmp_infImref( cc ) ) < 0 )
+                    res = 0;
+            }
+        }
     }
-    return 0;
+    
+    realRat_clear(halfwidth);
+    realRat_clear(side);
+    if (res==0)
+        return 0;
+    
+    /* test: check connectivity with boxes in reverse order */
+    /* stop when real part of current box is strictly less than */
+    /* real(center) b - width */
+    realRat_t prev;
+    realRat_init(prev);
+    realRat_sub(prev, compRat_realref( compBox_centerref(b) ), compBox_bwidthref(b));
+    
+    compBox_list_iterator it = compBox_list_endEl( connCmp_boxesref (cc) );
+    while ( it != NULL ) {
+        
+        /* check if connected */
+        if (compBox_are_8connected(compBox_list_elmt(it) ,b)){
+            res = 1;
+            it = NULL;
+        } else {
+            res = 0;
+            /* compare center of current box with prev */
+            if (realRat_cmp( compRat_realref( compBox_centerref( compBox_list_elmt(it) ) ), prev ) < 0)
+                it = NULL;
+            else
+                it = compBox_list_prev(it);
+        }
+        
+    }
+    
+    realRat_clear(prev);
+    return res;
+    
+//     /* test for large lists of boxes in union find: */
+//     /* test the last box of the cc first */
+//     compBox_list_iterator itl = connCmp_boxesref (cc)->_end;
+//     if (compBox_are_8connected(compBox_list_elmt(itl) ,b)){
+// //             printf("last");
+//             return 1;
+//     }
+//     
+//     compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (cc) );
+// //     int cnt = 0;
+// //     while (it!=compBox_list_end()) {
+//     while (compBox_list_next(it)!=compBox_list_end()) {/* do not test the last one, already tested */
+//         if (compBox_are_8connected(compBox_list_elmt(it) ,b)){
+// //             if (compBox_list_next(it)==compBox_list_end())
+// //                 printf("last\n");
+// //             else printf("%d\n", cnt);
+//             return 1;
+//         }
+//         it = compBox_list_next(it);
+// //         cnt++;
+//     }
+// //     if (res==1)
+// //         printf("not connected, NOT DETECTED nb of boxes: %d\n", compBox_list_get_size(connCmp_boxesref (cc)));
+// //     else
+// //         printf("not connected,     DETECTED nb of boxes: %d\n", compBox_list_get_size(connCmp_boxesref (cc)));
+//     return 0;
 }
 
 void connCmp_find_point_outside_connCmp( compRat_t res, const connCmp_t cc, const compBox_t initialBox ){

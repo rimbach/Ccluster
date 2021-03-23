@@ -34,6 +34,7 @@ void risolate_interface_poly( const realRat_poly_t poly,
     
     
     cacheApp_init_realRat_poly ( cache, poly);
+    cacheApp_canonicalise( cache );
     strategies_init(strat);
     
     strategies_set_str( strat, stratstr, nbThreads );
@@ -63,20 +64,11 @@ void risolate_interface_poly( const realRat_poly_t poly,
     metadatas_count(meta);
     metadatas_risolate_fprint(stdout, meta, eps);
     
-//     if (verb>=3) {
-//         connCmp_list_risolate_print_for_results(stdout, qRes, meta);
-//     }
     if (output==-2) {
-//         printf("gnuplot output: not yet implemented\n");
         risolate_connCmp_list_gnuplot(stdout, qRes, meta, 1);
     } else if (output==-3){
-//         printf("gnuplot output: not yet implemented\n");
-//         connCmp_list_gnuplot(stdout, qRes, meta, 1);
         risolate_connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
     } else if (output!=0) {
-//         printf("cluster output: not yet implemented\n");
-//         connCmp_list_risolate_print_for_results(stdout, qRes, meta);
-//         connCmp_list_print_for_results_withOutput(stdout, qRes, output, meta);
         connCmp_list_risolate_print_for_results_withOutput(stdout, qRes, output, meta);
     }
     
@@ -102,7 +94,10 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     connCmp_list_t qRes;
     compBox_list_t bDis;
     
+    compAnn_list_t qAnn;
+    
     cacheApp_init_realRat_poly ( cache, poly);
+    cacheApp_canonicalise( cache );
     strategies_init(strat);
     
     /* automaticly set initialBox */
@@ -111,7 +106,14 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
-        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
+        if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+            printf("; use 1 instead");
+        }
+        printf("\n");
+    }
+    if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+        realRat_set_si(compBox_bwidthref(initialBox), 1, 1);
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
@@ -137,26 +139,29 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);
+    if (metadatas_useRootRadii(meta)) {
+        compAnn_list_init(qAnn);
+        risolate_algo_global_rootRadii( qRes, bDis, qAnn, initialBox, eps, cache, meta);
+    }
+    else
+        risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-//     metadatas_fprint(stdout, meta, eps);
     metadatas_risolate_fprint(stdout, meta, eps);
     
-//     if (verb>=3) {
-//         connCmp_list_risolate_print_for_results(stdout, qRes, meta);
-//     }
     if (output==-2) {
-//         printf("gnuplot output: not yet implemented\n");
         risolate_connCmp_list_gnuplot(stdout, qRes, meta, 1);
     } else if (output==-3){
-//         printf("gnuplot output: not yet implemented\n");
-//         connCmp_list_gnuplot(stdout, qRes, meta, 1);
-        risolate_connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
+        if (metadatas_useRootRadii(meta)) 
+            risolate_connCmp_list_gnuplot_drawSubdiv_rootRadii(stdout, qRes, bDis, qAnn, meta);
+        else
+            risolate_connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
     } else if (output!=0) {
-//         printf("cluster output: not yet implemented\n");
-//         connCmp_list_risolate_print_for_results(stdout, qRes, meta);
         connCmp_list_risolate_print_for_results_withOutput(stdout, qRes, output, meta);
+    }
+    
+    if (metadatas_useRootRadii(meta)){
+        compAnn_list_clear(qAnn);
     }
     
     realRat_clear(sepBound);

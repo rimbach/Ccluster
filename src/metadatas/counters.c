@@ -122,6 +122,13 @@ void counters_init( counters * st) {
     st->size_allocated = INIT_SIZE_STATS;
     st->table = (counters_by_depth_ptr) ccluster_malloc (INIT_SIZE_STATS*sizeof(counters_by_depth));
     counters_by_depth_init( st->total );
+    
+    st->RR_predPrec         = 0;
+    st->RR_prec             = 0;
+    st->RR_nbGraeffe        = 0;
+    st->RR_nbGraeffeRepeted = 0;
+    st->RR_nbTaylors        = 0;
+    st->RR_nbTaylorsRepeted = 0;
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(st->_mutex), NULL);
 #endif    

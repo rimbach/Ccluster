@@ -79,6 +79,12 @@ void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, s
 void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly);
 void cacheApp_init_realRat_poly ( cacheApp_t cache, const realRat_poly_t poly);
 
+/* assume _poly is initialized */
+/* canonicalize the real part */
+CACHE_INLINE void cacheApp_canonicalise( cacheApp_t cache ){
+    realRat_poly_canonicalise(compRat_poly_realref(cache->_poly));
+}
+
 compApp_poly_ptr cacheApp_getApproximation ( cacheApp_t cache, slong prec );
 realApp_poly_ptr cacheApp_getApproximation_real ( cacheApp_t cache, slong prec );
 slong cacheApp_getDegree ( cacheApp_t cache );
@@ -97,6 +103,8 @@ void cacheApp_root_bound ( realRat_t bound, cacheApp_t cache );
 int cacheApp_root_bound_unsure ( realRat_t bound, cacheApp_t cache);
 
 void cacheApp_separation_bound ( realRat_t sepBound, cacheApp_t cache);
+
+slong cacheApp_getBitsize (cacheApp_t cache);
 
 #ifdef CCLUSTER_EXPERIMENTAL
 compApp_poly_ptr cacheApp_getDerivative ( cacheApp_t cache, slong prec, slong order );

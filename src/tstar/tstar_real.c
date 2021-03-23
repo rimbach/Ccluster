@@ -190,9 +190,20 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
     int anticipate_already_applied = 0;
     N = (int) 4+ceil(log2(1+log2(deg)));
 
+//     if (metadatas_getVerbo(meta)>=2) {
+//         printf("#########################\n");
+//         if (discard)
+//             printf(" depth: %d, prec for discarding test: %d\n", depth, (int) res.appPrec );
+//         else
+//             printf(" depth: %d, prec for validating test: %d\n", depth, (int) res.appPrec );
+//     }
+    
     if (TS_has_been_computed==0) {
+//         clock_t start2 = clock();
         tstar_real_getApproximation( pApprox, cache, res.appPrec, meta);
         tstar_real_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
+//         if (metadatas_getVerbo(meta)>=2)
+//             printf("time in initial taylor shift: %f\n", (double) (clock() - start2)/CLOCKS_PER_SEC );
     }
     
     
@@ -205,8 +216,11 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
         restemp = realApp_soft_compare( coeff0, coeffn, res.appPrec );
         while( restemp == -2 ){
             res.appPrec *=2;
+//             clock_t start2 = clock();
             tstar_real_getApproximation( pApprox, cache, res.appPrec, meta);
             tstar_real_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
+//             if (metadatas_getVerbo(meta)>=2)
+//                 printf("nprec: %ld, time in initial taylor shift: %f\n",res.appPrec, (double) (clock() - start2)/CLOCKS_PER_SEC );
             nbTaylorsRepeted +=1;
             realApp_abs( coeff0, realApp_poly_getCoeff(pApprox, 0) );
             realApp_abs( coeffn, realApp_poly_getCoeff(pApprox, realApp_poly_degree(pApprox)) );
@@ -303,10 +317,14 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
     
     realApp_poly_clear(pApprox);
     realApp_clear(sum);
-//     if (discard)
-//         printf(" prec for discarding test: %d\n", (int) res.appPrec );
-//     else
-//         printf(" --- prec for validating test: %d\n", (int) res.appPrec );
+    
+    if (metadatas_getVerbo(meta)>=3) {
+        if (discard)
+            printf(" depth: %d, prec for discarding test: %d\n", depth, (int) res.appPrec );
+        else
+            printf(" depth: %d, prec for validating test: %d\n", depth, (int) res.appPrec );
+    }
+
     
 //     if ((inNewton==0)&&(metadatas_getVerbo(meta)>=3))
 //         printf(" number of Graeffe iterations: %d\n", (int) nbGraeffe );

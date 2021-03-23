@@ -95,6 +95,9 @@ int realApp_poly_check_relOne_accuracy( const realApp_poly_t poly, slong prec);
 slong realApp_poly_get_relOne_accuracy_min( const realApp_poly_t poly);
 slong realApp_poly_get_relOne_accuracy_max( const realApp_poly_t poly);
 
+slong realApp_poly_get_absolute_accuracy_min( const realApp_poly_t poly);
+slong realApp_poly_get_absolute_accuracy_max( const realApp_poly_t poly);
+
 /* derivation */
 POLYNOMIALS_INLINE  void realApp_poly_derivative(realApp_poly_t fp, const realApp_poly_t f, slong prec){
     arb_poly_derivative(fp, f, prec);
