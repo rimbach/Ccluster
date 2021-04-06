@@ -4,7 +4,9 @@ NORMAL = "\e[0m"
 
 ECHO_ME = @/bin/echo -e
 
-all: testMignotteVerbose
+all: testVerbose
+
+testVerbose: testMignotteVerbose testBernoulliVerbose testMandelbrotVerbose
 
 testMignotteVerbose: genMignotteVerbose MignotteVerbose cleanMignotteVerbose 
 
@@ -13,6 +15,7 @@ testBernoulliVerbose: genBernoulliVerbose BernoulliVerbose cleanBernoulliVerbose
 testMandelbrotVerbose: genMandelbrotVerbose MandelbrotVerbose cleanMandelbrotVerbose
 
 temp_file=temp.txt
+input_file=temp_in.ccl
 
 # tests with Mignotte polynomials
 degree_Mignotte=64
@@ -81,3 +84,38 @@ MandelbrotVerbose: genMandelbrotVerbose
 	../bin/risolate ${input_Mandelbrot} -o 5 > ${temp_file}
 	@cat temp.txt
 	@check_output_risolate.sh --nbSols=19 --nbClus=19 --file=temp.txt
+
+CornerCases: 
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of a constant polynomial: should find no root" $(NORMAL)
+	echo "1  1" > ${input_file}
+	../bin/ccluster ${input_file} > ${temp_file}
+	@check_output_ccluster.sh --nbSols=0 --nbClus=0 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "Isolating real roots of a constant polynomial: should find no root" $(NORMAL)
+	../bin/risolate ${input_file} > ${temp_file}
+	@check_output_risolate.sh --nbSols=0 --nbClus=0 --file=temp.txt
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of a zero polynomial: should exit with error message" $(NORMAL)
+	echo "1  0" > ${input_file}
+	../bin/ccluster ${input_file}
+	${ECHO_ME} $(BGREEN) "Isolating real roots of a constant polynomial: should exit with error message" $(NORMAL)
+	../bin/risolate ${input_file}
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of a zero oracle polynomial: non terminating process with warning" $(NORMAL)
+	../bin/ccluster_zero 64 & sleep 0.5 & killall ../bin/ccluster_zero
+	../bin/ccluster_zero 64 -d 0,0,1 & sleep 0.5 & killall ../bin/ccluster_zero
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of a near zero oracle polynomial: terminating process with warning" $(NORMAL)
+	../bin/ccluster_near_zero 64
+	../bin/ccluster_near_zero 64 -d 0,0,1 
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of x^5: should find one cluster with 5 roots" $(NORMAL)
+	echo "6  0 0 0 0 0 1" > ${input_file}
+	../bin/ccluster ${input_file} > ${temp_file}
+	@check_output_ccluster.sh --nbSols=5 --nbClus=1 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "Isolating real roots of x^5: should find one root of multiplicity 5 roots" $(NORMAL)
+	echo "6  0 0 0 0 0 1" > ${input_file}
+	../bin/risolate ${input_file} > ${temp_file}
+	@check_output_risolate.sh --nbSols=5 --nbClus=1 --file=temp.txt
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of x^5 + x^4" $(NORMAL)
+	echo "6  0 0 0 0 1 1" > ${input_file}
+	../bin/ccluster ${input_file} > ${temp_file}
+	@check_output_ccluster.sh --nbSols=5 --nbClus=2 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "Isolating real roots of x^5 + x^4" $(NORMAL)
+	../bin/risolate ${input_file} > ${temp_file}
+	@check_output_risolate.sh --nbSols=5 --nbClus=2 --file=temp.txt

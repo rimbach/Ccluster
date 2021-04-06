@@ -57,6 +57,9 @@ POLYNOMIALS_INLINE void realApp_poly_set (realApp_poly_t dest, const realApp_pol
 POLYNOMIALS_INLINE void realApp_poly_set_coeff_si (realApp_poly_t dest, slong n, slong x)           { arb_poly_set_coeff_si (dest, n, x); }
 POLYNOMIALS_INLINE void realApp_poly_set_coeff_realApp(realApp_poly_t dest, slong n, const realApp_t x) { arb_poly_set_coeff_arb(dest, n, x); }
 
+/* interval operations */
+int  realApp_poly_contains_zero ( const realApp_poly_t poly );
+
 /* Arithmetic */
 POLYNOMIALS_INLINE void realApp_poly_mul( realApp_poly_t res, const realApp_poly_t poly1, const realApp_poly_t poly2, slong prec) {
     arb_poly_mul (res, poly1, poly2, prec);

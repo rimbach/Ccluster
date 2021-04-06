@@ -34,6 +34,15 @@ void risolate_interface_poly( const realRat_poly_t poly,
     
     
     cacheApp_init_realRat_poly ( cache, poly);
+    if (cacheApp_is_zero(cache)) {
+        printf("#risolate_interface.c: risolate_interface_poly \n");
+        printf("# input polynomial is zero polynomial: infinite number of roots \n");
+        printf("# exit\n");
+        cacheApp_clear(cache);
+        compBox_clear(initBox);
+        return;
+    }
+    
     cacheApp_canonicalise( cache );
     strategies_init(strat);
     
@@ -60,7 +69,8 @@ void risolate_interface_poly( const realRat_poly_t poly,
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    risolate_algo( qRes, bDis, initBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        risolate_algo( qRes, bDis, initBox, eps, cache, meta);
     metadatas_count(meta);
     metadatas_risolate_fprint(stdout, meta, eps);
     
@@ -97,7 +107,14 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     compAnn_list_t qAnn;
     
     cacheApp_init_realRat_poly ( cache, poly);
-    cacheApp_canonicalise( cache );
+    if (cacheApp_is_zero(cache)) {
+        printf("#risolate_interface.c: risolate_global_interface_poly \n");
+        printf("# input polynomial is zero polynomial: infinite number of roots \n");
+        printf("# exit\n");
+        cacheApp_clear(cache);
+        return;
+    } 
+    
     strategies_init(strat);
     
     /* automaticly set initialBox */
@@ -141,10 +158,12 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     
     if (metadatas_useRootRadii(meta)) {
         compAnn_list_init(qAnn);
-        risolate_algo_global_rootRadii( qRes, bDis, qAnn, initialBox, eps, cache, meta);
+        if (cacheApp_getDegree(cache)>0)
+            risolate_algo_global_rootRadii( qRes, bDis, qAnn, initialBox, eps, cache, meta);
     }
     else
-        risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);
+        if (cacheApp_getDegree(cache)>0)
+            risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_risolate_fprint(stdout, meta, eps);

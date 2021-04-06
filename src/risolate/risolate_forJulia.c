@@ -33,7 +33,15 @@ void risolate_forJulia_realRat_poly( connCmp_list_t qResults,
     
     /* set cache and strategy */
     cacheApp_init_realRat_poly ( cache, poly);
-    cacheApp_canonicalise( cache );
+    if (cacheApp_is_zero(cache)) {
+        printf("#risolate_forJulia.c: risolate_forJulia_realRat_poly \n");
+        printf("# input polynomial is zero polynomial: infinite number of roots \n");
+        printf("# exit\n");
+        cacheApp_clear(cache);
+        compBox_clear(initBox);
+        return;
+    }
+    
     strategies_init(strat);
     strategies_set_str( strat, stratstr, nbThreads );
     
@@ -48,7 +56,8 @@ void risolate_forJulia_realRat_poly( connCmp_list_t qResults,
     }
     metadatas_setSepBound(meta, sepBound);
     
-    risolate_algo( qResults, NULL, initBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        risolate_algo( qResults, NULL, initBox, eps, cache, meta);
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     
@@ -83,7 +92,14 @@ void risolate_global_forJulia_realRat_poly( connCmp_list_t qResults,
     
     /* set cache and strategy */
     cacheApp_init_realRat_poly ( cache, poly);
-    cacheApp_canonicalise( cache );
+    if (cacheApp_is_zero(cache)) {
+        printf("#risolate_forJulia.c: risolate_global_forJulia_realRat_poly \n");
+        printf("# input polynomial is zero polynomial: infinite number of roots \n");
+        printf("# exit\n");
+        cacheApp_clear(cache);
+        return;
+    }
+    
     strategies_init(strat);
     strategies_set_str( strat, stratstr, nbThreads );
     
@@ -115,10 +131,12 @@ void risolate_global_forJulia_realRat_poly( connCmp_list_t qResults,
     
     if (metadatas_useRootRadii(meta)) {
         compAnn_list_init(qAnn);
-        risolate_algo_global_rootRadii( qResults, NULL, qAnn, initialBox, eps, cache, meta);
+        if (cacheApp_getDegree(cache)>0)
+            risolate_algo_global_rootRadii( qResults, NULL, qAnn, initialBox, eps, cache, meta);
     }
     else
-        risolate_algo_global( qResults, NULL, initialBox, eps, cache, meta);
+        if (cacheApp_getDegree(cache)>0)
+            risolate_algo_global( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);

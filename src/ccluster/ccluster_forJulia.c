@@ -39,8 +39,9 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
     /* initialize power sums */
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
-
-    ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
+    
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -101,7 +102,8 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo_global( qResults, NULL, initialBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo_global( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -131,6 +133,14 @@ void ccluster_forJulia_compRat_poly( connCmp_list_t qResults,
     metadatas_t meta;
     
     cacheApp_init_compRat_poly(cache, poly);
+    if (cacheApp_is_zero(cache)) {
+        printf("#ccluster_forJulia.c: ccluster_forJulia_compRat_poly \n");
+        printf("# input polynomial is zero polynomial: infinite number of roots \n");
+        printf("# exit\n");
+        cacheApp_clear(cache);
+        return;
+    }
+    
     strategies_init(strat);
     
     strategies_set_str( strat, stratstr, nbThreads );
@@ -147,7 +157,8 @@ void ccluster_forJulia_compRat_poly( connCmp_list_t qResults,
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -177,6 +188,14 @@ void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults,
     metadatas_t meta;
     
     cacheApp_init_compRat_poly(cache, poly);
+    if (cacheApp_is_zero(cache)) {
+        printf("#ccluster_forJulia.c: ccluster_global_forJulia_compRat_poly \n");
+        printf("# input polynomial is zero polynomial: infinite number of roots \n");
+        printf("# exit\n");
+        cacheApp_clear(cache);
+        return;
+    }
+    
     strategies_init(strat);
     
     /* automatically set initialBox */
@@ -210,7 +229,8 @@ void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults,
     
     metadatas_init(meta, initialBox, strat, verb);
     
-    ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -269,7 +289,14 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
     
     /* set cache and strategy */
     cacheApp_init_realRat_poly ( cache, poly);
-    cacheApp_canonicalise( cache );
+    if (cacheApp_is_zero(cache)) {
+        printf("#ccluster_forJulia.c: ccluster_global_forJulia_realRat_poly \n");
+        printf("# input polynomial is zero polynomial: infinite number of roots \n");
+        printf("# exit\n");
+        cacheApp_clear(cache);
+        return;
+    }
+    
     strategies_init(strat);
     strategies_set_str( strat, stratstr, nbThreads );
     /* automaticly set realCoeffs: */
@@ -310,10 +337,12 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
         compAnn_list_init(qAnn);
         compAnn_list_init(qAnn1);
         compAnn_list_init(qAnn2);
-        ccluster_algo_global_rootRadii( qResults, NULL, qAnn, qAnn1, qAnn2, initBox, eps, cache, meta);
+        if (cacheApp_getDegree(cache)>0)
+            ccluster_algo_global_rootRadii( qResults, NULL, qAnn, qAnn1, qAnn2, initBox, eps, cache, meta);
     }
     else
-        ccluster_algo_global( qResults, NULL, initBox, eps, cache, meta);
+        if (cacheApp_getDegree(cache)>0)
+            ccluster_algo_global( qResults, NULL, initBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -413,7 +442,9 @@ void ccluster_forJulia_refine( connCmp_list_t qResults,
     
     metadatas_init(meta, initialBox, strat, verb);
     
-    ccluster_refine( qResults, qMainLoop, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_refine( qResults, qMainLoop, eps, cache, meta);
+    
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     if (verb>=3) {
@@ -474,7 +505,8 @@ int ccluster_global_forJulia_forTcluster_func( connCmp_list_t qResults,
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo_global( qResults, NULL, initialBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo_global( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -525,7 +557,8 @@ void ccluster_forJulia_draw( connCmp_list_t qResults,
     metadatas_init(meta, initialBox, strat, verb);
     
 //     ccluster_algo_draw( qResults, qDiscarded, initialBox, eps, cache, meta);
-    ccluster_algo( qResults, qDiscarded, initialBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo( qResults, qDiscarded, initialBox, eps, cache, meta);
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     if (verb>=3) {
