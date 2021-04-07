@@ -27,8 +27,6 @@
 
 #include "metadatas/pwSuDatas.h"
 
-#include "metadatas/cauchyDatas.h"
-
 #include <string.h>
 
 // #ifdef CCLUSTER_HAVE_PTHREAD
