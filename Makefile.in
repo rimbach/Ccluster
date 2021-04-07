@@ -21,6 +21,8 @@ BUILD_DIRS = $(SRC_PATH)\
 	     $(SRC_PATH)/polynomials\
 	     $(SRC_PATH)/tstar\
 	     $(SRC_PATH)/caches\
+	     $(SRC_PATH)/cauchy\
+	     $(SRC_PATH)/cauchy_tests\
 	     $(SRC_PATH)/geometry\
 	     $(SRC_PATH)/ISSAC20\
 	     $(SRC_PATH)/lists\

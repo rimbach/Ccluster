@@ -10,12 +10,14 @@ TEST_EXECS=$(TEST:%.c=%)
 
 build: ccluster\
        risolate\
+       cauchy\
        genPolFile\
        genRandPolFile\
        ccluster_spiral\
        ccluster_nested\
        ccluster_zero\
-       ccluster_near_zero
+       ccluster_near_zero\
+       cauchy_mandelbrot
 
 # TESTING VARIABLES
 degree=64
@@ -46,6 +48,12 @@ ccluster: ccluster.o parseArgs.h
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 
 risolate: risolate.o parseArgs.h
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	
+cauchy: cauchy.o parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
@@ -82,6 +90,12 @@ ccluster_zero: ccluster_zero.o
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 	    	
 ccluster_near_zero: ccluster_near_zero.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+
+cauchy_mandelbrot: cauchy_mandelbrot.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
