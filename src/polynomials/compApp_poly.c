@@ -11,6 +11,16 @@
 
 #include "compApp_poly.h"
 
+int compApp_poly_contains_zero(const compApp_poly_t poly){
+    int result = 1;
+    slong i = 0;
+    while ( ( i<=compApp_poly_degree(poly) ) && result ) {
+        result = result && compApp_contains_zero( compApp_poly_getCoeff( poly, i) );
+        i++;
+    }
+    return result;
+}
+
 int compApp_poly_check_relOne_accuracy( const compApp_poly_t poly, slong prec) {
     int result = 1;
     slong i = 0;

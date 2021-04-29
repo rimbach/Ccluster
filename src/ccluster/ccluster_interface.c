@@ -29,6 +29,9 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
     strategies_init(strat);
     
     strategies_set_str( strat, stratstr, nbThreads );
+    /* no root radii */
+    strategies_set_RootRadii( strat, 0 );
+    
     /* automatically set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
@@ -44,13 +47,21 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
             metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
     }
     
+    /* check if input polynomial is close to zero */
+    if (cacheApp_is_near_zero ( cache )) {
+        printf("#ccluster_interface.c: ccluster_interface_func \n");
+        printf("# input polynomial is nearly zero polynomial: can have infinite number of roots \n");
+    }
+    
     connCmp_list_init(qRes);
     compBox_list_init(bDis);
     
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    ccluster_algo( qRes, bDis, initialBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo( qRes, bDis, initialBox, eps, cache, meta);
+    
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     
@@ -96,13 +107,31 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     compBox_t initialBox;
     compBox_init(initialBox);
     compBox_set_si(initialBox, 0,1,0,1,0,1);
+    
+    /* check if input polynomial is close to zero */
+    if (cacheApp_is_near_zero ( cache )) {
+        printf("#ccluster_interface.c: ccluster_global_interface_func \n");
+        printf("# input polynomial is nearly zero polynomial: can have infinite number of roots \n");
+    }
+    
     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
-        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+            printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
+            if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+                printf("; use 1 instead");
+            }
+            printf("\n");
+    }
+    
+    if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+        realRat_set_si(compBox_bwidthref(initialBox), 1, 1);
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
     strategies_set_str( strat, stratstr, nbThreads );
+    /* no root radii */
+    strategies_set_RootRadii( strat, 0 );
+    
     /* automaticly set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
@@ -128,10 +157,12 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
         compAnn_list_init(qAnn);
         compAnn_list_init(qAnn1);
         compAnn_list_init(qAnn2);
-        ccluster_algo_global_rootRadii( qRes, bDis, qAnn, qAnn1, qAnn2, initialBox, eps, cache, meta);
+        if (cacheApp_getDegree(cache)>0)
+            ccluster_algo_global_rootRadii( qRes, bDis, qAnn, qAnn1, qAnn2, initialBox, eps, cache, meta);
     }
     else
-        ccluster_algo_global( qRes, bDis, initialBox, eps, cache, meta);
+        if (cacheApp_getDegree(cache)>0)
+            ccluster_algo_global( qRes, bDis, initialBox, eps, cache, meta);
     
     
     metadatas_count(meta);
@@ -164,7 +195,77 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     compBox_clear(initialBox);
 }
 
-/* name ccluster_global_interface_poly is for singular */
+void ccluster_interface_realRat_poly( const realRat_poly_t poly,
+                                      const compBox_t initialBox,
+                                      const realRat_t eps, 
+                                      char * stratstr,
+                                      int nbThreads,
+                                      int output,
+                                      int verb){
+    cacheApp_t cache;
+    strategies_t strat;
+    metadatas_t meta;
+    connCmp_list_t qRes;
+    compBox_list_t bDis;
+    
+    /* set cache and strategy */
+    cacheApp_init_realRat_poly ( cache, poly);
+    if (cacheApp_is_zero(cache)) {
+        printf("#ccluster_interface.c: ccluster_interface_realRat_poly \n");
+        printf("# input polynomial is zero polynomial: infinite number of roots \n");
+        printf("# exit\n");
+        cacheApp_clear(cache);
+        return;
+    }
+    strategies_set_str( strat, stratstr, nbThreads );
+    /* no root radii */
+    strategies_set_RootRadii( strat, 0 );
+    
+    /* automaticly set realCoeffs: */
+    /*                             input poly IS real */
+    /*                             input initial box is centered in 0 */
+    strategies_set_realCoeffs(strat, 1);
+    
+    metadatas_init(meta, initialBox, strat, verb);
+    
+    /* initialize power sums */
+    if (metadatas_usePowerSums(meta)) {
+        if (strat->_pwSuNbPs>1)
+            metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, strat->_pwSuNbPs, verb );
+        else 
+            metadatas_set_pwSuDatas( meta, NULL, cacheApp_getDegree(cache), 2, 1, 1, verb );
+    }
+    
+    connCmp_list_init(qRes);
+    compBox_list_init(bDis);
+    
+    if (output==-3) 
+        metadatas_setDrSub(meta, 1);
+    
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo( qRes, bDis, initialBox, eps, cache, meta);
+    
+    metadatas_count(meta);
+    metadatas_fprint(stdout, meta, eps);
+    
+    if (output==-2) {
+//         printf("gnuplot output: not yet implemented\n");
+        connCmp_list_gnuplot(stdout, qRes, meta, 1);
+    } else if (output==-3){
+//         connCmp_list_gnuplot(stdout, qRes, meta, 1);
+        connCmp_list_gnuplot_drawSubdiv(stdout, qRes, bDis, meta);
+    } else if (output!=0) {
+//         printf("cluster output: not yet implemented\n");
+        connCmp_list_print_for_results_withOutput(stdout, qRes, output, meta);
+    }
+    
+    cacheApp_clear(cache);
+    strategies_clear(strat);
+    metadatas_clear(meta);
+    connCmp_list_clear(qRes);
+    compBox_list_clear(bDis);
+}
+
 void ccluster_global_interface_realRat_poly( const realRat_poly_t poly,
                                              const realRat_t eps, 
                                              char * stratstr,
@@ -184,7 +285,15 @@ void ccluster_global_interface_realRat_poly( const realRat_poly_t poly,
     
     /* set cache and strategy */
     cacheApp_init_realRat_poly ( cache, poly);
-    cacheApp_canonicalise( cache );
+//     cacheApp_canonicalise( cache );
+    if (cacheApp_is_zero(cache)) {
+        printf("#ccluster_interface.c: ccluster_global_interface_realRat_poly \n");
+        printf("# input polynomial is zero polynomial: infinite number of roots \n");
+        printf("# exit\n");
+        cacheApp_clear(cache);
+        return;
+    }
+    
     strategies_init(strat);
     strategies_set_str( strat, stratstr, nbThreads );
     /* automaticly set realCoeffs: */
@@ -198,7 +307,14 @@ void ccluster_global_interface_realRat_poly( const realRat_poly_t poly,
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
-        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
+        if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+            printf("; use 1 instead");
+        }
+        printf("\n");
+    }
+    if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+        realRat_set_si(compBox_bwidthref(initialBox), 1, 1);
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
@@ -222,10 +338,12 @@ void ccluster_global_interface_realRat_poly( const realRat_poly_t poly,
         compAnn_list_init(qAnn);
         compAnn_list_init(qAnn1);
         compAnn_list_init(qAnn2);
-        ccluster_algo_global_rootRadii( qRes, bDis, qAnn, qAnn1, qAnn2, initialBox, eps, cache, meta);
+        if (cacheApp_getDegree(cache)>0)
+            ccluster_algo_global_rootRadii( qRes, bDis, qAnn, qAnn1, qAnn2, initialBox, eps, cache, meta);
     }
     else
-        ccluster_algo_global( qRes, bDis, initialBox, eps, cache, meta);
+        if (cacheApp_getDegree(cache)>0)
+            ccluster_algo_global( qRes, bDis, initialBox, eps, cache, meta);
     
     
     metadatas_count(meta);
@@ -286,7 +404,8 @@ void ccluster_interface_func_eval( void(*func)(compApp_poly_t, slong),
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, evalFast, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-    ccluster_algo( qRes, NULL, initialBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo( qRes, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -323,7 +442,14 @@ void ccluster_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     cacheApp_root_bound ( compBox_bwidthref(initialBox), cache );
     if (verb>=3) {
-        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+        printf("root bound: "); realRat_print(compBox_bwidthref(initialBox)); 
+        if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+            printf("; use 1 instead");
+        }
+        printf("\n");
+    }
+    if (realRat_is_zero(compBox_bwidthref(initialBox))) {
+        realRat_set_si(compBox_bwidthref(initialBox), 1, 1);
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
@@ -339,8 +465,8 @@ void ccluster_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     if (metadatas_usePowerSums(meta))
         metadatas_set_pwSuDatas( meta, evalFast, cacheApp_getDegree(cache), 2, 1, 1, verb );
     
-//     ccluster_algo( qRes, NULL, initialBox, eps, cache, meta);
-    ccluster_algo_global( qRes, NULL, initialBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo_global( qRes, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
@@ -466,6 +592,13 @@ int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * m
     connCmp_list_t qRes;
     
     cacheApp_init_compRat_poly(cache, poly);
+    if (cacheApp_is_zero(cache)) {
+        printf("#ccluster_interface.c: ccluster_interface_poly \n");
+        printf("# input polynomial is zero polynomial: infinite number of roots \n");
+        printf("# exit\n");
+        cacheApp_clear(cache);
+        return 0;
+    }
     strategies_init(strat);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), st&(0x1<<5), st>>6);
 //     strategies_set_int ( strat, st&(0x1), st&(0x1<<1), st&(0x1<<2), st&(0x1<<3), st&(0x1<<4), (st&( ((0x1<<10)-1)<<5 ))>>5, st>>16);
@@ -487,7 +620,8 @@ int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * m
     
     connCmp_list_init(qRes);
     
-    ccluster_algo( qRes, NULL, initialBox, eps, cache, meta);
+    if (cacheApp_getDegree(cache)>0)
+        ccluster_algo( qRes, NULL, initialBox, eps, cache, meta);
     metadatas_count(meta);
     metadatas_fprint(stdout, meta, eps);
     

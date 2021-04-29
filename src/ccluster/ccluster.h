@@ -173,6 +173,14 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
                                      int verb);
 
 /* name ccluster_global_interface_poly is for singular */
+void ccluster_interface_realRat_poly( const realRat_poly_t poly,
+                                      const compBox_t initialBox,
+                                      const realRat_t eps, 
+                                      char * stratstr,
+                                      int nbThreads,
+                                      int output,
+                                      int verb);
+
 void ccluster_global_interface_realRat_poly( const realRat_poly_t poly,
                                              const realRat_t eps, 
                                              char * stratstr,

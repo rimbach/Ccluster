@@ -39,6 +39,9 @@ POLYNOMIALS_INLINE void compApp_poly_fit_length(compApp_poly_t poly, slong len) 
 POLYNOMIALS_INLINE void compApp_poly_set_length(compApp_poly_t poly, slong len) { _acb_poly_set_length(poly, len); }
 
 POLYNOMIALS_INLINE slong compApp_poly_degree(const compApp_poly_t poly) { return acb_poly_degree(poly); }
+POLYNOMIALS_INLINE int   compApp_poly_is_zero(const compApp_poly_t poly) { return acb_poly_is_zero(poly); }
+int   compApp_poly_contains_zero(const compApp_poly_t poly);
+
 /* bounds are not checked */
 POLYNOMIALS_INLINE compApp_srcptr compApp_poly_getCoeff(const compApp_poly_t poly, slong degree) { return poly->coeffs + degree; }
 POLYNOMIALS_INLINE void  compApp_poly_swap( compApp_poly_t poly1, compApp_poly_t poly2 ) { acb_poly_swap(poly1, poly2); }

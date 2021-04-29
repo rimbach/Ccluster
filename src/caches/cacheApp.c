@@ -23,6 +23,8 @@ void cacheApp_init ( cacheApp_t cache, void(*getApproximation)(compApp_poly_t, s
     cache->_cache_real       = (realApp_poly_t *) ccluster_malloc ( (cache->_allocsize_real) * sizeof(realApp_poly_t) );
     
     cache->_from_poly = 0;
+    
+    cache->_degree = -1;
 #ifdef CCLUSTER_EXPERIMENTAL    
     cache->_der_size         = (int *) ccluster_malloc ( (cache->_allocsize) * sizeof(int) );
     cache->_cache_der        = (compApp_poly_t **) ccluster_malloc ( (cache->_allocsize) * sizeof(compApp_poly_t *) );
@@ -45,7 +47,10 @@ void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly){
     
     compRat_poly_init(cache->_poly);
     compRat_poly_set(cache->_poly, poly);
+    compRat_poly_canonicalise(cache->_poly);
     cache->_from_poly = 1;
+    
+    cache->_degree = -1;
     
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(cache->_mutex), NULL);
@@ -64,7 +69,10 @@ void cacheApp_init_realRat_poly ( cacheApp_t cache, const realRat_poly_t poly){
     
     compRat_poly_init(cache->_poly);
     compRat_poly_set_realRat_poly(cache->_poly, poly);
+    compRat_poly_canonicalise(cache->_poly);
     cache->_from_poly = 1;
+    
+    cache->_degree = -1;
     
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(cache->_mutex), NULL);
@@ -282,19 +290,49 @@ compApp_poly_ptr cacheApp_getDerivative ( cacheApp_t cache, slong prec, slong or
 #endif
 
 slong cacheApp_getDegree ( cacheApp_t cache ){
-    if (cache->_size == 0)
-        cacheApp_getApproximation (cache, CCLUSTER_DEFAULT_PREC);
-    return compApp_poly_degree((cache->_cache)[0]);
+    
+    if (cache->_degree == -1) {
+        
+        if (cache->_from_poly) {
+            cache->_degree = compRat_poly_degree( cache->_poly );
+        }
+        
+        else {
+            if (cache->_size == 0)
+                cacheApp_getApproximation (cache, CCLUSTER_DEFAULT_PREC);
+            cache->_degree = compApp_poly_degree((cache->_cache)[0]);
+        }
+        
+    }
+    
+    return cache->_degree;
 }
 
 /* returns the number of zero trailing coeffs */
-/* it is assumed that _poly has integer coeffficients */
+/* it is assumed that _poly has integer coefficients */
 slong cacheApp_getMultOfZero ( cacheApp_t cache ){
     realRat_poly_ptr p = compRat_poly_real_ptr( cache->_poly );
     int res = 0;
     while ( (res < realRat_poly_length(p)) && (fmpz_is_zero(p->coeffs + res) ==1 )) 
         res++;
     return res;
+}
+
+int cacheApp_is_zero ( cacheApp_t cache ){
+    
+    if (cache->_from_poly)
+        return compRat_poly_is_zero(cache->_poly);
+        
+    return 0;
+}
+
+int cacheApp_is_near_zero ( cacheApp_t cache ){
+    
+    if (cache->_size == 0)
+        cacheApp_getApproximation (cache, CCLUSTER_DEFAULT_PREC);
+    
+    return compApp_poly_contains_zero((cache->_cache)[0]);
+    
 }
 
 int cacheApp_is_real ( cacheApp_t cache ){
@@ -308,6 +346,13 @@ void cacheApp_root_bound ( realRat_t bound, cacheApp_t cache ){
     
     compApp_poly_ptr p;
     slong deg = cacheApp_getDegree(cache);
+    
+    /* deal with degree 0 polynomials */
+    if (deg<=0) {
+        realRat_one(bound);
+        return;
+    }
+    
     slong prec = CCLUSTER_DEFAULT_PREC;
     p = cacheApp_getApproximation (cache, prec);
     
@@ -367,6 +412,12 @@ slong cacheApp_getBitsize (cacheApp_t cache){
 void cacheApp_separation_bound ( realRat_t sepBound, cacheApp_t cache){
     
     slong deg = cacheApp_getDegree ( cache );
+    
+    /* deal with degree 0 polynomials */
+    if (deg==0) {
+        realRat_one(sepBound);
+        return;
+    }
     
     realRat_poly_canonicalise(compRat_poly_realref(cache->_poly));
     /* compute the inverse of the norm of the poly*/

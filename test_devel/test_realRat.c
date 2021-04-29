@@ -39,6 +39,10 @@ int main() {
     realRat_mul(r,r,s);
     printf("(1/2)*2: "); realRat_print(r); printf("\n");
     
+    
+    realRat_set_str_pretty(r, "1/2", 10);
+    printf("1/2: "); realRat_print(r); printf("\n");
+    
     realRat_clear(r);
     realRat_clear(s);
     return 0;   

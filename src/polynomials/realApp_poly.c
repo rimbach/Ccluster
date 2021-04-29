@@ -11,6 +11,18 @@
 
 #include "realApp_poly.h"
 
+/* ball operations */
+int  realApp_poly_contains_zero ( const realApp_poly_t poly ){
+    
+    int res = 1;
+    slong index = 0;
+    while ( (index < poly->length) && (res) ){
+        res = res && realApp_contains_zero ( poly->coeffs + index );
+        index ++;
+    }
+    return res;
+}
+
 /*order one center evaluation */
 // void realApp_poly_evaluate_order_one( realApp_t y, const realApp_poly_t f, const realApp_poly_t fder, const realApp_t x, slong prec){
 //     

@@ -38,6 +38,8 @@ POLYNOMIALS_INLINE void realRat_poly_fit_length(realRat_poly_t poly, slong len) 
 
 /* canonicalise, i.e. multiple with same roots and integer coeffs */
 POLYNOMIALS_INLINE void realRat_poly_canonicalise(realRat_poly_t poly) { fmpq_poly_canonicalise(poly); }
+/* testing */
+POLYNOMIALS_INLINE int  realRat_poly_is_zero(const realRat_poly_t poly) { return fmpq_poly_is_zero(poly); }
 
 /* setting */
 POLYNOMIALS_INLINE void realRat_poly_set (realRat_poly_t poly1, const realRat_poly_t poly2) {

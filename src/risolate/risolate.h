@@ -135,6 +135,23 @@ void risolate_interface_poly( const realRat_poly_t poly,
                               int output,
                               int verb);
 
+/* interfaces for Julia */
+void risolate_forJulia_realRat_poly( connCmp_list_t qResults, 
+                                    const realRat_poly_t poly, 
+                                    const compBox_t initialBox, 
+                                    const realRat_t eps, 
+                                    char * stratstr,
+                                    int nbThreads,
+                                    int verb);
+
+void risolate_global_forJulia_realRat_poly( connCmp_list_t qResults, 
+                                            const realRat_poly_t poly,  
+                                            compBox_t initialBox,
+                                            const realRat_t eps, 
+                                            char * stratstr,
+                                            int nbThreads,
+                                            int verb);
+
 void connCmp_risolate_print_for_results(FILE * f, const connCmp_t c, metadatas_t meta);
 
 void connCmp_list_risolate_print_for_results(FILE * f, const connCmp_list_t l, metadatas_t meta);

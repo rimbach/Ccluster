@@ -32,6 +32,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+int parallel_discard_done;
+pthread_mutex_t parallel_discard_mdone;
+pthread_cond_t  parallel_discard_cdone;
 
     
 typedef struct {

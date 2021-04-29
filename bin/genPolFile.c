@@ -62,6 +62,7 @@ int main(int argc, char **argv){
         printf("                      1: [default] Ccluster (.ccl)                  \n");
         printf("                      2:           MPsolve  (.mpl)                  \n");
         printf("                      3:           ANewDsc  (.dsc)                  \n");
+        printf("                      4:           msolve   (.ms)                   \n");
         printf("       -b , --bitsize: the bitsize of the coeffs (for Mignotte, randomDense, randomSparse\n");
         printf("                      8: [default] or a positive integer            \n");
         printf("       -n , --nbterms: the number of non-zero coeffs (for randomSparse)\n");
@@ -121,7 +122,7 @@ int main(int argc, char **argv){
         if ( (strcmp( argv[arg], "-f" ) == 0) || (strcmp( argv[arg], "--format" ) == 0) ) {
             if (argc>arg+1) {
                 parse = parse*sscanf(argv[arg+1], "%d", &format);
-                if ((format<=0)||(format>3)) {
+                if ((format<=0)||(format>4)) {
                     printf("%s ERROR: NON-VALID FORMAT (should be 1, 2 or 3) \n", argv[0]);
                     parse = 0;
                 }
@@ -335,6 +336,14 @@ int main(int argc, char **argv){
          
 //          fmpz_clear(den);
 //          fmpz_clear(coeff);
+    } else if (format==4) {
+        char * var = "x";
+        /* variable */
+        fprintf(curFile, "%s\n", var);
+        /* field characteristic */
+        fprintf(curFile, "0\n");
+        fmpq_poly_fprint_pretty(curFile, p, var);
+        fprintf(curFile, "\n");
     }
     else 
         printf("format %d not implemented\n", format);

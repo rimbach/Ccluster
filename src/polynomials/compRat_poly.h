@@ -18,6 +18,7 @@
 #define POLYNOMIALS_INLINE static __inline__
 #endif
 
+#include "base/base.h"
 #include "polynomials/realRat_poly.h"
 
 #ifdef __cplusplus
@@ -66,6 +67,22 @@ POLYNOMIALS_INLINE void compRat_poly_get_real(realRat_poly_t re, const compRat_p
 
 POLYNOMIALS_INLINE void compRat_poly_get_imag(realRat_poly_t im, const compRat_poly_t z) {
     realRat_poly_set(im, compRat_poly_imagref(z));
+}
+
+/* canonicalise, i.e. multiple with same roots and integer coeffs */
+POLYNOMIALS_INLINE void compRat_poly_canonicalise(compRat_poly_t poly) { 
+    realRat_poly_canonicalise(compRat_poly_realref(poly)); 
+    realRat_poly_canonicalise(compRat_poly_imagref(poly));
+}
+/* testing */
+POLYNOMIALS_INLINE int  compRat_poly_is_zero(const compRat_poly_t poly) { 
+    return  realRat_poly_is_zero(compRat_poly_realref(poly)) 
+           && realRat_poly_is_zero(compRat_poly_imagref(poly)); 
+}
+
+/* assume real and imag parts of poly are canonical */
+POLYNOMIALS_INLINE slong compRat_poly_degree(const compRat_poly_t poly) {
+    return CCLUSTER_MAX(realRat_poly_degree(compRat_poly_realref(poly)),realRat_poly_degree(compRat_poly_imagref(poly)));
 }
 
 /* setting */

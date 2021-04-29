@@ -13,7 +13,9 @@ build: ccluster\
        genPolFile\
        genRandPolFile\
        ccluster_spiral\
-       ccluster_nested
+       ccluster_nested\
+       ccluster_zero\
+       ccluster_near_zero
 
 # TESTING VARIABLES
 degree=64
@@ -68,6 +70,18 @@ ccluster_spiral: ccluster_spiral.o
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 
 ccluster_nested: ccluster_nested.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	
+ccluster_zero: ccluster_zero.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	
+ccluster_near_zero: ccluster_near_zero.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
