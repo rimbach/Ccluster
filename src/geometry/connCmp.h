@@ -54,11 +54,24 @@ typedef struct {
     int          degDe; /* nb of sol in the CC when the deflation has been computed */
     int          isDFG; /* a flag set to 1 if last terms of the first Graeffe iteration has been computed */
                         /*               0 otherwise */
-    realApp_poly defPo; /* "deflated" polynomial: interval polynomial that contains */
+    /* real case */
+    realApp_poly defPoR; /* "deflated" polynomial: interval polynomial that contains */
                         /*                        coeffs pol shifted to any point in the cc */
-    realApp_poly defFG; /* last terms of the first Graeffe iteration, unscaled */
+    realApp_poly defFGR; /* last terms of the first Graeffe iteration, unscaled */
+    /* complex case */
+    compApp_poly defPoC; /* "deflated" polynomial: interval polynomial that contains */
+                        /*                        coeffs pol shifted to any point in the cc */
+    compApp_poly defFGC; /* last terms of the first Graeffe iteration, unscaled */
     
     /* end for deflation */
+    
+    /* for re-using Taylor shifts */
+    int          reuFl;    /* 0 if no re-use is set */
+    compRat      reuCe;    /* center for the last taylor shift + Graeffe iterations done for this CC */
+    realRat      reuRa;    /* radius used for scaling */
+    int          reuNg;    /* number of Graeffe iterations */
+    slong        reuPr;    /* precision used */
+    compApp_poly reuPo;    /* computed pol */
 } connCmp;
 
 typedef connCmp connCmp_t[1];
@@ -79,8 +92,17 @@ typedef connCmp * connCmp_ptr;
 #define connCmp_isDefref(X) ( (X)->isDef)
 #define connCmp_degDeref(X) ( (X)->degDe)
 #define connCmp_isDFGref(X) ( (X)->isDFG)
-#define connCmp_defPoref(X) (&(X)->defPo)
-#define connCmp_defFGref(X) (&(X)->defFG)
+#define connCmp_defPoRref(X) (&(X)->defPoR)
+#define connCmp_defFGRref(X) (&(X)->defFGR)
+#define connCmp_defPoCref(X) (&(X)->defPoC)
+#define connCmp_defFGCref(X) (&(X)->defFGC)
+
+#define connCmp_reuFlref(X) ( (X)->reuFl)
+#define connCmp_reuCeref(X) (&(X)->reuCe)
+#define connCmp_reuRaref(X) (&(X)->reuRa)
+#define connCmp_reuNgref(X) ( (X)->reuNg)
+#define connCmp_reuPrref(X) ( (X)->reuPr)
+#define connCmp_reuPoref(X) (&(X)->reuPo)
 
 /* memory managment */
 void connCmp_init(connCmp_t x);
@@ -88,6 +110,25 @@ void connCmp_init_compBox(connCmp_t x, compBox_t b);
 
 void connCmp_clear(connCmp_t x);
 void connCmp_clear_for_tables(connCmp_t x);
+
+void connCmp_init_reu(connCmp_t x);
+void connCmp_clear_reu(connCmp_t x);
+
+void connCmp_reu_set_connCmp( connCmp_t dest, const connCmp_t src);
+
+void connCmp_reu_set_comp( connCmp_t dest, const compRat_t center,
+                                      const realRat_t radius,
+                                      int nbGraeffe,
+                                      slong prec,
+                                      compApp_poly_t pol );
+
+void connCmp_reu_set_real( connCmp_t dest, const realRat_t center,
+                                           const realRat_t radius,
+                                           int nbGraeffe,
+                                           slong prec,
+                                           realApp_poly_t pol );
+
+void connCmp_deflate_set_connCmp( connCmp_t dest, const connCmp_t src );
 
 /* deep copy of a connCmp; for the solver for triangular systems */
 void connCmp_set(connCmp_t dest, const connCmp_t src);

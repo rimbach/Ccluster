@@ -73,6 +73,7 @@ tstar_res tstar_real_interface( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,         /*the "default" arithmetic precision              */
                            int depth,          /*the depth for counter                           */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta){
     slong nprec = CCLUSTER_DEFAULT_PREC;
     
@@ -81,16 +82,16 @@ tstar_res tstar_real_interface( cacheApp_t cache,
     
     if (metadatas_useTstarOptim(meta)) {
         if (discard&&CCLUSTER_V2(meta)){
-            return tstar_real_optimized( cache, d, 0, discard, inNewton, nprec, depth, meta);
+            return tstar_real_optimized( cache, d, 0, discard, inNewton, nprec, depth, CC, meta);
         }
         else {
-            return tstar_real_optimized( cache, d, max_nb_sols, discard, inNewton, nprec, depth, meta);
+            return tstar_real_optimized( cache, d, max_nb_sols, discard, inNewton, nprec, depth, CC, meta);
         }
     }
     if (discard)
-        return tstar_real_asInPaper( cache, d, 0, discard, inNewton, nprec, depth, meta);
+        return tstar_real_asInPaper( cache, d, 0, discard, inNewton, nprec, depth, CC, meta);
     
-    return tstar_real_asInPaper( cache, d, max_nb_sols, discard, inNewton, nprec, depth, meta);
+    return tstar_real_asInPaper( cache, d, max_nb_sols, discard, inNewton, nprec, depth, CC, meta);
     
 }
 
@@ -101,6 +102,7 @@ tstar_res tstar_real_asInPaper( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,         /*the "default" arithmetic precision              */
                            int depth,          /*the depth for counter                           */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta){
     
     clock_t start = clock();
@@ -166,6 +168,7 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,        /*the "default" arithmetic precision              */
                            int depth,         /*the depth for counter                           */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta){
     
     clock_t start = clock();
@@ -315,14 +318,19 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
 //         cacheApp_nbItref(cache) = nbGraeffe;
 //     }
     
+    if (CC!=NULL) {
+        connCmp_reu_set_real( CC, compRat_realref( compDsk_centerref( d ) ), compDsk_radiusref( d ),
+                                  nbGraeffe, res.appPrec, pApprox );
+    }
+        
     realApp_poly_clear(pApprox);
     realApp_clear(sum);
     
     if (metadatas_getVerbo(meta)>=3) {
         if (discard)
-            printf(" depth: %d, prec for discarding test: %d\n", depth, (int) res.appPrec );
+            printf("#tstar_real.c: tstar_real_optimized: depth: %d, prec for exclusion test: %d\n", depth, (int) res.appPrec );
         else
-            printf(" depth: %d, prec for validating test: %d\n", depth, (int) res.appPrec );
+            printf("#tstar_real.c: tstar_real_optimized: depth: %d, prec for counting  test: %d\n", depth, (int) res.appPrec );
     }
 
     

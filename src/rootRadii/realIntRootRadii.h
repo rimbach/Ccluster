@@ -64,6 +64,13 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
                                   slong prec,
                                   metadatas_t meta );
 
+slong realIntRootRadii_rootRadii_2( compAnn_list_t annulii,  /* list of annulii */
+                                  slong centerRe,
+                                  cacheApp_t cache,        /* polynomial */
+//                                   const realRat_t delta,
+                                  slong prec,
+                                  metadatas_t meta );
+
 /* returns the precision used to carry out root radii */
 slong realIntRootRadii_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of annulii */
                                   slong centerIm,

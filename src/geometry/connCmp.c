@@ -10,6 +10,90 @@
 /* ************************************************************************** */
 
 #include "geometry/connCmp.h"
+void connCmp_init_reu(connCmp_t x) {
+    connCmp_reuFlref(x) = 0;
+    compRat_init( connCmp_reuCeref(x) );
+    realRat_init( connCmp_reuRaref(x) );
+    connCmp_reuNgref(x) = 0;
+    connCmp_reuPrref(x) = 0;
+    compApp_poly_init( connCmp_reuPoref(x) );
+}
+
+void connCmp_clear_reu(connCmp_t x) {
+    connCmp_reuFlref(x) = 0;
+    compRat_clear( connCmp_reuCeref(x) );
+    realRat_clear( connCmp_reuRaref(x) );
+    connCmp_reuNgref(x) = 0;
+    connCmp_reuPrref(x) = 0;
+    compApp_poly_clear( connCmp_reuPoref(x) );
+}
+
+void connCmp_reu_set_connCmp( connCmp_t dest, const connCmp_t src){
+    connCmp_reuFlref(dest) = connCmp_reuFlref(src);
+    compRat_set( connCmp_reuCeref(dest), connCmp_reuCeref(src) );
+    realRat_set( connCmp_reuRaref(dest), connCmp_reuRaref(src) );
+    connCmp_reuNgref(dest) = connCmp_reuNgref(src);
+    connCmp_reuPrref(dest) = connCmp_reuPrref(src);
+    compApp_poly_set(connCmp_reuPoref(dest), connCmp_reuPoref(src));
+}
+
+void connCmp_reu_set_comp( connCmp_t dest, const compRat_t center,
+                                      const realRat_t radius,
+                                      int nbGraeffe,
+                                      slong prec,
+                                      compApp_poly_t pol ){
+    connCmp_reuFlref(dest) = 1;
+    compRat_set( connCmp_reuCeref(dest), center );
+    realRat_set( connCmp_reuRaref(dest), radius );
+    connCmp_reuNgref(dest) = nbGraeffe;
+    connCmp_reuPrref(dest) = prec;
+    compApp_poly_set(connCmp_reuPoref(dest), pol);
+}
+
+void connCmp_reu_set_real( connCmp_t dest, const realRat_t center,
+                                           const realRat_t radius,
+                                           int nbGraeffe,
+                                           slong prec,
+                                           realApp_poly_t pol ){
+    connCmp_reuFlref(dest) = 1;
+    compRat_set_realRat( connCmp_reuCeref(dest), center );
+    realRat_set( connCmp_reuRaref(dest), radius );
+    connCmp_reuNgref(dest) = nbGraeffe;
+    connCmp_reuPrref(dest) = prec;
+    compApp_poly_set_realApp_poly(connCmp_reuPoref(dest), pol);
+}
+
+void connCmp_init_deflate  (connCmp_t x){
+    connCmp_isDefref(x) = 0;
+    connCmp_degDeref(x) = 0;
+    connCmp_isDFGref(x) = 0;
+    realApp_poly_init( connCmp_defPoRref(x) );
+    realApp_poly_init( connCmp_defFGRref(x) );
+    compApp_poly_init( connCmp_defPoCref(x) );
+    compApp_poly_init( connCmp_defFGCref(x) );
+}
+
+void connCmp_clear_deflate  (connCmp_t x){
+    connCmp_isDefref(x) = 0;
+    connCmp_degDeref(x) = 0;
+    connCmp_isDFGref(x) = 0;
+    realApp_poly_clear( connCmp_defPoRref(x) );
+    realApp_poly_clear( connCmp_defFGRref(x) );
+    compApp_poly_clear( connCmp_defPoCref(x) );
+    compApp_poly_clear( connCmp_defFGCref(x) );
+}
+
+void connCmp_deflate_set_connCmp( connCmp_t dest, const connCmp_t src ){
+    if (connCmp_isDefref(src) != 0) {
+        connCmp_isDefref(dest) = connCmp_isDefref(src);
+        connCmp_degDeref(dest) = connCmp_degDeref(src);
+        connCmp_isDFGref(dest) = connCmp_isDFGref(src);
+        realApp_poly_set( connCmp_defPoRref(dest), connCmp_defPoRref(src) );
+        realApp_poly_set( connCmp_defFGRref(dest), connCmp_defFGRref(src) );
+        compApp_poly_set( connCmp_defPoCref(dest), connCmp_defPoCref(src) );
+        compApp_poly_set( connCmp_defFGCref(dest), connCmp_defFGCref(src) );
+    }
+}
 
 void connCmp_init(connCmp_t x){
     compBox_list_init(connCmp_boxesref(x));
@@ -26,9 +110,10 @@ void connCmp_init(connCmp_t x){
     connCmp_isSepref(x) = 0;
     
     /* for deflation */
-    connCmp_isDefref(x) = 0;
-    connCmp_degDeref(x) = 0;
-    connCmp_isDFGref(x) = 0;
+    connCmp_init_deflate(x);
+    
+    /* for re-using Taylor shifts */
+    connCmp_init_reu(x);
 }
 
 void connCmp_init_compBox(connCmp_t x, compBox_t b){
@@ -59,10 +144,10 @@ void connCmp_clear(connCmp_t x){
     fmpz_clear(connCmp_nwSpdref(x));
     
     /* for deflation */
-    if (connCmp_isDefref(x) != 0) {
-        realApp_poly_clear( connCmp_defPoref(x) );
-        realApp_poly_clear( connCmp_defFGref(x) );
-    }
+    connCmp_clear_deflate(x);
+    
+    /* for re-using Taylor shifts */
+    connCmp_clear_reu(x);
 }
 
 void connCmp_clear_for_tables(connCmp_t x){
@@ -75,10 +160,10 @@ void connCmp_clear_for_tables(connCmp_t x){
     fmpz_clear(connCmp_nwSpdref(x));
     
     /* for deflation */
-    if (connCmp_isDefref(x) != 0) {
-        realApp_poly_clear( connCmp_defPoref(x) );
-        realApp_poly_clear( connCmp_defFGref(x) );
-    }
+    connCmp_clear_deflate(x);
+    
+    /* for re-using Taylor shifts */
+    connCmp_clear_reu(x);
 }
 
 void connCmp_set(connCmp_t dest, const connCmp_t src){
@@ -108,13 +193,10 @@ void connCmp_set(connCmp_t dest, const connCmp_t src){
     }
     
     /* for deflation */
-    if (connCmp_isDefref(src) != 0) {
-        connCmp_isDefref(dest) = connCmp_isDefref(src);
-        connCmp_degDeref(dest) = connCmp_degDeref(src);
-        connCmp_isDFGref(dest) = connCmp_isDFGref(src);
-        realApp_poly_set( connCmp_defPoref(dest), connCmp_defPoref(src) );
-        realApp_poly_set( connCmp_defFGref(dest), connCmp_defFGref(src) );
-    }
+    connCmp_deflate_set_connCmp(dest, src);
+    
+    /* for re-using Taylor shifts */
+    connCmp_reu_set_connCmp(dest, src);
 }
 
 connCmp_ptr connCmp_copy(connCmp_t src){

@@ -47,6 +47,8 @@ NUMBERS_INLINE void realApp_set_d     (realApp_t y, const double    x )         
 
 NUMBERS_INLINE void realApp_set_si     (realApp_t y, const slong    x )             { arb_set_si (y, x); }
 
+NUMBERS_INLINE void realApp_set_rad_zero (realApp_t x) { mag_zero(arb_radref(x)); }
+
 /* special cases */
 NUMBERS_INLINE void realApp_pos_inf    (realApp_t x                                ) { arb_pos_inf     (x); }
 NUMBERS_INLINE void realApp_neg_inf    (realApp_t x                                ) { arb_neg_inf     (x); }
@@ -80,6 +82,11 @@ NUMBERS_INLINE int  realApp_get_unique_si(slong * z, const realApp_t x) {
 
 /* performed inplace */
 NUMBERS_INLINE void realApp_add_error(realApp_t z, const realApp_t x) { arb_add_error( z, x ); }
+/* sets x to a ball centered in zero containing x */
+NUMBERS_INLINE void realApp_center_in_zero(realApp_t x) { 
+    arb_add_error_arf( x, arb_midref(x) ); 
+    arf_zero(arb_midref(x));
+}
 /* interval operations */
 NUMBERS_INLINE int  realApp_intersection(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { 
     return arb_intersection( z, x, y, prec ); 

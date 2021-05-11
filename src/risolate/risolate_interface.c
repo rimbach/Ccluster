@@ -72,7 +72,7 @@ void risolate_interface_poly( const realRat_poly_t poly,
     if (cacheApp_getDegree(cache)>0)
         risolate_algo( qRes, bDis, initBox, eps, cache, meta);
     metadatas_count(meta);
-    metadatas_risolate_fprint(stdout, meta, eps);
+    metadatas_risolate_fprint(stdout, meta, cache, eps);
     
     if (output==-2) {
         risolate_connCmp_list_gnuplot(stdout, qRes, meta, 1);
@@ -166,7 +166,7 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
             risolate_algo_global( qRes, bDis, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_risolate_fprint(stdout, meta, eps);
+    metadatas_risolate_fprint(stdout, meta, cache, eps);
     
     if (output==-2) {
         risolate_connCmp_list_gnuplot(stdout, qRes, meta, 1);

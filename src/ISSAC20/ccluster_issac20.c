@@ -297,7 +297,7 @@ int ccluster_issac20_main_loop( connCmp_list_t qResults,
 
 #ifdef WITHTSTAR
                     tstar_res resTstar;
-                    resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
+                    resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
                     connCmp_nSolsref(ccur) = resTstar.nbOfSol;
 //                     if (metadatas_getVerbo(meta)>3)
 //                         printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));
@@ -441,7 +441,7 @@ int ccluster_issac20_main_loop( connCmp_list_t qResults,
             /*experimental version: check result with a Pellet test*/
             compBox_get_containing_dsk(ccDisk, componentBox);
             tstar_res resTstar;
-            resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
+            resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
             if (resTstar.nbOfSol != connCmp_nSols(ccur)) {
                 if (metadatas_getVerbo(meta)>=2) {
                     printf("FAILURE: INCORRECT NUMBER OF SOLS IN A CLUSTER\n");

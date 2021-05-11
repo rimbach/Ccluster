@@ -126,7 +126,7 @@ newton_res newton_iteration( compApp_t iteration,
 /*test: interval newton */
 /* performs a newton test for the compBox b contained in the compDisk d;
  * returns 1 if interval newton certifies the existence of a solution in b;
- *         0 otherwise */
+ *         -1 otherwise */
 newton_res newton_interval(  compDsk_t d, 
                              cacheApp_t cache, 
                              slong prec, 
@@ -181,12 +181,17 @@ newton_res newton_interval(  compDsk_t d,
         if (compApp_contains(ball, fcBall)) {
             res.nflag=1;
         }
+//         else if ( compApp_intersection(cBall, ball, fcBall, res.appPrec) ) {
+//             res.nflag=0;
+//         }
+//         else
+//             res.nflag=-1;
     }
-    
-//     printf("result of interval newton: "); compApp_print(fcBall); printf("\n");
-//     printf("initial box              : "); compApp_print(ball); printf("\n");
-//     printf("interval newton result: %d \n", res.nflag);
-    
+//     if (metadatas_getVerbo(meta)>=3) {
+//         printf("#result of interval newton: "); compApp_print(fcBall); printf("\n");
+//         printf("#initial box              : "); compApp_print(ball); printf("\n");
+//         printf("#interval newton result: %d \n", res.nflag);
+//     }
     
     compApp_clear(cBall);
     compApp_clear(ball);
@@ -259,17 +264,81 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
         
         /*improvement: if one solution, try to validate with interval newton*/
         /* to avoid a costly taylor-shift in the tstar tes                  */ 
+        slong depth = connCmp_getDepth(CC, metadatas_initBref(meta));
         newton_res nres;
         nres.nflag = 0;
         if (connCmp_nSolsref(CC)==1) {
 //             printf("---the CC contains one solution: try to validate with interval newton\n");
             nres = newton_interval( ndisk, cache, res.appPrec, meta);
+            if (metadatas_getVerbo(meta)>=3)
+                        printf("#------only one sol, interval newton: nres.nflag: %d, depth: %ld\n", nres.nflag, depth);
         }
         
         if (nres.nflag==0) {
 //             printf("failed...\n");
-            slong depth = connCmp_getDepth(CC, metadatas_initBref(meta));
-            tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
+            tstar_res tres;
+            tres.nbOfSol = -2;
+            
+            /* try deflation */
+            if (metadatas_useDeflation(meta)){
+                if (connCmp_isDefref(CC)){
+                    
+                    if (metadatas_getVerbo(meta)>=3)
+                        printf("#------deflated connected component: nbSols: %d, prec: %ld, depth: %ld \n", connCmp_degDeref(CC), res.appPrec, depth);
+                    
+                    if (connCmp_reuFlref(CC)==1) {
+                        if (compRat_cmp( connCmp_reuCeref(CC), compDsk_centerref(ndisk) )==0){
+                            if (metadatas_getVerbo(meta)>=3) {
+                                printf("# SAME CENTER: try re-use \n");
+                            }
+                            tres = deflate_tstar_test_rescale( CC, cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, meta);
+                            if (metadatas_getVerbo(meta)>=3) {
+                                printf("#------run tstar with deflation rescale in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
+                            }
+                        }
+                    }
+            
+                    if ((tres.nbOfSol == -2)||(tres.nbOfSol == -1)) {
+                        tres = deflate_tstar_test( CC, cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, meta);
+                        if (metadatas_getVerbo(meta)>=3)
+                            printf("#------tstar with deflation in newton       : nbSols: %d, prec: %ld \n", tres.nbOfSol, tres.appPrec);
+                    }
+
+                    if (tres.nbOfSol ==-2) {
+                        if (metadatas_getVerbo(meta)>=3)
+                            printf("#------Unset deflation for a cluster of %d roots------\n", connCmp_degDeref(CC));
+                        connCmp_isDefref(CC) = 0;
+                    }
+                }
+                
+            }
+            
+            if (tres.nbOfSol == -2) {
+                clock_t start = clock();
+                
+                if (connCmp_reuFlref(CC)==1) {
+                    if (compRat_cmp( connCmp_reuCeref(CC), compDsk_centerref(ndisk) )==0){
+                        if (metadatas_getVerbo(meta)>=3) {
+                            printf("# SAME CENTER: try re-use \n");
+                        }
+                        tres = tstar_rescale( cache, ndisk, CC, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
+                        if (metadatas_getVerbo(meta)>=3) {
+                            printf("#------run tstar rescale in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
+                        }
+                    }
+                }
+                
+                if ((tres.nbOfSol == -2)||(tres.nbOfSol == -1))
+                    tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, CC, meta);
+                
+                if (metadatas_haveToCount(meta))
+                    metadatas_add_time_NeTSTes(meta, (double) (clock() - start) );
+            
+                if (metadatas_getVerbo(meta)>=3)
+                    printf("#------run tstar in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
+                
+            }
+            
             res.appPrec = tres.appPrec;
             res.nflag = (tres.nbOfSol == connCmp_nSolsref(CC));
         
@@ -324,6 +393,17 @@ newton_res newton_newton_connCmp( connCmp_t nCC,
         /* end test */
         /*connCmp_appPrref(nCC) = res.appPrec;*/ /*adjust the precision in the main loop*/
         
+        if (metadatas_useDeflation(meta)){
+            if (connCmp_isDefref(CC)){
+                    if (metadatas_getVerbo(meta)>=4)
+                        printf("------copy deflation datas \n");
+//                     deflate_copy(nCC, CC);
+                    connCmp_deflate_set_connCmp(nCC,CC);
+            }
+        }
+        
+        connCmp_reu_set_connCmp( nCC, CC );
+        
     }
     /* printf("Newton: new CC Ok (nflag: %d)--------------------------- \n", res.nflag);*/
     
@@ -350,8 +430,10 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
 //     chronos_tic_Newtons(metadatas_chronref(meta));
     /* printf("Newton: begin --------------------------- \n");*/
     newton_res res;
-    if (metadatas_usePredictPrec(meta))
+    if (metadatas_usePredictPrec(meta)) {
+//         res.appPrec = CCLUSTER_MAX(prec/2, CCLUSTER_DEFAULT_PREC);
         res.appPrec = prec;
+    }
     else
         res.appPrec = CCLUSTER_DEFAULT_PREC;
     
@@ -375,7 +457,7 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
 //     slong precsave = prec;
     
     res = newton_first_condition( fcenter, fpcenter, cache, c, fourcc, res.appPrec, meta);
-//     printf("Newton: firstCondOk (nflag: %d) prec avant: %d, prec apres: %d \n", res.nflag, prec, res.appPrec);
+//     printf("Newton: firstCondOk (nflag: %d) prec avant: %ld, prec apres: %ld \n", res.nflag, prec, res.appPrec);
     
     if (res.nflag){
 //         precsave = res.appPrec;
@@ -389,7 +471,7 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
     }
     
     realRat_set_si(compRat_imagref( compDsk_centerref(ndisk)), 0,1);
-//     printf("Newton: iterationOK (nflag: %d) prec avant: %d, prec apres: %d \n", res.nflag, prec, res.appPrec);
+//     printf("Newton: iterationOK (nflag: %d) prec avant: %ld, prec apres: %ld \n", res.nflag, prec, res.appPrec);
     
     if (res.nflag) {
 //         precsave = res.appPrec;
@@ -413,16 +495,32 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
             /* try deflation */
             if (metadatas_useDeflation(meta)){
                 if (connCmp_isDefref(CC)){
-                    if (metadatas_getVerbo(meta)>=3)
-                        printf("------deflated connected component: nbSols: %d, prec: %ld, depth: %ld \n", connCmp_degDeref(CC), res.appPrec, depth);
                     
-                    tres = deflate_tstar_test( CC, cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, meta);
-                    if (metadatas_getVerbo(meta)>=3)
-                        printf("------tstar with deflation        : nbSols: %d, prec: %ld \n", tres.nbOfSol, tres.appPrec);
+                    if (metadatas_getVerbo(meta)>=4)
+                        printf("#------deflated connected component: nbSols: %d, prec: %ld, depth: %ld \n", connCmp_degDeref(CC), res.appPrec, depth);
+                    
+                    if (connCmp_reuFlref(CC)==1) {
+                        if (compRat_cmp( connCmp_reuCeref(CC), compDsk_centerref(ndisk) )==0){
+                            if (metadatas_getVerbo(meta)>=4) {
+                                printf("# SAME CENTER: try re-use \n");
+                            }
+                            tres = deflate_real_tstar_test_rescale( CC, cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, meta);
+                            if (metadatas_getVerbo(meta)>=4) {
+                                printf("#------run tstar with deflation rescale in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
+                            }
+                        }
+                    }
+            
+                    if ((tres.nbOfSol == -2)||(tres.nbOfSol == -1)) {
+                        tres = deflate_real_tstar_test( CC, cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, meta);
+                        if (metadatas_getVerbo(meta)>=4)
+                            printf("#------tstar with deflation in newton       : nbSols: %d, prec: %ld \n", tres.nbOfSol, tres.appPrec);
+                    }
 
                     if (tres.nbOfSol ==-2) {
+                        if (metadatas_getVerbo(meta)>=4)
+                            printf("#------Unset deflation for a cluster of %d roots------\n", connCmp_degDeref(CC));
                         connCmp_isDefref(CC) = 0;
-                        deflate_connCmp_clear(CC);
                     }
                 }
                 
@@ -431,14 +529,26 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
             if (tres.nbOfSol == -2) {
                 clock_t start = clock();
                 
-//                 tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
-                tres = tstar_real_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
+                if (connCmp_reuFlref(CC)==1) {
+                    if (compRat_cmp( connCmp_reuCeref(CC), compDsk_centerref(ndisk) )==0){
+                        if (metadatas_getVerbo(meta)>=4) {
+                            printf("# SAME CENTER: try re-use \n");
+                        }
+                        tres = tstar_rescale( cache, ndisk, CC, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
+                        if (metadatas_getVerbo(meta)>=4) {
+                            printf("#------run tstar rescale in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
+                        }
+                    }
+                }
+                
+                if ((tres.nbOfSol == -2)||(tres.nbOfSol == -1))
+                    tres = tstar_real_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, CC, meta);
                 
                 if (metadatas_haveToCount(meta))
                     metadatas_add_time_NeTSTes(meta, (double) (clock() - start) );
             
-//                 if (metadatas_getVerbo(meta)>=3)
-//                     printf("------run tstar in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
+                if (metadatas_getVerbo(meta)>=4)
+                    printf("#------run tstar in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
             }
             
             res.appPrec = tres.appPrec;
@@ -497,11 +607,15 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
     
         if (metadatas_useDeflation(meta)){
             if (connCmp_isDefref(CC)){
-//                     printf("------copy deflation datas \n");
-                    deflate_connCmp_init(nCC);
-                    deflate_copy(nCC, CC);
+                    if (metadatas_getVerbo(meta)>=4)
+                        printf("------copy deflation datas \n");
+//                     deflate_copy(nCC, CC);
+                    connCmp_deflate_set_connCmp( nCC, CC);
             }
         }
+        
+        connCmp_reu_set_connCmp( nCC, CC );
+        
         
     }
     /* printf("Newton: new CC Ok (nflag: %d)--------------------------- \n", res.nflag);*/

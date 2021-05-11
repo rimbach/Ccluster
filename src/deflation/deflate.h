@@ -33,17 +33,28 @@ extern "C" {
 #define connCmp_isDefref(X) ( (X)->isDef)
 #define connCmp_degDeref(X) ( (X)->degDe)
 #define connCmp_isDFGref(X) ( (X)->isDFG)
-#define connCmp_defPoref(X) (&(X)->defPo)
-#define connCmp_defFGref(X) (&(X)->defFG)
+#define connCmp_defPoRref(X) (&(X)->defPoR)
+#define connCmp_defFGRref(X) (&(X)->defFGR)
+#define connCmp_defPoCref(X) (&(X)->defPoC)
+#define connCmp_defFGCref(X) (&(X)->defFGC)
     
 /* memory managment */
-void deflate_connCmp_init  (connCmp_t x);
-void deflate_connCmp_clear (connCmp_t x);
-/* setting */
-void deflate_set( connCmp_t x, cacheApp_t cache, const compDsk_t disk, int nbSols, slong prec, metadatas_t meta );
-void deflate_copy( connCmp_t dest, const connCmp_t src );
 
-tstar_res deflate_tstar_test( connCmp_t CC, cacheApp_t cache, const compDsk_t d, int max_nb_sols, int discard, slong prec, metadatas_t meta);
+// void deflate_connCmp_init  (connCmp_t x);
+// void deflate_connCmp_clear (connCmp_t x);
+// void deflate_copy( connCmp_t dest, const connCmp_t src );
+
+/* complex deflation */
+// /* setting */
+void deflate_set( connCmp_t x, cacheApp_t cache, const compDsk_t disk, int nbSols, slong prec, metadatas_t meta );
+tstar_res deflate_tstar_test( connCmp_t CC, cacheApp_t cache, const compDsk_t d, int max_nb_sols, int discard, slong prec, metadatas_t meta); 
+tstar_res deflate_tstar_test_rescale( connCmp_t CC, cacheApp_t cache, const compDsk_t d, int max_nb_sols, int discard, slong prec, metadatas_t meta);
+
+/* real deflation */
+/* setting */
+void deflate_real_set( connCmp_t x, cacheApp_t cache, const compDsk_t disk, int nbSols, slong prec, metadatas_t meta );
+tstar_res deflate_real_tstar_test( connCmp_t CC, cacheApp_t cache, const compDsk_t d, int max_nb_sols, int discard, slong prec, metadatas_t meta);
+tstar_res deflate_real_tstar_test_rescale( connCmp_t CC, cacheApp_t cache, const compDsk_t d, int max_nb_sols, int discard, slong prec, metadatas_t meta);
 
 /*DEPRECATED*/
 // /* deflate2 */

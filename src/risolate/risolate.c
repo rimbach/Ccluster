@@ -51,11 +51,7 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
             if (metadatas_useDeflation(meta)) {
                 if (connCmp_isDefref(cc)==1) {
                     slong precsave = res.appPrec;
-                    
-//                     if (metadatas_getVerbo(meta)>=3)
-//                         printf("---bisect compBox list: deflation is defined\n");
-                    
-                    res = deflate_tstar_test( cc, cache, bdisk, connCmp_nSolsref(cc), 1, res.appPrec, meta);
+                    res = deflate_real_tstar_test( cc, cache, bdisk, connCmp_nSolsref(cc), 1, res.appPrec, meta);
                     if (metadatas_getVerbo(meta)>=3)
                         printf("---tstar with deflation        : nbSols: %d, prec: %ld \n", res.nbOfSol, res.appPrec);
                     if (res.nbOfSol == -2)
@@ -64,7 +60,7 @@ slong risolate_discard_compBox_list( compBox_list_t boxes,
             }
 //             res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta); 
         if (res.nbOfSol == -2) {
-            res = tstar_real_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta); 
+            res = tstar_real_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, NULL, meta); 
 //             if (metadatas_useDeflation(meta)) {
 //                 if ((connCmp_isDefref(cc)==1)&&(metadatas_getVerbo(meta)>=3)) {
 //                     printf("---tstar without deflation     : nbSols: %d, prec: %ld \n", res.nbOfSol, res.appPrec);
@@ -157,15 +153,14 @@ void risolate_bisect_connCmp( connCmp_list_t dest,
                 connCmp_isSep(ctemp) = connCmp_isSep(cc);
                 /*end test */
                 
-                if (metadatas_useDeflation(meta)) {
+                
+            }
+            if (metadatas_useDeflation(meta)) {
                     if (connCmp_isDefref(cc)==1) {
 //                         printf("---bisect conn comp: deflation is defined; copy deflation data\n");
-                        deflate_connCmp_init(ctemp);
-                        deflate_copy(ctemp, cc);
+//                         deflate_copy(ctemp, cc);
+                        connCmp_deflate_set_connCmp(ctemp, cc);
                     }
-                }
-                
-                
             }
             connCmp_list_push(dest, ctemp);
         }
@@ -346,7 +341,11 @@ void risolate_main_loop( connCmp_list_t qResults,
             printf("------nb of boxes:         %d\n", compBox_list_get_size(connCmp_boxesref(ccur)));
             printf("------nb of roots:         %d\n", connCmp_nSolsref(ccur));
             printf("------last newton success: %d\n", connCmp_newSuref(ccur));
-            printf("------newton speed       : "); fmpz_print(connCmp_nwSpdref(ccur)); printf("\n");
+            realApp_t nwSpeed;
+            realApp_init(nwSpeed);
+            realApp_set_fmpz(nwSpeed, connCmp_nwSpdref(ccur), CCLUSTER_DEFAULT_PREC);
+            printf("#------newton speed       : "); realApp_printd(nwSpeed, 10); printf("\n");
+            realApp_clear(nwSpeed);
             printf("------separation Flag:     %d\n", separationFlag);
             printf("------widthFlag:           %d\n", widthFlag); 
             printf("------compactFlag:         %d\n", compactFlag);
@@ -359,12 +358,26 @@ void risolate_main_loop( connCmp_list_t qResults,
         
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
                 
-//                 resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
                 if (connCmp_nSolsref(ccur)!=1){
-                    resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
+                    
+                    resTstar.nbOfSol = -2;
+                    
+                    if (metadatas_useDeflation(meta)) {
+                        if (connCmp_isDefref(ccur)) {
+//                             resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
+                            resTstar = deflate_real_tstar_test( ccur, cache, ccDisk, connCmp_degDeref(ccur), 0, prec, meta);
+                            if (metadatas_getVerbo(meta)>=3)
+                                printf("#------run tstar with deflation for counting: nbSols: %d, required precision: %ld\n", (int) resTstar.nbOfSol, resTstar.appPrec);
+                        }
+                    }
+                    
+                    
+                    if (resTstar.nbOfSol < 0) {
+                        resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
+                        if (metadatas_getVerbo(meta)>=3)
+                            printf("#------run tstar for counting: nbSols: %d, required precision: %ld\n", (int) resTstar.nbOfSol, resTstar.appPrec);
+                    }
                     connCmp_nSolsref(ccur) = resTstar.nbOfSol;
-                    if (metadatas_getVerbo(meta)>3)
-                        printf("------run tstar: nbSols: %d, required precision: %ld\n", (int) connCmp_nSolsref(ccur), resTstar.appPrec);
                     prec = resTstar.appPrec;
                 }
         }
@@ -428,11 +441,13 @@ void risolate_main_loop( connCmp_list_t qResults,
 //                         if (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)==0) {
                         if (connCmp_isDefref(ccur)==0) {
                             if (realRat_cmp_ui(compDsk_radiusref(ccDisk), 1 ) < 0) {
-//                                 if (metadatas_getVerbo(meta)>=3){
-//                                     printf("\n\n\n ------Success of Newton Iteration for this Component with a cluster of %d roots------\n", connCmp_nSolsref(ccur) );
-//                                 }
-                                deflate_connCmp_init(ccur);
-                                deflate_set( ccur, cache, ccDisk, connCmp_nSolsref(ccur), connCmp_appPrref(ccur), meta );
+                                if (metadatas_getVerbo(meta)>=2){
+                                    printf("#------Set deflation for a cluster of %d roots------\n", connCmp_nSolsref(ccur) );
+                                    printf("#------disk: ");
+                                    compDsk_print(ccDisk);
+                                    printf("\n");
+                                }
+                                deflate_real_set( ccur, cache, ccDisk, connCmp_nSolsref(ccur), connCmp_appPrref(ccur), meta );
                                 
                             }
                         }

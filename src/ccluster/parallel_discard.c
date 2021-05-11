@@ -22,7 +22,7 @@ void * _parallel_discard_list_worker( void * arg_ptr ){
     /* arg->status has been set to 1 by caller           */
     /* nb_thread_running has been incremented by caller; */
     
-    arg->prec = ccluster_discard_compBox_list( arg->boxes, NULL, arg->cache, arg->prec, arg->meta);
+    arg->prec = ccluster_discard_compBox_list( arg->boxes, NULL, arg->cc, arg->cache, arg->prec, arg->meta);
     
     flint_cleanup();
     
@@ -38,7 +38,7 @@ void * _parallel_discard_list_worker( void * arg_ptr ){
 
 
 
-slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
+slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes,  connCmp_t cc, cacheApp_t cache,
                                         slong prec, metadatas_t meta, slong nbThreads){
     
     slong nb_threads = nbThreads;
@@ -59,6 +59,7 @@ slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t c
         
         args[i].prec = precres;
         compBox_list_init(args[i].boxes);
+        args[i].cc    = (connCmp_ptr) cc;
         args[i].cache = (cacheApp_ptr) cache;
         args[i].meta = (metadatas_ptr) meta;
         /*splits boxes in nbthreads lists*/

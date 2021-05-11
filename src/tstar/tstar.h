@@ -26,6 +26,8 @@
 #include "tstar/pelletTest.h"
 #include "metadatas/metadatas.h"
 
+#include "geometry/connCmp.h"
+
 #include "math.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -59,6 +61,7 @@ tstar_res tstar_interface( cacheApp_t cache,  /*                                
                            int inNewton,      /*a flag saying if it is for newton refinement   */
                            slong prec,        /*the "default" arithmetic precision             */
                            int depth,         /*the depth for counter                          */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta);
 
 tstar_res tstar_asInPaper( cacheApp_t cache,
@@ -68,6 +71,7 @@ tstar_res tstar_asInPaper( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement   */
                            slong prec,        /*the "default" arithmetic precision              */
                            int depth,         /*the depth for counter                           */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta);
 
 tstar_res tstar_optimized( cacheApp_t cache,
@@ -77,7 +81,18 @@ tstar_res tstar_optimized( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement   */
                            slong prec,        /*the "default" arithmetic precision               */
                            int depth,         /*the depth for counter                            */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta);
+
+tstar_res tstar_rescale( cacheApp_t cache,
+                              const compDsk_t d,
+                              const connCmp_ptr CC,
+                              int max_nb_sols,   /*the maximum number of sols in the disk          */
+                              int discard,       /*a flag saying if it is a discarding test or not */
+                              int inNewton,      /*a flag saying if it is for newton refinement     */
+                              slong prec,        /*the "default" arithmetic precision              */
+                              int depth,         /*the depth for counter                           */
+                              metadatas_t meta);
 
 void tstar_real_getApproximation( realApp_poly_t res, cacheApp_t cache, slong prec, metadatas_t meta);
 void tstar_real_taylor_shift_inplace( realApp_poly_t res, const compDsk_t d, slong prec, metadatas_t meta);
@@ -91,6 +106,7 @@ tstar_res tstar_real_interface( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,         /*the "default" arithmetic precision              */
                            int depth,          /*the depth for counter                           */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta);
 
 tstar_res tstar_real_asInPaper( cacheApp_t cache,
@@ -100,6 +116,7 @@ tstar_res tstar_real_asInPaper( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,         /*the "default" arithmetic precision              */
                            int depth,          /*the depth for counter                           */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta);
 
 tstar_res tstar_real_optimized( cacheApp_t cache,
@@ -109,6 +126,7 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,        /*the "default" arithmetic precision              */
                            int depth,         /*the depth for counter                           */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta);
 
 // int  tstar_real_downsize( compDsk_t nd,       /* if res==1, the disk containing the same sols */  

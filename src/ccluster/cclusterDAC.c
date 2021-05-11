@@ -185,7 +185,7 @@ void ccluster_main_loop_DAC( connCmp_list_t qResults,
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
             
             if (connCmp_nSolsref(ccur)==-1){
-                resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
+                resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
                 prec = resTstar.appPrec;
             }

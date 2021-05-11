@@ -41,6 +41,7 @@ extern "C" {
 
 slong ccluster_discard_compBox_list( compBox_list_t boxes, 
                                      compBox_list_t bDiscarded,
+                                     connCmp_t cc,
                                      cacheApp_t cache, 
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta);

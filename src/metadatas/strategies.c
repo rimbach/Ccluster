@@ -190,29 +190,28 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
 //         return;
 //     }
     
-    if (strcmp( stratName, STRAT_STR_V7 ) == 0) {
-        strat->_useNewton             = 1;
-        strat->_useTstarOptim         = 1;
-        strat->_usePredictPrec        = 1;
-        strat->_useAnticipate         = 1;
-        strat->_useRealCoeffs         = 1;
-        strat->_useDeflation          = 1;
-//         strat->_useDeflation          = 0;
-        strat->_usePowerSums          = 0;
-        strat->_useRootRadii          = 1;
-//         strat->_pwSuNbPs              = 1;
-        return;
-    }
-    
     if (strcmp( stratName, STRAT_STR_V8 ) == 0) {
         strat->_useNewton             = 1;
         strat->_useTstarOptim         = 1;
         strat->_usePredictPrec        = 1;
         strat->_useAnticipate         = 1;
         strat->_useRealCoeffs         = 1;
-        strat->_usePowerSums          = 1;
+        strat->_useDeflation          = 0;
+        strat->_usePowerSums          = 0;
+        strat->_forTests              = 0;
         strat->_useRootRadii          = 1;
-//         strat->_pwSuNbPs              = 1;
+        return;
+    }
+    if (strcmp( stratName, STRAT_STR_V7 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_useRealCoeffs         = 1;
+        strat->_useDeflation          = 0;
+        strat->_usePowerSums          = 0;
+        strat->_forTests              = 0;
+        strat->_useRootRadii          = 0;
         return;
     }
     
