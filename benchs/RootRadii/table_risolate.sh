@@ -498,6 +498,8 @@ stats_pol_rand()
     DSC_TSIZE=`echo $DSC_TSIZE+$DSC_TSIZE_T|bc -l`
     DSC_TTIME=`echo $DSC_TTIME+$DSC_TTIME_T|bc -l`
     DSC_TTIME_SQ=`echo $DSC_TTIME_SQ+$DSC_TTIME_T^2|bc -l`
+    
+    echo "$NAME & $NSOLS_T & $RR_NSOLS_T & $DSC_NSOLS_T "
 #     echo $DSC_TTIME_SQ
     
 #     LINE_TAB1="`format_numb $DEG $LENP` & `format_numb $BITSI_T $LENP` & `format_numb $NSOLS_T $LENP` & `format_numb $RR_NSOLS_T $LENP` & `format_numb $TSIZE_T $LENP` & `format_numb $TDEPT_T 2` & `format_time $TTIME_T`"
@@ -526,7 +528,7 @@ echo $POLNAME >> $TEMPTABFILE2
 echo $POLNAME >> $TEMPTABFILE3
 # 
 # DEGREES="256 391 512"
-DEGREES="16 32 64 256 391 512"
+DEGREES="256 391 512"
 # BITSIZES="16 8192 16384 32768"
 BITSIZES="16 8192 16384 32768 65536"
 for DEG in $DEGREES; do

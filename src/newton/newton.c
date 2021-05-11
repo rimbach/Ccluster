@@ -507,6 +507,8 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
                             tres = deflate_real_tstar_test_rescale( CC, cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, meta);
                             if (metadatas_getVerbo(meta)>=4) {
                                 printf("#------run tstar with deflation rescale in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
+//                                 tres = deflate_real_tstar_test( CC, cache, ndisk, connCmp_nSolsref(CC), 0, res.appPrec, meta);
+//                                 printf("#------tstar with deflation in newton       : nbSols: %d, prec: %ld \n\n", tres.nbOfSol, tres.appPrec);
                             }
                         }
                     }
@@ -537,6 +539,8 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
                         tres = tstar_rescale( cache, ndisk, CC, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, meta);
                         if (metadatas_getVerbo(meta)>=4) {
                             printf("#------run tstar rescale in Newton: nbSols: %d, required precision: %ld\n", tres.nbOfSol, tres.appPrec);
+//                             tres = tstar_real_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, CC, meta);
+//                             printf("#------run tstar in Newton        : nbSols: %d, required precision: %ld\n\n", tres.nbOfSol, tres.appPrec);
                         }
                     }
                 }

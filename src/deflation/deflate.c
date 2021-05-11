@@ -513,7 +513,7 @@ tstar_res deflate_tstar_test_rescale( connCmp_t CC, cacheApp_t cache, const comp
     realRat_init(ratio);
     realRat_set(ratio, compDsk_radiusref( d ));
     realRat_div(ratio, ratio, connCmp_reuRaref(CC));
-    slong pow = 1 >> connCmp_reuNgref(CC);
+    slong pow = 1 << connCmp_reuNgref(CC);
     realRat_pow_si (ratio, ratio, pow);
     compApp_poly_scale_realRat_in_place( pApprox->coeffs, ratio, pApprox->length, res.appPrec );
     realRat_clear(ratio);

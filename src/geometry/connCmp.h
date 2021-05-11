@@ -65,7 +65,7 @@ typedef struct {
     
     /* end for deflation */
     
-    /* for re-using Taylor shifts */
+//     /* for re-using Taylor shifts */
     int          reuFl;    /* 0 if no re-use is set */
     compRat      reuCe;    /* center for the last taylor shift + Graeffe iterations done for this CC */
     realRat      reuRa;    /* radius used for scaling */

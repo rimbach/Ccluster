@@ -331,10 +331,10 @@ tstar_res tstar_optimized( cacheApp_t cache,
 //         cacheApp_nbItref(cache) = nbGraeffe;
 //     }
     /*end for test */
-    if (CC!=NULL) {
-        connCmp_reu_set_comp( CC, compDsk_centerref( d ), compDsk_radiusref( d ),
-                                  nbGraeffe, res.appPrec, pApprox );
-    }
+//     if (CC!=NULL) {
+//         connCmp_reu_set_comp( CC, compDsk_centerref( d ), compDsk_radiusref( d ),
+//                                   nbGraeffe, res.appPrec, pApprox );
+//     }
     
     compApp_poly_clear(pApprox);
     realApp_clear(sum);
@@ -381,6 +381,7 @@ tstar_res tstar_rescale( cacheApp_t cache,
     realApp_init(sum);
     
 //     N = (int) 4+ceil(log2(1+log2(deg)));
+//     printf("#tstar.c: tstar_rescale; nb Graeffe iterations: %d\n", connCmp_reuNgref(CC));
     
     compApp_poly_set( pApprox, connCmp_reuPoref(CC) );
     res.appPrec = connCmp_reuPrref(CC);
@@ -388,7 +389,8 @@ tstar_res tstar_rescale( cacheApp_t cache,
     realRat_init(ratio);
     realRat_set(ratio, compDsk_radiusref( d ));
     realRat_div(ratio, ratio, connCmp_reuRaref(CC));
-    slong pow = 1 >> connCmp_reuNgref(CC);
+    slong pow = 1 << connCmp_reuNgref(CC);
+//     printf("#tstar.c: tstar_rescale; pow: %ld\n", pow);
     realRat_pow_si (ratio, ratio, pow);
     compApp_poly_scale_realRat_in_place( pApprox->coeffs, ratio, pApprox->length, res.appPrec );
     realRat_clear(ratio);
