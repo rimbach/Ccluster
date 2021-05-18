@@ -107,6 +107,7 @@ NUMBERS_INLINE void realApp_inv   ( realApp_t dest, const realApp_t x, slong pre
 NUMBERS_INLINE void realApp_add(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_add(z, x, y, prec); }
 NUMBERS_INLINE void realApp_add_si(realApp_t z, const realApp_t x, slong y, slong prec) { arb_add_si(z, x, y, prec); }
 NUMBERS_INLINE void realApp_sub(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_sub(z, x, y, prec); }
+NUMBERS_INLINE void realApp_sub_si(realApp_t z, const realApp_t x, slong y, slong prec) { arb_sub_si(z, x, y, prec); }
 NUMBERS_INLINE void realApp_mul(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_mul(z, x, y, prec); }
 NUMBERS_INLINE void realApp_neg(realApp_t z, const realApp_t x) { arb_neg(z, x); }
 NUMBERS_INLINE void realApp_div(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_div(z, x, y, prec); }

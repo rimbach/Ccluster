@@ -20,6 +20,12 @@ slong risolate_connCmp_getZoomRatio_1b( connCmp_t cc, slong prec ) {
     slong resleft = 0;
     slong resright = 0;
     
+        /* check that the box intersects at least an annulus */
+    if ( compAnn_list_get_size(compBox_annuli0ref(compBox_list_first(connCmp_boxesref(cc)))) ==0 ) {
+//         printf("#risolate_rootRadii.c: the box intersect no annulus\n");
+        return 0;
+    }
+    
     realRat_t center, width, temp;
     realRat_init(center);
     realRat_init(width);
@@ -31,16 +37,16 @@ slong risolate_connCmp_getZoomRatio_1b( connCmp_t cc, slong prec ) {
     b = compBox_list_first(connCmp_boxesref(cc)); /* unique box */
     sgn = realRat_sgn( compRat_realref( compBox_centerref( b ) ) );
     
-    printf(" size: %d\n", compAnn_list_get_size(compBox_annuli0ref(b)));
+//     printf(" size: %d\n", compAnn_list_get_size(compBox_annuli0ref(b)));
     /* leftmost anulus */
     if (sgn < 0)
         a = compAnn_list_last( compBox_annuli0ref(b) );
     else 
         a = compAnn_list_first( compBox_annuli0ref(b) );
     
-    printf("a: ");
-    compAnn_printd(a, 10);
-    printf("\n");
+//     printf("a: ");
+//     compAnn_printd(a, 10);
+//     printf("\n");
     
     /* if zero annulus return zero */
     if ( realApp_is_zero(compAnn_radInfref(a)) && realApp_is_zero(compAnn_radSupref(a)) ) {
@@ -108,6 +114,15 @@ slong risolate_connCmp_getZoomRatio_2b( connCmp_t cc, slong prec ) {
     slong resleft = 0;
     slong resright = 0;
     
+//     printf("#risolate_rootRadii.c: risolate_connCmp_getZoomRatio_2b; begin\n");
+    
+    /* check that both boxes intersect at least an annulus */
+    if ( ( compAnn_list_get_size(compBox_annuli0ref(compBox_list_first(connCmp_boxesref(cc)))) ==0 )
+        || ( compAnn_list_get_size(compBox_annuli0ref(compBox_list_last(connCmp_boxesref(cc)))) ==0 ) ) {
+//         printf("#risolate_rootRadii.c: one box intersect no annulus\n");
+        return 0;
+    }
+    
     realRat_t center, width, temp;
     realRat_init(center);
     realRat_init(width);
@@ -117,11 +132,18 @@ slong risolate_connCmp_getZoomRatio_2b( connCmp_t cc, slong prec ) {
     realApp_init(boundann);
     
     b = compBox_list_first(connCmp_boxesref(cc)); /* leftmost box */
+    
+//     printf("#size of annuli list: %d\n", compAnn_list_get_size(compBox_annuli0ref(b)));
+    
     sgn = realRat_sgn( compRat_realref( compBox_centerref( b ) ) );
     if (sgn < 0)
         a = compAnn_list_last( compBox_annuli0ref(b) );
     else 
         a = compAnn_list_first( compBox_annuli0ref(b) );
+    
+//     printf("#a: ");
+//     compAnn_printd(a, 10);
+//     printf("\n");
     
     /* if zero annulus return zero */
     if ( realApp_is_zero(compAnn_radInfref(a)) && realApp_is_zero(compAnn_radSupref(a)) ) {
@@ -148,11 +170,18 @@ slong risolate_connCmp_getZoomRatio_2b( connCmp_t cc, slong prec ) {
     }
     
     b = compBox_list_last(connCmp_boxesref(cc)); /* rightmost box */
+//     printf("#size of annuli list: %d\n", compAnn_list_get_size(compBox_annuli0ref(b)));
+    
     sgn = realRat_sgn( compRat_realref( compBox_centerref( b ) ) );
     if (sgn < 0)
         a = compAnn_list_first( compBox_annuli0ref(b) );
     else 
         a = compAnn_list_last( compBox_annuli0ref(b) );
+    
+//     printf("#a: ");
+//     compAnn_printd(a, 10);
+//     printf("\n");
+    
     realRat_set(width, compBox_bwidthref(b) );
     realRat_div_ui( width, width, 2 );
     realRat_sub(center, compRat_realref(compBox_centerref(b)), width );
@@ -173,6 +202,8 @@ slong risolate_connCmp_getZoomRatio_2b( connCmp_t cc, slong prec ) {
     realRat_clear(temp);
     realApp_clear(tempapp);
     realApp_clear(boundann);
+    
+//     printf("#risolate_rootRadii.c: risolate_connCmp_getZoomRatio_2b; end\n");
     
     return CCLUSTER_MIN( resleft, resright );
 }

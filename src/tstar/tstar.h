@@ -54,6 +54,8 @@ void tstar_graeffe_iterations_abs_two_first_coeffs( realApp_t coeff0, realApp_t 
 
 int tstar_numerical_test( compApp_poly_t pApprox, const compDsk_t d, slong prec, metadatas_t meta);
 
+void tstar_scale_and_round_to_zero( compApp_poly_t res, slong prec, metadatas_t meta);
+
 tstar_res tstar_interface( cacheApp_t cache,  /*                                               */
                            const compDsk_t d, /*                                               */
                            int max_nb_sols,   /*the maximum number of sols in the disk         */
@@ -98,6 +100,7 @@ void tstar_real_getApproximation( realApp_poly_t res, cacheApp_t cache, slong pr
 void tstar_real_taylor_shift_inplace( realApp_poly_t res, const compDsk_t d, slong prec, metadatas_t meta);
 void tstar_real_graeffe_iterations_inplace( realApp_poly_t res, int N, slong prec, metadatas_t meta);
 void tstar_real_graeffe_iterations_abs_two_first_coeffs( realApp_t coeff0, realApp_t coeff1, const realApp_poly_t pApprox, int N, slong prec, metadatas_t meta);
+void tstar_real_scale_and_round_to_zero( realApp_poly_t res, slong prec, metadatas_t meta);
 
 tstar_res tstar_real_interface( cacheApp_t cache,
                            const compDsk_t d,

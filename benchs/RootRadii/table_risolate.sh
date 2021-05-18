@@ -440,7 +440,8 @@ stats_pol_rand()
     NAME_OUTDSC=$NAME".out_dsc"
 #     DEG=$2
     
-    BITSI_T=$(grep "bitsize of input polynomial:"  $NAME_OUTRR| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+#     BITSI_T=$(grep "bitsize of input polynomial:"  $NAME_OUTRR| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    BITSI_T=$(grep "bitsize: "                     $NAME_OUT| tr -d ' ' | cut -f3 -d':' | cut -f1 -d'|')
     NSOLS_T=$(grep "number of real roots:"          $NAME_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     
     TSIZE_T=$(grep "tree size:"                    $NAME_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
@@ -499,14 +500,7 @@ stats_pol_rand()
     DSC_TTIME=`echo $DSC_TTIME+$DSC_TTIME_T|bc -l`
     DSC_TTIME_SQ=`echo $DSC_TTIME_SQ+$DSC_TTIME_T^2|bc -l`
     
-    echo "$NAME & $NSOLS_T & $RR_NSOLS_T & $DSC_NSOLS_T "
-#     echo $DSC_TTIME_SQ
-    
-#     LINE_TAB1="`format_numb $DEG $LENP` & `format_numb $BITSI_T $LENP` & `format_numb $NSOLS_T $LENP` & `format_numb $RR_NSOLS_T $LENP` & `format_numb $TSIZE_T $LENP` & `format_numb $TDEPT_T 2` & `format_time $TTIME_T`"
-#     LINE_TAB1=$LINE_TAB1" & `format_numb $RR_TSIZE_T $LENP` & `format_numb $RR_TDEPT_T 2` & `format_time $RR_TTIME_T` & `percent_time $RR_TTIME_T $TTIME_T`"
-#     LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE_T $LENP` &`format_time $DSC_TTIME_T`\\\\"
-#     
-#     echo $LINE_TAB1
+#     echo "$NAME & $NSOLS_T & $RR_NSOLS_T & $DSC_NSOLS_T "
 }
 
 REP="tab_risolate"
@@ -530,7 +524,7 @@ echo $POLNAME >> $TEMPTABFILE3
 # DEGREES="256 391 512"
 DEGREES="256 391 512"
 # BITSIZES="16 8192 16384 32768"
-BITSIZES="16 8192 16384 32768 65536"
+BITSIZES="4096 8192 16384 32768 65536"
 for DEG in $DEGREES; do
     for BIT in $BITSIZES; do
             REPNAME=$REP
@@ -706,13 +700,47 @@ done
 # done 
 # done
 # 
-# POLNAMES="Mignotte"
+POLNAME="Mignotte"
+# with increasing bit-size
+
+echo $POLNAME >> $TEMPTABFILE1
+echo $POLNAME >> $TEMPTABFILE2
+echo $POLNAME >> $TEMPTABFILE3
+
+DEGF=512
+# DEGF=256
+# BITSIZES="128 256 512 1024 2048"
+BITSIZES="127 255 511 1023 2047"
+for BIT in $BITSIZES; do
+    
+    DEG=$DEGF
+    REPNAME=$REP
+    NAME=$REPNAME"/"$POLNAME"_"$DEG"_"$BIT
+    
+    gen_with_deg_bs $NAME $POLNAME $DEG $BIT
+    run_risolate $NAME $POLNAME $DEG
+    run_aNewDsc  $NAME $POLNAME $DEG 1
+#     gen_and_run_ccluster $NAME
+    
+    stats_pol $NAME $DEG
+    echo "$POLNAME & $DEG & $BIT & `format_numb $NSOLS` & `format_numb $RR_NSOLS` & `format_numb $DSC_NSOLS` "
+#     LINE_TAB=" `format_numb $DEG $LENP` & "
+#     LINE_TAB=$LINE_TAB"`stats_pol $NAME`\\\\"
+#     echo $LINE_TAB >> $TEMPTABFILE
+#     stats_pol $NAME
+done
+
+# POLNAME="MignotteNes"
 # # with increasing bit-size
+# 
+# echo $POLNAME >> $TEMPTABFILE1
+# echo $POLNAME >> $TEMPTABFILE2
+# echo $POLNAME >> $TEMPTABFILE3
 # 
 # # DEGF=512
 # DEGF=256
-# BITSIZES="128 256 512 1024 2048"
-# # BITSIZES="128 256 512 1024 2048 4096 8192 16384 32768 65536"
+# # BITSIZES="128 256 512 1024 2048"
+# BITSIZES="32 64 128 256 512 1024"
 # for BIT in $BITSIZES; do
 #     
 #     DEG=$DEGF

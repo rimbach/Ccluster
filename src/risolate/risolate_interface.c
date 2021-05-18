@@ -59,7 +59,14 @@ void risolate_interface_poly( const realRat_poly_t poly,
     realRat_init(sepBound);
     cacheApp_separation_bound ( sepBound, cache);
     if (verb>=3) {
-        printf("separation bound: "); realRat_print(sepBound); printf("\n");
+        realApp_t sb;
+        realApp_init(sb);
+        realApp_set_realRat(sb, sepBound, CCLUSTER_DEFAULT_PREC);
+        printf("separation bound: "); 
+//         realRat_print(sepBound); 
+        realApp_printd(sb, 10);
+        printf("\n");
+        realApp_clear(sb);
     }
     metadatas_setSepBound(meta, sepBound);
     
@@ -149,7 +156,14 @@ void risolate_global_interface_poly( const realRat_poly_t poly,
     realRat_init(sepBound);
     cacheApp_separation_bound ( sepBound, cache);
     if (verb>=3) {
-        printf("separation bound: "); realRat_print(sepBound); printf("\n");
+        realApp_t sb;
+        realApp_init(sb);
+        realApp_set_realRat(sb, sepBound, CCLUSTER_DEFAULT_PREC);
+        printf("separation bound: "); 
+//         realRat_print(sepBound); 
+        realApp_printd(sb, 10);
+        printf("\n");
+        realApp_clear(sb);
     }
     metadatas_setSepBound(meta, sepBound);
     

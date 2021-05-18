@@ -86,6 +86,9 @@ POLYNOMIALS_INLINE void realRat_poly_mul(realRat_poly_t res, const realRat_poly_
 POLYNOMIALS_INLINE void realRat_poly_add(realRat_poly_t res, const realRat_poly_t poly1, const realRat_poly_t poly2) {
     fmpq_poly_add(res, poly1, poly2);
 }
+POLYNOMIALS_INLINE void realRat_poly_sub(realRat_poly_t res, const realRat_poly_t poly1, const realRat_poly_t poly2) {
+    fmpq_poly_sub(res, poly1, poly2);
+}
 POLYNOMIALS_INLINE void realRat_poly_scalar_mul_si(realRat_poly_t res, const realRat_poly_t poly1, slong q) {
     fmpq_poly_scalar_mul_si(res, poly1, q);
 }
@@ -129,6 +132,9 @@ void bernoulliInt_polynomial(realRat_poly_t poly, slong deg);
 
 void mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize);
 void mignotte_generalized(realRat_poly_t poly, slong deg, ulong pow, slong bitsize);
+/* assume bitsize has 8 as a factor */
+/* assume deg has 4 as a factor */
+void nested_mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize);
 
 void wilkinson_polynomial(realRat_poly_t poly, slong deg);
 

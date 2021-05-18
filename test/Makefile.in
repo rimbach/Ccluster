@@ -4,15 +4,27 @@ NORMAL = "\e[0m"
 
 ECHO_ME = @/bin/echo -e
 
+VALGRIND_CALL=valgrind --tool=memcheck --leak-check=yes
+RISOLATE_CALL=../bin/risolate
+CCLUSTER_CALL=../bin/ccluster
+
 all: testVerbose
 
 testVerbose: testMignotteVerbose testBernoulliVerbose testMandelbrotVerbose
+
+valgrind: valgrindMignotteVerbose valgrindBernoulliVerbose valgrindMandelbrotVerbose
 
 testMignotteVerbose: genMignotteVerbose MignotteVerbose cleanMignotteVerbose 
 
 testBernoulliVerbose: genBernoulliVerbose BernoulliVerbose cleanBernoulliVerbose 
 
 testMandelbrotVerbose: genMandelbrotVerbose MandelbrotVerbose cleanMandelbrotVerbose
+
+valgrindMignotteVerbose: genMignotteVerbose valgrindMignotte cleanMignotteVerbose 
+
+valgrindBernoulliVerbose: genBernoulliVerbose valgrindBernoulli cleanBernoulliVerbose 
+
+valgrindMandelbrotVerbose: genMandelbrotVerbose valgrindMandelbrot cleanMandelbrotVerbose
 
 temp_file=temp.txt
 input_file=temp_in.ccl
@@ -40,15 +52,15 @@ cleanMignotteVerbose:
 MignotteVerbose: genMignotteVerbose
 	${ECHO_ME} $(BGREEN) "Clustering complex roots of a Mignotte polynomial of degree ${degree_Mignotte} and bitsize ${bitsize_Mignotte}: should about a seconds" $(NORMAL)
 	${ECHO_ME} $(BGREEN) "by defaults, ccluster computes clusters without size constraints (i.e. option -e +inf)" $(NORMAL)
-	../bin/ccluster ${input_Mignotte} > ${temp_file}
+	${CCLUSTER_CALL} ${input_Mignotte} > ${temp_file}
 	@cat ${temp_file}
 	@check_output_ccluster.sh --nbSols=64 --nbClus=63 --file=${temp_file}
 	${ECHO_ME} $(BGREEN) "option -e precision where precision is given as the log in basis 2 of the maximum size of the clusters" $(NORMAL)
-	../bin/ccluster ${input_Mignotte} -e -500 > ${temp_file}
+	${CCLUSTER_CALL} ${input_Mignotte} -e -500 > ${temp_file}
 	@cat ${temp_file} 
 	@check_output_ccluster.sh --nbSols=64 --nbClus=64 --file=${temp_file}
 	${ECHO_ME} $(BGREEN) "Isolating real roots of a Mignotte polynomial of degree ${degree_Mignotte} and bitsize ${bitsize_Mignotte}: should take less than a seconds" $(NORMAL)
-	../bin/risolate ${input_Mignotte} > ${temp_file}
+	${RISOLATE_CALL} ${input_Mignotte} > ${temp_file}
 	@cat ${temp_file} 
 	@check_output_risolate.sh --nbSols=4 --nbClus=4 --file=${temp_file}
 
@@ -62,11 +74,11 @@ BernoulliVerbose: genBernoulliVerbose
 	${ECHO_ME} $(BGREEN) "Clustering complex roots of a Bernoulli polynomial of degree ${degree_Bernoulli}: should take less than a second" $(NORMAL)
 	@../bin/ccluster ${input_Bernoulli}
 	${ECHO_ME} $(BGREEN) "for a graphical output, use option -o -2 and pipe to gnuplot:" $(NORMAL)
-	../bin/ccluster ${input_Bernoulli} -o -2 | gnuplot
+	${CCLUSTER_CALL} ${input_Bernoulli} -o -2 | gnuplot
 	${ECHO_ME} $(BRED) "this test will stop with an error if you do not have gnuplot installed on your machine" $(NORMAL)
 	${ECHO_ME} $(BRED) "if gnuplot opens a window, close the window to continue" $(NORMAL)
 	${ECHO_ME} $(BGREEN) "for a graphical output with the subdivision tree, use options -m onlySubd -o -3 and pipe to gnuplot" $(NORMAL)
-	../bin/ccluster ${input_Bernoulli} -m onlySubd -o -3 | gnuplot
+	${CCLUSTER_CALL} ${input_Bernoulli} -m onlySubd -o -3 | gnuplot
 	
 genMandelbrotVerbose: 
 	@../bin/genPolFile Mandelbrot   ${iteration_Mandelbrot} ${input_Mandelbrot} >/dev/null
@@ -76,28 +88,28 @@ cleanMandelbrotVerbose:
 	
 MandelbrotVerbose: genMandelbrotVerbose
 	${ECHO_ME} $(BGREEN) "Clustering complex roots of a Mandelbrot polynomial of degree 127: should take about a second" $(NORMAL)
-	../bin/ccluster ${input_Mandelbrot} > ${temp_file}
+	${CCLUSTER_CALL} ${input_Mandelbrot} > ${temp_file}
 	@cat temp.txt
 	@check_output_ccluster.sh --nbSols=127 --nbClus=124 --file=${temp_file}
 	${ECHO_ME} $(BGREEN) "Isolating real roots of a Mandelbrot polynomial of degree 127: should take less than a second"
 	${ECHO_ME} $(BGREEN) "with option -o, one can specify the number of digits for displaying the clusters" $(NORMAL)
-	../bin/risolate ${input_Mandelbrot} -o 5 > ${temp_file}
+	${RISOLATE_CALL} ${input_Mandelbrot} -o 5 > ${temp_file}
 	@cat temp.txt
 	@check_output_risolate.sh --nbSols=19 --nbClus=19 --file=temp.txt
 
 CornerCases: 
 	${ECHO_ME} $(BGREEN) "Clustering complex roots of a constant polynomial: should find no root" $(NORMAL)
 	echo "1  1" > ${input_file}
-	../bin/ccluster ${input_file} > ${temp_file}
+	${CCLUSTER_CALL} ${input_file} > ${temp_file}
 	@check_output_ccluster.sh --nbSols=0 --nbClus=0 --file=${temp_file}
 	${ECHO_ME} $(BGREEN) "Isolating real roots of a constant polynomial: should find no root" $(NORMAL)
-	../bin/risolate ${input_file} > ${temp_file}
+	${RISOLATE_CALL} ${input_file} > ${temp_file}
 	@check_output_risolate.sh --nbSols=0 --nbClus=0 --file=temp.txt
 	${ECHO_ME} $(BGREEN) "Clustering complex roots of a zero polynomial: should exit with error message" $(NORMAL)
 	echo "1  0" > ${input_file}
-	../bin/ccluster ${input_file}
+	${CCLUSTER_CALL} ${input_file}
 	${ECHO_ME} $(BGREEN) "Isolating real roots of a constant polynomial: should exit with error message" $(NORMAL)
-	../bin/risolate ${input_file}
+	${RISOLATE_CALL} ${input_file}
 	${ECHO_ME} $(BGREEN) "Clustering complex roots of a zero oracle polynomial: non terminating process with warning" $(NORMAL)
 	../bin/ccluster_zero 64 & sleep 0.5 & killall ../bin/ccluster_zero
 	../bin/ccluster_zero 64 -d 0,0,1 & sleep 0.5 & killall ../bin/ccluster_zero
@@ -106,16 +118,81 @@ CornerCases:
 	../bin/ccluster_near_zero 64 -d 0,0,1 
 	${ECHO_ME} $(BGREEN) "Clustering complex roots of x^5: should find one cluster with 5 roots" $(NORMAL)
 	echo "6  0 0 0 0 0 1" > ${input_file}
-	../bin/ccluster ${input_file} > ${temp_file}
+	${CCLUSTER_CALL} ${input_file} > ${temp_file}
 	@check_output_ccluster.sh --nbSols=5 --nbClus=1 --file=${temp_file}
 	${ECHO_ME} $(BGREEN) "Isolating real roots of x^5: should find one root of multiplicity 5 roots" $(NORMAL)
 	echo "6  0 0 0 0 0 1" > ${input_file}
-	../bin/risolate ${input_file} > ${temp_file}
+	${RISOLATE_CALL} ${input_file} > ${temp_file}
 	@check_output_risolate.sh --nbSols=5 --nbClus=1 --file=temp.txt
 	${ECHO_ME} $(BGREEN) "Clustering complex roots of x^5 + x^4" $(NORMAL)
 	echo "6  0 0 0 0 1 1" > ${input_file}
-	../bin/ccluster ${input_file} > ${temp_file}
+	${CCLUSTER_CALL} ${input_file} > ${temp_file}
 	@check_output_ccluster.sh --nbSols=5 --nbClus=2 --file=${temp_file}
 	${ECHO_ME} $(BGREEN) "Isolating real roots of x^5 + x^4" $(NORMAL)
-	../bin/risolate ${input_file} > ${temp_file}
+	${RISOLATE_CALL} ${input_file} > ${temp_file}
+	@check_output_risolate.sh --nbSols=5 --nbClus=2 --file=temp.txt
+	
+valgrindMignotte: genMignotteVerbose
+	${ECHO_ME} $(BGREEN) "VALGRIND Clustering complex roots of a Mignotte polynomial of degree ${degree_Mignotte} and bitsize ${bitsize_Mignotte}" $(NORMAL)
+	${ECHO_ME} $(BGREEN) "by defaults, ccluster computes clusters without size constraints (i.e. option -e +inf)" $(NORMAL)
+	${VALGRIND_CALL} ${CCLUSTER_CALL} ${input_Mignotte} > ${temp_file}
+	@cat ${temp_file}
+	@check_output_ccluster.sh --nbSols=64 --nbClus=63 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "VALGRIND option -e precision where precision is given as the log in basis 2 of the maximum size of the clusters" $(NORMAL)
+	${VALGRIND_CALL} ${CCLUSTER_CALL} ${input_Mignotte} -e -500 > ${temp_file}
+	@cat ${temp_file} 
+	@check_output_ccluster.sh --nbSols=64 --nbClus=64 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "VALGRIND Isolating real roots of a Mignotte polynomial of degree ${degree_Mignotte} and bitsize ${bitsize_Mignotte}" $(NORMAL)
+	${VALGRIND_CALL} ${RISOLATE_CALL} ${input_Mignotte} > ${temp_file}
+	@cat ${temp_file} 
+	@check_output_risolate.sh --nbSols=4 --nbClus=4 --file=${temp_file}
+	
+valgrindBernoulli: genBernoulliVerbose
+	${ECHO_ME} $(BGREEN) "VALGRIND Clustering complex roots of a Bernoulli polynomial of degree ${degree_Bernoulli}" $(NORMAL)
+	${VALGRIND_CALL} ${CCLUSTER_CALL} ${input_Bernoulli}
+	
+valgrindMandelbrot: genMandelbrotVerbose
+	${ECHO_ME} $(BGREEN) "VALGRIND Clustering complex roots of a Mandelbrot polynomial of degree 127" $(NORMAL)
+	${VALGRIND_CALL} ${CCLUSTER_CALL} ${input_Mandelbrot} > ${temp_file}
+	@cat temp.txt
+	@check_output_ccluster.sh --nbSols=127 --nbClus=124 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "VALGRIND Isolating real roots of a Mandelbrot polynomial of degree 127"
+	${ECHO_ME} $(BGREEN) "with option -o, one can specify the number of digits for displaying the clusters" $(NORMAL)
+	${VALGRIND_CALL} ${RISOLATE_CALL} ${input_Mandelbrot} -o 5 > ${temp_file}
+	@cat temp.txt
+	@check_output_risolate.sh --nbSols=19 --nbClus=19 --file=temp.txt
+	
+valgrindCornerCases: 
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of a constant polynomial: should find no root" $(NORMAL)
+	echo "1  1" > ${input_file}
+	${VALGRIND_CALL} ${CCLUSTER_CALL} ${input_file} > ${temp_file}
+	@check_output_ccluster.sh --nbSols=0 --nbClus=0 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "Isolating real roots of a constant polynomial: should find no root" $(NORMAL)
+	${VALGRIND_CALL} ${RISOLATE_CALL} ${input_file} > ${temp_file}
+	@check_output_risolate.sh --nbSols=0 --nbClus=0 --file=temp.txt
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of a zero polynomial: should exit with error message" $(NORMAL)
+	echo "1  0" > ${input_file}
+	${VALGRIND_CALL} ${CCLUSTER_CALL} ${input_file}
+	${ECHO_ME} $(BGREEN) "Isolating real roots of a constant polynomial: should exit with error message" $(NORMAL)
+	${VALGRIND_CALL} ${RISOLATE_CALL} ${input_file}
+# 	${ECHO_ME} $(BGREEN) "Clustering complex roots of a zero oracle polynomial: non terminating process with warning" $(NORMAL)
+# 	${VALGRIND_CALL} ../bin/ccluster_zero 64 & sleep 0.5 & killall ../bin/ccluster_zero
+# 	${VALGRIND_CALL} ../bin/ccluster_zero 64 -d 0,0,1 & sleep 0.5 & killall ../bin/ccluster_zero
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of a near zero oracle polynomial: terminating process with warning" $(NORMAL)
+	${VALGRIND_CALL} ../bin/ccluster_near_zero 64
+	${VALGRIND_CALL} ../bin/ccluster_near_zero 64 -d 0,0,1 
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of x^5: should find one cluster with 5 roots" $(NORMAL)
+	echo "6  0 0 0 0 0 1" > ${input_file}
+	${VALGRIND_CALL} ${CCLUSTER_CALL} ${input_file} > ${temp_file}
+	@check_output_ccluster.sh --nbSols=5 --nbClus=1 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "Isolating real roots of x^5: should find one root of multiplicity 5 roots" $(NORMAL)
+	echo "6  0 0 0 0 0 1" > ${input_file}
+	${VALGRIND_CALL} ${RISOLATE_CALL} ${input_file} > ${temp_file}
+	@check_output_risolate.sh --nbSols=5 --nbClus=1 --file=temp.txt
+	${ECHO_ME} $(BGREEN) "Clustering complex roots of x^5 + x^4" $(NORMAL)
+	echo "6  0 0 0 0 1 1" > ${input_file}
+	${VALGRIND_CALL} ${CCLUSTER_CALL} ${input_file} > ${temp_file}
+	@check_output_ccluster.sh --nbSols=5 --nbClus=2 --file=${temp_file}
+	${ECHO_ME} $(BGREEN) "Isolating real roots of x^5 + x^4" $(NORMAL)
+	${VALGRIND_CALL} ${RISOLATE_CALL} ${input_file} > ${temp_file}
 	@check_output_risolate.sh --nbSols=5 --nbClus=2 --file=temp.txt
