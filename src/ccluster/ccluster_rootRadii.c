@@ -295,6 +295,7 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
     
     /* set relative precision for root radii */
     metadatas_setRelPr_si( meta, 1, degree*degree);
+//     metadatas_setRelPr_si( meta, 1, degree*bitsize);
     /* compute number of Graeffe Iterations for root radii */
     int N = ccluster_nbGIt_rootRadii( degree, metadatas_getRelPr(meta) );
     metadatas_setNbGIt ( meta, N);

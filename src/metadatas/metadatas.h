@@ -21,6 +21,7 @@
 #include "base/base.h"
 #include "numbers/compApp.h"
 #include "geometry/compBox.h"
+#include "caches/cacheApp.h"
 #include "metadatas/strategies.h"
 #include "metadatas/counters.h"
 #include "metadatas/chronos.h"
@@ -571,7 +572,7 @@ char * realRat_sprint_for_stat(char * out, const realRat_t x);
 int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps);
 int metadatas_print(metadatas_t meta, const realRat_t eps);
 
-int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps);
+int metadatas_risolate_fprint(FILE * file, metadatas_t meta, cacheApp_t cache, const realRat_t eps);
 
 #ifdef __cplusplus
 }

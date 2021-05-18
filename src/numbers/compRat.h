@@ -69,6 +69,11 @@ NUMBERS_INLINE void compRat_set_2realRat(compRat_t x, const realRat_t re, const 
     realRat_set(compRat_imagref(x), im);
 }
 
+NUMBERS_INLINE void compRat_set_realRat(compRat_t x, const realRat_t re) { 
+    realRat_set(compRat_realref(x), re); 
+    realRat_zero(compRat_imagref(x));
+}
+
 NUMBERS_INLINE void compRat_set_sisi(compRat_t x, slong preal, ulong qreal, slong pimag, ulong qimag) { 
     realRat_set_si(compRat_realref(x), preal, qreal); 
     realRat_set_si(compRat_imagref(x), pimag, qimag);

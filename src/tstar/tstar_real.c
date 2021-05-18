@@ -64,7 +64,40 @@ void tstar_real_graeffe_iterations_abs_two_first_coeffs( realApp_t coeff0, realA
     realApp_poly_clear(p2);
 }
 
-
+void tstar_real_scale_and_round_to_zero( realApp_poly_t res, slong prec, metadatas_t meta){
+    
+    /* test round to zero when possible */
+    realApp_t error, log2;
+    realApp_init(error);
+    realApp_init(log2);
+    realApp_one(error);
+    realApp_mul_2exp_si(error, error, - prec );
+    realApp_t ball;
+    realApp_init(ball);
+    realApp_zero(ball);
+    realApp_add_error( ball, error);
+        
+    realApp_abs(log2, res->coeffs + 0);
+    realApp_log_base_ui(log2, log2, 2, prec);
+    slong l = realApp_ceil_si(log2, prec) -1;
+    
+//     printf("log2 of trailing coeff: %ld\n", l);
+//     realApp_printd(log2, 10);
+//     printf("\n");
+    
+    for (slong j = res->length -1; j>=0; j--) {
+        /* rescale coeff */
+        if (l>0) {
+            realApp_mul_2exp_si(res->coeffs + j, res->coeffs + j, -l );
+        }
+        if ( realApp_contains( ball, res->coeffs + j) )
+            realApp_set( res->coeffs + j, ball );
+    }
+    
+    realApp_clear(error);
+    realApp_clear(log2);
+    realApp_clear(ball);
+}
 
 tstar_res tstar_real_interface( cacheApp_t cache,
                            const compDsk_t d,
@@ -73,6 +106,7 @@ tstar_res tstar_real_interface( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,         /*the "default" arithmetic precision              */
                            int depth,          /*the depth for counter                           */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta){
     slong nprec = CCLUSTER_DEFAULT_PREC;
     
@@ -81,16 +115,16 @@ tstar_res tstar_real_interface( cacheApp_t cache,
     
     if (metadatas_useTstarOptim(meta)) {
         if (discard&&CCLUSTER_V2(meta)){
-            return tstar_real_optimized( cache, d, 0, discard, inNewton, nprec, depth, meta);
+            return tstar_real_optimized( cache, d, 0, discard, inNewton, nprec, depth, CC, meta);
         }
         else {
-            return tstar_real_optimized( cache, d, max_nb_sols, discard, inNewton, nprec, depth, meta);
+            return tstar_real_optimized( cache, d, max_nb_sols, discard, inNewton, nprec, depth, CC, meta);
         }
     }
     if (discard)
-        return tstar_real_asInPaper( cache, d, 0, discard, inNewton, nprec, depth, meta);
+        return tstar_real_asInPaper( cache, d, 0, discard, inNewton, nprec, depth, CC, meta);
     
-    return tstar_real_asInPaper( cache, d, max_nb_sols, discard, inNewton, nprec, depth, meta);
+    return tstar_real_asInPaper( cache, d, max_nb_sols, discard, inNewton, nprec, depth, CC, meta);
     
 }
 
@@ -101,6 +135,7 @@ tstar_res tstar_real_asInPaper( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,         /*the "default" arithmetic precision              */
                            int depth,          /*the depth for counter                           */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta){
     
     clock_t start = clock();
@@ -166,6 +201,7 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
                            int inNewton,      /*a flag saying if it is for newton refinement     */
                            slong prec,        /*the "default" arithmetic precision              */
                            int depth,         /*the depth for counter                           */
+                           connCmp_ptr CC,        /* a connCmp for storing re-use data; can be NULL */
                            metadatas_t meta){
     
     clock_t start = clock();
@@ -240,6 +276,9 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
     while( (iteration <= N)&&(restemp==0) ){
         
         if (iteration >= 1) {
+//             if (iteration==1)
+//                 tstar_real_scale_and_round_to_zero( pApprox, res.appPrec, meta);
+            
             tstar_real_graeffe_iterations_inplace( pApprox, 1, res.appPrec, meta);
             nbGraeffe +=1;
         }
@@ -256,6 +295,8 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
                 res.appPrec *=2;
                 tstar_real_getApproximation( pApprox, cache, res.appPrec, meta);
                 tstar_real_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
+//                 if (iteration==1)
+//                     tstar_real_scale_and_round_to_zero( pApprox, res.appPrec, meta);
                 tstar_real_graeffe_iterations_inplace( pApprox, iteration, res.appPrec, meta);
                 realApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
                 restemp = realApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);
@@ -315,14 +356,19 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
 //         cacheApp_nbItref(cache) = nbGraeffe;
 //     }
     
+    if (CC!=NULL) {
+        connCmp_reu_set_real( CC, compRat_realref( compDsk_centerref( d ) ), compDsk_radiusref( d ),
+                                  nbGraeffe, res.appPrec, pApprox );
+    }
+        
     realApp_poly_clear(pApprox);
     realApp_clear(sum);
     
     if (metadatas_getVerbo(meta)>=3) {
         if (discard)
-            printf(" depth: %d, prec for discarding test: %d\n", depth, (int) res.appPrec );
+            printf("#tstar_real.c: tstar_real_optimized: depth: %d, prec for exclusion test: %d\n", depth, (int) res.appPrec );
         else
-            printf(" depth: %d, prec for validating test: %d\n", depth, (int) res.appPrec );
+            printf("#tstar_real.c: tstar_real_optimized: depth: %d, prec for counting  test: %d\n", depth, (int) res.appPrec );
     }
 
     

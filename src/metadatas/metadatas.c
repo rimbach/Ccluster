@@ -163,6 +163,15 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     r = fprintf(file, "#|%-39s %14d %14s|\n", "number of fails:",                    metadatas_getNbFailingNewton(meta),  " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in newton:",         metadatas_get_time_Newtons(meta),    " " );
     }
+    if (metadatas_useDeflation(meta)){
+    r = fprintf(file, "# -------------------Deflation        ---------------------------------\n");
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in interval TS:",         metadatas_get_time_DefTayl(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in derivatives:",         metadatas_get_time_DefDeri(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in evaluations:",         metadatas_get_time_DefEval(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in scaling    :",         metadatas_get_time_DefScal(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in Graeffe Its:",         metadatas_get_time_DefGrae(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in Tstar tests:",         metadatas_get_time_DefTsta(meta),    " " );
+    }
     if (metadatas_useRootRadii(meta)){
     r = fprintf(file, "# -------------------Root Radii       ---------------------------------\n");
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing root radii:",       metadatas_get_time_rootRad(meta),    " " );
@@ -232,7 +241,7 @@ char * compBox_sprint_for_stat_risolate(char * out, const compBox_t x){
     return out;
 }
 
-int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
+int metadatas_risolate_fprint(FILE * file, metadatas_t meta, cacheApp_t cache, const realRat_t eps){
     int r=1;
     int nbTaylorShifts  = metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsInTSTests(meta);
     int nbTaylorShiftsR = metadatas_getNbTaylorsRepetedInT0Tests(meta) + metadatas_getNbTaylorsRepetedInTSTests(meta);
@@ -241,23 +250,25 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     
     if (metadatas_getVerbo(meta)>=1) {
     r = fprintf(file, "# -------------------Risolate: ----------------------------------------\n");
-    r = fprintf(file, "# -------------------Input:    ----------------------------------------\n");
-    char temp[1000];
-    compBox_sprint_for_stat_risolate( temp, metadatas_initBref(meta) );
-    r = fprintf(file, "#|interval:%-60s\n", temp);
-    
+    r = fprintf(file, "# -------------------Input polynomial:    -----------------------------\n");
+    r = fprintf(file, "#|degree: %-23ld bitsize: %-28ld|\n", cacheApp_getDegree( cache ), cacheApp_getBitsize (cache));
     slong clog2 = fmpz_clog_ui(realRat_denref(metadatas_getSepBound(meta)), 2);
     slong flog2 = fmpz_flog_ui(realRat_denref(metadatas_getSepBound(meta)), 2);
     char temp2[1000];
     sprintf(temp2, " 2^(-%ld)<= sep bound <=2^(-%ld)", clog2, flog2);
+    r = fprintf(file, "#|lower bound for root separation: %36s|\n", temp2);
+    r = fprintf(file, "# -------------------Input parameters:    -----------------------------\n");
+    char temp[1000];
+    compBox_sprint_for_stat_risolate( temp, metadatas_initBref(meta) );
+    r = fprintf(file, "#|interval:%-60s\n", temp);
     
     if (realRat_is_den_zero( eps )) {
-        r = fprintf(file, "#|eps: %-19s %44s|\n", "+inf", temp2);
+        r = fprintf(file, "#|epsilon: %-60s|\n", "+inf");
     }
     else {
         realRat_sprint_for_stat( temp, eps );
 //         r = fprintf(file, "|eps: %-64s|\n", temp);
-        r = fprintf(file, "#|eps: %-19s %44s|\n", temp, temp2);
+        r = fprintf(file, "#|epsilon: %-60s|\n", temp);
     }
     int len = 0;
     //TODO find a better way for this...
@@ -325,11 +336,11 @@ int metadatas_risolate_fprint(FILE * file, metadatas_t meta, const realRat_t eps
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in newton:",         metadatas_get_time_Newtons(meta),    " " );
     if (metadatas_useDeflation(meta)){
     r = fprintf(file, "# -------------------Deflation        ---------------------------------\n");
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in interval TS:",         metadatas_get_time_DefTayl(meta),    " " );
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in derivatives:",         metadatas_get_time_DefDeri(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in interval TS:",         metadatas_get_time_DefTayl(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in derivatives:",         metadatas_get_time_DefDeri(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in evaluations:",         metadatas_get_time_DefEval(meta),    " " );
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in scaling    :",         metadatas_get_time_DefScal(meta),    " " );
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in first Gr.It:",         metadatas_get_time_DefGrae(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in scaling    :",         metadatas_get_time_DefScal(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in Graeffe Its:",         metadatas_get_time_DefGrae(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in Tstar tests:",         metadatas_get_time_DefTsta(meta),    " " );
     }
     }

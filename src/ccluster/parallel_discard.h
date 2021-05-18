@@ -41,6 +41,7 @@ pthread_cond_t  parallel_discard_cdone;
 typedef struct {
     slong prec;
     compBox_list_t boxes;
+    connCmp_ptr cc;
     cacheApp_ptr cache;
     metadatas_ptr meta;
 //     int status; /* 0: default, 1: is_running, 2: is_finnished */
@@ -51,7 +52,7 @@ typedef struct {
 
 void * _parallel_discard_list_worker( void * arg_ptr );
 
-slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, cacheApp_t cache, 
+slong ccluster_parallel_discard_compBox_list( compBox_list_t boxes, connCmp_t cc, cacheApp_t cache, 
                                         slong prec, metadatas_t meta, slong nbThreads);
 
 

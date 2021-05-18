@@ -98,6 +98,42 @@ void mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize){
     realRat_clear(two);
 }
 
+/* assume bitsize has 8 as a factor */
+/* assume deg has 4 as a factor */
+void nested_mignotte_polynomial(realRat_poly_t poly, slong deg, slong bitsize){
+    
+    realRat_t coeff;
+    realRat_poly_t templ, tempt, temp;
+    realRat_init(coeff);
+    realRat_poly_init(templ);
+    realRat_poly_fit_length(templ,(deg/4)+2);
+    realRat_poly_init(tempt);
+    realRat_poly_fit_length(tempt,3);
+    realRat_poly_init(temp);
+    
+    realRat_poly_one(poly);
+    realRat_poly_one(templ);
+    realRat_poly_zero(tempt);
+    realRat_poly_shift_left(templ, templ, (deg/4)+1);
+    
+    realRat_set_si(coeff, 2,1);
+    realRat_pow_si(coeff, coeff, bitsize/8); /*coeff = 2^(bitsize/8) */
+    realRat_sub_si(coeff, coeff, 1); /*coeff = 2^(bitsize/8)-1 */
+    realRat_poly_set_coeff_realRat(temp, 2, coeff); /* tempt = coeff*z^2 */
+    realRat_poly_set_coeff_si_ui(temp, 0, -1, 1); /* tempt = coeff*z^2 - 1*/
+    
+    for (int i=1; i<=4; i++){
+        realRat_poly_pow(tempt, temp, 2*i);  /* tempt = (coeff*z^2 - 1)^2*/
+        realRat_poly_sub(tempt, templ, tempt);
+        realRat_poly_mul(poly, poly, tempt);
+    }
+    
+    realRat_clear(coeff);
+    realRat_poly_clear(temp);
+    realRat_poly_clear(tempt);
+    realRat_poly_clear(templ);
+}
+
 void mignotte_generalized(realRat_poly_t poly, slong deg, ulong pow, slong bitsize){
     
     realRat_t coeff, two;

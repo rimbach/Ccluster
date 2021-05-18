@@ -95,6 +95,7 @@ NUMBERS_INLINE void realRat_mul_si(realRat_t dest, const realRat_t x, slong y) {
     fmpz_mul_si(realRat_numref(dest), realRat_numref(dest), y);
     realRat_canonicalise(dest);}
 NUMBERS_INLINE void realRat_sub(realRat_t dest, const realRat_t x, const realRat_t y) { fmpq_sub(dest, x, y); }
+NUMBERS_INLINE void realRat_sub_si(realRat_t z, const realRat_t x, slong y) { fmpq_sub_si(z, x, y); }
 NUMBERS_INLINE void realRat_add(realRat_t dest, const realRat_t x, const realRat_t y) { fmpq_add(dest, x, y); }
 NUMBERS_INLINE void realRat_add_si(realRat_t dest, const realRat_t x, slong y) { fmpq_add_si(dest, x, y); }
 NUMBERS_INLINE void realRat_div(realRat_t dest, const realRat_t x, const realRat_t y) { fmpq_div(dest, x, y); }

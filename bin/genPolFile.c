@@ -43,6 +43,7 @@ int main(int argc, char **argv){
         printf("       %s Mignotte       degree    filename [OPTIONS: format bitsize] \n", argv[0]);
         printf("       %s MignotteGen    degree    filename [OPTIONS: format bitsize power]\n", argv[0]);
         printf("       %s MignotteMul    degree    filename [OPTIONS: format bitsize power]\n", argv[0]);
+        printf("       %s MignotteNest   degree    filename [OPTIONS: format bitsize]\n", argv[0]);
         printf("       %s Chebyshev1     degree    filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Chebyshev2     degree    filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Legendre       degree    filename [OPTIONS: format] \n", argv[0]);
@@ -90,6 +91,7 @@ int main(int argc, char **argv){
     char mignotte[] = "Mignotte\0";
     char mignotteMul[] = "MignotteMul\0";
     char mignotteGen[] = "MignotteGen\0";
+    char mignotteNes[] = "MignotteNes\0";
     char regularGrid[] = "RegularGrid\0";
     char Chebyshev1[] = "Chebyshev1\0";
     char Chebyshev2[] = "Chebyshev2\0";
@@ -214,6 +216,10 @@ int main(int argc, char **argv){
         
     if (strcmp(poly, mignotteGen)==0) {
         MignotteGen_polynomial(p, firstArg, bitsize, power);
+    } else
+        
+    if (strcmp(poly, mignotteNes)==0) {
+        nested_mignotte_polynomial(p, firstArg, bitsize);
     } else
     
     if (strcmp(poly, randomDense)==0) {

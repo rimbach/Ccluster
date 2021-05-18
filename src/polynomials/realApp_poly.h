@@ -85,6 +85,10 @@ POLYNOMIALS_INLINE  void realApp_poly_evaluate(realApp_t y, const realApp_poly_t
     arb_poly_evaluate_rectangular(y, f, x, prec);
 }
 
+POLYNOMIALS_INLINE  void realApp_poly_evaluate2(realApp_t y, realApp_t z, const realApp_poly_t f, const realApp_t x, slong prec){
+    arb_poly_evaluate2_rectangular(y, z, f, x, prec);
+}
+
 // /*order one center evaluation */
 // void realApp_poly_evaluate_order_one( realApp_t y, const realApp_poly_t f, const realApp_poly_t fder, const realApp_t x, slong prec);
 
