@@ -286,6 +286,41 @@ int counters_getNbTaylorsInNewton           ( const counters_t st ){ return st->
 int counters_getNbGraeffeInNewton           ( const counters_t st ){ return st->total->nbGraeffeInNewton         ;}
 int counters_getNbPsCountingTest            ( const counters_t st ){ return st->total->nbPsCountingTest          ;}
 int counters_getNbEval                      ( const counters_t st ){ return st->total->nbEval                    ;}
+
+/* Cauchy root finder */
+void counters_add_CauchyExTest              ( counters_t st, int depth, slong prec ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyExTests                 +=1;
+    boxes_by_prec_add_int( (st->table[depth]).bpc, prec, 1);
+}
+int  counters_getNbCauchyExTests            ( const counters_t st ){ return st->total->nbCauchyExTests                    ;}
+void counters_add_CauchyExEvalsP            ( counters_t st, int depth, int nb ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyExEvalsP                 +=nb;
+}
+int  counters_getNbCauchyExEvalsP           ( const counters_t st ){ return st->total->nbCauchyExEvalsP                    ;}
+void counters_add_CauchyExEvalsD            ( counters_t st, int depth, int nb ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyExEvalsD                 +=nb;
+}
+int  counters_getNbCauchyExEvalsD           ( const counters_t st ){ return st->total->nbCauchyExEvalsD                    ;}
+void counters_add_CauchyCoTest              ( counters_t st, int depth, slong prec ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyCoTests                 +=1;
+    boxes_by_prec_add_int( (st->table[depth]).bpc, prec, 1);
+}
+int  counters_getNbCauchyCoTests            ( const counters_t st ){ return st->total->nbCauchyCoTests                    ;}
+void counters_add_CauchyCoEvalsP            ( counters_t st, int depth, int nb ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyCoEvalsP                 +=nb;
+}
+int  counters_getNbCauchyCoEvalsP           ( const counters_t st ){ return st->total->nbCauchyCoEvalsP                    ;}
+void counters_add_CauchyCoEvalsD            ( counters_t st, int depth, int nb ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyCoEvalsD                 +=nb;
+}
+int  counters_getNbCauchyCoEvalsD           ( const counters_t st ){ return st->total->nbCauchyCoEvalsD                    ;}
+
 /* DEPRECATED
 void counters_by_depth_get_lenghts_of_str( counters_by_depth_t res, counters_by_depth_t st){
     

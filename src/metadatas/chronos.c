@@ -39,6 +39,16 @@ void chronos_init( chronos_t times ){
     times->_clicks_rootRad_cumul = 0.0;
     times->_clicks_RRT0Tes_cumul = 0.0;
     
+    times->_clicks_CauExTo_cumul = 0.0;
+    times->_clicks_CauExEP_cumul = 0.0;
+    times->_clicks_CauExED_cumul = 0.0;
+    times->_clicks_CauExDS_cumul = 0.0;
+    times->_clicks_CauExCS_cumul = 0.0;
+    times->_clicks_CauCoTo_cumul = 0.0;
+    times->_clicks_CauCoEP_cumul = 0.0;
+    times->_clicks_CauCoED_cumul = 0.0;
+    times->_clicks_CauCoDS_cumul = 0.0;
+    times->_clicks_CauCoCS_cumul = 0.0;
 
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(times->_mutex), NULL);
