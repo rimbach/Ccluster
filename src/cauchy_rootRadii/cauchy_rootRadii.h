@@ -30,6 +30,15 @@ void cauchyRootRadii_root_bound( realRat_t upperBound,
                                  cacheCauchy_t cacheCau,
                                  cacheApp_t cache,
                                  metadatas_t meta );
+
+// void cauchyRootRadii_root_radius( const compRat_t center,
+//                                   realRat_t radInf, /* radInf < r_{d+1-m}(center, p) */
+//                                   realRat_t radSup, /* radSup > r_{d+1-m}(center, p) */
+//                                   realRat_t relativeError, /* want relativeError*radInf >= radSup */ 
+//                                   slong nbOfRoots,
+//                                   cacheCauchy_t cacheCau,
+//                                  cacheApp_t cache,
+//                                  metadatas_t meta );
     
 #ifdef __cplusplus
 }

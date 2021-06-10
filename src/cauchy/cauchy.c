@@ -361,12 +361,10 @@ void cauchy_main_loop( connCmp_list_t qResults,
                     
 //                     cauchyTest_res resCauchy = cauchyTest_deterministic_counting_test( compDsk_centerref(ccDisk), compDsk_radiusref(ccDisk),
 //                                                                                   cache, cacheCau, prec, meta, depth);
-                    realRat_t radius;
-                    realRat_init(radius);
-                    realRat_mul_si(radius, compDsk_radiusref(ccDisk), 2);
-                    cauchyTest_res resCauchy = cauchyTest_probabilistic_counting_test( compDsk_centerref(ccDisk), radius,
-                                                                                  cache, cacheCau, prec, meta, depth);
-                    realRat_clear(radius);
+                    realRat_mul_si(compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 2);
+                    
+                    cauchyTest_res resCauchy = cauchyTest_probabilistic_counting( ccDisk, cache, cacheCau, prec, meta, depth);
+                    realRat_div_ui(compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 2);
                     connCmp_nSolsref(ccur) = resCauchy.nbOfSol;
                     prec = resCauchy.appPrec;
                     if (metadatas_getVerbo(meta)>3)
@@ -378,77 +376,77 @@ void cauchy_main_loop( connCmp_list_t qResults,
 //                     if (metadatas_getVerbo(meta)>=3)
 //                         printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));
                     
-                 if ( (connCmp_nSolsref(ccur) == 1) && (!widthFlag) ) {
-                     
-                     if (metadatas_getVerbo(meta)>=3) {
-                         printf("# Refine CC with 1st power sum: \n");
-                     }
-                         
-                     realRat_t halfeps;
-                     realRat_init(halfeps);
-                     realRat_div_ui(halfeps, eps, 4);
-                     
-                     realRat_t isoRatio;
-                     realRat_init(isoRatio);
-                     realRat_set_si(isoRatio, 2, 1);
-                     
-                     compDsk_t res;
-                     compDsk_init(res);
-                     
-                     
-                     slong appPrec = cauchyTest_computeS1compDsk( res, isoRatio, ccDisk,
-                                                                  connCmp_nSolsref(ccur), cache, cacheCau,
-                                                                  halfeps, meta, depth );
-                     if (metadatas_getVerbo(meta)>=3)
-                        printf("#------appPrec: %ld\n", appPrec);
-                     
-                     connCmp_ptr nCC;
-                     nCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
-                     connCmp_init(nCC);
-                     
-                     compBox_list_ptr ltemp;
-                     ltemp = connCmp_boxesref(ccur);
-                     compBox_list_t ltemp2;
-                     compBox_list_init(ltemp2);
-                     compBox_ptr btemp;
-                     
-                     while (compBox_list_get_size(ltemp)>0){
-                        btemp = compBox_list_pop(ltemp);
-                        subdBox_quadrisect_with_compDsk( ltemp2, btemp, res, halfeps);
-                        compBox_clear(btemp);
-                        ccluster_free(btemp); /*comment it for julia...*/
-                     }
-                     compBox_list_swap(ltemp, ltemp2);
-                     compBox_list_clear(ltemp2);
-                     btemp = compBox_list_pop(ltemp);
-                     realRat_set(connCmp_widthref(nCC), compBox_bwidthref(btemp));
-                     connCmp_insert_compBox(nCC, btemp);
-                     while (!compBox_list_is_empty(ltemp))
-                     connCmp_insert_compBox(nCC, compBox_list_pop(ltemp));
-                     connCmp_nSols(nCC) = connCmp_nSols(ccur);
-                     connCmp_isSep(nCC) = connCmp_isSep(ccur);
-                     fmpz_set(connCmp_nwSpdref(nCC), connCmp_nwSpdref(ccur));
-                     
-                     connCmp_clear(ccur);
-                     ccluster_free(ccur);
-                     ccur = nCC;
-                     connCmp_appPrref(ccur) = appPrec;
-                     
-                     connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
-                     realRat_mul(threeWidth, three, connCmp_widthref(ccur));
-                     widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
-                     compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
-                     
-                     if (metadatas_getVerbo(meta)>=3) {
-                        printf("#------widthFlag: %d\n", widthFlag);
-                        printf("#------compactFlag: %d\n", compactFlag);
-                     }
-                     
-                     realRat_clear(halfeps);
-                     compDsk_clear(res);
-                     realRat_clear(isoRatio);
-                     compBox_list_clear(ltemp2);
-                 }
+//                  if ( (connCmp_nSolsref(ccur) == 1) && (!widthFlag) ) {
+//                      
+//                      if (metadatas_getVerbo(meta)>=3) {
+//                          printf("# Refine CC with 1st power sum: \n");
+//                      }
+//                          
+//                      realRat_t halfeps;
+//                      realRat_init(halfeps);
+//                      realRat_div_ui(halfeps, eps, 4);
+//                      
+//                      realRat_t isoRatio;
+//                      realRat_init(isoRatio);
+//                      realRat_set_si(isoRatio, 2, 1);
+//                      
+//                      compDsk_t res;
+//                      compDsk_init(res);
+//                      
+//                      
+//                      slong appPrec = cauchyTest_computeS1compDsk( res, isoRatio, ccDisk,
+//                                                                   connCmp_nSolsref(ccur), cache, cacheCau,
+//                                                                   halfeps, meta, depth );
+//                      if (metadatas_getVerbo(meta)>=3)
+//                         printf("#------appPrec: %ld\n", appPrec);
+//                      
+//                      connCmp_ptr nCC;
+//                      nCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
+//                      connCmp_init(nCC);
+//                      
+//                      compBox_list_ptr ltemp;
+//                      ltemp = connCmp_boxesref(ccur);
+//                      compBox_list_t ltemp2;
+//                      compBox_list_init(ltemp2);
+//                      compBox_ptr btemp;
+//                      
+//                      while (compBox_list_get_size(ltemp)>0){
+//                         btemp = compBox_list_pop(ltemp);
+//                         subdBox_quadrisect_with_compDsk( ltemp2, btemp, res, halfeps);
+//                         compBox_clear(btemp);
+//                         ccluster_free(btemp);
+//                      }
+//                      compBox_list_swap(ltemp, ltemp2);
+//                      compBox_list_clear(ltemp2);
+//                      btemp = compBox_list_pop(ltemp);
+//                      realRat_set(connCmp_widthref(nCC), compBox_bwidthref(btemp));
+//                      connCmp_insert_compBox(nCC, btemp);
+//                      while (!compBox_list_is_empty(ltemp))
+//                      connCmp_insert_compBox(nCC, compBox_list_pop(ltemp));
+//                      connCmp_nSols(nCC) = connCmp_nSols(ccur);
+//                      connCmp_isSep(nCC) = connCmp_isSep(ccur);
+//                      fmpz_set(connCmp_nwSpdref(nCC), connCmp_nwSpdref(ccur));
+//                      
+//                      connCmp_clear(ccur);
+//                      ccluster_free(ccur);
+//                      ccur = nCC;
+//                      connCmp_appPrref(ccur) = appPrec;
+//                      
+//                      connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
+//                      realRat_mul(threeWidth, three, connCmp_widthref(ccur));
+//                      widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
+//                      compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
+//                      
+//                      if (metadatas_getVerbo(meta)>=3) {
+//                         printf("#------widthFlag: %d\n", widthFlag);
+//                         printf("#------compactFlag: %d\n", compactFlag);
+//                      }
+//                      
+//                      realRat_clear(halfeps);
+//                      compDsk_clear(res);
+//                      realRat_clear(isoRatio);
+//                      compBox_list_clear(ltemp2);
+//                  }
 //                  if ( (metadatas_getVerbo(meta)>=3) && (connCmp_nSolsref(ccur) == 1) ) {
 //                      compDsk_t res;
 //                      compDsk_init(res);

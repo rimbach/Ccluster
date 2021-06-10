@@ -292,7 +292,7 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
         newton_res nres;
         nres.nflag = 0;
         if (connCmp_nSolsref(CC)==1) {
-            if (metadatas_getVerbo(meta)>3)
+            if (metadatas_getVerbo(meta)>=3)
                 printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: the CC contains one solution: try to validate with interval newton\n");
             nres = newton_cauchy_interval( ndisk, cache, cacheCau, res.appPrec, meta);
             if (metadatas_getVerbo(meta)>3) {
@@ -312,11 +312,11 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
             if ( connCmp_nSolsref(CC) <= 3 ) {
                 /* try the combinatorial version of Cauchy counting test */
                 realRat_mul_si(compDsk_radiusref(ndisk), compDsk_radiusref(ndisk), 2);
-                cres = cauchyTest_deterministic_counting_test_combinatorial( compDsk_centerref(ndisk),
-                                                                             compDsk_radiusref(ndisk),
-                                                                             connCmp_nSolsref(CC),
-                                                                             cache, cacheCau, res.appPrec,
-                                                                             meta, depth);
+                cres = cauchyTest_deterministic_counting_combinatorial( compDsk_centerref(ndisk),
+                                                                        compDsk_radiusref(ndisk),
+                                                                        connCmp_nSolsref(CC),
+                                                                        cache, cacheCau, res.appPrec,
+                                                                        meta, depth);
                 res.appPrec = cres.appPrec;
                 res.nflag = (cres.nbOfSol == connCmp_nSolsref(CC));
                 if (! res.nflag )
@@ -327,29 +327,16 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
             } else {
 //             if (res.nflag==0){
                 /* version with exclusion of discs on contour */
-                realRat_t radInf, radSup;
-                realRat_init(radInf);
-                realRat_init(radSup);
-                realRat_set(radInf, compDsk_radiusref(ndisk));
-                realRat_mul_si(radInf, radInf, 4);
-                realRat_div_ui(radInf, radInf, 3);
-                realRat_set(radSup, compDsk_radiusref(ndisk));
-                realRat_mul_si(radSup, radSup, 6);
-                /* center    : compDsk_centerref(ndisk); */
-                /* radius Inf: 4/3*compDsk_radiusref(ndisk); */
-                cres = cauchyTest_deterministic_counting_test_for_newton( compDsk_centerref(ndisk), 
-                                                                                        radInf,  
-                                                                                        radSup,
-                                                                                        connCmp_nSolsref(CC),
-                                                                                        cache, cacheCau, res.appPrec,
-                                                                                        meta, depth);
+                cres = cauchyTest_deterministic_verification( ndisk, connCmp_nSolsref(CC), cache, cacheCau, res.appPrec, meta, depth);
                 res.appPrec = cres.appPrec;
+//                 cres = cauchyTest_probabilistic_counting( ndisk, cache, cacheCau, res.appPrec, meta, depth);
+//                 res.appPrec = cres.appPrec;
+//                 if (cres.nbOfSol == connCmp_nSolsref(CC)) {
+//                     cres = cauchyTest_deterministic_counting( ndisk, cacheCauchy_isoRatioref(cacheCau), cache, cacheCau, res.appPrec, meta, depth);
+//                     res.appPrec = cres.appPrec;
+//                 }
                 res.nflag = (cres.nbOfSol == connCmp_nSolsref(CC));
-                if (res.nflag)
-                    realRat_set(compDsk_radiusref(ndisk), radInf);
-                realRat_clear(radInf);
-                realRat_clear(radSup);
-                if (metadatas_getVerbo(meta)>3) {
+                if (metadatas_getVerbo(meta)>=3) {
                     printf("newton_cauchy.c, newton_cauchy_newton_connCmp: cauchy test res %d\n", cres.nbOfSol);
                     /* version with Tstar test: only for debug*/
                     tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, NULL, meta);

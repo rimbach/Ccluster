@@ -46,7 +46,7 @@ void cacheCauchy_init ( cacheCauchy_t cache,
     realApp_init(cacheCauchy_lBoundApref(cache));
     realApp_init(cacheCauchy_uBoundApref(cache));
     
-    /* compute nbEvalEx = ceil ( log_isoRatio (2*degree +1) ) + 1*/
+    /* compute nbEvalEx = ceil ( log_isoRatio (4*degree +1) ) + nbPsComputed*/
     realApp_t liR;
     realApp_init(liR);
     realApp_set_realRat(liR, cacheCauchy_isoRatioref(cache), CCLUSTER_DEFAULT_PREC);

@@ -42,7 +42,7 @@ void cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     /* with evaluation function */
     cauchyRootRadii_root_bound( compBox_bwidthref(initialBox), cacheCau, cache, meta );
     if (verb>=3) {
-        printf("root bound with eval function: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+        printf("#root bound with eval function: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     /* with coefficients */
