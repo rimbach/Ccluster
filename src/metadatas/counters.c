@@ -88,11 +88,19 @@ void counters_by_depth_init( counters_by_depth_t st) {
     st->nbTaylorsRepetedInTSTests = 0;
     st->nbNewton                  = 0;
     st->nbFailingNewton           = 0;
-    st->nbTSTestsInNewton                  = 0;
-    st->nbTaylorsInNewton          = 0;
-    st->nbGraeffeInNewton          = 0;
+    st->nbTSTestsInNewton         = 0;
+    st->nbTaylorsInNewton         = 0;
+    st->nbGraeffeInNewton         = 0;
     st->nbPsCountingTest          = 0;   
     st->nbEval                    = 0;
+    
+    st-> nbCauchyExTests          = 0;
+    st-> nbCauchyExEvalsP         = 0;
+    st-> nbCauchyExEvalsD         = 0;
+    st-> nbCauchyCoTests          = 0;
+    st-> nbCauchyCoEvalsP         = 0;
+    st-> nbCauchyCoEvalsD         = 0;
+
     boxes_by_prec_init( st->bpc );
 }
 
@@ -255,7 +263,15 @@ void counters_count ( counters_t st ) {
        st->total->nbTaylorsInNewton         += (st->table)[i].nbTaylorsInNewton         ; 
        st->total->nbGraeffeInNewton         += (st->table)[i].nbGraeffeInNewton         ;
        st->total->nbPsCountingTest          += (st->table)[i].nbPsCountingTest          ;    
-       st->total->nbEval        += (st->table)[i].nbEval           ;
+       st->total->nbEval                    += (st->table)[i].nbEval                    ;
+       
+       st->total->nbCauchyExTests           += (st->table)[i].nbCauchyExTests           ; 
+       st->total->nbCauchyExEvalsP          += (st->table)[i].nbCauchyExEvalsP          ; 
+       st->total->nbCauchyExEvalsD          += (st->table)[i].nbCauchyExEvalsD          ; 
+       st->total->nbCauchyCoTests           += (st->table)[i].nbCauchyCoTests           ;
+       st->total->nbCauchyCoEvalsP          += (st->table)[i].nbCauchyCoEvalsP          ;    
+       st->total->nbCauchyCoEvalsD          += (st->table)[i].nbCauchyCoEvalsD          ;
+       
        boxes_by_prec_add_boxes_by_prec( st->total->bpc, (st->table)[i].bpc ); 
     }
 

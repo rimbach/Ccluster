@@ -511,6 +511,154 @@ cauchyTest_res cauchyTest_computeSsApprox(compApp_ptr ps,
     
 }
 
+slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
+                                   const compDsk_t Delta,
+                                   cacheApp_t cache,
+                                   cacheCauchy_t cacheCau,
+                                   metadatas_t meta, int depth) {
+    
+    slong res = -1;
+    
+    clock_t start = clock();
+    double evalTime=0;
+    
+    slong appPrec = CCLUSTER_DEFAULT_PREC;
+    /* want |s0*-s0| less than 1/4 */
+    /* => number of evaluation points = ceil ( log_isoRatio (4*degree +1) ) + 1*/
+    realApp_t liR;
+    realApp_init(liR);
+    realApp_set_realRat(liR, isoRatio, CCLUSTER_DEFAULT_PREC);
+    realApp_log(liR, liR, CCLUSTER_DEFAULT_PREC );
+    realApp_t qApp;
+    realApp_init(qApp);
+    realApp_set_si(qApp, 4*cacheCauchy_degreeref(cacheCau)+1);
+    realApp_log(qApp, qApp, CCLUSTER_DEFAULT_PREC );
+    realApp_div(qApp, qApp, liR, CCLUSTER_DEFAULT_PREC );
+    slong q = realApp_ceil_si( qApp, CCLUSTER_DEFAULT_PREC ) + 1;
+    
+    /* want w(s0*)<1/4 */
+    realApp_t errAp;
+    realApp_init(errAp);
+    realApp_set_d(errAp, 0.25);
+    
+    compApp_t point       ;
+    compApp_t pointShifted;
+    compApp_t fval        ;
+    compApp_t fderval     ;
+    compApp_t fdiv        ;
+    compApp_t s0star      ;
+    
+    compApp_init( point        );
+    compApp_init( pointShifted );
+    compApp_init( fval         );
+    compApp_init( fderval      );
+    compApp_init( fdiv         );
+    compApp_init( s0star       );
+    
+    realApp_t radRe;
+    realApp_t radIm;
+    realApp_init(radRe);
+    realApp_init(radIm);
+    
+    compApp_t c, a;
+    realRat_t argu;
+    
+    compApp_init(c);
+    compApp_init(a);
+    realRat_init(argu);
+    
+    compApp_poly_ptr app = NULL;
+    
+    int enoughPrec = 0;
+    while (enoughPrec == 0) {
+        if (metadatas_getVerbo(meta)>=3)
+            printf("#------ appPrec: %ld\n", appPrec);
+        
+        enoughPrec = 1;
+        compApp_zero(s0star);
+        compApp_set_compRat(c, compDsk_centerref(Delta), appPrec);
+        
+        if (cacheCauchy_evalFastref(cacheCau) == NULL)
+            app = cacheApp_getApproximation ( cache, appPrec );
+        
+        for(slong i=0; i<q; i++) {
+            realRat_set_si(argu, 2*i, q);
+            compApp_set_realRat(a, argu, appPrec);
+            acb_exp_pi_i( point, a, appPrec);
+            compApp_mul_realRat(pointShifted, point, compDsk_radiusref(Delta), appPrec);
+            compApp_add( pointShifted, c, pointShifted, appPrec);
+            
+            start = clock();
+            if (cacheCauchy_evalFastref(cacheCau) == NULL)
+                compApp_poly_evaluate2_rectangular(fval, fderval, app, pointShifted, appPrec);
+            else
+                (cacheCauchy_evalFastref(cacheCau))( fval, fderval, pointShifted, appPrec);
+            evalTime += (double) (clock() - start);
+            
+            if (compApp_contains_zero( fval )){
+                if (metadatas_getVerbo(meta)>=3)
+                    printf("#------ fval contains 0, i: %ld\n", i);
+                appPrec = 2*appPrec;
+                enoughPrec = 0;
+                break;
+            }
+            
+            compApp_div(fdiv, fderval, fval, appPrec);
+            compApp_mul(fdiv, fdiv, point, appPrec);
+            compApp_mul_realRat(fdiv, fdiv, compDsk_radiusref(Delta), appPrec);
+            compApp_div_si( fdiv, fdiv, q, appPrec);
+            compApp_add(s0star, s0star, fdiv, appPrec);
+            
+            /* check error of s0star */
+            realApp_get_rad_realApp( radRe, compApp_realref(s0star) );
+            realApp_get_rad_realApp( radIm, compApp_imagref(s0star) );
+//             realApp_mul_realRat( radRe, radRe, compDsk_radiusref(Delta), appPrec );
+//             realApp_mul_realRat( radIm, radIm, compDsk_radiusref(Delta), appPrec );
+            if ( realApp_ge( radRe, errAp ) || realApp_ge( radIm, errAp ) ){
+                if (metadatas_getVerbo(meta)>=3)
+                    printf("#------ s0star not precise enough, i: %ld\n", i);
+                appPrec = 2*appPrec;
+                enoughPrec = 0;
+                break;
+            }
+                
+        }
+        if (metadatas_getVerbo(meta)>=3)
+            if (enoughPrec == 1)
+                printf("#------ s0star precise enough\n");
+        
+    }
+    
+    /* add error */
+    realApp_add_error( compApp_realref(s0star), errAp );
+    realApp_add_error( compApp_imagref(s0star), errAp );
+    
+    /* s0star contains a unique integer */
+    realApp_get_unique_si( &res, compApp_realref(s0star) );
+    
+    realApp_clear(liR);
+    realApp_clear(qApp);
+    realApp_clear(errAp);
+    compApp_clear( point        );
+    compApp_clear( pointShifted );
+    compApp_clear( fval         );
+    compApp_clear( fderval      );
+    compApp_clear( fdiv         );
+    compApp_clear( s0star       );
+    realApp_clear(radRe);
+    realApp_clear(radIm);
+    compApp_clear(c);
+    compApp_clear(a);
+    realRat_clear(argu);
+    
+    if (metadatas_haveToCount(meta)) {
+        metadatas_add_time_CauCoED(meta, evalTime);
+        metadatas_add_CauchyCoEvalsD(meta, depth, q);
+    }
+    
+    return res;
+}
+
 slong cauchyTest_computeS1compDsk( compDsk_t res,
                                    const realRat_t isoRatio,
                                    const compDsk_t Delta,

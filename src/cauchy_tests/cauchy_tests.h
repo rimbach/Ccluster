@@ -137,34 +137,49 @@ cauchyTest_res cauchyTest_probabilistic_exclusion_test( const compRat_t center,
                                                        slong prec,
                                                        metadatas_t meta, int depth);
 
-cauchyTest_res cauchyTest_probabilistic_counting_test( const compRat_t center,
-                                                       const realRat_t radius,           
-                                                       cacheApp_t cache,
-                                                       cacheCauchy_t cacheCau,
-                                                       slong prec,
-                                                       metadatas_t meta, int depth);
+cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,           
+                                                  cacheApp_t cache,
+                                                  cacheCauchy_t cacheCau,
+                                                  slong prec,
+                                                  metadatas_t meta, int depth);
 
-/* version for separated input disk:
- * D(center, radius) and D(center, 4*radius) 
- * are assumed to contain the same number of roots */
-cauchyTest_res cauchyTest_deterministic_counting_test_for_separated_discs( const compRat_t center,
-                                                                           const realRat_t radius,           
-                                                                           cacheApp_t cache,
-                                                                           cacheCauchy_t cacheCau,
-                                                                           slong prec,
-                                                                           metadatas_t meta, int depth);
+cauchyTest_res cauchyTest_deterministic_counting( const compDsk_t Delta, 
+                                                  const realRat_t a,
+                                                  cacheApp_t cache,
+                                                  cacheCauchy_t cacheCau,
+                                                  slong prec,
+                                                  metadatas_t meta, int depth);
 
-/* version for newton: */
-cauchyTest_res cauchyTest_deterministic_counting_test_for_newton( const compRat_t center,
-                                                                  realRat_t radInf,  
-                                                                  const realRat_t radSup,
-                                                                  slong nbOfRoots,
-                                                                  cacheApp_t cache,
-                                                                  cacheCauchy_t cacheCau,
-                                                                  slong prec,
-                                                                  metadatas_t meta, int depth);
+/* this version verifies that there are nbOfRoots roots in Delta */
+cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
+                                                      slong nbOfRoots,
+                                                      cacheApp_t cache,
+                                                      cacheCauchy_t cacheCau,
+                                                      slong prec,
+                                                      metadatas_t meta, int depth);
 
-cauchyTest_res cauchyTest_deterministic_counting_test_combinatorial( const compRat_t center,
+/* certification that A(center, radInf, radSup) contains no root: */
+/* if  0 then A(center, radInf, radSup) contains no root */
+/* if -1 then A(center, (radSup+radInf)/2 - (5/4)*isoRatio*(radSup-radInf)/2,  */
+/*                      (radSup+radInf)/2 + (5/4)*isoRatio*(radSup-radInf)/2 ) */
+/*             contains a root */
+cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
+                                           const realRat_t radInf,  
+                                           const realRat_t radSup,
+                                           cacheApp_t cache,
+                                           cacheCauchy_t cacheCau,
+                                           slong prec,
+                                           metadatas_t meta, int depth);
+
+// cauchyTest_res cauchyTest_deterministic_counting_with_radInf_radSup( const compRat_t center,
+//                                                                      const realRat_t radInf,  
+//                                                                      const realRat_t radSup,
+//                                                                      cacheApp_t cache,
+//                                                                      cacheCauchy_t cacheCau,
+//                                                                      slong prec,
+//                                                                      metadatas_t meta, int depth);
+
+cauchyTest_res cauchyTest_deterministic_counting_combinatorial( const compRat_t center,
                                                                      realRat_t radius,
                                                                      slong nbOfRoots,
                                                                      cacheApp_t cache,
@@ -172,7 +187,16 @@ cauchyTest_res cauchyTest_deterministic_counting_test_combinatorial( const compR
                                                                      slong prec,
                                                                      metadatas_t meta, int depth);
 
-    
+/* this version work for any iso ratio, not necessarily the one
+ * defined in CacheCau 
+ * the disk has to be isolated as isoRation 
+ * returns the number of roots in Delta */
+slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
+                                   const compDsk_t Delta,
+                                   cacheApp_t cache,
+                                   cacheCauchy_t cacheCau,
+                                   metadatas_t meta, int depth);
+
 slong cauchyTest_computeS1compDsk( compDsk_t res,
                                    const realRat_t isoRatio,
                                    const compDsk_t Delta,

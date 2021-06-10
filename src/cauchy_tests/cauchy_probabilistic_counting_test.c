@@ -11,15 +11,11 @@
 
 #include "cauchy_tests/cauchy_tests.h"
 
-/* version for separated input disk:
- * D(center, radius) and D(center, 4*radius) 
- * are assumed to contain the same number of roots */
-cauchyTest_res cauchyTest_probabilistic_counting_test( const compRat_t center,
-                                                       const realRat_t radius,           
-                                                       cacheApp_t cache,
-                                                       cacheCauchy_t cacheCau,
-                                                       slong prec,
-                                                       metadatas_t meta, int depth){
+cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,         
+                                                  cacheApp_t cache,
+                                                  cacheCauchy_t cacheCau,
+                                                  slong prec,
+                                                  metadatas_t meta, int depth){
     
     clock_t start = clock();
     
@@ -27,33 +23,10 @@ cauchyTest_res cauchyTest_probabilistic_counting_test( const compRat_t center,
     res.appPrec = prec;
     realApp_ptr wP  = cacheCauchy_wanErrExref(cacheCau);
     
-//     realRat_t RadInf, RadSup, Rad, ExRad, ratio;
-//     realApp_t nbCentersApp;
-//     realRat_init(RadInf);
-//     realRat_init(RadSup);
-//     realRat_init(Rad);
-//     realRat_init(ExRad);
-//     realRat_init(ratio);
-//     realApp_init(nbCentersApp);
-    
-//     realRat_set(RadInf, radius);
-//     realRat_mul_si(RadSup, RadInf, 4);
-//     realRat_add(Rad, RadInf, RadSup);
-//     realRat_div_ui(Rad, Rad, 2);
-//     realRat_sub(ExRad, RadSup, RadInf);
-//     realRat_div_ui(ExRad, ExRad, 2);
-//     realRat_div(ExRad, ExRad, cacheCauchy_isoRatioref(cacheCau));
-//     realRat_div(ratio, Rad, ExRad);
-//     realApp_pi(nbCentersApp, CCLUSTER_DEFAULT_PREC);
-//     realApp_mul_si(nbCentersApp, nbCentersApp, 2, CCLUSTER_DEFAULT_PREC);
-//     realApp_mul_realRat(nbCentersApp, nbCentersApp, ratio, CCLUSTER_DEFAULT_PREC);
-//     slong nbCenters = realApp_ceil_si(nbCentersApp, CCLUSTER_DEFAULT_PREC);
-    
-    cacheCauchy_set_bounds( cacheCau, radius, CCLUSTER_DEFAULT_PREC);
+    cacheCauchy_set_bounds( cacheCau, compDsk_radiusref(Delta), CCLUSTER_DEFAULT_PREC);
     
     if (metadatas_getVerbo(meta)>3) {
-        printf("#---cauchy probabilistic counting test: \n");
-//         printf("------ isoRatio: "); realRat_print(metadatas_getIsoRatio(meta)); printf("\n");
+        printf("#---cauchy probabilistic counting: \n");
         printf("#------ isoRatio: "); realRat_print(cacheCauchy_isoRatioref(cacheCau)); printf("\n");
     }
     
@@ -61,8 +34,7 @@ cauchyTest_res cauchyTest_probabilistic_counting_test( const compRat_t center,
     compApp_init(s0);
     int alreadyEvaluated = 0;
     
-    /* apply counting test to D(center, 2*radius) */
-    res = cauchyTest_computeS0Approx(s0, center, radius,
+    res = cauchyTest_computeS0Approx(s0, compDsk_centerref(Delta), compDsk_radiusref(Delta),
                                      NULL, 0, 0, 
                                     0, &alreadyEvaluated, cache, cacheCau, CAUCHYTEST_UNCERTIFI, prec, CAUCHYTEST_INCOUNTIN, meta, depth );
     
