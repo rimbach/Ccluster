@@ -254,6 +254,139 @@ void cauchy_prep_loop( compBox_list_t bDiscarded,
     realRat_clear(diam);
 }
 
+/* let res = D(c',r'), Delta=D(c,r) */
+/* set r' st |c-c'|+r/theta <= r' <= 5/4 r */
+void cauchy_setRadSup( compDsk_t res, const compDsk_t Delta, const realRat_t theta ){
+    
+    compRat_t temp;
+    compRat_init(temp);
+    compRat_sub(temp, compDsk_centerref(Delta), compDsk_centerref(res) );
+    
+    compApp_t tempApp;
+    compApp_init(tempApp);
+    
+    slong prec = CCLUSTER_DEFAULT_PREC;
+    compApp_set_compRat(tempApp, temp, prec);
+    realApp_t distApp;
+    realApp_init(distApp);
+    compApp_abs( distApp, tempApp, prec );
+    
+    realRat_t dist, rOtheta, ubound;
+    realRat_init(dist);
+    realRat_init(rOtheta);
+    realRat_init(ubound);
+    
+    realApp_get_realRat(dist, distApp);
+    realRat_div( rOtheta, compDsk_radiusref(Delta), theta );
+    realRat_set_si(ubound, 5,4);
+    realRat_mul(ubound, ubound, compDsk_radiusref(Delta) );
+    
+    realRat_add(compDsk_radiusref(res), dist, rOtheta );
+    
+    while( realRat_cmp( compDsk_radiusref(res), ubound ) >0 ) {
+        prec = 2*prec;
+        compApp_set_compRat(tempApp, temp, prec);
+        compApp_abs( distApp, tempApp, prec );
+        realApp_get_realRat(dist, distApp);
+        realRat_add(compDsk_radiusref(res), dist, rOtheta );
+    }
+    
+    compRat_clear(temp);
+    compApp_clear(tempApp);
+    realApp_clear(distApp);
+    realRat_clear(dist);
+    realRat_init(rOtheta);
+    realRat_init(ubound);
+}
+
+/* assume Delta = D(c,r) contains m and has isolation ratio theta >=2 */
+/* computes a disk res = D(c',r') such that*/
+/* Delta and res contain the same roots */
+/* either r' <= eps */
+/*     or res is m/((2m-2)*theta) rigid */
+slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slong m, const realRat_t theta, const realRat_t eps,
+                                       cacheApp_t cache,
+                                       cacheCauchy_t cacheCau,
+                                       slong prec, metadatas_t meta, slong depth) {
+    
+    realRat_t epsp;
+    realRat_init(epsp);
+    realRat_mul_si(epsp, eps, 2);
+    /* if 2*eps \geq r, return the disk D(c,r/2) */
+    if (metadatas_getVerbo(meta)>=3) {
+            printf("# --- cauchy.c: cauchy_compressionIntoRigidDisk; eps:");
+            realRat_print(eps);
+            printf("\n# --- cauchy.c: cauchy_compressionIntoRigidDisk; 2*eps:");
+            realRat_print(epsp);
+            printf("\n# --- cauchy.c: cauchy_compressionIntoRigidDisk; r:");
+            realRat_print(compDsk_radiusref(Delta));
+            printf("\n");
+    }
+        
+    if ( (realRat_cmp( epsp, compDsk_radiusref(Delta) )>=0) ){
+        
+        if (metadatas_getVerbo(meta)>=3) {
+            printf("# --- cauchy.c: cauchy_compressionIntoRigidDisk;  2*eps >= radius of input disc; \n");
+        }
+        
+        compDsk_set(res, Delta );
+        realRat_div_ui( compDsk_radiusref(res), compDsk_radiusref(res), 2);
+        
+        realRat_clear(epsp);
+        return prec;
+    }
+    /* here eps < r/2 */ 
+    /* set epsp = m*eps/theta */
+    realRat_div(epsp, eps, theta);
+    realRat_mul_si(epsp, epsp, m);
+    
+    /* compute a disk of radius less than m*eps/theta containing s1(p,Delta) */
+    slong appPrec = cauchyTest_computeS1compDsk( res, theta, Delta, m, cache, cacheCau, epsp, meta, depth );
+    
+    /* if m=1 then res is equivalent to Delta and has radius less than eps/2 */
+    /* return the disk res */
+    if (m==1) {
+        
+        if (metadatas_getVerbo(meta)>=3) {
+            printf("# --- cauchy.c: cauchy_compressionIntoRigidDisk;  m=1; use s1 \n");
+        }
+        
+        realRat_clear(epsp);
+        return appPrec;
+    }
+    /* here m>1 */
+    
+    realRat_t relativeError;
+    realRat_init(relativeError);
+    realRat_set_si(relativeError, 19, 10);
+    /* set c' = center(s1)/m */
+    compRat_div_ui( compDsk_centerref(res), compDsk_centerref(res), (ulong) m );
+    /* set u st |c-c'|+r/theta <= u <= 5/4 r */
+    cauchy_setRadSup( res, Delta, theta );
+    /* compute r such that 1 <= r / r_{d+1-m} (s1/m, p) <= relativeError */ 
+    realRat_t radInf;
+    realRat_init(radInf);
+    realRat_zero(radInf);
+    
+    if (metadatas_getVerbo(meta)>=3) {
+            printf("# --- cauchy.c: cauchy_compressionIntoRigidDisk; call root radii \n");
+    }
+    cauchyRootRadii_root_radius( compDsk_centerref(res),
+                                 radInf,        /* radInf = 0 < r_{d+1-m}(center, p) */
+                                 compDsk_radiusref(res),        /* radSup > r_{d+1-m}(center, p) */
+                                 relativeError, /* want relativeError*radInf >= radSup */ 
+                                 epsp,
+                                 theta,   /*isolation ratio of the disk in which is computed rr */ 
+                                 m,
+                                 cacheCau, cache, meta );
+    
+    realRat_clear(radInf);
+    realRat_clear(epsp);
+    realRat_clear(relativeError);
+    
+    return appPrec;
+}
+
 void cauchy_main_loop( connCmp_list_t qResults,  
                          compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
@@ -367,7 +500,7 @@ void cauchy_main_loop( connCmp_list_t qResults,
                     realRat_div_ui(compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 2);
                     connCmp_nSolsref(ccur) = resCauchy.nbOfSol;
                     prec = resCauchy.appPrec;
-                    if (metadatas_getVerbo(meta)>3)
+                    if (metadatas_getVerbo(meta)>=3)
                         printf("#------nb sols after Cauchy: %d\n", (int) connCmp_nSolsref(ccur));
                      
 //                     resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
@@ -375,6 +508,42 @@ void cauchy_main_loop( connCmp_list_t qResults,
 //                     prec = resTstar.appPrec;
 //                     if (metadatas_getVerbo(meta)>=3)
 //                         printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));
+                    
+                    realRat_t epsComp;
+                    realRat_init(epsComp);
+                    realRat_set_si( epsComp, (slong) connCmp_nSolsref(ccur), (slong) connCmp_nSolsref(ccur) + 3*cacheApp_getDegree(cache) );
+                    realRat_mul( epsComp, epsComp, epsComp );
+                    realRat_mul_si(compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 2);
+                    
+                    if ( realRat_cmp (epsComp, compDsk_radiusref(ccDisk) ) < 0  ) {
+                        
+                        if (metadatas_getVerbo(meta)>=3) {
+                            printf("# Test compression into rigid disc for a CC with %d roots \n", connCmp_nSolsref(ccur));
+                            printf("# Delta: "); compDsk_print( ccDisk ); printf("\n");
+                            printf("# Required radius: "); realRat_print(epsComp); printf("\n");
+                        }
+                        
+                        compDsk_t res;
+                        compDsk_init(res);
+                        
+                        
+                        /* ccDisk is at least 2 isolated */
+                        realRat_t theta;
+                        realRat_init(theta);
+                        realRat_set_si(theta, 2, 1);
+                        
+                        slong precres = cauchy_compressionIntoRigidDisk( res, ccDisk, connCmp_nSolsref(ccur), theta, epsComp,
+                                                                         cache, cacheCau, prec, meta, depth);
+                        
+                        if (metadatas_getVerbo(meta)>=3) {
+                            printf("# Precision after compression: %ld\n", precres);
+                            printf("# res: "); compDsk_print( res ); printf("\n");
+                        }
+                        realRat_clear(theta);
+                        compDsk_clear(res);
+                    }
+                    realRat_div_ui(compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 2);
+                    realRat_init(epsComp);
                     
 //                  if ( (connCmp_nSolsref(ccur) == 1) && (!widthFlag) ) {
 //                      

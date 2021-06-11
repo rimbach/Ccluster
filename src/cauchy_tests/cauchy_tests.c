@@ -790,7 +790,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
             
         
     }
-    /* the radius of the ball s1 is less than errAp => it is less than error */
+    /* the radius of the ball s1 is less than errAp => it is less than error = eps/2 */
     /* s1 approximates rs1(p_\Delta,0,1) with |s1 - rs1(p_\Delta,0,1)|\geq errAp */
     /* thus the disk center(s1), 2*error contains rs1(p_\Delta,0,1) */
     compRat_t mc;

@@ -103,6 +103,16 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta);
 
+/* assume Delta = D(c,r) contains m and has isolation ratio theta >=2 */
+/* computes a disk res = D(c',r') such that*/
+/* Delta and res contain the same roots */
+/* either r' <= eps */
+/*     or res is m/((2m-2)*theta) rigid */
+slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slong m, const realRat_t theta, const realRat_t eps,
+                                       cacheApp_t cache,
+                                       cacheCauchy_t cacheCau,
+                                       slong prec, metadatas_t meta, slong depth);
+
 int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps);
 
 

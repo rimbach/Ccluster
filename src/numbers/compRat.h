@@ -114,6 +114,16 @@ NUMBERS_INLINE void compRat_add(compRat_t dest, const compRat_t x, const compRat
     realRat_add(compRat_imagref(dest), compRat_imagref(x), compRat_imagref(y));
 }
 
+NUMBERS_INLINE void compRat_sub(compRat_t dest, const compRat_t x, const compRat_t y) { 
+    realRat_sub(compRat_realref(dest), compRat_realref(x), compRat_realref(y)); 
+    realRat_sub(compRat_imagref(dest), compRat_imagref(x), compRat_imagref(y));
+}
+
+NUMBERS_INLINE void compRat_div_ui(compRat_t dest, const compRat_t x, ulong y) { 
+    realRat_div_ui(compRat_realref(dest), compRat_realref(x), y); 
+    realRat_div_ui(compRat_imagref(dest), compRat_imagref(x), y);
+}
+
 /* geometric operations */
 /* sets dest to abs(x.real-y.real) + i*abs(x.imag-y.imag) */
 void compRat_comp_distance( compRat_t dest, const compRat_t x, const compRat_t y );
