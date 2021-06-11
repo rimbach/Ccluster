@@ -11,6 +11,60 @@
 
 #include "cauchy_tests/cauchy_tests.h"
 
+void cauchyTest_fmatheta( realRat_t res, const realRat_t a, const realRat_t theta ) {
+    
+    realRat_t t1, t2;
+    realRat_init(t1);
+    realRat_init(t2);
+    
+    /* res = (5/4)theta */
+    realRat_set_si( res, 5, 4 );
+    realRat_mul   ( res, res, theta );
+    realRat_one(t1);
+    realRat_one(t2);
+    /* t1 = (1-(5/4)theta) */
+    realRat_sub(t1, t1, res);
+    /* t2 = (1+(5/4)theta) */
+    realRat_add(t2, t2, res);
+    /* res = a^2*t1 + t2 */
+    realRat_mul(res, a, a);
+    realRat_mul(res, res, t1);
+    realRat_add(res, res, t2);
+    /* res = (1/(2a))*(a^2*t1 + t2) */
+    realRat_div(res, res, a);
+    realRat_div_ui(res, res, 2);
+    
+    realRat_clear(t1);
+    realRat_clear(t2);
+}
+
+void cauchyTest_fpatheta( realRat_t res, const realRat_t a, const realRat_t theta ){
+    
+    realRat_t t1, t2;
+    realRat_init(t1);
+    realRat_init(t2);
+    
+    /* res = (5/4)theta */
+    realRat_set_si( res, 5, 4 );
+    realRat_mul   ( res, res, theta );
+    realRat_one(t1);
+    realRat_one(t2);
+    /* t1 = (1+(5/4)theta) */
+    realRat_add(t1, t1, res);
+    /* t2 = (1-(5/4)theta) */
+    realRat_sub(t2, t2, res);
+    /* res = a^2*t1 + t2 */
+    realRat_mul(res, a, a);
+    realRat_mul(res, res, t1);
+    realRat_add(res, res, t2);
+    /* res = (1/(2a))*(a^2*t1 + t2) */
+    realRat_div(res, res, a);
+    realRat_div_ui(res, res, 2);
+    
+    realRat_clear(t1);
+    realRat_clear(t2);
+}
+
 /* version for any disk */
 cauchyTest_res cauchyTest_deterministic_counting( const compDsk_t Delta,
                                                   const realRat_t a,

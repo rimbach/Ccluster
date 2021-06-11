@@ -143,6 +143,9 @@ cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,
                                                   slong prec,
                                                   metadatas_t meta, int depth);
 
+void cauchyTest_fmatheta( realRat_t res, const realRat_t a, const realRat_t theta );
+void cauchyTest_fpatheta( realRat_t res, const realRat_t a, const realRat_t theta );
+    
 cauchyTest_res cauchyTest_deterministic_counting( const compDsk_t Delta, 
                                                   const realRat_t a,
                                                   cacheApp_t cache,
@@ -197,6 +200,9 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
                                    cacheCauchy_t cacheCau,
                                    metadatas_t meta, int depth);
 
+/* Assume Delta is isoRatio-isolated and contains nbOfRoots roots */
+/* Computes a disk res with radius less than eps */
+/* containing s1(p, Delta) */
 slong cauchyTest_computeS1compDsk( compDsk_t res,
                                    const realRat_t isoRatio,
                                    const compDsk_t Delta,
