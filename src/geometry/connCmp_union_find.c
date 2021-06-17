@@ -22,9 +22,9 @@ void connCmp_union_compBox( connCmp_list_t ccs, compBox_t b){
     
     connCmp_ptr cctemp;
     
-    clock_t start, start2;
-    double temp = 0;
-    start = clock();
+//     clock_t start, start2;
+//     double temp = 0;
+//     start = clock();
     
 //     printf("#connCmp_union_find.c, l 29: begin \n");
 //     printf("#connCmp_union_find.c, l 30: nb of ccs: %d\n", connCmp_list_get_size(ccs) );
@@ -46,9 +46,9 @@ void connCmp_union_compBox( connCmp_list_t ccs, compBox_t b){
 //                 printf("                             number of boxes in cctemp: %d\n ", compBox_list_get_size(connCmp_boxesref(cctemp)));
 //             }
             
-            start2 = clock();
+//             start2 = clock();
             connCmp_merge_2_connCmp(cb, cctemp);
-            temp += ( (float) clock() - start2 )/CLOCKS_PER_SEC ;
+//             temp += ( (float) clock() - start2 )/CLOCKS_PER_SEC ;
             
             connCmp_clear(cctemp);
             ccluster_free(cctemp);
@@ -58,8 +58,8 @@ void connCmp_union_compBox( connCmp_list_t ccs, compBox_t b){
 //         cnt ++;
     }
     
-    timeIn_merge_2_connCmp += temp;
-    timeIn_are_8connected  += ( ( (float) clock() - start )/CLOCKS_PER_SEC - temp );
+//     timeIn_merge_2_connCmp += temp;
+//     timeIn_are_8connected  += ( ( (float) clock() - start )/CLOCKS_PER_SEC - temp );
     
     connCmp_list_push(ltemp, cb);
     connCmp_list_swap(ltemp, ccs);

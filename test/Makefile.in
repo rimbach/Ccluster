@@ -29,6 +29,9 @@ valgrindMandelbrotVerbose: genMandelbrotVerbose valgrindMandelbrot cleanMandelbr
 temp_file=temp.txt
 input_file=temp_in.ccl
 
+clean: cleanMignotteVerbose cleanBernoulliVerbose cleanMandelbrotVerbose
+	@rm -f ${input_file} ${temp_file}
+
 # tests with Mignotte polynomials
 degree_Mignotte=64
 bitsize_Mignotte=14
