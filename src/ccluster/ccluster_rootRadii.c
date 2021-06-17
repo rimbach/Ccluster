@@ -314,6 +314,10 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
     /* */
     slong prec1 = realIntRootRadii_rootRadii( annulii, 0, cache, prec, meta );
     
+    if (metadatas_getVerbo(meta)>=3) {
+        printf("time in first root radii: %f\n", (double) (clock() - start)/CLOCKS_PER_SEC );
+    }
+    
     /* derive upper bound for the norm of the roots */
 //     slong centerRe1 = realApp_ceil_si(compAnn_radSupref(compAnn_list_last(annulii)), prec);
     realApp_ceil_realRat(upperBound, compAnn_radSupref(compAnn_list_last(annulii)), prec);
