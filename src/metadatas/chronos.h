@@ -80,6 +80,8 @@ typedef struct {
     double  _clicks_CauCoED_cumul; /* time in evaluations in certifying    counting tests */
     double  _clicks_CauCoDS_cumul; /* time in computing divisions in       counting tests */
     double  _clicks_CauCoCS_cumul; /* time in computing s0 in              counting tests */
+    /* Compression into rigid disks */
+    double  _clicks_CompTot_cumul; /* time spent in compression algorithm */
     
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_t _mutex;
@@ -326,6 +328,11 @@ METADATAS_INLINE void   chronos_add_time_CauCoCS( chronos_t times, double d, int
     times->_clicks_CauCoCS_cumul += d/CLOCKS_PER_SEC;
 }
 METADATAS_INLINE double chronos_get_time_CauCoCS ( const chronos_t times ) { return times->_clicks_CauCoCS_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CompTot( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CompTot_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CompTot ( const chronos_t times ) { return times->_clicks_CompTot_cumul; }
 
 /* DEPRECATED */
 // METADATAS_INLINE void   chronos_tic_Approxi      ( chronos_t times ) { times->_clicks_Approxi = clock(); }

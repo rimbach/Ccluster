@@ -44,7 +44,11 @@ newton_res newton_cauchy_first_condition( compApp_t fcenter,
         tstar_getApproximation( pApprox, cache, res.appPrec, meta);
         compApp_poly_evaluate2(fcenter, fpcenter, pApprox, center, res.appPrec);
     } else {
+//         printf("\n\n  prec: %ld\n", res.appPrec);
+//         printf("     point: "); compApp_printd(center, 20); printf("\n");
         (cacheCauchy_evalFastref(cacheCau))(fcenter, fpcenter, center, res.appPrec);
+//         printf("  f(point): "); compApp_printd(fcenter, 20); printf("\n");
+//         printf(" f'(point): "); compApp_printd(fpcenter, 20); printf("\n");
     }
     compApp_abs(fcenterabs, fcenter, res.appPrec);
     compApp_abs(fpcenterabs, fpcenter, res.appPrec);
@@ -241,7 +245,7 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
                                          slong prec, 
                                          metadatas_t meta) {
     
-    /* printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: begin --------------------------- \n");*/
+//     printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: begin --------------------------- \n");
     newton_res res;
     if (metadatas_usePredictPrec(meta))
         res.appPrec = prec;
@@ -268,7 +272,7 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
 //     slong precsave = prec;
     
     res = newton_cauchy_first_condition( fcenter, fpcenter, cache, cacheCau, c, fourcc, res.appPrec, meta);
-//     printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: firstCondOk (nflag: %d) prec avant: %d, prec apres: %d \n", res.nflag, prec, res.appPrec);
+//     printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: firstCondOk (nflag: %d) prec avant: %ld, prec apres: %ld \n", res.nflag, prec, res.appPrec);
     
     if (res.nflag){
 //         precsave = res.appPrec;
@@ -406,6 +410,8 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
     compApp_clear(iteration);
     
 //     chronos_toc_Newtons(metadatas_chronref(meta));
+    
+//     printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: end --------------------------- \n");
     
     return res;
 }

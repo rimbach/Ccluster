@@ -777,7 +777,36 @@ METADATAS_INLINE void metadatas_add_CauchyCoEvalsD ( metadatas_t m, int depth, i
                     metadatas_unlock(m);
 #endif
 }
+
 METADATAS_INLINE int  metadatas_getNbCauchyCoEvalsD ( const metadatas_t m ){ return counters_getNbCauchyCoEvalsD   (metadatas_countref(m));}
+
+/* compression algorithm */
+METADATAS_INLINE int  metadatas_getComp_nb ( const metadatas_t m ){ return counters_getComp_nb   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_addComp_nb ( metadatas_t m, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_addComp_nb(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE void metadatas_add_time_CompTot(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CompTot( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CompTot ( const metadatas_t m ) { return chronos_get_time_CompTot (metadatas_chronref(m)); }
 
 /* printing */
 char * compBox_sprint_for_stat(char * out, const compBox_t x);
