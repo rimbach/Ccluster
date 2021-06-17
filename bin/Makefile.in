@@ -1,6 +1,6 @@
 INCLUDE_PATH = $(INCS) -I../src
 LIBRARY_PATH = -L.. $(LIBS)
-LIBRARY_FLAG = -lflint -larb -lccluster -lm
+LIBRARY_FLAG = -lgmp -lflint -larb -lccluster -lm
 
 QUIET_CC  = @echo '   ' CC  ' ' $@;
 

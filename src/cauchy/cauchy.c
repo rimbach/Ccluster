@@ -309,6 +309,8 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
                                        cacheCauchy_t cacheCau,
                                        slong prec, metadatas_t meta, slong depth) {
     
+    clock_t start=clock();
+    
     realRat_t epsp;
     realRat_init(epsp);
     realRat_mul_si(epsp, eps, 2);
@@ -383,6 +385,9 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
     realRat_clear(radInf);
     realRat_clear(epsp);
     realRat_clear(relativeError);
+    
+    metadatas_addComp_nb( meta, 1);
+    metadatas_add_time_CompTot(meta, (double) (clock() - start));
     
     return appPrec;
 }
@@ -518,7 +523,7 @@ void cauchy_main_loop( connCmp_list_t qResults,
                     if ( realRat_cmp (epsComp, compDsk_radiusref(ccDisk) ) < 0  ) {
                         
                         if (metadatas_getVerbo(meta)>=3) {
-                            printf("# Test compression into rigid disc for a CC with %d roots \n", connCmp_nSolsref(ccur));
+                            printf("\n# Test compression into rigid disc for a CC with %d roots \n", connCmp_nSolsref(ccur));
                             printf("# Delta: "); compDsk_print( ccDisk ); printf("\n");
                             printf("# Required radius: "); realRat_print(epsComp); printf("\n");
                         }
@@ -537,7 +542,7 @@ void cauchy_main_loop( connCmp_list_t qResults,
                         
                         if (metadatas_getVerbo(meta)>=3) {
                             printf("# Precision after compression: %ld\n", precres);
-                            printf("# res: "); compDsk_print( res ); printf("\n");
+                            printf("# res: "); compDsk_print( res ); printf("\n\n");
                         }
                         realRat_clear(theta);
                         compDsk_clear(res);
@@ -901,27 +906,9 @@ int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time   in evals for certi. CT:",         metadatas_get_time_CauCoED(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing divs     CT:",         metadatas_get_time_CauCoDS(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing s0s      ET:",         metadatas_get_time_CauCoCS(meta),    " " );
-//     r = fprintf(file, "# -------------------TSTest used to discard boxes----------------------\n");
-//     r = fprintf(file, "#|%-39s %14d %14s|\n", "total number DT:",                    metadatas_getNbT0Tests(meta),        " " );
-//     r = fprintf(file, "#|%-39s %14d %14s|\n", "number of tests without conclusion:", metadatas_getNbFailingT0Tests(meta), " " );
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in tests DT:",       metadatas_get_time_T0Tests(meta),    " " );
-//     r = fprintf(file, "# -------------------TSTest used to validate clusters------------------\n");
-//     r = fprintf(file, "#|%-39s %14d %14s|\n", "total number VT:",                    metadatas_getNbTSTests(meta),        " " );
-//     r = fprintf(file, "#|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbTSTestsInNewton(meta), " " );
-//     r = fprintf(file, "#|%-39s %14d %14s|\n", "number of tests without conclusion:", metadatas_getNbFailingTSTests(meta), " " );
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in tests VT:",       metadatas_get_time_TSTests(meta),    " " );
-//     r = fprintf(file, "# -------------------Taylor shifts-------------------------------------\n");
-//     r = fprintf(file, "#|%-39s %14d |%13d|\n", "total number TS:",                    nbTaylorShifts + nbTaylorShiftsR, nbTaylorShiftsR );
-//     r = fprintf(file, "#|%-39s %14d |%13d|\n", "number in discarding TSTests TS:",    metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsRepetedInT0Tests(meta), metadatas_getNbTaylorsRepetedInT0Tests(meta) );
-//     r = fprintf(file, "#|%-39s %14d |%13d|\n", "number in validating TSTests TS:",    metadatas_getNbTaylorsInTSTests(meta) + metadatas_getNbTaylorsRepetedInTSTests(meta), metadatas_getNbTaylorsRepetedInTSTests(meta) );
-//     r = fprintf(file, "#|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbTaylorsInNewton(meta), " " );
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in Taylor shifts:",  metadatas_get_time_Taylors(meta),    " " );
-//     r = fprintf(file, "# -------------------Graeffe Iterations--------------------------------\n");
-//     r = fprintf(file, "#|%-39s %14d |%13d|\n", "total number GR:",                       nbGraeffe + nbGraeffeR, nbGraeffeR );
-//     r = fprintf(file, "#|%-39s %14d |%13d|\n", "number in discarding TSTests GR:",       metadatas_getNbGraeffeInT0Tests(meta) + metadatas_getNbGraeffeRepetedInT0Tests(meta), metadatas_getNbGraeffeRepetedInT0Tests(meta) );
-//     r = fprintf(file, "#|%-39s %14d |%13d|\n", "number in validating TSTests GR:",       metadatas_getNbGraeffeInTSTests(meta) + metadatas_getNbGraeffeRepetedInTSTests(meta), metadatas_getNbGraeffeRepetedInTSTests(meta) );
-//     r = fprintf(file, "#|%-39s %14d %14s|\n", "number in Newton iterations:",        metadatas_getNbGraeffeInNewton(meta), " " );
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in Graeffe Iterations:", metadatas_get_time_Graeffe(meta),    " " );
+    r = fprintf(file, "# -------------------Compression into rigid discs---------------------\n");
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "total number of compression:",           metadatas_getComp_nb(meta),  " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in compression:",       metadatas_get_time_CompTot(meta),    " " );
     if (metadatas_useNewton(meta)){
     r = fprintf(file, "# -------------------Newton Iterations---------------------------------\n");
     r = fprintf(file, "#|%-39s %14d %14s|\n", "total number NE:",                       metadatas_getNbNewton(meta),         " " );

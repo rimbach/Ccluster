@@ -51,6 +51,7 @@ NUMBERS_INLINE void compApp_zero(compApp_t z                   ) { acb_zero(z); 
 NUMBERS_INLINE void compApp_one (compApp_t z                   ) { acb_one (z); }
 NUMBERS_INLINE void compApp_onei(compApp_t z                   ) { acb_onei(z); }
 NUMBERS_INLINE void compApp_set (compApp_t z, const compApp_t x) { acb_set (z, x); }
+NUMBERS_INLINE void compApp_set_round (compApp_t z, const compApp_t x, slong prec) { acb_set_round (z, x, prec); }
 NUMBERS_INLINE void compApp_set_si (compApp_t z, slong x) { acb_set_si (z, x); }
 NUMBERS_INLINE void compApp_set_sisi (compApp_t z, slong re, slong im) { 
     arb_set_si (acb_realref(z), re);

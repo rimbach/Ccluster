@@ -122,8 +122,20 @@ void cauchyTest_evaluateAtPoints( cacheApp_t cache,
                 compApp_set( fvals+i, cacheCauchy_fvalsExref(cacheCau) + i/quo );
                 compApp_set( fdervals+i, cacheCauchy_fdervalsExref(cacheCau) + i/quo );
             }
-            else
+            else {
+//                 printf("\n\n  prec: %ld\n", prec);
+//                 printf("     point: "); compApp_printd(pointsShifted+i, 20); printf("\n");
                 (cacheCauchy_evalFastref(cacheCau))( fvals+i, fdervals + i, pointsShifted+i, prec);
+                
+                /* for test */
+//                 printf("  f(point): "); compApp_printd(fvals+i, 20); printf("\n");
+//                 printf(" f'(point): "); compApp_printd(fdervals+i, 20); printf("\n");
+//                 compApp_poly_ptr app = cacheApp_getApproximation ( cache, prec );
+//                 compApp_poly_evaluate2_rectangular(fvals + i, fdervals + i, app, pointsShifted + i, prec);
+//                 printf("  f(point): "); compApp_printd(fvals+i, 20); printf("\n");
+//                 printf(" f'(point): "); compApp_printd(fdervals+i, 20); printf("\n");
+                /* end for test */
+            }
         }
     }
     
