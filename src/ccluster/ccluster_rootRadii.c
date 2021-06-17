@@ -313,6 +313,7 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
         prec = 2*prec;
     /* */
     slong prec1 = realIntRootRadii_rootRadii( annulii, 0, cache, prec, meta );
+//     slong prec1 = realIntRootRadii_rootRadii_2( annulii, 0, cache, prec, meta );
     
     if (metadatas_getVerbo(meta)>=3) {
         printf("time in first root radii: %f\n", (double) (clock() - start)/CLOCKS_PER_SEC );
