@@ -113,6 +113,8 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
                                        cacheCauchy_t cacheCau,
                                        slong prec, metadatas_t meta, slong depth);
 
+connCmp_ptr cauchy_actualizeCCafterCompression( connCmp_ptr CC, const compDsk_t Delta, slong appPrec, metadatas_t meta );
+
 int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps);
 
 

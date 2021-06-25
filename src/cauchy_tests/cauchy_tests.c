@@ -537,16 +537,7 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
     slong appPrec = CCLUSTER_DEFAULT_PREC;
     /* want |s0*-s0| less than 1/4 */
     /* => number of evaluation points = ceil ( log_isoRatio (4*degree +1) ) + 1*/
-    realApp_t liR;
-    realApp_init(liR);
-    realApp_set_realRat(liR, isoRatio, CCLUSTER_DEFAULT_PREC);
-    realApp_log(liR, liR, CCLUSTER_DEFAULT_PREC );
-    realApp_t qApp;
-    realApp_init(qApp);
-    realApp_set_si(qApp, 4*cacheCauchy_degreeref(cacheCau)+1);
-    realApp_log(qApp, qApp, CCLUSTER_DEFAULT_PREC );
-    realApp_div(qApp, qApp, liR, CCLUSTER_DEFAULT_PREC );
-    slong q = realApp_ceil_si( qApp, CCLUSTER_DEFAULT_PREC ) + 1;
+    slong q = cacheCauchy_get_NbOfEvalPoints( cacheCauchy_degreeref(cacheCau), isoRatio, 1, CCLUSTER_DEFAULT_PREC );
     
     /* want w(s0*)<1/4 */
     realApp_t errAp;
@@ -648,8 +639,8 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
     /* s0star contains a unique integer */
     realApp_get_unique_si( &res, compApp_realref(s0star) );
     
-    realApp_clear(liR);
-    realApp_clear(qApp);
+//     realApp_clear(liR);
+//     realApp_clear(qApp);
     realApp_clear(errAp);
     compApp_clear( point        );
     compApp_clear( pointShifted );
@@ -711,7 +702,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
     /* qApp = ceil( log_{isoRatio}(1 + (rd*isoRatio)/error ) ) + 1 */
     
     if (metadatas_getVerbo(meta)>=3) {
-        printf("#------ nb of eval points: %ld\n", q);
+        printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: nb of eval points: %ld\n", q);
     }
     
     compApp_t point       ;
@@ -744,8 +735,9 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
     
     int enoughPrec = 0;
     while (enoughPrec == 0) {
-        if (metadatas_getVerbo(meta)>=3)
-            printf("#------ appPrec: %ld\n", appPrec);
+        if (metadatas_getVerbo(meta)>=3) {
+            printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: precision: %ld\n",  appPrec);
+        }
         
         enoughPrec = 1;
         compApp_zero(s1);
@@ -767,8 +759,9 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
                 (cacheCauchy_evalFastref(cacheCau))( fval, fderval, pointShifted, appPrec);
             
             if (compApp_contains_zero( fval )){
-                if (metadatas_getVerbo(meta)>=3)
-                    printf("#------ fval contains 0, i: %ld\n", i);
+                if (metadatas_getVerbo(meta)>=3) {
+                    printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: fval contains 0, i: %ld\n", i);
+                }
                 appPrec = 2*appPrec;
                 enoughPrec = 0;
                 break;
@@ -789,7 +782,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
 //             realApp_mul_realRat( radIm, radIm, compDsk_radiusref(Delta), appPrec );
             if ( realApp_ge( radRe, errAp ) || realApp_ge( radIm, errAp ) ){
                 if (metadatas_getVerbo(meta)>=3)
-                    printf("#------ s1 not precise enough, i: %ld\n", i);
+                    printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: s1 not precise enough, i: %ld\n", i);
                 appPrec = 2*appPrec;
                 enoughPrec = 0;
                 break;
@@ -798,7 +791,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
         }
         if (metadatas_getVerbo(meta)>=3)
             if (enoughPrec == 1)
-                printf("#------ s1 precise enough\n");
+                printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: s1 precise enough\n");
             
         
     }

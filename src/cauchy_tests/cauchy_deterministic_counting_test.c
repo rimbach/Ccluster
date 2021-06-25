@@ -99,6 +99,7 @@ cauchyTest_res cauchyTest_deterministic_counting( const compDsk_t Delta,
 
 cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
                                                       slong nbOfRoots,
+                                                      const realRat_t a,
                                                       cacheApp_t cache,
                                                       cacheCauchy_t cacheCau,
                                                       slong prec,
@@ -107,12 +108,9 @@ cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
     cauchyTest_res res;
     res.appPrec = prec;
     
-    realRat_t radInf, radSup, a;
+    realRat_t radInf, radSup;
     realRat_init(radInf);
     realRat_init(radSup);
-    realRat_init(a);
-    
-    realRat_set(a, cacheCauchy_isoRatioref(cacheCau));
     
     realRat_set(radInf, compDsk_radiusref(Delta));
     realRat_div(radInf, radInf, a);
@@ -120,8 +118,17 @@ cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
     realRat_mul(radSup, radSup, a);
     
     /* first call deterministic test */
-    res = cauchyTest_probabilistic_counting( Delta, cache, cacheCau, res.appPrec, meta, depth);
+    if (realRat_cmp(a, cacheCauchy_isoRatioref(cacheCau))==0) {
+        res = cauchyTest_probabilistic_counting( Delta, cache, cacheCau, res.appPrec, meta, depth);
+    }
+    else {
+        res = cauchyTest_probabilistic_counting_withIsoRatio( a, Delta, cache, cacheCau, res.appPrec, meta, depth);
+    }
     
+    if (metadatas_getVerbo(meta)>=3) {
+            printf("#------------------cauchyTest_deterministic_verification: res of proba counting is %d\n", res.nbOfSol);
+    }
+
     if ( res.nbOfSol != nbOfRoots )
         res.nbOfSol = -1;
     else {
@@ -129,11 +136,16 @@ cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
                                           cache, cacheCau, prec, meta, depth);
         if (res.nbOfSol == 0)
            res.nbOfSol = nbOfRoots;
+        else
+           res.nbOfSol = -1;
+        
+        if (metadatas_getVerbo(meta)>=3) {
+            printf("#------------------cauchyTest_deterministic_verification: res of verification is %d\n", res.nbOfSol);
+        }
     }
     
     realRat_clear(radInf);
     realRat_clear(radSup);
-    realRat_clear(a);
     
     return res;
 }
@@ -177,10 +189,10 @@ cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
     slong nbCenters = realApp_ceil_si(nbCentersApp, CCLUSTER_DEFAULT_PREC);
     
     if (metadatas_getVerbo(meta)>=3) {
-        printf("#---cauchy RootFreeAnnulus: \n");
-        printf("#------ nb of discs on contour for certification: %d \n", (int) nbCenters);
-        printf("#------ radius of discs on contour for certification: 5/4*"); realRat_print( ExRad ); printf("\n");
-        printf("#------ isoRatio for exclusion: "); realRat_print( cacheCauchy_isoRatioref(cacheCau) ); printf("\n");
+        printf("#---------cauchy RootFreeAnnulus: \n");
+        printf("#------------nb of discs on contour for certification: %d \n", (int) nbCenters);
+        printf("#------------radius of discs on contour for certification: 5/4*"); realRat_print( ExRad ); printf("\n");
+        printf("#------------isoRatio for exclusion: "); realRat_print( cacheCauchy_isoRatioref(cacheCau) ); printf("\n");
     }
     
     /* try to prove that A(c, Rad-ExRad, Rad+ExRad) contains no root */
@@ -198,7 +210,7 @@ cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
     if (resEx.nbOfSol != 0) {
         res.nbOfSol = -1;
         if (metadatas_getVerbo(meta)>=3) {
-            printf("#------ certification failed!\n");
+            printf("#------------certification failed!\n");
         }
     } else {
     /* D(c,Rad) is isoRatio-isolated */

@@ -106,6 +106,10 @@ void subdBox_quadrisect_with_compDsk( compBox_list_t res, const compBox_t b, con
     realRat_mul(halfwidth, half, compBox_bwidthref(b));
     realRat_mul(halfnwidth, half, nwidth);
     
+//     printf("subdBox_quadrisect_with_compDsk: \n");
+//     printf("with of input box: "); realRat_print(compBox_bwidthref(b)); printf("\n");
+//     printf("wanted width     : "); realRat_print(nwidth); printf("\n");
+    
     realRat_sub( compRat_realref(downLeftCorner), compRat_realref(compBox_centerref(b)), halfwidth);
     realRat_sub( compRat_imagref(downLeftCorner), compRat_imagref(compBox_centerref(b)), halfwidth);
     realRat_add( compRat_realref(upRightCorner), compRat_realref(compBox_centerref(b)), halfwidth);
@@ -391,8 +395,6 @@ void subdBox_risolate_bisect_with_ratio( compBox_list_t res, const compBox_t b, 
     realRat_clear(width);
 }
 
-/* DEPRECATED 
-
 void subdBox_quadrisect_intersect_compDsk( compBox_list_t res, const compBox_t b, const compDsk_t d){
     
     compBox_list_t temp;
@@ -414,4 +416,4 @@ void subdBox_quadrisect_intersect_compDsk( compBox_list_t res, const compBox_t b
     compBox_list_clear(temp);
     
 }
-*/
+

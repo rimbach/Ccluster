@@ -12,6 +12,111 @@
 #include <stdlib.h>
 #include "cacheCauchy.h"
 
+/* compute q = ceil ( log_isoRatio (4*degree +1) ) + nbPs */
+slong cacheCauchy_get_NbOfEvalPoints( slong degree, const realRat_t isoRatio, slong nbPs, slong prec ) {
+    
+    realApp_t liR;
+    realApp_init(liR);
+    realApp_t qApp;
+    realApp_init(qApp);
+    
+    realApp_set_realRat(liR, isoRatio, prec);
+    realApp_log(liR, liR, prec );
+    realApp_set_si(qApp, 4*degree+1);
+    realApp_log(qApp, qApp, prec );
+    realApp_div(qApp, qApp, liR, prec );
+    slong q = realApp_ceil_si( qApp, prec ) + nbPs;
+    
+    realApp_clear(liR);
+    realApp_clear(qApp);
+    
+    return q;
+}
+
+/* compute q2 = log_isoRatio (2*degree*q1 +1) s.t. q2 multiple of q1 */
+slong cacheCauchy_get_NbOfEvalPoints_cert( slong degree, slong q1, const realRat_t isoRatio, slong prec ) {
+    
+    realApp_t liR;
+    realApp_init(liR);
+    realApp_t qApp;
+    realApp_init(qApp);
+    
+    realApp_set_realRat(liR, isoRatio, prec);
+    realApp_log(liR, liR, prec );
+    realApp_set_si(qApp, 4*degree*q1+1);
+    realApp_log(qApp, qApp, prec );
+    realApp_div(qApp, qApp, liR, prec );
+    slong q2 = realApp_ceil_si( qApp, prec ) + 1;
+    
+    realApp_clear(liR);
+    realApp_clear(qApp);
+    
+    return q2;
+}
+
+/* compute error wP = (d*isoRatio^(-q))/(1-isoRatio^(-q)) */
+void cacheCauchy_wantedErrorOnS0 (realApp_t wP, slong degree, slong q, const realRat_t isoRatio, slong prec ){
+    
+    realApp_t tempApp;
+    realApp_init(tempApp);
+    
+    realApp_set_realRat(wP, isoRatio, prec);
+    realApp_inv(wP, wP, prec);
+    realApp_pow_ui(wP, wP, q, prec);
+    realApp_set_si(tempApp, 1);
+    realApp_sub(tempApp, tempApp, wP, prec);
+    realApp_div(wP, wP, tempApp, prec);
+    realApp_mul_si(wP, wP, degree, prec);
+    
+    realApp_clear(tempApp);
+}
+
+/* compute lower bound unit: (isoRatio-1)^d/isoRatio^d */
+void cacheCauchy_lowerBoundUnit( realRat_t lowerBoundUnit, slong degree, const realRat_t isoRatio ) {
+    realRat_add_si(lowerBoundUnit, isoRatio, -1);
+    realRat_div(lowerBoundUnit, lowerBoundUnit, isoRatio);
+    realRat_pow_si(lowerBoundUnit, lowerBoundUnit, degree);
+}
+
+/* compute upper bound unit: (d*(isoRatio+1)/(isoRatio-1) */
+void cacheCauchy_upperBoundUnit( realRat_t upperBoundUnit, slong degree, const realRat_t isoRatio ) {
+    realRat_t temp;
+    realRat_init(temp);
+    
+    realRat_add_si(upperBoundUnit, isoRatio, +1);
+    realRat_mul_si(upperBoundUnit, upperBoundUnit, degree);
+    realRat_add_si(temp, isoRatio, -1);
+    realRat_div(upperBoundUnit, upperBoundUnit, temp);
+    
+    realRat_clear(temp);
+}
+
+void cacheCauchy_lBoundApp( realApp_t lbApp, slong degree, const realRat_t isoRatio, const realRat_t radius, slong prec){
+    
+    realRat_t lb, rd;
+    realRat_init(lb);
+    realRat_init(rd);
+    
+    cacheCauchy_lowerBoundUnit( lb, degree, isoRatio );
+    realRat_pow_si(rd, radius, degree);
+    realRat_mul( lb, lb, rd );
+    
+    /* approximate */
+    realApp_set_realRat(lbApp, lb, prec);
+    
+    realRat_clear(lb);
+    realRat_clear(rd);
+}
+
+void cacheCauchy_uBoundApp( realApp_t ubApp, slong degree, const realRat_t isoRatio, const realRat_t radius, slong prec){
+    realRat_t ub;
+    realRat_init(ub);
+    cacheCauchy_upperBoundUnit( ub, degree, isoRatio );
+    realRat_div(ub, ub, radius);
+    realApp_set_realRat(ubApp, ub, prec);
+    realRat_clear(ub);
+}
+
 void cacheCauchy_init ( cacheCauchy_t cache, 
                         void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
                         slong degree,
@@ -46,26 +151,12 @@ void cacheCauchy_init ( cacheCauchy_t cache,
     realApp_init(cacheCauchy_lBoundApref(cache));
     realApp_init(cacheCauchy_uBoundApref(cache));
     
-    /* compute nbEvalEx = ceil ( log_isoRatio (4*degree +1) ) + nbPsComputed*/
-    realApp_t liR;
-    realApp_init(liR);
-    realApp_set_realRat(liR, cacheCauchy_isoRatioref(cache), CCLUSTER_DEFAULT_PREC);
-    realApp_log(liR, liR, CCLUSTER_DEFAULT_PREC );
-    realApp_t q1App;
-    realApp_init(q1App);
-    realApp_set_si(q1App, 4*degree+1);
-    realApp_log(q1App, q1App, CCLUSTER_DEFAULT_PREC );
-    realApp_div(q1App, q1App, liR, CCLUSTER_DEFAULT_PREC );
-    slong q1 = realApp_ceil_si( q1App, CCLUSTER_DEFAULT_PREC ) + cacheCauchy_nbPwSuExref(cache);
+    /* compute q1 = ceil ( log_isoRatio (4*degree +1) ) + nbPs*/
+    slong q1 = cacheCauchy_get_NbOfEvalPoints( degree, cacheCauchy_isoRatioref(cache), cacheCauchy_nbPwSuExref(cache), CCLUSTER_DEFAULT_PREC );
     cacheCauchy_nbEvalExref(cache) = q1;
     
     /* compute nbEvalCe = max ( log_isoRatio (2*degree*nbEvalCo +1), degree +1 ) s.t. nbEvalCe multiple of nbEvalCo */
-    realApp_t q2App;
-    realApp_init(q2App);
-    realApp_set_si(q2App, 4*degree*q1+1);
-    realApp_log(q2App, q2App, CCLUSTER_DEFAULT_PREC );
-    realApp_div(q2App, q2App, liR, CCLUSTER_DEFAULT_PREC );
-    slong q2 = realApp_ceil_si( q2App, CCLUSTER_DEFAULT_PREC ) +1;
+    slong q2 = cacheCauchy_get_NbOfEvalPoints_cert( degree, q1, cacheCauchy_isoRatioref(cache), CCLUSTER_DEFAULT_PREC );
     q2 = CCLUSTER_MAX(q2, degree +1);
     slong quo = ((slong) q2/q1) +1;
     q2 = q1*quo;
@@ -74,15 +165,8 @@ void cacheCauchy_init ( cacheCauchy_t cache,
     
     /* compute error cacheCauchy_wanErrExref(cache)[i] = (d*isoRatio^(-q1+i))/(1-isoRatio^(-q1)) */
     realApp_ptr wP = cacheCauchy_wanErrExref(cache) + 0;
-    realApp_t tempApp;
-    realApp_init(tempApp);
-    realApp_set_realRat(wP, cacheCauchy_isoRatioref(cache), CCLUSTER_DEFAULT_PREC);
-    realApp_inv(wP, wP, CCLUSTER_DEFAULT_PREC);
-    realApp_pow_ui(wP, wP, q1, CCLUSTER_DEFAULT_PREC);
-    realApp_set_si(tempApp, 1);
-    realApp_sub(tempApp, tempApp, wP, CCLUSTER_DEFAULT_PREC);
-    realApp_div(wP, wP, tempApp, CCLUSTER_DEFAULT_PREC);
-    realApp_mul_si(wP, wP, degree, CCLUSTER_DEFAULT_PREC);
+    cacheCauchy_wantedErrorOnS0 (wP, degree, q1, cacheCauchy_isoRatioref(cache), CCLUSTER_DEFAULT_PREC );
+    
     for (int i = 1; i<cacheCauchy_nbPwSuExref(cache); i++) {
         wP = cacheCauchy_wanErrExref(cache) + i;
         realApp_mul_realRat(wP, cacheCauchy_wanErrExref(cache) + (i-1), cacheCauchy_isoRatioref(cache), CCLUSTER_DEFAULT_PREC);
@@ -91,28 +175,15 @@ void cacheCauchy_init ( cacheCauchy_t cache,
     
     /* compute error cacheCauchy_wanErrCeref(cache) = (d*isoRatio^(-q2))/(1-isoRatio^(-q2)) */
     realApp_ptr wP2 = cacheCauchy_wanErrCeref(cache);
-    realApp_set_realRat(wP2, cacheCauchy_isoRatioref(cache), CCLUSTER_DEFAULT_PREC);
-    realApp_inv(wP2, wP2, CCLUSTER_DEFAULT_PREC);
-    realApp_pow_ui(wP2, wP2, q2, CCLUSTER_DEFAULT_PREC);
-    realApp_set_si(tempApp, 1);
-    realApp_sub(tempApp, tempApp, wP2, CCLUSTER_DEFAULT_PREC);
-    realApp_div(wP2, wP2, tempApp, CCLUSTER_DEFAULT_PREC);
-    realApp_mul_si(wP2, wP2, degree, CCLUSTER_DEFAULT_PREC);
+    cacheCauchy_wantedErrorOnS0 (wP2, degree, q2, cacheCauchy_isoRatioref(cache), CCLUSTER_DEFAULT_PREC );
     
     /* compute lower bound unit: (isoRatio-1)^d/isoRatio^d */
     realRat_ptr lb = cacheCauchy_lBoundUnref(cache);
-    realRat_add_si(lb, cacheCauchy_isoRatioref(cache), -1);
-    realRat_div(lb, lb, cacheCauchy_isoRatioref(cache));
-    realRat_pow_si(lb, lb, degree);
+    cacheCauchy_lowerBoundUnit( lb, degree, cacheCauchy_isoRatioref(cache) );
     
     /* compute upper bound unit: (d*(isoRatio+1)/(isoRatio-1) */
     realRat_ptr ub = cacheCauchy_uBoundUnref(cache);
-    realRat_t temp;
-    realRat_init(temp);
-    realRat_add_si(ub, cacheCauchy_isoRatioref(cache), +1);
-    realRat_mul_si(ub, ub, degree);
-    realRat_add_si(temp, cacheCauchy_isoRatioref(cache), -1);
-    realRat_div(ub, ub, temp);
+    cacheCauchy_upperBoundUnit( ub, degree, cacheCauchy_isoRatioref(cache) );
     
     /* evaluation points for uncertified*/
     cacheCauchy_precEvalExref(cache) = 0;
@@ -156,13 +227,6 @@ void cacheCauchy_init ( cacheCauchy_t cache,
     cacheCauchy_fvalsCeref(cache)         = fvalsCe        ; 
     cacheCauchy_fdervalsCeref(cache)      = fdervalsCe     ; 
     cacheCauchy_fdivsCeref(cache)         = fdivsCe        ;
-    
-    realApp_clear(liR);
-    realApp_clear(q1App);
-    realApp_clear(q2App);
-    realApp_clear(tempApp);
-    
-    realRat_clear(temp);
     
     if (metadatas_getVerbo(meta)>=2) {
         printf("#---cacheCauchy: \n");
