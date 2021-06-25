@@ -137,11 +137,31 @@ cauchyTest_res cauchyTest_probabilistic_exclusion_test( const compRat_t center,
                                                        slong prec,
                                                        metadatas_t meta, int depth);
 
+cauchyTest_res cauchyTest_probabilistic_verification( const compDsk_t Delta,
+                                                      slong nbOfRoots,
+                                                      const realRat_t a,
+                                                      cacheApp_t cache,
+                                                      cacheCauchy_t cacheCau,
+                                                      slong prec,
+                                                      metadatas_t meta, int depth);
+
 cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,           
                                                   cacheApp_t cache,
                                                   cacheCauchy_t cacheCau,
                                                   slong prec,
                                                   metadatas_t meta, int depth);
+
+/* this version works for any iso ratio, not necessarily the one
+ * defined in CacheCau 
+ * the disk is not necessarily isoRatio-isolated
+ * can fail, otherwise
+ * returns the number of roots in Delta */
+cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t isoRatio,
+                                                               const compDsk_t Delta,
+                                                               cacheApp_t cache,
+                                                               cacheCauchy_t cacheCau,
+                                                               slong prec,
+                                                               metadatas_t meta, int depth);
 
 void cauchyTest_fmatheta( realRat_t res, const realRat_t a, const realRat_t theta );
 void cauchyTest_fpatheta( realRat_t res, const realRat_t a, const realRat_t theta );
@@ -156,6 +176,7 @@ cauchyTest_res cauchyTest_deterministic_counting( const compDsk_t Delta,
 /* this version verifies that there are nbOfRoots roots in Delta */
 cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
                                                       slong nbOfRoots,
+                                                      const realRat_t a,
                                                       cacheApp_t cache,
                                                       cacheCauchy_t cacheCau,
                                                       slong prec,
@@ -190,15 +211,25 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial( const compRat_t 
                                                                      slong prec,
                                                                      metadatas_t meta, int depth);
 
-/* this version work for any iso ratio, not necessarily the one
+/* this version works for any iso ratio, not necessarily the one
  * defined in CacheCau 
- * the disk has to be isolated as isoRation 
+ * the disk has to be isolated as isoRatio
  * returns the number of roots in Delta */
 slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
                                    const compDsk_t Delta,
                                    cacheApp_t cache,
                                    cacheCauchy_t cacheCau,
                                    metadatas_t meta, int depth);
+
+/* this version works for any iso ratio, not necessarily the one
+ * defined in CacheCau 
+ * the disk IS NOT NECESSARILY isoRatio-isolated;
+ * can fail */
+cauchyTest_res cauchyTest_computeS0compDsk_probabilistic( const realRat_t isoRatio,
+                                                          const compDsk_t Delta,
+                                                          cacheApp_t cache,
+                                                          cacheCauchy_t cacheCau,
+                                                          metadatas_t meta, int depth);
 
 /* Assume Delta is isoRatio-isolated and contains nbOfRoots roots */
 /* Computes a disk res with radius less than eps */

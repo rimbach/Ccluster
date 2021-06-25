@@ -326,12 +326,13 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
                 if (! res.nflag )
                     realRat_div_ui(compDsk_radiusref(ndisk), compDsk_radiusref(ndisk), 2);
                 if (metadatas_getVerbo(meta)>3) {
-                    printf("newton_cauchy.c, newton_cauchy_newton_connCmp: cauchy test comb res %d\n", cres.nbOfSol);
+                    printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: cauchy test comb res %d\n", cres.nbOfSol);
                 }
             } else {
 //             if (res.nflag==0){
                 /* version with exclusion of discs on contour */
-                cres = cauchyTest_deterministic_verification( ndisk, connCmp_nSolsref(CC), cache, cacheCau, res.appPrec, meta, depth);
+                cres = cauchyTest_deterministic_verification( ndisk, connCmp_nSolsref(CC), cacheCauchy_isoRatioref(cacheCau),
+                                                               cache, cacheCau, res.appPrec, meta, depth);
                 res.appPrec = cres.appPrec;
 //                 cres = cauchyTest_probabilistic_counting( ndisk, cache, cacheCau, res.appPrec, meta, depth);
 //                 res.appPrec = cres.appPrec;
@@ -341,10 +342,10 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
 //                 }
                 res.nflag = (cres.nbOfSol == connCmp_nSolsref(CC));
                 if (metadatas_getVerbo(meta)>=3) {
-                    printf("newton_cauchy.c, newton_cauchy_newton_connCmp: cauchy test res %d\n", cres.nbOfSol);
+                    printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: cauchy test res %d\n", cres.nbOfSol);
                     /* version with Tstar test: only for debug*/
                     tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, NULL, meta);
-                    printf("newton_cauchy.c, newton_cauchy_newton_connCmp: tstar  test res %d\n\n", tres.nbOfSol);
+                    printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: tstar  test res %d\n\n", tres.nbOfSol);
                 }
             }
         }

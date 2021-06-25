@@ -57,7 +57,9 @@ void cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     /* automaticly set realCoeffs */
     if (cacheApp_is_real(cache)==0
         || compBox_contains_real_line_in_interior(initialBox)==0 )
-        strategies_set_realCoeffs(strat, 0);
+        strategies_set_realCoeffs(metadatas_stratref(meta), 0);
+    
+//     strategies_set_realCoeffs(metadatas_stratref(meta), 0);
     
     connCmp_list_init(qRes);
     compBox_list_init(bDis);

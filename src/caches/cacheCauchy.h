@@ -113,6 +113,24 @@ typedef cacheCauchy * cacheCauchy_ptr;
 #define cacheCauchy_fdervalsCeref(X)      ((X)->_fdervalsCe)
 #define cacheCauchy_fdivsCeref(X)         ((X)->_fdivsCe)
 
+/* compute q = ceil ( log_isoRatio (4*degree +1) ) + nbPs */
+slong cacheCauchy_get_NbOfEvalPoints( slong degree, const realRat_t isoRatio, slong nbPs, slong prec );
+
+/* compute q2 = log_isoRatio (2*degree*q1 +1) s.t. q2 multiple of q1 */
+slong cacheCauchy_get_NbOfEvalPoints_cert( slong degree, slong q1, const realRat_t isoRatio, slong prec );
+
+/* compute error wP = (d*isoRatio^(-q))/(1-isoRatio^(-q)) */
+void cacheCauchy_wantedErrorOnS0 (realApp_t wP, slong degree, slong q, const realRat_t isoRatio, slong prec );
+
+/* compute lower bound unit: (isoRatio-1)^d/isoRatio^d */
+void cacheCauchy_lowerBoundUnit( realRat_t lowerBoundUnit, slong degree, const realRat_t isoRatio );
+
+/* compute upper bound unit: (d*(isoRatio+1)/(isoRatio-1) */
+void cacheCauchy_upperBoundUnit( realRat_t upperBoundUnit, slong degree, const realRat_t isoRatio );
+
+void cacheCauchy_lBoundApp( realApp_t lbApp, slong degree, const realRat_t isoRatio, const realRat_t radius, slong prec);
+void cacheCauchy_uBoundApp( realApp_t ubApp, slong degree, const realRat_t isoRatio, const realRat_t radius, slong prec);
+
 void cacheCauchy_init ( cacheCauchy_t cache, 
                         void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
                         slong degree,
