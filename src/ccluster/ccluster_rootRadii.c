@@ -312,8 +312,8 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
     while (prec<degree/2)
         prec = 2*prec;
     /* */
+    
     slong prec1 = realIntRootRadii_rootRadii( annulii, 0, cache, prec, meta );
-//     slong prec1 = realIntRootRadii_rootRadii_2( annulii, 0, cache, prec, meta );
     
     if (metadatas_getVerbo(meta)>=3) {
         printf("time in first root radii: %f\n", (double) (clock() - start)/CLOCKS_PER_SEC );
@@ -322,9 +322,16 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
     /* derive upper bound for the norm of the roots */
 //     slong centerRe1 = realApp_ceil_si(compAnn_radSupref(compAnn_list_last(annulii)), prec);
     realApp_ceil_realRat(upperBound, compAnn_radSupref(compAnn_list_last(annulii)), prec);
+    
+    slong center = 1;
+//     if (realRat_cmp_ui(upperBound, degree) <=0) {
+//         center = fmpz_get_si(realRat_numref(upperBound));
+//     }
+    
     prec = 2*prec1;
-    slong prec2 = realIntRootRadii_rootRadii( annulii1, 1, cache, prec, meta );
-    slong prec3 = realIntRootRadii_rootRadii_imagCenter( annulii2, 1, cache, prec, meta );
+    
+    slong prec2 = realIntRootRadii_rootRadii( annulii1, center, cache, prec, meta );
+    slong prec3 = realIntRootRadii_rootRadii_imagCenter( annulii2, center, cache, prec, meta );
     
     prec3 = CCLUSTER_MAX( prec2, prec3);
     prec3 = CCLUSTER_MAX( prec1, prec3);

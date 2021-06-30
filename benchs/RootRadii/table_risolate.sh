@@ -524,7 +524,7 @@ echo $POLNAME >> $TEMPTABFILE3
 # DEGREES="256 391 512"
 DEGREES="256 391 512"
 # BITSIZES="16 8192 16384 32768"
-BITSIZES="4096 8192 16384 32768 65536"
+BITSIZES="8192 16384 32768 65536"
 for DEG in $DEGREES; do
     for BIT in $BITSIZES; do
             REPNAME=$REP
@@ -616,7 +616,7 @@ done
 DEGREES="256 391 512 791 1024"
 # DEGREES="256 391"
 # POLNAMES="Bernoulli Chebyshev1 Legendre Wilkinson"
-POLNAMES="Bernoulli Wilkinson"
+POLNAMES="Bernoulli Wilkinson Chebyshev1"
 # POLNAMES="Bernoulli Chebyshev1 Legendre"
 
 for POLNAME in $POLNAMES; do
