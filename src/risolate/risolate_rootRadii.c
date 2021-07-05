@@ -1330,6 +1330,7 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     slong prec = CCLUSTER_DEFAULT_PREC;
     /* heuristic to predict the precision: at least the degree */
     while (prec<degree/2)
+//     while (prec<degree)
         prec = 2*prec;
 //     slong precpred = prec;
     /* */
@@ -1367,9 +1368,6 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     /* if upperBound is zero, set it to one */
     if ( realRat_is_zero(upperBound) )
         realRat_set_si(upperBound, 1, 1);
-    /* set width to 2*upperBound: not good for Mignotte pols??? */
-//     realRat_mul_si( upperBound, upperBound, 2);
-//     realRat_set( compBox_bwidthref(box), upperBound );
     
     /* not that efficient: */
     realRat_mul_si( upperBound, upperBound, 2);
@@ -1380,8 +1378,9 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
 //         realRat_mul_si(compBox_bwidthref(box), compBox_bwidthref(box), 2);
     compBox_set(metadatas_initBref(meta), box);
     /* use initial box instead */
-    compBox_set(metadatas_initBref(meta), initialBox);
-    compBox_set(box, initialBox);
+//     compBox_set(metadatas_initBref(meta), initialBox);
+//     compBox_set(box, initialBox);
+
     compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
 //     
     compBox_copy_annulii(box, 0, annulii);

@@ -61,70 +61,96 @@ void realIntRootRadii_taylor_shift_inplace_comp( compApp_poly_t res, slong cente
 }
 
 /* returns 0 if after some iterations, the relative accuracy is less than 1 */
-int realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta){
+// int realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta){
+//     
+//         clock_t start = clock();
+//         int ret = 1;
+//         slong lastAcc=prec;
+//         slong curAcc;
+//         
+//         for(int i = 0; (i < N) && (ret == 1); i++) {
+//             curAcc = realApp_poly_get_relOne_accuracy_min(res);
+// //             printf("#i = %d, Working precision: %ld, max relative acc: %ld, min relative acc: %ld\n", i,
+// //                     prec, realApp_poly_get_relOne_accuracy_max(res), 
+// //                     realApp_poly_get_relOne_accuracy_min(res)
+// //                   );
+// //             printf("#iterated polynomial polynomial\n");
+// //             realApp_poly_printd(res, 20);
+// //             printf("\n\n\n");
+// //             
+// //             for (slong index = 0; index<res->length; index++){
+// //                 if (( realApp_is_zero((res->coeffs)+index)==0 ) && ( realApp_contains( zeroPrec, (res->coeffs)+index ) ))
+// //                     realApp_set( (res->coeffs)+index, zeroPrec);
+// //             }
+// //             
+// //             printf("#iterated polynomial polynomial\n");
+// //             realApp_poly_printd(res, 20);
+// //             printf("\n\n\n");
+// //             for (slong index = 0; index<res->length; index++){
+// //                 if ( realApp_is_exact((res->coeffs)+index)==0) {
+// //                     fmpz_t zf;
+// //                     fmpz_init(zf);
+// //                     int unique = arb_get_unique_fmpz( zf, (res->coeffs)+index);
+// //                     printf("#---i = %d, index = %ld, is not exact, contains unique integer: %d\n", i, index, unique);
+// //                     if ((i>=1)&& unique){
+// //                         printf("coeff before: "); realApp_printd((res->coeffs)+index, 20); printf("\n");
+// //                         realApp_set_fmpz((res->coeffs)+index, zf, prec);
+// //                         printf("coeff after : "); realApp_printd((res->coeffs)+index, 20); printf("\n");
+// //                     }
+// //                     fmpz_clear(zf);
+// //                 }
+// //             }
+// //             curAcc = realApp_poly_get_relOne_accuracy_min(res);    
+// //             printf("#Working precision: %ld, max absolute acc: %ld, min absolute acc: %ld\n",
+// //                     prec, realApp_poly_get_absolute_accuracy_max(res), 
+// //                     realApp_poly_get_absolute_accuracy_min(res)
+// //                   );
+// //             if ( ( ( i == (int) N/4 ) || ( i == (int) N/2 ) || ( i == (int) 3*N/4 ) ) && (prec > CCLUSTER_DEFAULT_PREC) ) {
+//             if ( ( curAcc < prec/2 ) && ( lastAcc < prec/2 ) && (prec > CCLUSTER_DEFAULT_PREC) ) {
+// //                 printf("old prec: %ld, ", prec);
+//                 prec = prec/2;
+// //                 printf("new prec: %ld \n", prec);
+//             }
+// //             if ( (lastAcc< -prec) && (curAcc<lastAcc) )
+// //                 ret = 0;
+// 
+//             if ( curAcc < 1 )
+//                 ret = 0;
+//             else
+//                 realApp_poly_oneGraeffeIteration_in_place( res, prec );
+//             lastAcc=curAcc;
+//         }
+//         
+//         if (metadatas_haveToCount(meta)) {
+//             clock_t end = clock();
+//             metadatas_add_time_Graeffe(meta, (double) (end - start) );
+//             metadatas_add_time_RRGraef(meta, (double) (end - start) );
+//         }
+//         
+//         return ret;
+//         
+// }
+
+/* returns the precision */
+slong realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta){
     
         clock_t start = clock();
-        int ret = 1;
         slong lastAcc=prec;
         slong curAcc;
         
-        realApp_t zeroPrec, error;
-        realApp_init(zeroPrec);
-        realApp_init(error);
-        realApp_zero(zeroPrec);
-        realApp_one(error);
-        realApp_mul_2exp_si(error, error, -prec);
-        realApp_add_error(zeroPrec, error);
-        
-        for(int i = 0; (i < N) && (ret == 1); i++) {
+        for(int i = 0; i < N; i++) {
             curAcc = realApp_poly_get_relOne_accuracy_min(res);
 //             printf("#i = %d, Working precision: %ld, max relative acc: %ld, min relative acc: %ld\n", i,
 //                     prec, realApp_poly_get_relOne_accuracy_max(res), 
 //                     realApp_poly_get_relOne_accuracy_min(res)
 //                   );
-//             printf("#iterated polynomial polynomial\n");
-//             realApp_poly_printd(res, 20);
-//             printf("\n\n\n");
-//             
-//             for (slong index = 0; index<res->length; index++){
-//                 if (( realApp_is_zero((res->coeffs)+index)==0 ) && ( realApp_contains( zeroPrec, (res->coeffs)+index ) ))
-//                     realApp_set( (res->coeffs)+index, zeroPrec);
-//             }
-//             
-//             printf("#iterated polynomial polynomial\n");
-//             realApp_poly_printd(res, 20);
-//             printf("\n\n\n");
-//             for (slong index = 0; index<res->length; index++){
-//                 if ( realApp_is_exact((res->coeffs)+index)==0) {
-//                     fmpz_t zf;
-//                     fmpz_init(zf);
-//                     int unique = arb_get_unique_fmpz( zf, (res->coeffs)+index);
-//                     printf("#---i = %d, index = %ld, is not exact, contains unique integer: %d\n", i, index, unique);
-//                     if ((i>=1)&& unique){
-//                         printf("coeff before: "); realApp_printd((res->coeffs)+index, 20); printf("\n");
-//                         realApp_set_fmpz((res->coeffs)+index, zf, prec);
-//                         printf("coeff after : "); realApp_printd((res->coeffs)+index, 20); printf("\n");
-//                     }
-//                     fmpz_clear(zf);
-//                 }
-//             }
-//             curAcc = realApp_poly_get_relOne_accuracy_min(res);    
-//             printf("#Working precision: %ld, max absolute acc: %ld, min absolute acc: %ld\n",
-//                     prec, realApp_poly_get_absolute_accuracy_max(res), 
-//                     realApp_poly_get_absolute_accuracy_min(res)
-//                   );
-//             if ( ( ( i == (int) N/4 ) || ( i == (int) N/2 ) || ( i == (int) 3*N/4 ) ) && (prec > CCLUSTER_DEFAULT_PREC) ) {
             if ( ( curAcc < prec/2 ) && ( lastAcc < prec/2 ) && (prec > CCLUSTER_DEFAULT_PREC) ) {
+//             if ( ( curAcc < prec/2 ) && (prec > CCLUSTER_DEFAULT_PREC) ) {
 //                 printf("old prec: %ld, ", prec);
                 prec = prec/2;
 //                 printf("new prec: %ld \n", prec);
             }
-//             if ( (lastAcc< -prec) && (curAcc<lastAcc) )
-//                 ret = 0;
-            if ( curAcc < 1 )
-                ret = 0;
-            else
-                realApp_poly_oneGraeffeIteration_in_place( res, prec );
+            realApp_poly_oneGraeffeIteration_in_place( res, prec );
             lastAcc=curAcc;
         }
         
@@ -134,22 +160,54 @@ int realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N
             metadatas_add_time_RRGraef(meta, (double) (end - start) );
         }
         
-        realApp_clear(zeroPrec);
-        realApp_clear(error);
-        
-        return ret;
+        return prec;
         
 }
 
 /* returns 0 if after some iterations, the relative accuracy is less than 1 */
-int realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta){
+// int realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta){
+//     
+//         clock_t start = clock();
+//         int ret = 1;
+//         slong lastAcc=prec;
+//         slong curAcc;
+//         
+//         for(int i = 0; i < N && (ret == 1); i++) {
+//             curAcc = compApp_poly_get_relOne_accuracy_min(res);
+// //             printf("#Working precision: %ld, max relative acc: %ld, min relative acc: %ld\n",
+// //                     prec, compApp_poly_get_relOne_accuracy_max(res), 
+// //                     compApp_poly_get_relOne_accuracy_min(res)
+// //                   );
+// //             if ( ( ( i == (int) N/4 ) || ( i == (int) N/2 ) || ( i == (int) 3*N/4 ) )  && (prec > CCLUSTER_DEFAULT_PREC) ) {
+//             if ( ( curAcc < prec/2 ) && ( lastAcc < prec/2 ) && (prec > CCLUSTER_DEFAULT_PREC) ) {
+// //                 printf("old prec: %ld, ", prec);
+//                 prec = prec/2;
+// //                 printf("new prec: %ld \n", prec);
+//             }
+//             if ( (lastAcc< -prec) && (curAcc<lastAcc) )
+//                 ret = 0;
+//             else
+//                 compApp_poly_oneGraeffeIteration_in_place( res, prec );
+//             
+//             lastAcc=curAcc;
+//         }
+//         
+//         if (metadatas_haveToCount(meta)) {
+//             clock_t end = clock();
+//             metadatas_add_time_Graeffe(meta, (double) (end - start) );
+//             metadatas_add_time_RRGraef(meta, (double) (end - start) );
+//         }
+//         
+//         return ret;
+// }
+
+slong realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta){
     
         clock_t start = clock();
-        int ret = 1;
         slong lastAcc=prec;
         slong curAcc;
         
-        for(int i = 0; i < N && (ret == 1); i++) {
+        for(int i = 0; i < N; i++) {
             curAcc = compApp_poly_get_relOne_accuracy_min(res);
 //             printf("#Working precision: %ld, max relative acc: %ld, min relative acc: %ld\n",
 //                     prec, compApp_poly_get_relOne_accuracy_max(res), 
@@ -161,11 +219,7 @@ int realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N
                 prec = prec/2;
 //                 printf("new prec: %ld \n", prec);
             }
-            if ( (lastAcc< -prec) && (curAcc<lastAcc) )
-                ret = 0;
-            else
-                compApp_poly_oneGraeffeIteration_in_place( res, prec );
-            
+            compApp_poly_oneGraeffeIteration_in_place( res, prec );
             lastAcc=curAcc;
         }
         
@@ -175,7 +229,7 @@ int realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N
             metadatas_add_time_RRGraef(meta, (double) (end - start) );
         }
         
-        return ret;
+        return prec;
 }
 
 /* assume i<j<k */
@@ -246,6 +300,11 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
     else if (realApp_gt(leftSide, temp)==1)
         res = 0;
     else {
+//             printf( "#realIntRootRadii.c , realIntRootRadii_liesBelow: i: %ld, j:%ld, k:%ld \n", i, j, k);
+//             printf( "#absPi:    "); realApp_printd(absPi, 20); printf("\n");
+//             printf( "#absPj:    "); realApp_printd(absPj, 20); printf("\n");
+//             printf( "#absPk:    "); realApp_printd(absPk, 20); printf("\n");
+//             printf( "#leftSide: "); realApp_printd(leftSide, 20); printf("\n");
              realApp_get_rad_realApp(leftSide, leftSide);
              realApp_one(temp);
              realApp_div_ui(temp, temp, 2, prec);
@@ -253,7 +312,6 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
                  /* with strictly less that 1, contains as unique integer 0*/
                  res = 1;
              else {/* otherwise can not say if it is zero or not */
-//                  printf( "#realIntRootRadii.c , realIntRootRadii_liesBelow: i: %ld, j:%ld, k:%ld \n", i, j, k);
                  res = -1;
              }
     }
@@ -263,6 +321,202 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
     realApp_init(temp);
 
 //     printf( "#realIntRootRadii.c , realIntRootRadii_liesBelow: leq 0: %d \n", res);
+    
+    return res;
+}
+
+ /* assume i<j<k */
+/* assume logAbsPi=log|pi|, logAbsPj=log|pj|, logAbsPk=log|pk| */
+/* decide if [j,log|pj|] lies below the line passing trough [i,log|pi|] and [k,log|pk|]*/
+/* returns 1 if yes */
+/*         0 if no  */
+/*        -1 if it can not be decided because the error on logAbs is greater than 1/2*/
+int realIntRootRadii_liesBelowLog( slong i, const realApp_t logAbsPi,
+                                   slong j, const realApp_t logAbsPj,
+                                   slong k, const realApp_t logAbsPk,
+                                   slong prec ){
+    /* decide if [j,log|pj|] lies below the line passing trough [i,log|pi|] and [k,log|pk|]  */
+    /*  <=> decide if (log|pj| - log|pi|)/(j-i) <= (log|pk| - log|pi|)/(k-i)                 */
+    /*  <=> decide if (log|pj| - log|pi|)*(k-i) - (log|pk| - log|pi|)*(j-i) <= 0             */
+    
+    /* check if logAbsPi is <0 */
+    /* in which case j lies ABOVE the line passing trough [i,log|pi|] and [k,log|pk|]*/
+    if ( realApp_is_negative(logAbsPi) ){
+        return 0;
+    }
+    
+    int res=-1;
+    
+    realApp_t leftSide, rightSide;
+    realApp_init(leftSide);
+    realApp_init(rightSide);
+    
+    if ( mag_is_inf( arb_radref(logAbsPj) ) ) { /* may be -inf */
+        
+        if ( mag_is_inf( arb_radref(logAbsPk) ) ) {
+            
+            res = -1;
+            
+        } else {
+            
+            realApp_set( leftSide, logAbsPj );
+            realApp_set_rad_zero (leftSide);
+            realApp_sub(leftSide, leftSide, logAbsPi, prec);
+            realApp_mul_si(leftSide, leftSide, k-i, prec);
+            realApp_sub(rightSide, logAbsPk, logAbsPi, prec);
+            realApp_mul_si(rightSide, rightSide, j-i, prec);
+            if (realApp_lt(leftSide, rightSide)==1)
+                res = 1;
+            else
+                res = -1;
+        }
+        
+    } else {
+    
+    //     realApp_t leftSide, rightSide;
+    //     realApp_init(leftSide);
+    //     realApp_init(rightSide);
+    //     realApp_init(temp);
+        
+        realApp_sub(leftSide, logAbsPj, logAbsPi, prec);
+        realApp_mul_si(leftSide, leftSide, k-i, prec);
+        realApp_sub(rightSide, logAbsPk, logAbsPi, prec);
+        realApp_mul_si(rightSide, rightSide, j-i, prec);
+        
+        if (realApp_lt(leftSide, rightSide)==1)
+            res = 1;
+        else if (realApp_gt(leftSide, rightSide)==1)
+            res = 0;
+        else {
+    //         res = -1;
+            if (realApp_check_absolute_accuracy( logAbsPi, -1)
+                &&realApp_check_absolute_accuracy( logAbsPj, -1)
+                &&realApp_check_absolute_accuracy( logAbsPk, -1) )
+                res = 1;
+            else
+                res = -1;
+        }
+    
+    }
+    realApp_clear(leftSide);
+    realApp_clear(rightSide);
+//     realApp_clear(temp);
+    
+    return res;
+}
+
+int realIntRootRadii_computeLog( realApp_t dest, const realApp_t src, slong prec) {
+    
+    if ( realApp_contains_zero( src ) ) {
+        if (realApp_check_absolute_accuracy( src, -1)) {
+            /* -> it is zero */
+            realApp_neg_inf(dest);
+        } else {
+            /* set center to max log max src */
+            realApp_t rad;
+            realApp_init(rad);
+            realApp_get_rad_realApp(rad, src);
+            realApp_add(dest, src, rad, prec);
+            realApp_log_base_ui(dest, dest, 2, prec);
+            mag_inf(arb_radref(dest));
+            realApp_clear(rad);
+            return 0;
+        }
+    } else 
+        realApp_log_base_ui(dest, src, 2, prec);
+    
+    return 1;
+}
+
+slong realIntRootRadii_convexHullLog( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec ){
+    
+    realApp_ptr logAbsCoeffs = (realApp_ptr) ccluster_malloc ( len*sizeof(realApp) );
+    for (slong i=0; i<len; i++)
+        realApp_init(logAbsCoeffs+i);
+        
+    slong res = 0;
+    
+    /* push two first points */
+    convexHull[res]=0;
+    res++;
+    convexHull[res]=1;
+    res++;
+    
+    slong nbOfLogComp = 1;
+    
+    /* compute log of two first points */
+    int restemp = realIntRootRadii_computeLog( logAbsCoeffs + 0, abscoeffs + 0, prec);
+    realIntRootRadii_computeLog( logAbsCoeffs + 1, abscoeffs + 1, prec);
+    if (restemp==0)
+        res = 0;
+    
+    /* loop on other points */
+    for (slong i = 2; (i<len) && (res>=2); i++){
+        
+        if (nbOfLogComp<i) {
+            restemp = realIntRootRadii_computeLog( logAbsCoeffs + i, abscoeffs + i, prec);
+            nbOfLogComp = i;
+//             if (restemp==0)
+//                 res = 0;
+        }
+        
+        int liesBelow = 1;
+        while ((res >= 2) && (liesBelow==1) ) {
+            liesBelow = realIntRootRadii_liesBelowLog( convexHull[res-2], logAbsCoeffs + convexHull[res-2], 
+                                                 convexHull[res-1], logAbsCoeffs + convexHull[res-1],
+                                                 i,     logAbsCoeffs + i, 
+                                                 prec);
+            if (liesBelow == 1)
+                res--;
+            if (liesBelow <= -1) {
+                /* it is not possible to decide if (res-1, convexHull[res-1]) lies below     */
+                /* the line passing trough (res-2, convexHull[res-2]) and (i, convexHull[i]) */
+                /* try to figure out if there exist a k s.t. it is possible to decide that  */
+                /* it lies below line passing trough (res-2, convexHull[res-2]) and (k, convexHull[k]) */
+//                 printf("#%ld-th point lies below the line passing trough %ld, %ld ?\n", res-1, res-2, i);
+                int liesBelow2 = -1;
+                for (slong k = i+1; (k<len)&&(liesBelow2<1)&&(res>=2); k++) {
+                    
+                    if (nbOfLogComp<k) {
+                        restemp = realIntRootRadii_computeLog( logAbsCoeffs + k, abscoeffs + k, prec);
+                        nbOfLogComp = k;
+//                         if (restemp==0)
+//                             res = 0;
+                    }
+                    
+                    if (res>=2)
+                        liesBelow2 = realIntRootRadii_liesBelowLog( convexHull[res-2], logAbsCoeffs + convexHull[res-2], 
+                                                 convexHull[res-1], logAbsCoeffs + convexHull[res-1],
+                                                 k,     logAbsCoeffs + k, 
+                                                 prec);
+//                     if (liesBelow2 == 1 )
+//                         printf("#---%ld-th point lies below the line passing trough %ld, %ld\n", res-1, res-2, k);
+                        
+                }
+                if (liesBelow2 == 1) {
+                    liesBelow = 1;
+                    res--;
+                } else {
+                    res = 0;
+                    liesBelow = -1;
+//                     for (slong i=0; i<len; i++)
+//                         realApp_clear(logAbsCoeffs);
+//                     ccluster_free(logAbsCoeffs);
+//                     
+//                     return res;
+                }
+            }
+        }
+//         printf("#realIntRootRadii.c , realIntRootRadii_convexHull: res: %ld\n", res);
+        if (res>=1) {
+            convexHull[res] = i;
+            res++;
+        }
+    }
+    
+    for (slong i=0; i<len; i++)
+        realApp_clear(logAbsCoeffs+i);
+    ccluster_free(logAbsCoeffs);
     
     return res;
 }
@@ -289,8 +543,28 @@ slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoef
             if (liesBelow == 1)
                 res--;
             if (liesBelow <= -1) {
-                res=0;
-                return res;
+                /* it is not possible to decide if (res-1, convexHull[res-1]) lies below     */
+                /* the line passing trough (res-2, convexHull[res-2]) and (i, convexHull[i]) */
+                /* try to figure out if there exist a k s.t. it is possible to decide that  */
+                /* it lies below line passing trough (res-2, convexHull[res-2]) and (k, convexHull[k]) */
+//                 printf("#%ld-th point lies below the line passing trough %ld, %ld ?\n", res-1, res-2, i);
+                int liesBelow2 = -1;
+                for (slong k = i+1; (k<len)&&(liesBelow2<1); k++) {
+                    liesBelow2 = realIntRootRadii_liesBelow( convexHull[res-2], abscoeffs + convexHull[res-2], 
+                                                 convexHull[res-1], abscoeffs + convexHull[res-1],
+                                                 k,     abscoeffs + k, 
+                                                 prec);
+//                     if (liesBelow2 == 1 )
+//                         printf("#---%ld-th point lies below the line passing trough %ld, %ld\n", res-1, res-2, k);
+                        
+                }
+                if (liesBelow2 == 1) {
+                    liesBelow = 1;
+                    res--;
+                } else {
+                    res = 0;
+                    return res;
+                }
             }
         }
 //         printf("#realIntRootRadii.c , realIntRootRadii_convexHull: res: %ld\n", res);
@@ -328,7 +602,7 @@ slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoef
 //                 /* keep it in the CH and verify afterwards */
 // //                 res=0;
 // //                 return res;
-//                 convexHullUnsure[lenUnsure] = i;
+//                 convexHullUnsure[lenUnsure] = res-1;
 //                 lenUnsure ++;
 //             }
 //         }
@@ -401,7 +675,7 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
     
     while ( lenCh == 0 ) {
         
-//         printf("#---realIntRootRadii.c; realIntRootRadii_rootRadii : prec: %ld \n", nprec);
+        printf("#---realIntRootRadii.c; realIntRootRadii_rootRadii : prec: %ld \n", nprec);
         
         realIntRootRadii_getApproximation_real( pApprox, cache, nprec, meta );
 //         realApp_poly_set(pApprox, cacheApp_getApproximation_real ( cache, nprec ));
@@ -410,17 +684,31 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
 //         printf("#---realIntRootRadii_rootRadii: shifted polynomial\n");
 //         realApp_poly_printd(pApprox, 20);
 //         printf("\n");
-        int enoughRelacc = realIntRootRadii_Ngraeffe_iterations_inplace_real( pApprox, N, nprec, meta);
+   
+//         int enoughRelacc = realIntRootRadii_Ngraeffe_iterations_inplace_real( pApprox, N, nprec, meta);
+        slong nprec2 = realIntRootRadii_Ngraeffe_iterations_inplace_real( pApprox, N, nprec, meta);
+//         clock_t start = clock();
+//         for (int i=0; i<N; i++)
+//             realApp_poly_oneGraeffeIteration_in_place( pApprox, nprec );
+//         
+//         if (metadatas_haveToCount(meta)) {
+//             clock_t end = clock();
+//             metadatas_add_time_Graeffe(meta, (double) (end - start) );
+//             metadatas_add_time_RRGraef(meta, (double) (end - start) );
+//         }
+//         int enoughRelacc=1;
+        
 //         printf("---realIntRootRadii_rootRadii: enoughRelacc: %d, prec: %ld\n", enoughRelacc, nprec);
         /* compute abs of coeffs */
         
-        if (enoughRelacc==1) {
+//         if (enoughRelacc==1) {
             for(slong i = 0; i <= degree; i++) {
                 realApp_abs( (pApprox->coeffs)+i, (pApprox->coeffs)+i );
             }
             /* compute convex hull */
-            lenCh = realIntRootRadii_convexHull( convexHull, (pApprox->coeffs), degree+1, nprec );
-        }
+            lenCh = realIntRootRadii_convexHull( convexHull, (pApprox->coeffs), degree+1, nprec2 );
+//             lenCh = realIntRootRadii_convexHullLog( convexHull, (pApprox->coeffs), degree+1, nprec2 );
+//         }
 //         printf("---realIntRootRadii_rootRadii: lenCh: %ld\n", lenCh);
         
         if (lenCh==0) { /* double precision */
@@ -532,27 +820,28 @@ slong realIntRootRadii_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of
     
     while ( lenCh == 0 ) {
         
-//         printf("#---realIntRootRadii.c; realIntRootRadii_rootRadii : prec: %ld \n", nprec);
+        printf("#---realIntRootRadii.c; realIntRootRadii_rootRadii_imagCenter : prec: %ld \n", nprec);
         
         realIntRootRadii_getApproximation_comp( pApprox, cache, nprec, meta );
 //         compApp_poly_set(pApprox, cacheApp_getApproximation ( cache, nprec ));
         if (centerIm != 0)
             realIntRootRadii_taylor_shift_inplace_comp( pApprox, 0, centerIm, nprec, meta);
-        int enoughRelacc = realIntRootRadii_Ngraeffe_iterations_inplace_comp( pApprox, N, nprec, meta);
+//         int enoughRelacc = realIntRootRadii_Ngraeffe_iterations_inplace_comp( pApprox, N, nprec, meta);
+        slong nprec2 = realIntRootRadii_Ngraeffe_iterations_inplace_comp( pApprox, N, nprec, meta);
 //         printf("---realIntRootRadii_rootRadii: enoughRelacc: %d, prec: %ld\n", enoughRelacc, nprec);
 //         for(int i = 0; i < N; i++)
 //             compApp_poly_oneGraeffeIteration_in_place( pApprox, nprec );
         /* compute sum of squares of real and imaginary parts of coeffs */
-        if (enoughRelacc==1) {
+//         if (enoughRelacc==1) {
             for(slong i = 0; i <= degree; i++){
-                realApp_sqr( compApp_realref((pApprox->coeffs)+i), compApp_realref((pApprox->coeffs)+i), nprec );
-                realApp_sqr( compApp_imagref((pApprox->coeffs)+i), compApp_imagref((pApprox->coeffs)+i), nprec );
-                realApp_add( (pSquares->coeffs)+i, compApp_realref((pApprox->coeffs)+i), compApp_imagref((pApprox->coeffs)+i), nprec);
+                realApp_sqr( compApp_realref((pApprox->coeffs)+i), compApp_realref((pApprox->coeffs)+i), nprec2 );
+                realApp_sqr( compApp_imagref((pApprox->coeffs)+i), compApp_imagref((pApprox->coeffs)+i), nprec2 );
+                realApp_add( (pSquares->coeffs)+i, compApp_realref((pApprox->coeffs)+i), compApp_imagref((pApprox->coeffs)+i), nprec2);
             }
             /* compute convex hull */
-            lenCh = realIntRootRadii_convexHull( convexHull, (pSquares->coeffs), degree+1, nprec );
+            lenCh = realIntRootRadii_convexHull( convexHull, (pSquares->coeffs), degree+1, nprec2 );
 //             printf("---realIntRootRadii_rootRadii: lenCh: %ld\n", lenCh);
-        }
+//         }
         
         if (lenCh==0){ /* double precision */
             nprec = 2*nprec;

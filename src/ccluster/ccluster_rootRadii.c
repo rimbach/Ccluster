@@ -347,6 +347,14 @@ void ccluster_algo_global_rootRadii( connCmp_list_t qResults,
             printf("#Annulii: ");
             compAnn_list_printd(annulii, 10);
             printf("\n\n");
+            
+            printf("#Annulii1: ");
+            compAnn_list_printd(annulii1, 10);
+            printf("\n\n");
+            
+            printf("#Annulii2: ");
+            compAnn_list_printd(annulii2, 10);
+            printf("\n\n");
         }
 //     }
     

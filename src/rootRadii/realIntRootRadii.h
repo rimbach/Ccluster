@@ -37,8 +37,11 @@ void realIntRootRadii_getApproximation_comp( compApp_poly_t res, cacheApp_t cach
 void realIntRootRadii_taylor_shift_inplace_real( realApp_poly_t res, slong centerRe, slong prec, metadatas_t meta);
 void realIntRootRadii_taylor_shift_inplace_comp( compApp_poly_t res, slong centerRe, slong centerIm, slong prec, metadatas_t meta);
 
-int realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta);
-int realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta);
+// int realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta);
+// int realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta);
+
+slong realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta);
+slong realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta);
 
 /* assume i<j<k */
 /* assume absPi=|Pi|, absPj=|Pj|, absPk=|Pk| are approximations of integers */
