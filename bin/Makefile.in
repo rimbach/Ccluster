@@ -19,7 +19,8 @@ build: ccluster\
        cauchy\
        cauchy_mandelbrot\
        cauchy_runnels\
-       cauchy_nested
+       cauchy_nested\
+       cauchy_mignotte
 
 # TESTING VARIABLES
 degree=64
@@ -110,6 +111,12 @@ cauchy_runnels: cauchy_runnels.o
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 
 cauchy_nested: cauchy_nested.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	
+cauchy_mignotte: cauchy_mignotte.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \

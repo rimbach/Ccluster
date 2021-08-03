@@ -19,6 +19,7 @@ cauchyTest_res cauchyTest_probabilistic_verification( const compDsk_t Delta,
                                                       slong prec,
                                                       metadatas_t meta, int depth){
     
+    int level = 5;
     cauchyTest_res res;
     res.appPrec = prec;
     
@@ -30,7 +31,7 @@ cauchyTest_res cauchyTest_probabilistic_verification( const compDsk_t Delta,
         res = cauchyTest_probabilistic_counting_withIsoRatio( a, Delta, cache, cacheCau, res.appPrec, meta, depth);
     }
     
-    if (metadatas_getVerbo(meta)>=3) {
+    if (metadatas_getVerbo(meta)>=level) {
             printf("#------------------cauchyTest_probabilistic_verification: res of proba counting is %d\n", res.nbOfSol);
     }
 
@@ -129,6 +130,7 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
                                                                cacheCauchy_t cacheCau,
                                                                slong prec,
                                                                metadatas_t meta, int depth){
+    int level = 5;
     cauchyTest_res res;
     res.nbOfSol = -1;
     res.appPrec = prec;
@@ -139,7 +141,7 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
     /* want |s0*-s0| less than 1/4 */
     /* => number of evaluation points = ceil ( log_isoRatio (4*degree +1) ) + 1*/
     slong q = cacheCauchy_get_NbOfEvalPoints( cacheCauchy_degreeref(cacheCau), isoRatio, 1, CCLUSTER_DEFAULT_PREC );
-    if (metadatas_getVerbo(meta)>=3)
+    if (metadatas_getVerbo(meta)>=level)
         printf("#------------------cauchyTest_probabilistic_counting_withIsoRatio: nb of eval points: %ld\n", q);
     
     /* want w(s0*)<1/4 */
@@ -182,7 +184,7 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
     
     int enoughPrec = 0;
     while (enoughPrec == 0) {
-        if (metadatas_getVerbo(meta)>=3)
+        if (metadatas_getVerbo(meta)>=level)
             printf("#------------------cauchyTest_probabilistic_counting_withIsoRatio: res.appPrec: %ld\n", res.appPrec);
         
         cacheCauchy_lBoundApp( lb, cacheCauchy_degreeref(cacheCau), isoRatio, compDsk_radiusref(Delta), res.appPrec);
@@ -212,7 +214,7 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
             compApp_abs(modulus, fval, res.appPrec);
             
             if (compApp_contains_zero( fval )){
-//                 if (metadatas_getVerbo(meta)>=3)
+//                 if (metadatas_getVerbo(meta)>=level)
 //                     printf("#------------------cauchyTest_probabilistic_counting_withIsoRatio: fval contains 0, i: %ld\n", i);
                 if (realApp_lt( modulus, lb )){
                     enoughPrec=-2;
@@ -251,7 +253,7 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
 //             realApp_mul_realRat( radRe, radRe, compDsk_radiusref(Delta), appPrec );
 //             realApp_mul_realRat( radIm, radIm, compDsk_radiusref(Delta), appPrec );
             if ( realApp_ge( radRe, errAp ) || realApp_ge( radIm, errAp ) ){
-//                 if (metadatas_getVerbo(meta)>=3)
+//                 if (metadatas_getVerbo(meta)>=level)
 //                     printf("#------------------cauchyTest_probabilistic_counting_withIsoRatio: s0star not precise enough, i: %ld\n", i);
                 res.appPrec = 2*res.appPrec;
                 enoughPrec = 0;
@@ -259,7 +261,7 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
             }
                 
         }
-//         if (metadatas_getVerbo(meta)>=3)
+//         if (metadatas_getVerbo(meta)>=level)
 //             if (enoughPrec == 1)
 //                 printf("#------------------cauchyTest_probabilistic_counting_withIsoRatio: s0star precise enough\n");
         

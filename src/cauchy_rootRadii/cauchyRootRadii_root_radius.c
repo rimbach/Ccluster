@@ -15,7 +15,7 @@
 /*         0 otherwise                                                 */
 int _cauchyRootRadii_stoppingCriterion ( const realRat_t radInf, const realRat_t radSup, const realRat_t relativeError, const realRat_t eps, const metadatas_t meta ) {
     
-    if (metadatas_getVerbo(meta)>=3) {
+    if (metadatas_getVerbo(meta)>=4) {
         printf("#------------cauchyRootRadii_root_radius.c: radInf        is "); realRat_print(radInf); printf("\n");
         printf("#                                           radSup        is "); realRat_print(radSup); printf("\n");
         printf("#                                           eps           is "); realRat_print(eps   ); printf("\n");
@@ -32,7 +32,7 @@ int _cauchyRootRadii_stoppingCriterion ( const realRat_t radInf, const realRat_t
         realRat_clear(temp);
     }
     
-    if (metadatas_getVerbo(meta)>=3) {
+    if (metadatas_getVerbo(meta)>=4) {
         printf("#                                           stop          is %d \n", stop);
     }
     
@@ -147,6 +147,7 @@ void cauchyRootRadii_root_radius( const compRat_t center,
                                   cacheApp_t cache,
                                   metadatas_t meta ){
     
+    int level = 5;
     cauchyTest_res cres;
     cres.appPrec = CCLUSTER_DEFAULT_PREC;
     slong precForT = CCLUSTER_DEFAULT_PREC;
@@ -182,7 +183,7 @@ void cauchyRootRadii_root_radius( const compRat_t center,
         
     if ( (stop==0) && ( realRat_is_zero( radInf ) ) ) {
         
-        if (metadatas_getVerbo(meta)>=3) {
+        if (metadatas_getVerbo(meta)>=level) {
             printf("#---------------cauchyRootRadii_root_radius.c: radInf is 0 \n");
         }
  
@@ -190,7 +191,7 @@ void cauchyRootRadii_root_radius( const compRat_t center,
         realRat_set( compDsk_radiusref(Delta), epsprime );
         cres = cauchyTest_deterministic_verification( Delta, nbOfRoots, a,
                                                       cache, cacheCau, cres.appPrec, meta, 0);
-        if (metadatas_getVerbo(meta)>=3)
+        if (metadatas_getVerbo(meta)>=level)
                 printf("#---------------cauchyRootRadii_root_radius.c: return of deterministic verification: cres.nbOfSol: %d \n", cres.nbOfSol);
         
         if (cres.nbOfSol == -1) { /* A(center, fma*epsprime, fpa*epsprime) contains a root */
@@ -220,7 +221,7 @@ void cauchyRootRadii_root_radius( const compRat_t center,
         /* sqrt(radInf*radSup) <= t < (relativeError)^(1/4)*sqrt(radInf*radSup) */
         precForT = _cauchyRootRadii_findRational ( t, radInf, radSup, relativeError, precForT );
         
-        if (metadatas_getVerbo(meta)>=3) {
+        if (metadatas_getVerbo(meta)>=level) {
             printf("#------------cauchyRootRadii_root_radius.c: t is "); realRat_print(t); printf("\n");
         }
         realRat_set( compDsk_radiusref(Delta), t );
@@ -228,7 +229,7 @@ void cauchyRootRadii_root_radius( const compRat_t center,
         /* Apply deterministic verification to D(center, t)*/
         cres = cauchyTest_deterministic_verification( Delta, nbOfRoots, a,
                                                       cache, cacheCau, cres.appPrec, meta, 0);
-        if (metadatas_getVerbo(meta)>=3)
+        if (metadatas_getVerbo(meta)>=level)
                 printf("#------------cauchyRootRadii_root_radius.c: return of deterministic verification: cres.nbOfSol: %d \n", cres.nbOfSol);
         
         if (cres.nbOfSol == -1) { /* A(center, fma*t, fpa*t) contains a root */
@@ -270,6 +271,7 @@ void cauchyRootRadii_probabilistic_root_radius( const compRat_t center,
                                                 cacheApp_t cache,
                                                 metadatas_t meta ){
     
+    int level = 5;
     cauchyTest_res cres;
     cres.appPrec = CCLUSTER_DEFAULT_PREC;
     slong precForT = CCLUSTER_DEFAULT_PREC;
@@ -305,7 +307,7 @@ void cauchyRootRadii_probabilistic_root_radius( const compRat_t center,
         
     if ( (stop==0) && ( realRat_is_zero( radInf ) ) ) {
         
-        if (metadatas_getVerbo(meta)>=3) {
+        if (metadatas_getVerbo(meta)>=level) {
             printf("#---------------cauchyRootRadii_probabilistic_root_radius.c: radInf is 0 \n");
         }
  
@@ -313,7 +315,7 @@ void cauchyRootRadii_probabilistic_root_radius( const compRat_t center,
         realRat_set( compDsk_radiusref(Delta), epsprime );
         cres = cauchyTest_probabilistic_verification( Delta, nbOfRoots, a,
                                                       cache, cacheCau, cres.appPrec, meta, 0);
-        if (metadatas_getVerbo(meta)>=3)
+        if (metadatas_getVerbo(meta)>=level)
                 printf("#---------------cauchyRootRadii_probabilistic_root_radius.c: return of probabilistic verification: cres.nbOfSol: %d \n", cres.nbOfSol);
         
         if (cres.nbOfSol == -1) { /* A(center, fma*epsprime, fpa*epsprime) contains a root */
@@ -343,7 +345,7 @@ void cauchyRootRadii_probabilistic_root_radius( const compRat_t center,
         /* sqrt(radInf*radSup) <= t < (relativeError)^(1/4)*sqrt(radInf*radSup) */
         precForT = _cauchyRootRadii_findRational ( t, radInf, radSup, relativeError, precForT );
         
-        if (metadatas_getVerbo(meta)>=3) {
+        if (metadatas_getVerbo(meta)>=level) {
             printf("#------------cauchyRootRadii_probabilistic_root_radius.c: t is "); realRat_print(t); printf("\n");
         }
         realRat_set( compDsk_radiusref(Delta), t );
@@ -351,7 +353,7 @@ void cauchyRootRadii_probabilistic_root_radius( const compRat_t center,
         /* Apply probabilistic verification to D(center, t)*/
         cres = cauchyTest_probabilistic_verification( Delta, nbOfRoots, a,
                                                       cache, cacheCau, cres.appPrec, meta, 0);
-        if (metadatas_getVerbo(meta)>=3)
+        if (metadatas_getVerbo(meta)>=level)
                 printf("#------------cauchyRootRadii_probabilistic_root_radius.c: return of probabilistic verification: cres.nbOfSol: %d \n", cres.nbOfSol);
         
         if (cres.nbOfSol == -1) { /* A(center, fma*t, fpa*t) contains a root */

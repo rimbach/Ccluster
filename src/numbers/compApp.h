@@ -85,6 +85,7 @@ NUMBERS_INLINE void compApp_pow_si( compApp_t dest, const compApp_t x, slong l, 
 NUMBERS_INLINE void compApp_sqrt  ( compApp_t dest, const compApp_t x, slong prec) { acb_sqrt(dest, x, prec); }
 
 NUMBERS_INLINE void compApp_mul_realApp   ( compApp_t dest, const compApp_t x, const realApp_t y, slong prec) { acb_mul_arb   (dest, x, y, prec); }
+NUMBERS_INLINE void compApp_mul_2exp_si   ( compApp_t dest, const compApp_t x, slong e) { acb_mul_2exp_si   (dest, x, e); }
 
 /* printing */
 NUMBERS_INLINE void compApp_fprint (FILE * file, const compApp_t x)                           { acb_fprint (file, x               ); }

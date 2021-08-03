@@ -245,6 +245,7 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
                                          slong prec, 
                                          metadatas_t meta) {
     
+    int level = 4;
 //     printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: begin --------------------------- \n");
     newton_res res;
     if (metadatas_usePredictPrec(meta))
@@ -296,10 +297,10 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
         newton_res nres;
         nres.nflag = 0;
         if (connCmp_nSolsref(CC)==1) {
-            if (metadatas_getVerbo(meta)>=3)
+            if (metadatas_getVerbo(meta)>=level)
                 printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: the CC contains one solution: try to validate with interval newton\n");
             nres = newton_cauchy_interval( ndisk, cache, cacheCau, res.appPrec, meta);
-            if (metadatas_getVerbo(meta)>3) {
+            if (metadatas_getVerbo(meta)>level) {
                 printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: nres.nflag: %d\n", nres.nflag);
 //                 newton_res nrest;
 //                 nrest = newton_interval( ndisk, cache, res.appPrec, meta);
@@ -325,7 +326,7 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
                 res.nflag = (cres.nbOfSol == connCmp_nSolsref(CC));
                 if (! res.nflag )
                     realRat_div_ui(compDsk_radiusref(ndisk), compDsk_radiusref(ndisk), 2);
-                if (metadatas_getVerbo(meta)>3) {
+                if (metadatas_getVerbo(meta)>level) {
                     printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: cauchy test comb res %d\n", cres.nbOfSol);
                 }
             } else {
@@ -341,7 +342,7 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
 //                     res.appPrec = cres.appPrec;
 //                 }
                 res.nflag = (cres.nbOfSol == connCmp_nSolsref(CC));
-                if (metadatas_getVerbo(meta)>=3) {
+                if (metadatas_getVerbo(meta)>=level) {
                     printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: cauchy test res %d\n", cres.nbOfSol);
                     /* version with Tstar test: only for debug*/
                     tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, NULL, meta);

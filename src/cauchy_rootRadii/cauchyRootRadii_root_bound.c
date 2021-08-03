@@ -16,6 +16,7 @@ void cauchyRootRadii_root_bound( realRat_t upperBound,
                                  cacheApp_t cache,
                                  metadatas_t meta ) {
     
+    int level = 10;
     compDsk_t Delta;
     compDsk_init(Delta);
     cauchyTest_res cres;
@@ -28,7 +29,7 @@ void cauchyRootRadii_root_bound( realRat_t upperBound,
     cres = cauchyTest_deterministic_verification( Delta, cacheCauchy_degreeref(cacheCau), cacheCauchy_isoRatioref(cacheCau), 
                                                   cache, cacheCau, cres.appPrec, meta, 0);
     
-    if (metadatas_getVerbo(meta)>=3) {
+    if (metadatas_getVerbo(meta)>=level) {
         printf("#---cauchy root bound algorithm: \n");
         printf("#-------cauchy test res %d\n", cres.nbOfSol);
         printf("#------ upperBound: "); realRat_print(compDsk_radiusref(Delta)); printf("\n");
@@ -39,7 +40,7 @@ void cauchyRootRadii_root_bound( realRat_t upperBound,
         realRat_mul(compDsk_radiusref(Delta), compDsk_radiusref(Delta), compDsk_radiusref(Delta));
         cres = cauchyTest_deterministic_verification( Delta, cacheCauchy_degreeref(cacheCau), cacheCauchy_isoRatioref(cacheCau), 
                                                       cache, cacheCau, cres.appPrec, meta, 0);
-        if (metadatas_getVerbo(meta)>=3) {
+        if (metadatas_getVerbo(meta)>=level) {
             printf("#-------cauchy test res %d\n", cres.nbOfSol);
             printf("#------ upperBound: "); realRat_print(compDsk_radiusref(Delta)); printf("\n");
             printf("#------ cres:       %d, %ld\n", cres.nbOfSol, cres.appPrec);

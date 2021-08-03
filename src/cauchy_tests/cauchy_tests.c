@@ -38,7 +38,7 @@ void cauchyTest_getEvaluationPoints( const compRat_t center,
         points        = cacheCauchy_pointsCeref(cacheCau);
         pointsShifted = cacheCauchy_pointsShiftedCeref(cacheCau);
     } else {
-        nbPoints = cacheCauchy_nbEvalExref(cacheCau);
+        nbPoints      = cacheCauchy_nbEvalExref(cacheCau);
         points        = cacheCauchy_pointsExref(cacheCau);
         pointsShifted = cacheCauchy_pointsShiftedExref(cacheCau);
     }
@@ -62,7 +62,7 @@ void cauchyTest_getEvaluationPoints( const compRat_t center,
     compApp_add                 (c,    c, a,     2*prec);
     }
     for(slong i=0; i<nbPoints; i++) {
-        realRat_set_si(argu, 2*i, nbPoints);
+        realRat_set_si(argu, -2*i, nbPoints);
         compApp_set_realRat(a, argu, prec);
         acb_exp_pi_i( points + i, a, prec);
         compApp_mul_realRat_in_place(points + i, radius, prec);
@@ -106,15 +106,16 @@ void cauchyTest_evaluateAtPoints( cacheApp_t cache,
     clock_t start = clock();
     
     if (cacheCauchy_evalFastref(cacheCau) == NULL) {
-        compApp_poly_ptr app = cacheApp_getApproximation ( cache, prec );
+        
+        compApp_poly_ptr app    = cacheApp_getApproximation ( cache, prec );
+//      
         for (slong i=0; i<nbPoints; i++)
             if ( ( reUseEvals ) && ( (i%quo)==0 ) ) {
                 compApp_set( fvals+i, cacheCauchy_fvalsExref(cacheCau) + i/quo );
                 compApp_set( fdervals+i, cacheCauchy_fdervalsExref(cacheCau) + i/quo );
             }
-            else
+            else 
                 compApp_poly_evaluate2_rectangular(fvals + i, fdervals + i, app, pointsShifted + i, prec);
-//             compApp_poly_evaluate2_horner(fvals + i, fdervals + i, app, pointsShifted + i, prec);
     }
     else {
         for (slong i=0; i<nbPoints; i++) {
@@ -123,18 +124,7 @@ void cauchyTest_evaluateAtPoints( cacheApp_t cache,
                 compApp_set( fdervals+i, cacheCauchy_fdervalsExref(cacheCau) + i/quo );
             }
             else {
-//                 printf("\n\n  prec: %ld\n", prec);
-//                 printf("     point: "); compApp_printd(pointsShifted+i, 20); printf("\n");
                 (cacheCauchy_evalFastref(cacheCau))( fvals+i, fdervals + i, pointsShifted+i, prec);
-                
-                /* for test */
-//                 printf("  f(point): "); compApp_printd(fvals+i, 20); printf("\n");
-//                 printf(" f'(point): "); compApp_printd(fdervals+i, 20); printf("\n");
-//                 compApp_poly_ptr app = cacheApp_getApproximation ( cache, prec );
-//                 compApp_poly_evaluate2_rectangular(fvals + i, fdervals + i, app, pointsShifted + i, prec);
-//                 printf("  f(point): "); compApp_printd(fvals+i, 20); printf("\n");
-//                 printf(" f'(point): "); compApp_printd(fdervals+i, 20); printf("\n");
-                /* end for test */
             }
         }
     }
@@ -402,6 +392,96 @@ int cauchyTest_computeSsApprox_fromVals(compApp_ptr ps,
     return res;
 }
 
+void cauchyTest_shiftFFT(                 const compRat_t center,
+                                          const realRat_t radius,
+                                          const realRat_t radius2,
+                                          slong vangle,           
+                                          slong vindex,           
+                                          cacheApp_t cache,
+                                          cacheCauchy_t cacheCau,
+                                          int certified,
+                                          slong prec,
+                                          int inCounting,
+                                          metadatas_t meta, int depth ) {
+    
+    // //             printf("here\n");
+    
+                clock_t start = clock();
+                
+                slong nbPoints = cacheCauchy_nbEvalCeref(cacheCau);
+                
+                compApp_poly_t shiftedPoly;
+                compApp_poly_init2( shiftedPoly, nbPoints );
+                /* compute approximation of the pol */
+                compApp_poly_set(shiftedPoly, cacheApp_getApproximation ( cache, prec ) );
+                
+                compApp_t c;
+                compApp_init(c);
+                realRat_t argu;
+                realRat_init(argu);
+                compApp_t a;
+                compApp_init(a);
+                /* compute approximation of the center */
+                if (radius2==NULL)
+                    compApp_set_compRat(c, center, 2*prec);
+                else {
+                    compApp_set_compRat         (c,    center,   2*prec);
+                    realRat_set_si              (argu, 2*vindex, vangle);
+                    compApp_set_realRat         (a,    argu,     2*prec);
+                    acb_exp_pi_i                (a,    a,        2*prec);
+                    compApp_mul_realRat_in_place(a,    radius2,  2*prec);
+                    compApp_add                 (c,    c, a,     2*prec);
+                }
+                /* shift in the center */
+                clock_t start2 = clock();
+                _acb_poly_taylor_shift_convolution(shiftedPoly->coeffs, c, shiftedPoly->length, prec);
+                compApp_poly_scale_realRat_in_place( shiftedPoly->coeffs, radius, shiftedPoly->length, prec );
+                if (metadatas_haveToCount(meta))
+                    metadatas_add_time_Taylors(meta, (double) (clock() - start2) );
+                
+                /* compute fft */
+                acb_dft_pre_t t;
+                acb_dft_precomp_init(t, nbPoints, prec);
+                acb_dft_precomp(cacheCauchy_fvalsCeref(cacheCau), shiftedPoly->coeffs, t, prec);
+                /* derivative */
+                compApp_poly_derivative( shiftedPoly, shiftedPoly, prec);
+                slong index = 0;
+                while (index < shiftedPoly->length){
+                    compApp_div_realRat( (shiftedPoly->coeffs) + index, (shiftedPoly->coeffs) + index, radius, prec );
+                    index++;
+                }
+                compApp_zero((shiftedPoly->coeffs) + (shiftedPoly->length));
+                acb_dft_precomp(cacheCauchy_fdervalsCeref(cacheCau), shiftedPoly->coeffs, t, prec);
+                
+                compApp_poly_clear(shiftedPoly);
+                compApp_clear(c);
+                realRat_clear(argu);
+                compApp_clear(a);
+                acb_dft_precomp_clear(t);
+                
+    if (metadatas_haveToCount(meta)) {
+        slong nbEvals = nbPoints;
+        if (inCounting == CAUCHYTEST_INCOUNTIN) {
+            if (certified == CAUCHYTEST_CERTIFIED) {
+                metadatas_add_time_CauCoED(meta, (double) (clock() - start));
+                metadatas_add_CauchyCoEvalsD(meta, depth, nbEvals);
+            } else {
+                metadatas_add_time_CauCoEP(meta, (double) (clock() - start));
+                metadatas_add_CauchyCoEvalsP(meta, depth, nbEvals);
+            }
+        } else {
+            if (certified == CAUCHYTEST_CERTIFIED) {
+                metadatas_add_time_CauExED(meta, (double) (clock() - start));
+                metadatas_add_CauchyExEvalsD(meta, depth, nbEvals);
+            } else {
+                metadatas_add_time_CauExEP(meta, (double) (clock() - start));
+                metadatas_add_CauchyExEvalsP(meta, depth, nbEvals);
+            }
+        }
+    }
+    
+}
+
 cauchyTest_res cauchyTest_computeS0Approx(compApp_t ps,
                                           const compRat_t center,
                                           const realRat_t radius,
@@ -426,13 +506,29 @@ cauchyTest_res cauchyTest_computeS0Approx(compApp_t ps,
     if (*alreadyEvaluated == 0) {
         
         while (res.nbOfSol==-1){
-            /* compute points and evals at prec res.appPrec*/
-            cauchyTest_getEvaluationPoints( center, radius,
-                                            radius2, vangle, vindex,
-                                            cacheCau, certified, res.appPrec);
             
-            cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
+//             if (cacheCauchy_evalFastref(cacheCau) == NULL) {
+//                 if ( certified == CAUCHYTEST_CERTIFIED ) {
+//                     cauchyTest_shiftFFT( center, radius, radius2, vangle, vindex, cache, cacheCau, certified, res.appPrec, inCounting, meta, depth );
+//                 } else {
+//                     /* compute points and evals at prec res.appPrec*/
+//                     cauchyTest_getEvaluationPoints( center, radius,
+//                                                     radius2, vangle, vindex,
+//                                                     cacheCau, certified, res.appPrec);
+//                 
+//                     cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
+//                 }
+//             } else {
+            
+                /* compute points and evals at prec res.appPrec*/
+                cauchyTest_getEvaluationPoints( center, radius,
+                                                radius2, vangle, vindex,
+                                                cacheCau, certified, res.appPrec);
+                
+                cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
                
+//             }   
+        
             res.nbOfSol = cauchyTest_computeFdivs_fromVals(cacheCau, certified, res.appPrec, inCounting, meta);
             if ( res.nbOfSol ==-1 )
                 res.appPrec = 2*res.appPrec;
@@ -449,12 +545,26 @@ cauchyTest_res cauchyTest_computeS0Approx(compApp_t ps,
     while ( res.nbOfSol ==-1 ) {
         res.appPrec = 2*res.appPrec;
         
-        cauchyTest_getEvaluationPoints( center, radius, 
-                                        radius2, vangle, vindex,
-                                        cacheCau, certified, res.appPrec);
+//         if (cacheCauchy_evalFastref(cacheCau) == NULL) {
+//                 if ( certified == CAUCHYTEST_CERTIFIED ) {
+//                     cauchyTest_shiftFFT( center, radius, radius2, vangle, vindex, cache, cacheCau, certified, res.appPrec, inCounting, meta, depth );
+//                 } else {
+//                     /* compute points and evals at prec res.appPrec*/
+//                     cauchyTest_getEvaluationPoints( center, radius,
+//                                                     radius2, vangle, vindex,
+//                                                     cacheCau, certified, res.appPrec);
+//                 
+//                     cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
+//                 }
+//         } else {
+            
+            cauchyTest_getEvaluationPoints( center, radius, 
+                                            radius2, vangle, vindex,
+                                            cacheCau, certified, res.appPrec);
+            
+            cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
          
-        cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
-         
+//         }
         /* compute approximation of Power sums */
         res.nbOfSol = cauchyTest_computeFdivs_fromVals(cacheCau, certified, res.appPrec, inCounting, meta);
         res.nbOfSol = cauchyTest_computeS0Approx_fromVals(ps, cacheCau, certified, rotation, res.appPrec, inCounting, meta);
@@ -485,13 +595,26 @@ cauchyTest_res cauchyTest_computeSsApprox(compApp_ptr ps,
     res.nbOfSol = -1;
         
     while (res.nbOfSol==-1){
-        /* compute points and evals at prec res.appPrec*/
-        cauchyTest_getEvaluationPoints( center, radius,
+//         if (cacheCauchy_evalFastref(cacheCau) == NULL) {
+//                 if ( certified == CAUCHYTEST_CERTIFIED ) {
+//                     cauchyTest_shiftFFT( center, radius, radius2, vangle, vindex, cache, cacheCau, certified, res.appPrec, inCounting, meta, depth );
+//                 } else {
+//                     /* compute points and evals at prec res.appPrec*/
+//                     cauchyTest_getEvaluationPoints( center, radius,
+//                                                     radius2, vangle, vindex,
+//                                                     cacheCau, certified, res.appPrec);
+//                 
+//                     cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
+//                 }
+//         } else {
+            /* compute points and evals at prec res.appPrec*/
+            cauchyTest_getEvaluationPoints( center, radius,
                                         radius2, vangle, vindex,
                                         cacheCau, certified, res.appPrec);
          
-        cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
-            
+            cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
+//         }
+        
         res.nbOfSol = cauchyTest_computeFdivs_fromVals(cacheCau, certified, res.appPrec, inCounting, meta);
         if ( res.nbOfSol ==-1 )
             res.appPrec = 2*res.appPrec;
@@ -506,12 +629,24 @@ cauchyTest_res cauchyTest_computeSsApprox(compApp_ptr ps,
     while ( res.nbOfSol ==-1 ) {
         res.appPrec = 2*res.appPrec;
         
-        cauchyTest_getEvaluationPoints( center, radius, 
-                                        radius2, vangle, vindex,
-                                        cacheCau, certified, res.appPrec);
-         
-        cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
-         
+//         if (cacheCauchy_evalFastref(cacheCau) == NULL) {
+//                 if ( certified == CAUCHYTEST_CERTIFIED ) {
+//                     cauchyTest_shiftFFT( center, radius, radius2, vangle, vindex, cache, cacheCau, certified, res.appPrec, inCounting, meta, depth );
+//                 } else {
+//                     /* compute points and evals at prec res.appPrec*/
+//                     cauchyTest_getEvaluationPoints( center, radius,
+//                                                     radius2, vangle, vindex,
+//                                                     cacheCau, certified, res.appPrec);
+//                 
+//                     cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
+//                 }
+//         } else {
+            cauchyTest_getEvaluationPoints( center, radius, 
+                                            radius2, vangle, vindex,
+                                            cacheCau, certified, res.appPrec);
+            
+            cauchyTest_evaluateAtPoints( cache, cacheCau, certified, res.appPrec, inCounting, meta, depth);
+//         }
         /* compute approximation of Power sums */
         res.nbOfSol = cauchyTest_computeFdivs_fromVals(cacheCau, certified, res.appPrec, inCounting, meta);
         res.nbOfSol = cauchyTest_computeSsApprox_fromVals(ps, cacheCau, res.appPrec, inCounting, meta);
@@ -671,6 +806,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
                                    const realRat_t eps,
                                    metadatas_t meta, int depth) {
     
+    int level = 5;
     slong appPrec = CCLUSTER_DEFAULT_PREC;
     
     realRat_t error;
@@ -701,7 +837,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
     slong q = realApp_ceil_si( qApp, CCLUSTER_DEFAULT_PREC ) + 1;
     /* qApp = ceil( log_{isoRatio}(1 + (rd*isoRatio)/error ) ) + 1 */
     
-    if (metadatas_getVerbo(meta)>=3) {
+    if (metadatas_getVerbo(meta)>=level) {
         printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: nb of eval points: %ld\n", q);
     }
     
@@ -735,7 +871,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
     
     int enoughPrec = 0;
     while (enoughPrec == 0) {
-        if (metadatas_getVerbo(meta)>=3) {
+        if (metadatas_getVerbo(meta)>=level) {
             printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: precision: %ld\n",  appPrec);
         }
         
@@ -759,7 +895,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
                 (cacheCauchy_evalFastref(cacheCau))( fval, fderval, pointShifted, appPrec);
             
             if (compApp_contains_zero( fval )){
-                if (metadatas_getVerbo(meta)>=3) {
+                if (metadatas_getVerbo(meta)>=level) {
                     printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: fval contains 0, i: %ld\n", i);
                 }
                 appPrec = 2*appPrec;
@@ -781,7 +917,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
 //             realApp_mul_realRat( radRe, radRe, compDsk_radiusref(Delta), appPrec );
 //             realApp_mul_realRat( radIm, radIm, compDsk_radiusref(Delta), appPrec );
             if ( realApp_ge( radRe, errAp ) || realApp_ge( radIm, errAp ) ){
-                if (metadatas_getVerbo(meta)>=3)
+                if (metadatas_getVerbo(meta)>=level)
                     printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: s1 not precise enough, i: %ld\n", i);
                 appPrec = 2*appPrec;
                 enoughPrec = 0;
@@ -789,7 +925,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
             }
                 
         }
-        if (metadatas_getVerbo(meta)>=3)
+        if (metadatas_getVerbo(meta)>=level)
             if (enoughPrec == 1)
                 printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: s1 precise enough\n");
             

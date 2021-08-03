@@ -25,6 +25,8 @@
 
 #include "acb_poly.h"
 
+#include <acb_dft.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

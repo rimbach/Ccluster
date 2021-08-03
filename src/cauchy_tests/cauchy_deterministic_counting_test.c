@@ -105,6 +105,7 @@ cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
                                                       slong prec,
                                                       metadatas_t meta, int depth){
     
+    int level =4;
     cauchyTest_res res;
     res.appPrec = prec;
     
@@ -125,7 +126,7 @@ cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
         res = cauchyTest_probabilistic_counting_withIsoRatio( a, Delta, cache, cacheCau, res.appPrec, meta, depth);
     }
     
-    if (metadatas_getVerbo(meta)>=3) {
+    if (metadatas_getVerbo(meta)>=level) {
             printf("#------------------cauchyTest_deterministic_verification: res of proba counting is %d\n", res.nbOfSol);
     }
 
@@ -139,7 +140,7 @@ cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
         else
            res.nbOfSol = -1;
         
-        if (metadatas_getVerbo(meta)>=3) {
+        if (metadatas_getVerbo(meta)>=level) {
             printf("#------------------cauchyTest_deterministic_verification: res of verification is %d\n", res.nbOfSol);
         }
     }
@@ -162,6 +163,8 @@ cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
                                            cacheCauchy_t cacheCau,
                                            slong prec,
                                            metadatas_t meta, int depth){
+    
+    int level =4;
     clock_t start = clock();
     
     cauchyTest_res res;
@@ -188,7 +191,7 @@ cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
     realApp_mul_realRat(nbCentersApp, nbCentersApp, ratio, CCLUSTER_DEFAULT_PREC);
     slong nbCenters = realApp_ceil_si(nbCentersApp, CCLUSTER_DEFAULT_PREC);
     
-    if (metadatas_getVerbo(meta)>=3) {
+    if (metadatas_getVerbo(meta)>=level) {
         printf("#---------cauchy RootFreeAnnulus: \n");
         printf("#------------nb of discs on contour for certification: %d \n", (int) nbCenters);
         printf("#------------radius of discs on contour for certification: 5/4*"); realRat_print( ExRad ); printf("\n");
@@ -209,7 +212,7 @@ cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
     
     if (resEx.nbOfSol != 0) {
         res.nbOfSol = -1;
-        if (metadatas_getVerbo(meta)>=3) {
+        if (metadatas_getVerbo(meta)>=level) {
             printf("#------------certification failed!\n");
         }
     } else {
@@ -252,7 +255,7 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial( const compRat_t 
     fmpz_add_si( realRat_numref(gamma), realRat_numref(gamma), 1);
     realRat_set(rad, radius);
     
-    if (metadatas_getVerbo(meta)>3) {
+    if (metadatas_getVerbo(meta)>=4) {
         printf("#---cauchy deterministic counting test in Newton iteration, combinatorial version: \n");
         printf("#------ isoRatio: "); realRat_print(cacheCauchy_isoRatioref(cacheCau)); printf("\n");
         printf("#------ max number of roots in disc: %ld\n", nbOfRoots);
@@ -288,7 +291,7 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial( const compRat_t 
             }
         }
         
-        if (metadatas_getVerbo(meta)>3) {
+        if (metadatas_getVerbo(meta)>=4) {
             if ((res.nbOfSol == -1)||(res.nbOfSol != nbOfRoots)){
                 printf("# ------%ld-th iteration, certification failed; res.nbOfSol: %d\n", i, res.nbOfSol);
             }

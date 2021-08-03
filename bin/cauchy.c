@@ -151,7 +151,8 @@ int main(int argc, char **argv){
             realRat_poly_fread(curFile, p);
             compRat_poly_set_realRat_poly(p_global,p);
             
-            cauchy_global_interface_func( getApprox, eps, isoRatio, nbPows, st, nbthreads, output, verbosity);
+//             cauchy_global_interface_func( getApprox, eps, isoRatio, nbPows, st, nbthreads, output, verbosity);
+            cauchy_global_interface_realRat_poly( p, eps, isoRatio, nbPows, st, nbthreads, output, verbosity);
             
             fclose (curFile);
         }

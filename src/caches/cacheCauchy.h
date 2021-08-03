@@ -78,6 +78,22 @@ typedef struct {
     compApp_ptr _fdervalsCe;
     compApp_ptr _fdivsCe;
     
+    /* case where the coefficients are known: shifted polynomial */
+//     compApp_poly _shiftedPoly;
+//     compApp_poly _shiftedPolyDer;
+    
+//     /* test with p mod (x^q -1) and p' mod (x^q -1) */
+//     compRat_poly_t  _RP;
+//     compRat_poly_t  _QP;
+//     compRat_poly_t  _RPp;
+//     compRat_poly_t  _QPp;
+//     compApp_poly_t *_cacheRP;
+//     compApp_poly_t *_cacheQP;
+//     compApp_poly_t *_cacheRPp;
+//     compApp_poly_t *_cacheQPp;
+//     int _sizeCache;
+//     int _allocsizeCache;
+    
 } cacheCauchy;
 
 typedef cacheCauchy cacheCauchy_t[1];
@@ -113,6 +129,9 @@ typedef cacheCauchy * cacheCauchy_ptr;
 #define cacheCauchy_fdervalsCeref(X)      ((X)->_fdervalsCe)
 #define cacheCauchy_fdivsCeref(X)         ((X)->_fdivsCe)
 
+// #define cacheCauchy_shiftedPolyref(X)      (&(X)->_shiftedPoly)
+// #define cacheCauchy_shiftedPolyDerref(X)   (&(X)->_shiftedPolyDer)
+
 /* compute q = ceil ( log_isoRatio (4*degree +1) ) + nbPs */
 slong cacheCauchy_get_NbOfEvalPoints( slong degree, const realRat_t isoRatio, slong nbPs, slong prec );
 
@@ -144,6 +163,11 @@ void cacheCauchy_get_lBoundApp( realApp_t lbApp, cacheCauchy_t cache, const real
 void cacheCauchy_get_uBoundApp( realApp_t ubApp, cacheCauchy_t cache, const realRat_t radius, slong prec);
 
 void cacheCauchy_set_bounds( cacheCauchy_t cache, const realRat_t radius, slong prec );
+
+// compApp_poly_ptr cacheCauchy_getApproximation_RP      ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec );
+// compApp_poly_ptr cacheCauchy_getApproximation_QP      ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec );
+// compApp_poly_ptr cacheCauchy_getApproximation_RPp     ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec );
+// compApp_poly_ptr cacheCauchy_getApproximation_QPp     ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec );
 
 void cacheCauchy_clear ( cacheCauchy_t cache );
 
