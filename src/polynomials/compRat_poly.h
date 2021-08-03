@@ -113,6 +113,21 @@ POLYNOMIALS_INLINE void compRat_poly_set2_realRat_poly
     realRat_poly_set(compRat_poly_imagref(z), y);
 }
 
+/* Finds the quotient Q and remainder R of the Euclidean division of poly1 by poly2.*/
+POLYNOMIALS_INLINE void compRat_poly_divrem( compRat_poly_t Q, compRat_poly_t R, const compRat_poly_t poly1, const realRat_poly_t poly2) {
+    realRat_poly_divrem( compRat_poly_realref(Q), compRat_poly_realref(R), compRat_poly_realref(poly1), poly2);
+    realRat_poly_divrem( compRat_poly_imagref(Q), compRat_poly_imagref(R), compRat_poly_imagref(poly1), poly2);
+}
+/* Finds the remainder R of the Euclidean division of poly1 by poly2.*/
+POLYNOMIALS_INLINE void compRat_poly_rem( compRat_poly_t R, const compRat_poly_t poly1, const realRat_poly_t poly2) {
+    realRat_poly_rem( compRat_poly_realref(R), compRat_poly_realref(poly1), poly2);
+    realRat_poly_rem( compRat_poly_imagref(R), compRat_poly_imagref(poly1), poly2);
+}
+POLYNOMIALS_INLINE void compRat_poly_derivative( compRat_poly_t dest, const compRat_poly_t src) {
+    realRat_poly_derivative( compRat_poly_realref(dest), compRat_poly_realref(src));
+    realRat_poly_derivative( compRat_poly_imagref(dest), compRat_poly_imagref(src));
+}
+
 /* printing */
 int compRat_poly_fprint(FILE * file, const compRat_poly_t z); 
 

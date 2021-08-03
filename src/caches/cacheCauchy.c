@@ -125,6 +125,8 @@ void cacheCauchy_init ( cacheCauchy_t cache,
                         const metadatas_t meta
                       ){
     
+    int level = 3;
+    
     cacheCauchy_evalFastref(cache) = evalFast;
     cacheCauchy_degreeref(cache) = degree;
     
@@ -157,7 +159,9 @@ void cacheCauchy_init ( cacheCauchy_t cache,
     
     /* compute nbEvalCe = max ( log_isoRatio (2*degree*nbEvalCo +1), degree +1 ) s.t. nbEvalCe multiple of nbEvalCo */
     slong q2 = cacheCauchy_get_NbOfEvalPoints_cert( degree, q1, cacheCauchy_isoRatioref(cache), CCLUSTER_DEFAULT_PREC );
+//     printf("q2: %ld\n");
     q2 = CCLUSTER_MAX(q2, degree +1);
+//     printf("q2: %ld\n");
     slong quo = ((slong) q2/q1) +1;
     q2 = q1*quo;
     cacheCauchy_quotientref(cache) = quo;
@@ -228,7 +232,27 @@ void cacheCauchy_init ( cacheCauchy_t cache,
     cacheCauchy_fdervalsCeref(cache)      = fdervalsCe     ; 
     cacheCauchy_fdivsCeref(cache)         = fdivsCe        ;
     
-    if (metadatas_getVerbo(meta)>=2) {
+    /*initialize shifted poly */
+//     compApp_poly_init2( cacheCauchy_shiftedPolyref(cache), q2);
+//     compApp_poly_init2( cacheCauchy_shiftedPolyDerref(cache), q2);
+//     /* initialize cache for mod pols */
+//     compRat_poly_init(cache->_RP);
+//     compRat_poly_init(cache->_RPp);
+//     compRat_poly_init(cache->_QP);
+//     compRat_poly_init(cache->_QPp);
+//     compRat_poly_zero(cache->_RP);
+//     compRat_poly_zero(cache->_RPp);
+//     compRat_poly_zero(cache->_QP);
+//     compRat_poly_zero(cache->_QPp);
+//     
+//     cache->_sizeCache            = 0;
+//     cache->_allocsizeCache       = CACHE_DEFAULT_SIZE;
+//     cache->_cacheRP              = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsizeCache) * sizeof(compApp_poly_t) );
+//     cache->_cacheRPp             = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsizeCache) * sizeof(compApp_poly_t) );
+//     cache->_cacheQP              = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsizeCache) * sizeof(compApp_poly_t) );
+//     cache->_cacheQPp             = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsizeCache) * sizeof(compApp_poly_t) );
+    
+    if (metadatas_getVerbo(meta)>=level) {
         printf("#---cacheCauchy: \n");
         printf("#------ assumed isolation ratio                : "); realRat_print(cacheCauchy_isoRatioref(cache)); printf("\n");
         printf("#------ number of power sums  for exclusion    : %ld\n", cacheCauchy_nbPwSuExref(cache));
@@ -288,6 +312,167 @@ void cacheCauchy_set_bounds( cacheCauchy_t cache, const realRat_t radius, slong 
     
 }
 
+// //requires: prec is 2^n*CCLUSTER_DEFAULT_PREC
+// compApp_poly_ptr cacheCauchy_getApproximation_RP      ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec ) {
+//     
+//     if (cache->_from_poly==0)
+//         return cacheApp_getApproximation ( cache, prec );
+//     
+//     //get index in cache
+//     slong log2prec = (slong)(prec/(slong)CCLUSTER_DEFAULT_PREC);
+//     int index = 0;
+//     while (log2prec>>=1) index++; //index should contain the log2 of prec/CCLUSTER_DEFAULT_PREC
+// //     printf("index: %d\n", index); 
+//     
+//     if (index < cacheCau->_sizeCache)
+//         return (cacheCau->_cacheRP)[index];
+//     
+//     if (cacheCau->_sizeCache == 0) {
+//         /* let q=_nbEvalEx */
+//         /*compute p modulo x^q -1 and p' modulo x^q -1*/
+//         realRat_poly_t div;
+//         /* set div to x^q -1 */
+//         realRat_poly_init(div);
+//         realRat_poly_one(div);
+// //         realRat_poly_shift_left(div, div, cacheCau->_nbEvalEx);
+//         realRat_poly_shift_left(div, div, (slong) (cacheCau->_degree)/2 );
+// //         realRat_poly_set_coeff_si_ui (div, 0, -1, 1);
+//         
+// //         printf("x^q - 1: ");
+// //         realRat_poly_print_pretty( div, "x" );
+// //         printf("\n");
+//         
+// //         compRat_poly_divrem(cacheCau->_QP, cacheCau->_Pmod, cache->_poly, div);
+//         realRat_poly_divrem(compRat_poly_realref(cacheCau->_QP), compRat_poly_realref(cacheCau->_RP), compRat_poly_realref(cache->_poly), div);
+//         
+// //         printf("\n P = (x^q - 1)Q + R: degree of Q: %ld, degree of R: %ld\n", compRat_poly_degree(cacheCau->_QP), compRat_poly_degree(cacheCau->_RP));
+// //         realRat_poly_print_pretty( compRat_poly_realref(cacheCau->_QP), "x" );
+// //         printf("\n");
+// //         realRat_poly_print_pretty( compRat_poly_realref(cacheCau->_RP), "x" );
+// //         realRat_poly_t temp;
+// //         realRat_poly_init(temp);
+// //         realRat_poly_mul(temp, compRat_poly_realref(cacheCau->_QP), div);
+// //         realRat_poly_add(temp, temp, compRat_poly_realref(cacheCau->_RP) );
+// //         printf("\n");
+// //         realRat_poly_print_pretty( temp, "x" );
+// //         printf("\n");
+// //         realRat_poly_print_pretty( compRat_poly_realref(cache->_poly), "x" );
+// //         realRat_poly_clear(temp);
+// //         printf("\n");
+//         
+//         compRat_poly_t Pp;
+//         compRat_poly_init(Pp);
+//         compRat_poly_derivative(Pp, cache->_poly);
+//         realRat_poly_divrem(compRat_poly_realref(cacheCau->_QPp), compRat_poly_realref(cacheCau->_RPp), compRat_poly_realref(Pp), div);
+//         
+// //         printf("\n p' / (x^q - 1): ");
+// //         realRat_poly_print_pretty( compRat_poly_realref(cacheCau->_QPp), "x" );
+// //         printf("\n");
+// //         realRat_poly_print_pretty( compRat_poly_realref(cacheCau->_RPp), "x" );
+// // //         realRat_poly_t temp;
+// //         realRat_poly_init(temp);
+// //         realRat_poly_mul(temp, compRat_poly_realref(cacheCau->_QPp), div);
+// //         realRat_poly_add(temp, temp, compRat_poly_realref(cacheCau->_RPp) );
+// //         printf("\n");
+// //         realRat_poly_print_pretty( temp, "x" );
+// //         printf("\n");
+// //         realRat_poly_print_pretty( compRat_poly_realref(Pp), "x" );
+// //         realRat_poly_clear(temp);
+// //         printf("\n");
+//         
+//         compRat_poly_clear(Pp);
+//         realRat_poly_clear(div);
+//     }
+//     
+//     if (index < cacheCau->_allocsizeCache) {
+//         while (index >= cacheCau->_sizeCache){
+//             compApp_poly_init(cacheCau->_cacheRP[cacheCau->_sizeCache]);
+//             compApp_poly_init(cacheCau->_cacheRPp[cacheCau->_sizeCache]);
+//             compApp_poly_init(cacheCau->_cacheQP[cacheCau->_sizeCache]);
+//             compApp_poly_init(cacheCau->_cacheQPp[cacheCau->_sizeCache]);
+//             slong nprec = (0x1<<(cacheCau->_sizeCache))*CCLUSTER_DEFAULT_PREC;
+//             compApp_poly_set_compRat_poly(cacheCau->_cacheRP[cacheCau->_sizeCache], cacheCau->_RP, nprec);
+//             compApp_poly_set_compRat_poly(cacheCau->_cacheRPp[cacheCau->_sizeCache], cacheCau->_RPp, nprec);
+//             compApp_poly_set_compRat_poly(cacheCau->_cacheQP[cacheCau->_sizeCache], cacheCau->_QP, nprec);
+//             compApp_poly_set_compRat_poly(cacheCau->_cacheQPp[cacheCau->_sizeCache], cacheCau->_QPp, nprec);
+//             
+//             cacheCau->_sizeCache +=1;
+//         }
+//         return (cacheCau->_cacheRP)[index];
+//     }
+//     
+//     while (index >= cacheCau->_allocsizeCache) 
+//         cacheCau->_allocsizeCache += CACHE_DEFAULT_SIZE;
+//     
+//     cacheCau->_cacheRP  = (compApp_poly_t *) ccluster_realloc (cacheCau->_cacheRP, (cacheCau->_allocsizeCache) * sizeof(compApp_poly_t) );
+//     cacheCau->_cacheRPp = (compApp_poly_t *) ccluster_realloc (cacheCau->_cacheRPp, (cacheCau->_allocsizeCache) * sizeof(compApp_poly_t) );
+//     cacheCau->_cacheQP  = (compApp_poly_t *) ccluster_realloc (cacheCau->_cacheQP, (cacheCau->_allocsizeCache) * sizeof(compApp_poly_t) );
+//     cacheCau->_cacheQPp = (compApp_poly_t *) ccluster_realloc (cacheCau->_cacheQPp, (cacheCau->_allocsizeCache) * sizeof(compApp_poly_t) );
+//    
+//     while (index >= cacheCau->_sizeCache){
+//         
+//         compApp_poly_init(cacheCau->_cacheRP[cacheCau->_sizeCache]);
+//         compApp_poly_init(cacheCau->_cacheRPp[cacheCau->_sizeCache]);
+//         compApp_poly_init(cacheCau->_cacheQP[cacheCau->_sizeCache]);
+//         compApp_poly_init(cacheCau->_cacheQPp[cacheCau->_sizeCache]);
+//         slong nprec = (0x1<<(cacheCau->_sizeCache))*CCLUSTER_DEFAULT_PREC;
+//         compApp_poly_set_compRat_poly(cacheCau->_cacheRP[cacheCau->_sizeCache], cacheCau->_RP, nprec);
+//         compApp_poly_set_compRat_poly(cacheCau->_cacheRPp[cacheCau->_sizeCache], cacheCau->_RPp, nprec);
+//         compApp_poly_set_compRat_poly(cacheCau->_cacheQP[cacheCau->_sizeCache], cacheCau->_QP, nprec);
+//         compApp_poly_set_compRat_poly(cacheCau->_cacheQPp[cacheCau->_sizeCache], cacheCau->_QPp, nprec);
+//             
+//         cacheCau->_sizeCache +=1;
+//     }
+//     
+//     return (cacheCau->_cacheRP)[index];
+//     
+// }
+// 
+// compApp_poly_ptr cacheCauchy_getApproximation_RPp     ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec ){
+//     
+//     if (cache->_from_poly==0)
+//         return NULL;
+//     
+//     //get index in cache
+//     slong log2prec = (slong)(prec/(slong)CCLUSTER_DEFAULT_PREC);
+//     int index = 0;
+//     while (log2prec>>=1) index++; //index should contain the log2 of prec/CCLUSTER_DEFAULT_PREC
+//     
+//     cacheCauchy_getApproximation_RP      ( cacheCau, cache, prec );
+//     return (cacheCau->_cacheRPp)[index];
+//     
+// }
+// 
+// compApp_poly_ptr cacheCauchy_getApproximation_QP     ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec ){
+//     
+//     if (cache->_from_poly==0)
+//         return NULL;
+//     
+//     //get index in cache
+//     slong log2prec = (slong)(prec/(slong)CCLUSTER_DEFAULT_PREC);
+//     int index = 0;
+//     while (log2prec>>=1) index++; //index should contain the log2 of prec/CCLUSTER_DEFAULT_PREC
+//     
+//     cacheCauchy_getApproximation_RP      ( cacheCau, cache, prec );
+//     return (cacheCau->_cacheQP)[index];
+//     
+// }
+// 
+// compApp_poly_ptr cacheCauchy_getApproximation_QPp     ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec ){
+//     
+//     if (cache->_from_poly==0)
+//         return NULL;
+//     
+//     //get index in cache
+//     slong log2prec = (slong)(prec/(slong)CCLUSTER_DEFAULT_PREC);
+//     int index = 0;
+//     while (log2prec>>=1) index++; //index should contain the log2 of prec/CCLUSTER_DEFAULT_PREC
+//     
+//     cacheCauchy_getApproximation_RP      ( cacheCau, cache, prec );
+//     return (cacheCau->_cacheQPp)[index];
+//     
+// }
+// 
 void cacheCauchy_clear ( cacheCauchy_t cache ){
     
     realRat_clear(cacheCauchy_isoRatioref(cache));
@@ -352,4 +537,24 @@ void cacheCauchy_clear ( cacheCauchy_t cache ){
     ccluster_free(fvalsCe         );
     ccluster_free(fdervalsCe      );
     ccluster_free(fdivsCe         );
+    
+    /*initialize shifted poly */
+//     compApp_poly_clear( cacheCauchy_shiftedPolyref(cache));
+//     compApp_poly_clear( cacheCauchy_shiftedPolyDerref(cache));
+    
+//     /* free the caches */
+//     compRat_poly_clear(cache->_RP);
+//     compRat_poly_clear(cache->_RPp);
+//     compRat_poly_clear(cache->_QP);
+//     compRat_poly_clear(cache->_QPp);
+//     for (int i=0; i<cache->_sizeCache; i++) {
+//         compApp_poly_clear( (cache->_cacheRP)[i] );
+//         compApp_poly_clear( (cache->_cacheRPp)[i] );
+//         compApp_poly_clear( (cache->_cacheQP)[i] );
+//         compApp_poly_clear( (cache->_cacheQPp)[i] );
+//     }
+//     ccluster_free(cache->_cacheRP);
+//     ccluster_free(cache->_cacheRPp);
+//     ccluster_free(cache->_cacheQP);
+//     ccluster_free(cache->_cacheQPp);
 }

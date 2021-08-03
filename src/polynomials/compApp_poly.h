@@ -111,6 +111,9 @@ POLYNOMIALS_INLINE  void compApp_poly_evaluate(compApp_t y, const compApp_poly_t
 POLYNOMIALS_INLINE  void compApp_poly_evaluate_horner(compApp_t y, const compApp_poly_t f, const compApp_t x, slong prec){
     acb_poly_evaluate_horner(y, f, x, prec);
 }
+POLYNOMIALS_INLINE  void compApp_poly_evaluate_rectangular(compApp_t y, const compApp_poly_t f, const compApp_t x, slong prec){
+    acb_poly_evaluate_rectangular(y, f, x, prec);
+}
 POLYNOMIALS_INLINE  void compApp_poly_evaluate2(compApp_t y, compApp_t z, const compApp_poly_t f, const compApp_t x, slong prec){
     acb_poly_evaluate2_rectangular(y, z, f, x, prec);
 }

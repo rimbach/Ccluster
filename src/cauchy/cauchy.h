@@ -50,6 +50,15 @@ void cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
                                      int output,
                                      int verb);
 
+void cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
+                                           const realRat_t eps,
+                                           const realRat_t isoRatio,
+                                           int nbPows,
+                                           char * stratstr,
+                                           int nbThreads,
+                                           int output,
+                                           int verb);
+
 /* version with function for fast evaluation */
 void cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                    void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong), 
