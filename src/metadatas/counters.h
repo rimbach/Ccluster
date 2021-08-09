@@ -111,7 +111,8 @@ typedef struct {
         int RR_nbTaylorsRepeted;
         
         /* compression */
-        int Comp_nb;
+        int Comp_nb_1;
+        int Comp_nb_p;
         
 #ifdef CCLUSTER_HAVE_PTHREAD
         pthread_mutex_t _mutex;
@@ -195,8 +196,10 @@ void counters_add_CauchyCoEvalsD            ( counters_t st, int depth, int nb )
 int  counters_getNbCauchyCoEvalsD           ( const counters_t st );
 
 /* compression algorithm */
-void counters_addComp_nb                     (counters_t st, int nb );
-int  counters_getComp_nb                     (const counters_t st );
+void counters_addComp_nb_1                     (counters_t st, int nb );
+int  counters_getComp_nb_1                     (const counters_t st );
+void counters_addComp_nb_p                     (counters_t st, int nb );
+int  counters_getComp_nb_p                     (const counters_t st );
 
 
 /* DEPRECATED */

@@ -81,7 +81,11 @@ typedef struct {
     double  _clicks_CauCoDS_cumul; /* time in computing divisions in       counting tests */
     double  _clicks_CauCoCS_cumul; /* time in computing s0 in              counting tests */
     /* Compression into rigid disks */
-    double  _clicks_CompTot_cumul; /* time spent in compression algorithm */
+    double  _clicks_CompCen_cumul; /* time spent in computing center of gravity s1/m */
+    double  _clicks_CompRRP_cumul; /* time spent in probabilistic root radius algorithm */
+    double  _clicks_CompCCT_cumul; /* time spent in probabilistic root radius algorithm */
+    double  _clicks_CompRRD_cumul; /* time spent in deterministiv root radius algorithm */
+    double  _clicks_CompTot_cumul; /* total time spent in compression algorithm */
     
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_t _mutex;
@@ -328,6 +332,26 @@ METADATAS_INLINE void   chronos_add_time_CauCoCS( chronos_t times, double d, int
     times->_clicks_CauCoCS_cumul += d/CLOCKS_PER_SEC;
 }
 METADATAS_INLINE double chronos_get_time_CauCoCS ( const chronos_t times ) { return times->_clicks_CauCoCS_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CompCen( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CompCen_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CompCen ( const chronos_t times ) { return times->_clicks_CompCen_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CompRRP( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CompRRP_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CompRRP ( const chronos_t times ) { return times->_clicks_CompRRP_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CompCCT( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CompCCT_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CompCCT ( const chronos_t times ) { return times->_clicks_CompCCT_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CompRRD( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CompRRD_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CompRRD ( const chronos_t times ) { return times->_clicks_CompRRD_cumul; }
 
 METADATAS_INLINE void   chronos_add_time_CompTot( chronos_t times, double d, int nbThreads ){
     times->_clicks_CompTot_cumul += d/CLOCKS_PER_SEC;

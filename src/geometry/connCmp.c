@@ -114,6 +114,10 @@ void connCmp_init(connCmp_t x){
     
     /* for re-using Taylor shifts */
     connCmp_init_reu(x);
+    
+    /* for Cauchy root finder */
+    connCmp_isRigref(x) = 0;
+    connCmp_isIsoref(x) = 0;
 }
 
 void connCmp_init_compBox(connCmp_t x, compBox_t b){
@@ -177,6 +181,9 @@ void connCmp_set(connCmp_t dest, const connCmp_t src){
     connCmp_appPrref(dest) = connCmp_appPrref(src);
     connCmp_newSuref(dest) = connCmp_newSuref(src);
     connCmp_isSepref(dest) = connCmp_isSepref(src);
+    
+    connCmp_isRigref(dest) = connCmp_isRigref(src);
+    connCmp_isIsoref(dest) = connCmp_isIsoref(src);
     
     /* copy the boxes */
     compBox_ptr nBox;
