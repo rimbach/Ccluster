@@ -325,6 +325,60 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
     return res;
 }
 
+/* assume convexHull is already initialized, and contains enough space for a convex hull of len points */
+/* returns 0 if needs more precision on the coeffs */
+/* otherwise returns the length of the convex hull */
+slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec ){
+    
+    slong res = 0;
+    /* push two first points */
+    convexHull[res]=0;
+    res++;
+    convexHull[res]=1;
+    res++;
+    /* loop on other points */
+    for (slong i = 2; i<len; i++){
+        int liesBelow = 1;
+        while ((res >= 2) && (liesBelow==1) ) {
+            liesBelow = realIntRootRadii_liesBelow( convexHull[res-2], abscoeffs + convexHull[res-2], 
+                                                 convexHull[res-1], abscoeffs + convexHull[res-1],
+                                                 i,     abscoeffs + i, 
+                                                 prec);
+            if (liesBelow == 1)
+                res--;
+            if (liesBelow <= -1) {
+//                 /* it is not possible to decide if (res-1, convexHull[res-1]) lies below     */
+//                 /* the line passing trough (res-2, convexHull[res-2]) and (i, convexHull[i]) */
+//                 /* try to figure out if there exist a k s.t. it is possible to decide that  */
+//                 /* it lies below line passing trough (res-2, convexHull[res-2]) and (k, convexHull[k]) */
+// //                 printf("#%ld-th point lies below the line passing trough %ld, %ld ?\n", res-1, res-2, i);
+//                 int liesBelow2 = -1;
+//                 for (slong k = i+1; (k<len)&&(liesBelow2<1); k++) {
+//                     liesBelow2 = realIntRootRadii_liesBelow( convexHull[res-2], abscoeffs + convexHull[res-2], 
+//                                                  convexHull[res-1], abscoeffs + convexHull[res-1],
+//                                                  k,     abscoeffs + k, 
+//                                                  prec);
+// //                     if (liesBelow2 == 1 )
+// //                         printf("#---%ld-th point lies below the line passing trough %ld, %ld\n", res-1, res-2, k);
+//                         
+//                 }
+//                 if (liesBelow2 == 1) {
+//                     liesBelow = 1;
+//                     res--;
+//                 } else {
+                    res = 0;
+                    return res;
+//                 }
+            }
+        }
+//         printf("#realIntRootRadii.c , realIntRootRadii_convexHull: res: %ld\n", res);
+        convexHull[res] = i;
+        res++;
+    }
+    
+    return res;
+}
+
  /* assume i<j<k */
 /* assume logAbsPi=log|pi|, logAbsPj=log|pj|, logAbsPk=log|pk| */
 /* decide if [j,log|pj|] lies below the line passing trough [i,log|pi|] and [k,log|pk|]*/
@@ -521,60 +575,6 @@ slong realIntRootRadii_convexHullLog( slong * convexHull, const realApp_ptr absc
     return res;
 }
 
-/* assume convexHull is already initialized, and contains enough space for a convex hull of len points */
-/* returns 0 if needs more precision on the coeffs */
-/* otherwise returns the length of the convex hull */
-slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec ){
-    
-    slong res = 0;
-    /* push two first points */
-    convexHull[res]=0;
-    res++;
-    convexHull[res]=1;
-    res++;
-    /* loop on other points */
-    for (slong i = 2; i<len; i++){
-        int liesBelow = 1;
-        while ((res >= 2) && (liesBelow==1) ) {
-            liesBelow = realIntRootRadii_liesBelow( convexHull[res-2], abscoeffs + convexHull[res-2], 
-                                                 convexHull[res-1], abscoeffs + convexHull[res-1],
-                                                 i,     abscoeffs + i, 
-                                                 prec);
-            if (liesBelow == 1)
-                res--;
-            if (liesBelow <= -1) {
-                /* it is not possible to decide if (res-1, convexHull[res-1]) lies below     */
-                /* the line passing trough (res-2, convexHull[res-2]) and (i, convexHull[i]) */
-                /* try to figure out if there exist a k s.t. it is possible to decide that  */
-                /* it lies below line passing trough (res-2, convexHull[res-2]) and (k, convexHull[k]) */
-//                 printf("#%ld-th point lies below the line passing trough %ld, %ld ?\n", res-1, res-2, i);
-                int liesBelow2 = -1;
-                for (slong k = i+1; (k<len)&&(liesBelow2<1); k++) {
-                    liesBelow2 = realIntRootRadii_liesBelow( convexHull[res-2], abscoeffs + convexHull[res-2], 
-                                                 convexHull[res-1], abscoeffs + convexHull[res-1],
-                                                 k,     abscoeffs + k, 
-                                                 prec);
-//                     if (liesBelow2 == 1 )
-//                         printf("#---%ld-th point lies below the line passing trough %ld, %ld\n", res-1, res-2, k);
-                        
-                }
-                if (liesBelow2 == 1) {
-                    liesBelow = 1;
-                    res--;
-                } else {
-                    res = 0;
-                    return res;
-                }
-            }
-        }
-//         printf("#realIntRootRadii.c , realIntRootRadii_convexHull: res: %ld\n", res);
-        convexHull[res] = i;
-        res++;
-    }
-    
-    return res;
-}
-
 // slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec ){
 //     
 //     slong res = 0;
@@ -675,7 +675,7 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
     
     while ( lenCh == 0 ) {
         
-        printf("#---realIntRootRadii.c; realIntRootRadii_rootRadii : prec: %ld \n", nprec);
+//         printf("#---realIntRootRadii.c; realIntRootRadii_rootRadii : prec: %ld \n", nprec);
         
         realIntRootRadii_getApproximation_real( pApprox, cache, nprec, meta );
 //         realApp_poly_set(pApprox, cacheApp_getApproximation_real ( cache, nprec ));
@@ -687,6 +687,7 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
    
 //         int enoughRelacc = realIntRootRadii_Ngraeffe_iterations_inplace_real( pApprox, N, nprec, meta);
         slong nprec2 = realIntRootRadii_Ngraeffe_iterations_inplace_real( pApprox, N, nprec, meta);
+//         printf("#---realIntRootRadii.c; realIntRootRadii_rootRadii : prec2: %ld \n", nprec2);
 //         clock_t start = clock();
 //         for (int i=0; i<N; i++)
 //             realApp_poly_oneGraeffeIteration_in_place( pApprox, nprec );
