@@ -138,7 +138,8 @@ void counters_init( counters * st) {
     st->RR_nbTaylors        = 0;
     st->RR_nbTaylorsRepeted = 0;
     
-    st->Comp_nb             = 0;
+    st->Comp_nb_1           = 0;
+    st->Comp_nb_p           = 0;
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(st->_mutex), NULL);
 #endif    
@@ -340,8 +341,10 @@ void counters_add_CauchyCoEvalsD            ( counters_t st, int depth, int nb )
 int  counters_getNbCauchyCoEvalsD           ( const counters_t st ){ return st->total->nbCauchyCoEvalsD                    ;}
 
 /* compression algorithm */
-void counters_addComp_nb                     (counters_t st, int nb ) { (st->Comp_nb) += nb;                                ;}
-int  counters_getComp_nb                     (const counters_t st ){ return st->Comp_nb                                     ;}
+void counters_addComp_nb_1                     (counters_t st, int nb ) { (st->Comp_nb_1) += nb;                                ;}
+int  counters_getComp_nb_1                     (const counters_t st ){ return st->Comp_nb_1                                     ;}
+void counters_addComp_nb_p                     (counters_t st, int nb ) { (st->Comp_nb_p) += nb;                                ;}
+int  counters_getComp_nb_p                     (const counters_t st ){ return st->Comp_nb_p                                     ;}
 /* DEPRECATED
 void counters_by_depth_get_lenghts_of_str( counters_by_depth_t res, counters_by_depth_t st){
     

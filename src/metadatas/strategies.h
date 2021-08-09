@@ -74,6 +74,10 @@ extern "C" {
 #define STRAT_STR_FORTESTS1 "test1"
 #define STRAT_STR_FORTESTS2 "test2"
 
+/* for Cauchy */
+#define STRAT_STR_C1 "C1"
+#define STRAT_STR_C2 "C2"
+
 typedef struct {
     int _useNewton;
     int _useTstarOptim;
@@ -90,6 +94,7 @@ typedef struct {
     int _pwSuNbPs;
 //     realRat _pwSuIsoRatio;
     int _useRootRadii;
+    int _useCompression;
 } strategies;
 
 typedef strategies strategies_t[1];
@@ -143,6 +148,9 @@ METADATAS_INLINE void strategies_set_pwSuNbPs   ( strategies_t strat, int nb ) {
 
 METADATAS_INLINE int strategies_useRootRadii        ( const strategies_t strat ) { return strat->_useRootRadii      ; }
 METADATAS_INLINE void strategies_set_RootRadii   ( strategies_t strat, int flag ) { strat->_useRootRadii=flag      ; }
+
+METADATAS_INLINE int strategies_useCompression        ( const strategies_t strat ) { return strat->_useCompression      ; }
+METADATAS_INLINE void strategies_set_Compression   ( strategies_t strat, int flag ) { strat->_useCompression=flag      ; }
 
 #ifdef __cplusplus
 }

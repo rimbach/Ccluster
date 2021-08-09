@@ -105,7 +105,7 @@ cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
                                                       slong prec,
                                                       metadatas_t meta, int depth){
     
-    int level =4;
+    int level =3;
     cauchyTest_res res;
     res.appPrec = prec;
     
@@ -118,7 +118,7 @@ cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
     realRat_set(radSup, compDsk_radiusref(Delta));
     realRat_mul(radSup, radSup, a);
     
-    /* first call deterministic test */
+    /* first call probabilistic test */
     if (realRat_cmp(a, cacheCauchy_isoRatioref(cacheCau))==0) {
         res = cauchyTest_probabilistic_counting( Delta, cache, cacheCau, res.appPrec, meta, depth);
     }
@@ -164,7 +164,7 @@ cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
                                            slong prec,
                                            metadatas_t meta, int depth){
     
-    int level =4;
+    int level =3;
     clock_t start = clock();
     
     cauchyTest_res res;

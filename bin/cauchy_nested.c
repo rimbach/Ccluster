@@ -76,7 +76,8 @@ int main(int argc, char **argv){
         printf("                     -2 or g or G: gnuplot output: can be piped to gnuplot \n");
         printf("                     -3 or gs or GS: gnuplot output with subdivision tree \n");
         printf("      -m, --mode: the version of the algorithm\n");
-        printf("                     default value is \"default\"  \n");
+        printf("                     C1: subdivision without compression  \n");
+        printf("                     C2 [default]: subdivision with compression  \n");
         printf("      -i, --isoRatio: the assumed isolation ratio\n");
         printf("                      a positive, >1, rational as 2 or 4/3 [default]\n");
         printf("      -n, --nbPows:  the number of power sums computed for uncertified exclusion\n");
@@ -114,7 +115,7 @@ int main(int argc, char **argv){
     realRat_t isoRatio;
     int nbPows = 3;
     
-    char stDefault[] = "default"; 
+    char stDefault[] = "C2"; 
     st = stDefault;
     
     compBox_init(bInit);

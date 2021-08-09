@@ -147,7 +147,7 @@ void cauchyRootRadii_root_radius( const compRat_t center,
                                   cacheApp_t cache,
                                   metadatas_t meta ){
     
-    int level = 5;
+    int level = 3;
     cauchyTest_res cres;
     cres.appPrec = CCLUSTER_DEFAULT_PREC;
     slong precForT = CCLUSTER_DEFAULT_PREC;

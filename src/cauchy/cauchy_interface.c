@@ -79,7 +79,7 @@ void cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, meta);
     
     metadatas_count(meta);
-    metadatas_cauchy_fprint(stdout, meta, eps);
+    metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau);
     
     if (output==-2) {
 //         printf("gnuplot output: not yet implemented\n");
@@ -168,7 +168,7 @@ void cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
     cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, meta);
     
     metadatas_count(meta);
-    metadatas_cauchy_fprint(stdout, meta, eps);
+    metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau);
     
     if (output==-2) {
 //         printf("gnuplot output: not yet implemented\n");
@@ -249,7 +249,7 @@ void cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, meta);
     
     metadatas_count(meta);
-    metadatas_cauchy_fprint(stdout, meta, eps);
+    metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau);
     
     if (output==-2) {
 //         printf("gnuplot output: not yet implemented\n");

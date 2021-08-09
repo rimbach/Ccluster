@@ -72,6 +72,10 @@ typedef struct {
     int          reuNg;    /* number of Graeffe iterations */
     slong        reuPr;    /* precision used */
     compApp_poly reuPo;    /* computed pol */
+    
+    /* for Cauchy root finder */
+    int          isRig;    /* 1 => rigidity ratio of containing disc is m/( (2m-2)*theta ) with theta = 2 */
+    int          isIso;    /* 1 => isolation ratio is containing disc is 1 + 3d/m */
 } connCmp;
 
 typedef connCmp connCmp_t[1];
@@ -103,6 +107,9 @@ typedef connCmp * connCmp_ptr;
 #define connCmp_reuNgref(X) ( (X)->reuNg)
 #define connCmp_reuPrref(X) ( (X)->reuPr)
 #define connCmp_reuPoref(X) (&(X)->reuPo)
+
+#define connCmp_isRigref(X) ( (X)->isRig)
+#define connCmp_isIsoref(X) ( (X)->isIso)
 
 /* memory managment */
 void connCmp_init(connCmp_t x);

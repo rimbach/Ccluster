@@ -200,6 +200,7 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
                 /* test */
                 connCmp_isSep(ctemp) = connCmp_isSep(cc);
                 /*end test */
+                connCmp_isRigref(ctemp) = connCmp_isRigref(cc);
             }
             connCmp_list_push(dest, ctemp);
         }
@@ -309,7 +310,7 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
                                        cacheCauchy_t cacheCau,
                                        slong prec, metadatas_t meta, slong depth) {
     
-    int level = 4;
+    int level = 3;
     clock_t start=clock();
     
     realRat_t epsp;
@@ -349,8 +350,10 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
             printf("\n");
     }
     
+    clock_t start2=clock();
     /* compute a disk of radius less than m*eps/theta containing s1(p,Delta) */
     slong appPrec = cauchyTest_computeS1compDsk( res, theta, Delta, m, cache, cacheCau, epsp, meta, depth );
+    metadatas_add_time_CompCen(meta, (double) (clock() - start2));
     
     /* if m=1 then res is equivalent to Delta and has radius less than eps/2 */
     /* return the disk res */
@@ -360,6 +363,9 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
             printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; m=1; use s1 \n");
         }
         
+        metadatas_addComp_nb_1( meta, 1);
+        metadatas_add_time_CompTot(meta, (double) (clock() - start));
+    
         realRat_clear(epsp);
         return appPrec;
     }
@@ -383,60 +389,67 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
     if (metadatas_getVerbo(meta)>=level) {
             printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; call root radii \n");
     }
-//     cauchyRootRadii_root_radius( compDsk_centerref(res),
-//                                  radInf,        /* radInf = 0 < r_{d+1-m}(center, p) */
-//                                  compDsk_radiusref(res),        /* radSup > r_{d+1-m}(center, p) */
-//                                  relativeError, /* want relativeError*radInf >= radSup */ 
-//                                  epsp,
-//                                  theta,   /*isolation ratio of the disk in which is computed rr */ 
-//                                  m,
-//                                  cacheCau, cache, meta );
+    /* Certified RR algo */
+    start2=clock();
+    cauchyRootRadii_root_radius( compDsk_centerref(res),
+                                 radInf,        /* radInf = 0 < r_{d+1-m}(center, p) */
+                                 compDsk_radiusref(res),        /* radSup > r_{d+1-m}(center, p) */
+                                 relativeError, /* want relativeError*radInf >= radSup */ 
+                                 epsp,
+                                 theta,   /*isolation ratio of the disk in which is computed rr */ 
+                                 m,
+                                 cacheCau, cache, meta );
+     metadatas_add_time_CompRRD(meta, (double) (clock() - start2));
      
-    realRat_zero(radInf);
-    cauchyTest_res cres;
-    cres.nbOfSol = -1;
-    cres.appPrec = appPrec;
-    realRat_t a, fma;
-    realRat_init(a);
-    realRat_init(fma);
-    realRat_set_si(a, 12, 11);
-    cauchyTest_fmatheta(fma, a, cacheCauchy_isoRatioref( cacheCau ) );
-    
-    realRat_t radSup;
-    realRat_init(radSup);
-    realRat_set(radSup, compDsk_radiusref(res));
-    
-    while (cres.nbOfSol==-1) {
-        cauchyRootRadii_probabilistic_root_radius( compDsk_centerref(res),
-                                                   radInf,        /* radInf = 0 < r_{d+1-m}(center, p) */
-                                                   radSup,        /* radSup > r_{d+1-m}(center, p) */
-                                                   relativeError, /* want relativeError*radInf >= radSup */ 
-                                                   epsp,
-                                                   theta,   /*isolation ratio of the disk in which is computed rr */ 
-                                                   m, cres.appPrec,
-                                                   cacheCau, cache, meta );
-        
-        cres = cauchyTest_deterministic_verification( res, m,  a, cache, cacheCau, cres.appPrec, meta, depth);
-        
-        if (metadatas_getVerbo(meta)>=level) {
-            printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; result of probabilistic verification: %d \n", cres.nbOfSol);
-        }
-        if (cres.nbOfSol==-1){
-            realRat_set(radSup, compDsk_radiusref(res));
-            realRat_mul(radInf, fma, radSup );
-        } else {
-            realRat_set(compDsk_radiusref(res), radSup);
-        }
-    }
+     /* try non-certified then verify */
+//     realRat_zero(radInf);
+//     cauchyTest_res cres;
+//     cres.nbOfSol = -1;
+//     cres.appPrec = appPrec;
+//     realRat_t a, fma;
+//     realRat_init(a);
+//     realRat_init(fma);
+//     realRat_set_si(a, 12, 11);
+//     cauchyTest_fmatheta(fma, a, cacheCauchy_isoRatioref( cacheCau ) );
+//     
+//     realRat_t radSup;
+//     realRat_init(radSup);
+//     realRat_set(radSup, compDsk_radiusref(res));
+//     
+//     while (cres.nbOfSol==-1) {
+//         start2=clock();
+//         cauchyRootRadii_probabilistic_root_radius( compDsk_centerref(res),
+//                                                    radInf,        /* radInf = 0 < r_{d+1-m}(center, p) */
+//                                                    radSup,        /* radSup > r_{d+1-m}(center, p) */
+//                                                    relativeError, /* want relativeError*radInf >= radSup */ 
+//                                                    epsp,
+//                                                    theta,   /*isolation ratio of the disk in which is computed rr */ 
+//                                                    m, cres.appPrec,
+//                                                    cacheCau, cache, meta );
+//         metadatas_add_time_CompRRP(meta, (double) (clock() - start2));
+//         start2=clock();
+//         cres = cauchyTest_deterministic_verification( res, m,  a, cache, cacheCau, cres.appPrec, meta, depth);
+//         metadatas_add_time_CompCCT(meta, (double) (clock() - start2));
+//         if (metadatas_getVerbo(meta)>=level) {
+//             printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; result of deterministic verification: %d \n", cres.nbOfSol);
+//         }
+//         if (cres.nbOfSol==-1){
+//             realRat_set(radSup, compDsk_radiusref(res));
+//             realRat_mul(radInf, fma, radSup );
+//         } else {
+//             realRat_set(compDsk_radiusref(res), radSup);
+//         }
+//     }
+//     realRat_clear(a);
+//     realRat_clear(fma);
+//     realRat_clear(radSup);
     
     realRat_clear(radInf);
     realRat_clear(epsp);
     realRat_clear(relativeError);
-    realRat_clear(a);
-    realRat_clear(fma);
-    realRat_clear(radSup);
     
-    metadatas_addComp_nb( meta, 1);
+    
+    metadatas_addComp_nb_p( meta, 1);
     metadatas_add_time_CompTot(meta, (double) (clock() - start));
     
     return appPrec;
@@ -534,6 +547,8 @@ void cauchy_main_loop( connCmp_list_t qResults,
     int separationFlag;
     int widthFlag;
     int compactFlag;
+    int rigidFlag; /* the disk is m/( (2m-2)theta )-rigid */
+    int isolaFlag; /* the disk is (1 + 3d/m)-isolated */
     
     slong prec, depth;
 //     tstar_res resTstar;
@@ -644,6 +659,8 @@ void cauchy_main_loop( connCmp_list_t qResults,
       
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
+        rigidFlag      = 0;
+        isolaFlag      = 0;
         
         if (metadatas_getVerbo(meta)>=level) {
             printf("\n#---depth: %d\n", (int) depth);
@@ -656,7 +673,9 @@ void cauchy_main_loop( connCmp_list_t qResults,
                 printf("#------max number of roots in ccur:      %ld\n", nbMaxSol); 
             printf("#------separation Flag: %d\n", separationFlag);
             printf("#------widthFlag: %d\n", widthFlag); 
-            printf("#------compactFlag: %d\n", compactFlag); 
+            printf("#------compactFlag: %d\n", compactFlag);
+            printf("#------rigidFlag: %d\n", rigidFlag); 
+            printf("#------isolaFlag: %d\n", isolaFlag); 
         }
         
         if ((separationFlag)&&(connCmp_newSu(ccur)==0)) {
@@ -676,7 +695,7 @@ void cauchy_main_loop( connCmp_list_t qResults,
                     connCmp_nSolsref(ccur) = resCauchy.nbOfSol;
                     prec = resCauchy.appPrec;
                     if (metadatas_getVerbo(meta)>=level)
-                        printf("#------nb sols after Cauchy: %d\n", (int) connCmp_nSolsref(ccur));
+                        printf("#------nb sols: %d\n", (int) connCmp_nSolsref(ccur));
                      
 //                     resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
 //                     connCmp_nSolsref(ccur) = resTstar.nbOfSol;
@@ -684,121 +703,130 @@ void cauchy_main_loop( connCmp_list_t qResults,
 //                     if (metadatas_getVerbo(meta)>=3)
 //                         printf("------nb sols after tstar: %d\n", (int) connCmp_nSolsref(ccur));
                     
-                    clock_t start2;
-                    
-                    realRat_mul_si(compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 2);
-                    /* let ccDisk = D(c,r) be at least 2-isolated and contain m roots */
-                    /* let epsp = max( eps, r/( (1 + 3d/m)^2 ) ) */
-                    /* compute a CC with containing disk D(c',r') s.t   */
-                    /* either D(c',r') is rigid with radius r' > epsp */
-                    /* or     D(c',r')           has radius r' <= epsp */
-                    /* in the latter case D(c', (1 + 3d/m)r') is (1 + 3d/m)-isolated */
-                    
-                    realRat_t epsp;
-                    realRat_init(epsp);
-                    realRat_set_si( epsp, (slong) connCmp_nSolsref(ccur), (slong) connCmp_nSolsref(ccur) + 3*cacheApp_getDegree(cache) );
-                    realRat_mul( epsp, epsp, epsp );
-                    realRat_mul( epsp, epsp, compDsk_radiusref(ccDisk) );
-                    /* case where eps = +inf; eps = 1/0 */
-                    if (realRat_is_den_zero(eps)==0)
-                        realRat_max_2_realRat(epsp, eps);
-                    
-                    /* let epspp = (2/9) epsp */
-                    /* compute a disk D(c'',r'') s.t. */
-                    /* either D(c'',r'') is rigid with radius r'' > epspp = (2/9) epsp */
-                    /*     or D(c'',r'')           has radius r'' <= epspp = (2/9) epsp */
-                    realRat_t epspp;
-                    realRat_init(epspp);
-//                     realRat_div_ui(epspp, epsp, 3);
-                    realRat_mul_si(epspp, epsp, 2);
-                    realRat_div_ui(epspp, epspp, 9);
-                    
-                    if (metadatas_getVerbo(meta)>=level) {
-                        printf("\n#------Test compression into rigid disc for a CC with depth %ld with %d roots \n", depth, connCmp_nSolsref(ccur));
-                        printf("#---------Delta: "); compDsk_print( ccDisk ); printf("\n");
-                        printf("#---------Required radius of containing disk of CC: "); realRat_print(epsp); printf("\n");
-                        printf("#---------Required radius of disk:                  "); realRat_print(epspp); printf("\n");
-                        printf("#---------Epsilon                :                  "); realRat_print(eps); printf("\n");
-                        start2=clock();
-                    }
-//                         
-                    compDsk_t res;
-                    compDsk_init(res);
-                    /* ccDisk is at least 2 isolated */
-                    realRat_t theta;
-                    realRat_init(theta);
-                    realRat_set_si(theta, 2, 1);
+                    if (metadatas_useCompression(meta)){
+                        clock_t start2 = clock();
                         
-                    slong precres = cauchy_compressionIntoRigidDisk( res, ccDisk, connCmp_nSolsref(ccur), theta, epspp,
-                                                                         cache, cacheCau, prec, meta, depth);
+                        realRat_mul_si(compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 2);
+                        /* let ccDisk = D(c,r) be at least 2-isolated and contain m roots */
+                        /* let epsp = max( eps, r/( (1 + 3d/m)^2 ) ) */
+                        /* compute a CC with containing disk D(c',r') s.t   */
+                        /* either D(c',r') is rigid with radius r' > epsp */
+                        /* or     D(c',r')           has radius r' <= epsp */
+                        /* in the latter case D(c', (1 + 3d/m)r') is (1 + 3d/m)-isolated */
                         
-                    if (metadatas_getVerbo(meta)>=level) {
-                        printf("#---------Precision after compression: %ld\n", precres);
-                        printf("#---------res: "); compDsk_print( res ); printf("\n");
-//                         tstar_res resTstar = tstar_interface( cache, res, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
-//                         printf("#------nb sols after tstar: %d\n", (int) resTstar.nbOfSol);
-                    }
-                    
-                    /* actualize connected component: */
-                    if ( realRat_cmp( compDsk_radiusref(res), epspp) > 0) { /* if r'' > epspp = (2/9)epsp */
-                        /* cover D(c'',r'') with at most 9 sub-boxes of the subdivision tree of width >r'' and <= 2r'' */
-                        /* resulting CC has width at most 6*r'' */
-                        /* the containing disk D(c',r') of the resulting CC has radius at most (3/4)*6*r'' = (9/2)r'' */
+                        realRat_t epsp;
+                        realRat_init(epsp);
+                        realRat_set_si( epsp, (slong) connCmp_nSolsref(ccur), (slong) connCmp_nSolsref(ccur) + 3*cacheApp_getDegree(cache) );
+                        realRat_mul( epsp, epsp, epsp );
+                        realRat_mul( epsp, epsp, compDsk_radiusref(ccDisk) );
+                        /* case where eps = +inf; eps = 1/0 */
+                        if (realRat_is_den_zero(eps)==0)
+                            realRat_max_2_realRat(epsp, eps);
+                        
+                        /* let epspp = (2/9) epsp */
+                        /* compute a disk D(c'',r'') s.t. */
+                        /* either D(c'',r'') is rigid with radius r'' > epspp = (2/9) epsp */
+                        /*     or D(c'',r'')           has radius r'' <= epspp = (2/9) epsp */
+                        realRat_t epspp;
+                        realRat_init(epspp);
+    //                     realRat_div_ui(epspp, epsp, 3);
+                        realRat_mul_si(epspp, epsp, 2);
+                        realRat_div_ui(epspp, epspp, 9);
+                        
                         if (metadatas_getVerbo(meta)>=level) {
-                            printf("#---------rigid disk\n");
+                            printf("\n#------Test compression into rigid disc for a CC with depth %ld with %d roots \n", depth, connCmp_nSolsref(ccur));
+                            printf("#---------Delta: "); compDsk_print( ccDisk ); printf("\n");
+                            printf("#---------Required radius of containing disk of CC: "); realRat_print(epsp); printf("\n");
+                            printf("#---------Required radius of disk:                  "); realRat_print(epspp); printf("\n");
+                            printf("#---------Epsilon                :                  "); realRat_print(eps); printf("\n");
+                            start2=clock();
                         }
-                        ccur = cauchy_actualizeCCafterCompression( ccur, res, precres, meta );
-                    } else {
-                        if ( realRat_cmp( epsp, eps) == 0) { /* r'' <= (2/9)eps */
+    //                         
+                        compDsk_t res;
+                        compDsk_init(res);
+                        /* ccDisk is at least 2 isolated */
+                        realRat_t theta;
+                        realRat_init(theta);
+                        realRat_set_si(theta, 2, 1);
+                            
+                        slong precres = cauchy_compressionIntoRigidDisk( res, ccDisk, connCmp_nSolsref(ccur), theta, epspp,
+                                                                            cache, cacheCau, prec, meta, depth);
+                            
+                        if (metadatas_getVerbo(meta)>=level) {
+                            printf("#---------Precision after compression: %ld\n", precres);
+                            printf("#---------res: "); compDsk_print( res ); printf("\n");
+    //                         tstar_res resTstar = tstar_interface( cache, res, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
+    //                         printf("#------nb sols after tstar: %d\n", (int) resTstar.nbOfSol);
+                        }
+                        
+                        /* actualize connected component: */
+                        if ( realRat_cmp( compDsk_radiusref(res), epspp) > 0) { /* if r'' > epspp = (2/9)epsp */
                             /* cover D(c'',r'') with at most 9 sub-boxes of the subdivision tree of width >r'' and <= 2r'' */
-                            /* resulting CC has width at most 6*r'' <= 6*(2/9)eps */
-                            /* the containing disk D(c',r') of the resulting CC has radius at most (3/4)*6*(2/9)eps = eps */
+                            /* resulting CC has width at most 6*r'' */
+                            /* the containing disk D(c',r') of the resulting CC has radius at most (3/4)*6*r'' = (9/2)r'' */
                             ccur = cauchy_actualizeCCafterCompression( ccur, res, precres, meta );
+                            rigidFlag = 1;
+                            connCmp_isRigref(ccur) = 1;
                             if (metadatas_getVerbo(meta)>=level) {
-                                printf("#---------disk with size smaller than epsilon\n");
+                                printf("#---------rigid disk\n");
                             }
                         } else {
-                            /* the Disk D(c'', (1 + 3d/m)r'') is (1 + 3d/m) isolated */
-                            realRat_mul_si( compDsk_radiusref(res), compDsk_radiusref(res), 
-                                            connCmp_nSolsref(ccur) + 3*cacheApp_getDegree(cache) );
-                            realRat_div_ui( compDsk_radiusref(res), compDsk_radiusref(res), 
-                                            connCmp_nSolsref(ccur) );
-                            /* cover D(c'',(1 + 3d/m)r'') with at most 9 sub-boxes of the subdivision tree */
-                            /* of size (1 + 3d/m)r''=(1/3)(1 + 3d/m)epsp */
-                            /* resulting CC has width at most 3*(1/3)(1 + 3d/m)*epsp = (1 + 3d/m)*epsp */
-                            /* the containing disk D(c',r') of the resulting CC has radius at most (3/4)*(1 + 3d/m)*epsp */
-                            /* and is (1 + 3d/m) isolated */
-                            if (metadatas_getVerbo(meta)>=level) {
-                                printf("#---------isolated disk\n");
+                            if ( realRat_cmp( epsp, eps) == 0) { /* r'' <= (2/9)eps */
+                                /* cover D(c'',r'') with at most 9 sub-boxes of the subdivision tree of width >r'' and <= 2r'' */
+                                /* resulting CC has width at most 6*r'' <= 6*(2/9)eps */
+                                /* the containing disk D(c',r') of the resulting CC has radius at most (3/4)*6*(2/9)eps = eps */
+                                ccur = cauchy_actualizeCCafterCompression( ccur, res, precres, meta );
+                                widthFlag = 1;
+                                if (metadatas_getVerbo(meta)>=level) {
+                                    printf("#---------disk with size smaller than epsilon\n");
+                                }
+                            } else {
+                                /* the Disk D(c'', (1 + 3d/m)r'') is (1 + 3d/m) isolated */
+                                realRat_mul_si( compDsk_radiusref(res), compDsk_radiusref(res), 
+                                                connCmp_nSolsref(ccur) + 3*cacheApp_getDegree(cache) );
+                                realRat_div_ui( compDsk_radiusref(res), compDsk_radiusref(res), 
+                                                connCmp_nSolsref(ccur) );
+                                /* cover D(c'',(1 + 3d/m)r'') with at most 9 sub-boxes of the subdivision tree */
+                                /* of size (1 + 3d/m)r''=(1/3)(1 + 3d/m)epsp */
+                                /* resulting CC has width at most 3*(1/3)(1 + 3d/m)*epsp = (1 + 3d/m)*epsp */
+                                /* the containing disk D(c',r') of the resulting CC has radius at most (3/4)*(1 + 3d/m)*epsp */
+                                /* and is (1 + 3d/m) isolated */
+                                ccur = cauchy_actualizeCCafterCompression( ccur, res, precres, meta );
+                                isolaFlag = 1;
+                                if (metadatas_getVerbo(meta)>=level) {
+                                    printf("#---------isolated disk\n");
+                                }
                             }
-                            ccur = cauchy_actualizeCCafterCompression( ccur, res, precres, meta );
+                            
                         }
                         
-                    }
+                        realRat_clear(theta);
+                        compDsk_clear(res);
+                        realRat_clear(epsp);
+                        realRat_clear(epspp);
+                        
+                        connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
+                        compBox_get_containing_dsk(ccDisk, componentBox);
+                        realRat_mul(threeWidth, three, connCmp_widthref(ccur));
+                        widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
+                        compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
+                        depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
+                        
+                        if (metadatas_getVerbo(meta)>=level) {
+                            printf("#---------containing disk of ccur: "); compDsk_print( ccDisk ); printf("\n");
+    //                         tstar_res resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
+    //                         printf("#------nb sols after tstar: %d\n", (int) resTstar.nbOfSol);
+    //                         printf("#------registered nb of roots: %d\n", (int) connCmp_nSolsref(ccur));
+                            printf("#---------separation Flag: %d\n", separationFlag);
+                            printf("#---------widthFlag      : %d\n", widthFlag); 
+                            printf("#---------compactFlag    : %d\n", compactFlag);
+                            printf("#---------depth          : %ld\n", depth);
+                            printf("#---------rigidFlag: %d\n", rigidFlag); 
+                            printf("#---------isolaFlag: %d\n", isolaFlag); 
+                            printf("#---------time spent in compression: %f\n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
+                            printf("\n");
+                        }
                     
-                    realRat_clear(theta);
-                    compDsk_clear(res);
-                    realRat_clear(epsp);
-                    realRat_clear(epspp);
-                    
-                    connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
-                    compBox_get_containing_dsk(ccDisk, componentBox);
-                    realRat_mul(threeWidth, three, connCmp_widthref(ccur));
-                    widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
-                    compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
-                    depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
-                    
-                    if (metadatas_getVerbo(meta)>level) {
-                        printf("#---------containing disk of ccur: "); compDsk_print( ccDisk ); printf("\n");
-//                         tstar_res resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
-//                         printf("#------nb sols after tstar: %d\n", (int) resTstar.nbOfSol);
-//                         printf("#------registered nb of roots: %d\n", (int) connCmp_nSolsref(ccur));
-                        printf("#---------separation Flag: %d\n", separationFlag);
-                        printf("#---------widthFlag      : %d\n", widthFlag); 
-                        printf("#---------compactFlag    : %d\n", compactFlag);
-                        printf("#---------depth          : %ld\n", depth);
-                        printf("#---------time spent in compression: %f\n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-                        printf("\n");
                     }
                     
                 
@@ -809,7 +837,8 @@ void cauchy_main_loop( connCmp_list_t qResults,
         }
         
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
-               ( (!widthFlag)||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) ) )  )
+               ( (!widthFlag)||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) ) )
+               && ( (!metadatas_useCompression(meta))||(connCmp_isRigref(ccur)==0)) )
 //             &&!( metadatas_useStopWhenCompact(meta) && compactFlag && (connCmp_nSols(ccur)==1) ) //this is DEPRECATED: pass eps = 1/0 instead 
            ) {
             
@@ -1019,17 +1048,29 @@ void cauchy_algo_global( connCmp_list_t qResults,
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
 }
 
-int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
+int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheApp_t cache, cacheCauchy_t cacheCau){
     int r=1;
 //     int nbTaylorShifts  = metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsInTSTests(meta);
 //     int nbTaylorShiftsR = metadatas_getNbTaylorsRepetedInT0Tests(meta) + metadatas_getNbTaylorsRepetedInTSTests(meta);
 //     int nbGraeffe       = metadatas_getNbGraeffeInT0Tests(meta) + metadatas_getNbGraeffeInTSTests(meta);
 //     int nbGraeffeR      = metadatas_getNbGraeffeRepetedInT0Tests(meta) + metadatas_getNbGraeffeRepetedInTSTests(meta);
+    char temp[1000];
     
     if (metadatas_getVerbo(meta)>=1) {
-    r = fprintf(file, "# -------------------Ccluster Expe: -----------------------------------\n");
+    r = fprintf(file, "# -------------------Cauchy Root Finder: ------------------------------\n");
     r = fprintf(file, "# -------------------Input:    ----------------------------------------\n");
-    char temp[1000];
+    if (metadatas_getVerbo(meta)>=2) {
+    slong degree = cacheApp_getDegree( cache );
+    if (cacheCauchy_evalFastref(cacheCau) == NULL) {
+        if (cache->_from_poly) {
+            slong bitsize = cacheApp_getBitsize (cache);
+            r = fprintf(file, "#|pol: %-25s degree: %-10ld bitsize: %10ld|\n", "exact coefficients", degree, bitsize);
+        } else
+            r = fprintf(file, "#|pol: %-25s degree: %-10ld bitsize: %10c|\n", "approximated coefficients", degree, '?');
+    }
+    else
+        r = fprintf(file, "#|pol: %-25s degree: %-10ld bitsize: %10c|\n", "evaluation procedure", degree, '?');
+    }
     compBox_sprint_for_stat( temp, metadatas_initBref(meta) );
     r = fprintf(file, "#|box:%-65s\n", temp);
     if (realRat_is_den_zero( eps ))
@@ -1084,7 +1125,12 @@ int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
 //     r = fprintf(file, "# ---------------------------------------------------------------------\n");
 //     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in shift for FFT        :",         metadatas_get_time_Taylors(meta),    " " );
     r = fprintf(file, "# -------------------Compression into rigid discs---------------------\n");
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "total number of compression:",           metadatas_getComp_nb(meta),  " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "total number for clus of  1 root:",       metadatas_getComp_nb_1(meta),  " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "total number for clus of >1 root:",       metadatas_getComp_nb_p(meta),  " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in comp s1/m:",                metadatas_get_time_CompCen(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in proba. RR algo:",             metadatas_get_time_CompRRP(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in certi. CT:",                 metadatas_get_time_CompCCT(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in certi. RR algo:",             metadatas_get_time_CompRRD(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in compression:",       metadatas_get_time_CompTot(meta),    " " );
     if (metadatas_useNewton(meta)){
     r = fprintf(file, "# -------------------Newton Iterations---------------------------------\n");
