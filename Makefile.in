@@ -73,6 +73,9 @@ benchMACIS2019: library bins MACIS19
 benchISSAC2020: library bins ISSAC20
 	cd benchs && make benchISSAC2020 && cd ..
 	
+benchCASC2021: library bins
+	cd benchs && make benchCASC2021 && cd ..
+	
 ################## End benchs ######################################################
 ################## targets for building##############################################
 
