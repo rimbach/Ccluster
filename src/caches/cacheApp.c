@@ -47,7 +47,8 @@ void cacheApp_init_compRat_poly ( cacheApp_t cache, const compRat_poly_t poly){
     
     compRat_poly_init(cache->_poly);
     compRat_poly_set(cache->_poly, poly);
-    compRat_poly_canonicalise(cache->_poly);
+//     compRat_poly_canonicalise(cache->_poly);
+    compRat_poly_integers(cache->_poly);
     cache->_from_poly = 1;
     
     cache->_degree = -1;
@@ -69,7 +70,13 @@ void cacheApp_init_realRat_poly ( cacheApp_t cache, const realRat_poly_t poly){
     
     compRat_poly_init(cache->_poly);
     compRat_poly_set_realRat_poly(cache->_poly, poly);
-    compRat_poly_canonicalise(cache->_poly);
+//     compRat_poly_canonicalise(cache->_poly);
+    compRat_poly_integers(cache->_poly);
+    
+//     printf("\n\n"); compRat_poly_print(cache->_poly); printf("\n\n");
+//     fmpz_one( fmpq_poly_denref( compRat_poly_realref(cache->_poly )) );
+//     printf("\n\n"); compRat_poly_print(cache->_poly); printf("\n\n");
+    
     cache->_from_poly = 1;
     
     cache->_degree = -1;

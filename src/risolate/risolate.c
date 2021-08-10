@@ -367,7 +367,7 @@ void risolate_main_loop( connCmp_list_t qResults,
 //                             resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
                             resTstar = deflate_real_tstar_test( ccur, cache, ccDisk, connCmp_degDeref(ccur), 0, prec, meta);
                             if (metadatas_getVerbo(meta)>=3)
-                                printf("#------run tstar with deflation for counting: nbSols: %d, required precision: %ld\n", (int) resTstar.nbOfSol, resTstar.appPrec);
+                                printf("#------run tstar with deflation for counting: depth: %ld, nbSols: %d, required precision: %ld\n", depth, (int) resTstar.nbOfSol, resTstar.appPrec);
                         }
                     }
                     
@@ -375,7 +375,7 @@ void risolate_main_loop( connCmp_list_t qResults,
                     if (resTstar.nbOfSol < 0) {
                         resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
                         if (metadatas_getVerbo(meta)>=3)
-                            printf("#------run tstar for counting: nbSols: %d, required precision: %ld\n", (int) resTstar.nbOfSol, resTstar.appPrec);
+                            printf("#------run tstar for counting: depth: %ld, nbSols: %d, required precision: %ld\n", depth, (int) resTstar.nbOfSol, resTstar.appPrec);
                     }
                     connCmp_nSolsref(ccur) = resTstar.nbOfSol;
                     prec = resTstar.appPrec;
@@ -400,8 +400,8 @@ void risolate_main_loop( connCmp_list_t qResults,
                   )
              ) ) {
             
-            if (metadatas_getVerbo(meta)>3) {
-                    printf("#--- Newton iteration\n");
+            if (metadatas_getVerbo(meta)>=3) {
+                    printf("#------ Newton iteration for a cluster of %d roots, depth: %ld------\n", connCmp_nSolsref(ccur), depth );
             }
                 
             if (metadatas_haveToCount(meta)){
@@ -442,7 +442,7 @@ void risolate_main_loop( connCmp_list_t qResults,
                         if (connCmp_isDefref(ccur)==0) {
                             if (realRat_cmp_ui(compDsk_radiusref(ccDisk), 1 ) < 0) {
                                 if (metadatas_getVerbo(meta)>=2){
-                                    printf("#------Set deflation for a cluster of %d roots------\n", connCmp_nSolsref(ccur) );
+                                    printf("#------Set deflation for a cluster of %d roots, depth: %ld------\n", connCmp_nSolsref(ccur), depth );
                                     printf("#------disk: ");
                                     compDsk_print(ccDisk);
                                     printf("\n");

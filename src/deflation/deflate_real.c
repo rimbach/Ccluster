@@ -229,7 +229,7 @@ void deflate_real_set( connCmp_t x, cacheApp_t cache, const compDsk_t disk, int 
     }
 //     if (metadatas_getVerbo(meta)>=2) {
 //         printf("deflate.c: deflate_tstar_test: Interval polynomial after re-center: \n");
-//         realApp_poly_printd(connCmp_defPoref(x), 10);
+//         realApp_poly_printd(connCmp_defPoRref(x), 10);
 //         printf("\n\n");
 //     }
 }

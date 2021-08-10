@@ -69,11 +69,17 @@ POLYNOMIALS_INLINE void compRat_poly_get_imag(realRat_poly_t im, const compRat_p
     realRat_poly_set(im, compRat_poly_imagref(z));
 }
 
-/* canonicalise, i.e. multiple with same roots and integer coeffs */
+/* canonicalise */
 POLYNOMIALS_INLINE void compRat_poly_canonicalise(compRat_poly_t poly) { 
     realRat_poly_canonicalise(compRat_poly_realref(poly)); 
     realRat_poly_canonicalise(compRat_poly_imagref(poly));
 }
+/* multiple with same roots and integer coeffs */
+POLYNOMIALS_INLINE void compRat_poly_integers(compRat_poly_t poly) { 
+    realRat_poly_integers(compRat_poly_realref(poly)); 
+    realRat_poly_integers(compRat_poly_imagref(poly));
+}
+
 /* testing */
 POLYNOMIALS_INLINE int  compRat_poly_is_zero(const compRat_poly_t poly) { 
     return  realRat_poly_is_zero(compRat_poly_realref(poly)) 

@@ -524,7 +524,7 @@ echo $POLNAME >> $TEMPTABFILE3
 # DEGREES="256 391 512"
 DEGREES="256 391 512"
 # BITSIZES="16 8192 16384 32768"
-BITSIZES="4096 8192 16384 32768 65536"
+BITSIZES="8192 16384 32768 65536"
 for DEG in $DEGREES; do
     for BIT in $BITSIZES; do
             REPNAME=$REP
@@ -591,6 +591,11 @@ for DEG in $DEGREES; do
             
             echo "$POLNAME & $DEG & $BIT & `format_time $NSOLS` & `format_time $RR_NSOLS` & `format_time $DSC_NSOLS` "
             
+            LINE_TAB2="`format_numb $DEG $LENP` & `format_numb $BIT $LENP` & `format_time $RR_TTIME` & `percent_time $RR_TINRR $RR_TTIME`"
+            LINE_TAB2=$LINE_TAB2" & `format_time $RR_PPREC $LENP` & `format_time $RR_PRECN $LENP`"
+            LINE_TAB2=$LINE_TAB2" & `format_time $RR_NBGRA $LENP` & `format_time $RR_NBGRR $LENP`"
+            LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\" 
+            
             LINE_TAB3="`format_numb $DEG $LENP` & `format_numb $BIT $LENP` & `format_time $NSOLS`"
             LINE_TAB3=$LINE_TAB3" & `format_time $TTIME` (`format_time $TTIME_SQ`) & `format_time $NBEXT`,`format_time $NBCOT`"
             LINE_TAB3=$LINE_TAB3" & `format_time $RR_TTIME` (`format_time $RR_TTIME_SQ`)  & `format_time $RR_NBEXT`,`format_time $RR_NBCOT`"
@@ -599,7 +604,7 @@ for DEG in $DEGREES; do
             LINE_TAB3=$LINE_TAB3" & `format_time $DSC_TTIME` (`format_time $DSC_TTIME_SQ`)\\\\"
             
 #             echo $LINE_TAB1 >> $TEMPTABFILE1
-#             echo $LINE_TAB2 >> $TEMPTABFILE2
+            echo $LINE_TAB2 >> $TEMPTABFILE2
             echo $LINE_TAB3 >> $TEMPTABFILE3
     done
 done
@@ -616,7 +621,7 @@ done
 DEGREES="256 391 512 791 1024"
 # DEGREES="256 391"
 # POLNAMES="Bernoulli Chebyshev1 Legendre Wilkinson"
-POLNAMES="Bernoulli Wilkinson"
+POLNAMES="Bernoulli Wilkinson Chebyshev1"
 # POLNAMES="Bernoulli Chebyshev1 Legendre"
 
 for POLNAME in $POLNAMES; do
@@ -788,7 +793,7 @@ done
 
 # cat $TEMPTABFILE1
 rm -f $TEMPTABFILE1
-# cat $TEMPTABFILE2
+cat $TEMPTABFILE2
 rm -f $TEMPTABFILE2
 cat $TEMPTABFILE3
 rm -f $TEMPTABFILE3

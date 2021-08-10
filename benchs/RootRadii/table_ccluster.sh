@@ -414,7 +414,9 @@ stats_pol()
     LINE_TAB2=$LINE_TAB2" & `format_numb $RR_NBGRA $LENP` & `format_numb $RR_NBGRR $LENP`"
     LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\"  
     
-#     echo $LINE_TAB1
+    echo $LINE_TAB1
+    echo $LINE_TAB2
+    echo $LINE_TAB3
     echo $LINE_TAB1 >> $TEMPTABFILE1
     echo $LINE_TAB2 >> $TEMPTABFILE2
     echo $LINE_TAB3 >> $TEMPTABFILE3
@@ -584,111 +586,11 @@ for DEG in $DEGREES; do
     echo $LINE_TAB1 >> $TEMPTABFILE1
     echo $LINE_TAB2 >> $TEMPTABFILE2
     echo $LINE_TAB3 >> $TEMPTABFILE3
+    echo $LINE_TAB1
+    echo $LINE_TAB2
+    echo $LINE_TAB3
     
 done
-# 
-# 
-# DEGF="128"
-# # DEGF="64"
-# # DEGF="32"
-# DEGREES="32 64 128"
-# BITSIZES="8192 16384 32768 65536 131072 262144"
-# # BITSIZES="8192"
-# # DEGREES="128 191"
-# POLNAME="randomDense"
-# 
-# #solve random polynomials with ccluster
-# echo $POLNAME >> $TEMPTABFILE1
-# echo $POLNAME >> $TEMPTABFILE2
-# echo $POLNAME >> $TEMPTABFILE3
-# 
-# for DEG in $DEGREES; do
-# for BIT in $BITSIZES; do
-#     
-# #     DEG=$DEGF
-#     REPNAME=$REP
-#     NAME=$REPNAME"/"$POLNAME"_"$DEG"_"$BIT
-#     
-#     NSOLS=0
-#     TSIZE=0
-#     TDEPT=0
-#     NBEXT=0
-#     TTIME=0
-#     TTIME_SQ=0
-# #     NBTZT=0
-# #     NBTST=0
-#     RR_NSOLS=0
-#     RR_TTIME=0
-#     RR_TTIME_SQ=0
-#     RR_TSIZE=0
-#     RR_TDEPT=0
-#     RR_NBEXT=0
-#     RR_PRECN=0
-#     RR_PPREC=0
-#     RR_NBGRA=0
-#     RR_NBGRR=0
-#     RR_TINGR=0
-#     RR_TINRR=0
-#     TMPSOLVE_S=0
-#     TMPSOLVE_S_SQ=0
-# #     DSC_NSOLS=0
-# #     DSC_TSIZE=0
-# #     DSC_TTIME=0
-#     
-#     genRand_with_deg_bs $NAME $POLNAME $DEG $BIT $NBPOLS $REPNAME
-#     for CURIND in `seq 1 $NBPOLS`; do
-#         NAME=$REPNAME"/"$POLNAME"_"$DEG"_"$BIT"_"$CURIND
-#         run_ccluster $NAME $POLNAME $DEG
-#         run_mpsolve  $NAME $POLNAME $DEG
-# #         run_aNewDsc  $NAME $POLNAME $DEG
-#         stats_pol_rand $NAME $DEG
-#     done
-#     
-# #     BITSI=`echo     $BITSI    /$NBPOLS     |bc -l`
-#     NSOLS=`echo     $NSOLS    /$NBPOLS     |bc -l`
-#     TSIZE=`echo     $TSIZE    /$NBPOLS     |bc -l`
-#     TDEPT=`echo     $TDEPT    /$NBPOLS     |bc -l`
-#     NBEXT=`echo     $NBEXT    /$NBPOLS     |bc -l`
-#     TTIME=`echo     $TTIME    /$NBPOLS     |bc -l`
-#     TTIME_SQ=`echo "sqrt("$TTIME_SQ"/"$NBPOLS "-" $TTIME"^2)"   |bc -l`
-#     RR_NSOLS=`echo  $RR_NSOLS /$NBPOLS     |bc -l`
-#     RR_TTIME=`echo  $RR_TTIME /$NBPOLS     |bc -l`
-#     RR_TTIME_SQ=`echo "sqrt("$RR_TTIME_SQ"/"$NBPOLS "-" $RR_TTIME"^2)"   |bc -l`
-#     RR_TSIZE=`echo  $RR_TSIZE /$NBPOLS     |bc -l`
-#     RR_TDEPT=`echo  $RR_TDEPT /$NBPOLS     |bc -l`
-#     RR_NBEXT=`echo  $RR_NBEXT /$NBPOLS     |bc -l`
-#     RR_PRECN=`echo  $RR_PRECN /$NBPOLS     |bc -l`
-#     RR_PPREC=`echo  $RR_PPREC /$NBPOLS     |bc -l`
-#     RR_NBGRA=`echo  $RR_NBGRA /$NBPOLS     |bc -l`
-#     RR_NBGRR=`echo  $RR_NBGRR /$NBPOLS     |bc -l`
-#     RR_TINGR=`echo  $RR_TINGR /$NBPOLS     |bc -l`
-#     RR_TINRR=`echo  $RR_TINRR /$NBPOLS     |bc -l`
-#     TMPSOLVE_S=`echo  $TMPSOLVE_S /$NBPOLS     |bc -l`
-#     TMPSOLVE_S_SQ=`echo "sqrt("$TMPSOLVE_S_SQ"/"$NBPOLS "-" $TMPSOLVE_S"^2)"   |bc -l`
-#     
-#     LINE_TAB1="$DEG & `format_time $NSOLS` & `format_time $RR_NSOLS` & `format_time $TSIZE` & `format_time $TDEPT` & `format_time $TTIME`"
-#     LINE_TAB1=$LINE_TAB1" & `format_time $RR_TSIZE` & `format_time $RR_TDEPT` & `format_time $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
-# #     LINE_TAB1=$LINE_TAB1" & `format_numb $DSC_TSIZE $LENP` &`format_time $DSC_TTIME`\\\\"
-#     
-# #     LINE_TAB2="$DEG & `format_time $RR_TTIME` & `format_time $RR_PRECN` & `format_time $RR_TINRR` & `percent_time $RR_TINRR $RR_TTIME`\\\\" 
-#     LINE_TAB2="`format_numb $DEG $LENP` & `format_time $BITSISE` & `format_time $RR_TTIME` & `percent_time $RR_TINRR $RR_TTIME`"
-#     LINE_TAB2=$LINE_TAB2" & `format_time $RR_PPREC` & `format_time $RR_PRECN`"
-#     LINE_TAB2=$LINE_TAB2" & `format_time $RR_NBGRA` & `format_time $RR_NBGRR`"
-#     LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\"   
-#     
-#     LINE_TAB3="`format_numb $DEG $LENP` & `format_numb $BIT $LENP`"
-#     LINE_TAB3=$LINE_TAB3" & `format_time $TTIME`  (`format_time $TTIME_SQ`)   & `format_time $NBEXT`"
-#     LINE_TAB3=$LINE_TAB3" & `format_time $RR_TTIME` (`format_time $RR_TTIME_SQ`) & `format_time $RR_NBEXT`"
-# #     LINE_TAB3=$LINE_TAB3" & `format_time $RR_PRECN` "
-#     LINE_TAB3=$LINE_TAB3" & `percent_time $RR_TINRR $RR_TTIME` & `percent_time $RR_TTIME $TTIME`"
-#     LINE_TAB3=$LINE_TAB3" & `format_time $TMPSOLVE_S` (`format_time $TMPSOLVE_S_SQ`) \\\\"
-#     
-#     echo $LINE_TAB1 >> $TEMPTABFILE1
-#     echo $LINE_TAB2 >> $TEMPTABFILE2
-#     echo $LINE_TAB3 >> $TEMPTABFILE3
-#     
-# done
-# done
 
 #Other polynomials
 DEGREES="128 191 256 391 512"
