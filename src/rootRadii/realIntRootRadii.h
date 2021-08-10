@@ -37,9 +37,7 @@ void realIntRootRadii_getApproximation_comp( compApp_poly_t res, cacheApp_t cach
 void realIntRootRadii_taylor_shift_inplace_real( realApp_poly_t res, slong centerRe, slong prec, metadatas_t meta);
 void realIntRootRadii_taylor_shift_inplace_comp( compApp_poly_t res, slong centerRe, slong centerIm, slong prec, metadatas_t meta);
 
-// int realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta);
-// int realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta);
-
+/* default version */
 slong realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta);
 slong realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta);
 
@@ -59,6 +57,12 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
 /* otherwise returns the length of the convex hull */
 slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec );
 
+int   realIntRootRadii_GraeffeAndCH_real ( slong convexHull[], slong * lenCH, slong * nprec, realApp_poly_t absCoeffs,
+                                           realApp_poly_t pApprox, int N, slong prec, metadatas_t meta );
+
+int   realIntRootRadii_GraeffeAndCH_comp ( slong convexHull[], slong * lenCH, slong * nprec, realApp_poly_t absCoeffs,
+                                           compApp_poly_t pApprox, int N, slong prec, metadatas_t meta );
+
 /* returns the precision used to carry out root radii */
 slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
                                   slong centerRe,
@@ -66,20 +70,6 @@ slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
 //                                   const realRat_t delta,
                                   slong prec,
                                   metadatas_t meta );
-
-// slong realIntRootRadii_rootRadii_2( compAnn_list_t annulii,  /* list of annulii */
-//                                   slong centerRe,
-//                                   cacheApp_t cache,        /* polynomial */
-// //                                   const realRat_t delta,
-//                                   slong prec,
-//                                   metadatas_t meta );
-// 
-// slong realIntRootRadii_rootRadii_3( compAnn_list_t annulii,  /* list of annulii */
-//                                     slong centerRe,
-//                                     cacheApp_t cache,        /* polynomial */
-// //                                   const realRat_t delta,
-//                                     slong prec,
-//                                     metadatas_t meta );
 
 /* returns the precision used to carry out root radii */
 slong realIntRootRadii_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of annulii */
@@ -93,8 +83,26 @@ void realIntRootRadii_connectedComponents( compAnn_list_t annulii, slong prec );
 
 void realIntRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache, slong prec );  /* list of annulii */
 
-void realIntRootRadii_bisect_connCmp( connCmp_list_t dest, 
-                                      connCmp_t cc);
+/* CASC2021 version: implemented in realIntRootRadiiCASC2021.c */
+
+int realIntRootRadiiCASC2021_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta);
+int realIntRootRadiiCASC2021_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta);
+
+/* returns the precision used to carry out root radii */
+slong realIntRootRadiiCASC2021_rootRadii( compAnn_list_t annulii,  /* list of annulii */
+                                  slong centerRe,
+                                  cacheApp_t cache,        /* polynomial */
+//                                   const realRat_t delta,
+                                  slong prec,
+                                  metadatas_t meta );
+
+/* returns the precision used to carry out root radii */
+slong realIntRootRadiiCASC2021_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of annulii */
+                                  slong centerIm,
+                                  cacheApp_t cache,        /* polynomial */
+//                                   const realRat_t delta,
+                                  slong prec,
+                                  metadatas_t meta );
 
 #ifdef __cplusplus
 }

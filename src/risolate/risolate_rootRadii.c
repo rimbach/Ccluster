@@ -1335,7 +1335,10 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
 //     slong precpred = prec;
     /* */
     start2 = clock();
-    prec = realIntRootRadii_rootRadii( annulii, 0, cache, prec, meta );
+    if (metadatas_useCASC2021(meta))
+        prec = realIntRootRadiiCASC2021_rootRadii( annulii, 0, cache, prec, meta );
+    else
+        prec = realIntRootRadii_rootRadii( annulii, 0, cache, prec, meta );
     
     /* use annulii to get a sharp upper bound on the roots */
 //     slong upperBound = realApp_ceil_si(compAnn_radSupref(compAnn_list_last(annulii)), prec);
