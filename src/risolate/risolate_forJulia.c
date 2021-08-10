@@ -59,7 +59,7 @@ void risolate_forJulia_realRat_poly( connCmp_list_t qResults,
     if (cacheApp_getDegree(cache)>0)
         risolate_algo( qResults, NULL, initBox, eps, cache, meta);
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_risolate_fprint(stdout, meta, cache, eps);
     
     if (verb>=3) {
         connCmp_list_risolate_print_for_results(stdout, qResults, meta);
@@ -139,7 +139,7 @@ void risolate_global_forJulia_realRat_poly( connCmp_list_t qResults,
             risolate_algo_global( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_risolate_fprint(stdout, meta, cache, eps);
     
     if (verb>=3) {
         connCmp_list_risolate_print_for_results(stdout, qResults, meta);

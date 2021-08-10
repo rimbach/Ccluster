@@ -19,11 +19,11 @@ void compAnn_fprintd( FILE * file, const compAnn_t x, slong digits ){
         fprintf(file, "#center: %ld, ", compAnn_centerReref(x) );
     if (compAnn_centerImref(x)!=0)
         fprintf(file, "#center: i%ld, ", compAnn_centerImref(x) );
-    fprintf(file, "#radInf: ");
+    fprintf(file, "radInf: ");
     realApp_fprintd(file, compAnn_radInfref(x), digits);
     fprintf(file, "  radSup: ");
     realApp_fprintd(file, compAnn_radSupref(x), digits);
-    fprintf(file, "\n");
+//     fprintf(file, "\n");
 }
 
 void compAnn_fprint( FILE * file, const compAnn_t x){
@@ -33,11 +33,11 @@ void compAnn_fprint( FILE * file, const compAnn_t x){
         fprintf(file, "#center: %ld, ", compAnn_centerReref(x) );
     if (compAnn_centerImref(x)!=0)
         fprintf(file, "#center: i%ld, ", compAnn_centerImref(x) );
-    fprintf(file, "#radInf: ");
+    fprintf(file, "radInf: ");
     realApp_fprint(file, compAnn_radInfref(x));
-    fprintf(file, "#  radSup: ");
+    fprintf(file, "  radSup: ");
     realApp_fprint(file, compAnn_radSupref(x));
-    fprintf(file, "\n");
+//     fprintf(file, "\n");
 }
 
 /* assume a1 and a2 are centered on the real line; a1 = c1, r1; a2 = c2, r2 */

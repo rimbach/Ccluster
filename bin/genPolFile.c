@@ -29,6 +29,8 @@ void WilkMul_polynomial(  realRat_poly_t dest, int degree);
 void WilkMulF_polynomial(  realRat_poly_t dest, int degree, int power);
 void Laguerre_polynomial(  realRat_poly_t dest, int degree);
 
+void nestedClusters_polynomial(  realRat_poly_t dest, int nbRoots, int relativeWidth, int iterations);
+
 void genSpiralPolFile( FILE * file, int degree, int prec);
 void genClusterPolFile( FILE * file, int iteration, int prec);
 
@@ -57,7 +59,8 @@ int main(int argc, char **argv){
         printf("       %s Runnels        iteration filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Laguerre       degree    filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Spiral         degree    filename [OPTIONS:        precision]; only for MPsolve\n", argv[0]);
-        printf("       %s nestedClusters iteration filename [OPTIONS:        precision]; only for MPsolve\n", argv[0]);
+//         printf("       %s nestedClusters iteration filename [OPTIONS:        precision]; only for MPsolve\n", argv[0]);
+        printf("       %s nestedClusters iteration filename [OPTIONS: format c a]\n", argv[0]);
         printf("                                                                    \n");
         printf("       -f , --format: the format of the output file                 \n");
         printf("                      1: [default] Ccluster (.ccl)                  \n");
@@ -73,6 +76,11 @@ int main(int argc, char **argv){
         printf("                      2: [default] or a positive integer            \n");
         printf("       -L , --precision: (for NestedClusters and Spiral)            \n"); 
         printf("                      53: [default] or a positive integer            \n");
+        printf("       OPTIONS ONLY FOR nestedClusters:                                \n");
+        printf("       -c : nb of roots in the clusters, \n");
+        printf("                       3: [default] or a positive integer            \n");
+        printf("       -a : relative width of nested clusters, \n");
+        printf("                       16: [default] or an integer >=2            \n");
         return -1;
     }
     
@@ -86,6 +94,8 @@ int main(int argc, char **argv){
     int nbterms   = 10;
     int power     = 2;
     int precision = 53;
+    int c = 3;
+    int a = 16;
     
     char bernoulli[] = "Bernoulli\0";
     char mignotte[] = "Mignotte\0";
@@ -176,6 +186,28 @@ int main(int argc, char **argv){
             }
         }
         
+        if ( (strcmp( argv[arg], "-c" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &c);
+                if (c<=0){
+                    printf("%s ERROR: NON-VALID c (should be >0) \n", argv[0]);
+                    parse = 0;
+                }
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-a" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &a);
+                if (a<=1){
+                    printf("%s ERROR: NON-VALID a (should be >=2) \n", argv[0]);
+                    parse = 0;
+                }
+                arg++;
+            }
+        }
+        
     }
     
     if (!parse) {
@@ -259,6 +291,10 @@ int main(int argc, char **argv){
         Laguerre_polynomial( p, firstArg);
     } else
         
+    if (strcmp(poly, nestedClusters)==0) {
+        nestedClusters_polynomial( p, c, a, firstArg );
+    } else
+        
     if ((strcmp(poly, Spiral)==0)&&(parse==1)) {
         FILE * curFile;
         printf ("%s PARSING OK; output file: %s\n", argv[0], filename);
@@ -269,15 +305,15 @@ int main(int argc, char **argv){
         return 1;
     } else
         
-    if ((strcmp(poly, nestedClusters)==0)&&(parse==1)) {
-        FILE * curFile;
-        printf ("%s PARSING OK; output file: %s\n", argv[0], filename);
-        curFile = fopen (filename,"w");
-        genClusterPolFile( curFile, firstArg, precision );
-        fclose (curFile);
-        realRat_poly_clear(p);
-        return 1;
-    } else
+//     if ((strcmp(poly, nestedClusters)==0)&&(parse==1)) {
+//         FILE * curFile;
+//         printf ("%s PARSING OK; output file: %s\n", argv[0], filename);
+//         curFile = fopen (filename,"w");
+//         genClusterPolFile( curFile, firstArg, precision );
+//         fclose (curFile);
+//         realRat_poly_clear(p);
+//         return 1;
+//     } else
         
     {
         printf ("%s PARSING ERROR; INVALID POLYNOMIAL: %s\n", argv[0], poly);
@@ -711,6 +747,101 @@ void Laguerre_polynomial(  realRat_poly_t dest, int degree){
     realRat_poly_clear(pone);
     realRat_poly_clear(pzero);
     realRat_poly_clear(ptemp);
+}
+
+void nestedClusters_polynomial(  realRat_poly_t dest, int c, int a, int n) {
+    
+    /* compute degree = nbroots^n */
+    slong degree = 1;
+    for (int i = 1; i<= n; i++)
+        degree = degree*c;
+//     printf("degree: %ld\n", degree);
+    /* compute nbroots^n power sums of resulting polynomial */
+    realRat_ptr pss = (realRat_ptr) ccluster_malloc ( (degree+1)*sizeof(realRat) );
+    for (slong i = 0; i<degree+1; i++) {
+        realRat_init(pss+i);
+        realRat_zero(pss+i);
+    }
+    realRat_set_si(pss+0, 1, 1);
+    
+    for (int it = 1; it<=n; it++){
+        
+//         printf("---iteration: %d\n", it);
+        
+        realRat_t ac, atc, nps, temp;
+        realRat_init(ac);
+        realRat_init(atc);
+        realRat_init(nps);
+        realRat_init(temp);
+        realRat_set_si(ac, (slong) a, 1);
+        realRat_pow_si(ac, ac, c);
+        
+        slong qc=degree;
+        while ( qc>=0 ){
+//             printf("------h=qc: %ld\n", qc);
+            realRat_zero(nps);
+            realRat_one(atc);
+            for (slong tc = 0; tc<=qc; tc=tc+c ){
+//                 printf("---------tc: %ld\n", tc);
+                realRat_one(temp);
+                fmpz_bin_uiui( realRat_numref(temp), qc, tc );
+                realRat_mul(temp, temp, pss+tc);
+                realRat_div(temp, temp, atc);
+                realRat_add(nps, nps, temp);
+                /* atc = atc*ac */
+                realRat_mul(atc, atc, ac);
+            }
+            realRat_mul_si(nps, nps, c);
+            realRat_set(pss+qc, nps);
+            qc = qc - c;
+        }
+        
+        
+        realRat_clear(ac);
+        realRat_clear(atc);
+        realRat_clear(nps);
+        realRat_clear(temp);
+    }
+    
+//     printf("power sums: \n");
+//     for (slong h = 0; h<=degree; h++){
+//         printf("%ld-th ps: ",h); realRat_print(pss+h); printf("\n");
+//     }
+    
+    /* apply Newton identities to recover coefficients */
+    realRat_poly_init2(dest, degree+1);
+    dest->length = degree+1;
+
+    realRat_t temp, coeff;
+    realRat_init(temp);
+    realRat_init(coeff);
+    
+    realRat_poly_set_coeff_si_ui(dest, degree, 1, 1);
+    for (slong i = 1; i<=degree; i++){
+        
+        if ((i%c)==0) {
+            realRat_set( coeff, pss+i );
+            for(slong j = 1; j<=i-1; j++){
+                realRat_poly_get_coeff_realRat( temp, dest, degree-j );
+                realRat_mul( temp, temp, pss+(i-j) );
+                realRat_add( coeff, coeff, temp);
+            }
+            realRat_neg( coeff, coeff );
+            realRat_div_ui( coeff, coeff, (ulong) i );
+        } else {
+            realRat_zero( coeff );
+        }
+        
+        realRat_poly_set_coeff_realRat( dest, degree-i, coeff );
+    }
+    
+    realRat_clear(temp);
+    realRat_clear(coeff);
+    
+    for (slong i = 0; i<degree; i++) {
+        realRat_clear(pss+i);
+    }
+    ccluster_free(pss);
 }
 
 void genSpiralPolFile( FILE * file, int degree, int prec){

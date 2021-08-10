@@ -37,17 +37,13 @@ extern "C" {
 #define STRAT_REALCOEF 32
 #define STRAT_PWSUTEST 64
 #define STRAT_ROOTRADI 128
-#define STRAT_CASC2021 256
-#define STRAT_FORTESTS 512
+#define STRAT_FORTESTS 256
 
 #define STRAT_INT_ONLSUBD 55
 #define STRAT_STR_ONLSUBD "onlySubd"
 
 #define STRAT_INT_DEFAULT 183
 #define STRAT_STR_DEFAULT "default"
-
-#define STRAT_INT_CASC2021 311
-#define STRAT_STR_CASC2021 "CASC2021"
 
 #define STRAT_INT_V1 5
 #define STRAT_STR_V1 "V1"
@@ -94,7 +90,6 @@ typedef struct {
     int _pwSuNbPs;
 //     realRat _pwSuIsoRatio;
     int _useRootRadii;
-    int _useCASC2021;
 } strategies;
 
 typedef strategies strategies_t[1];
@@ -148,9 +143,6 @@ METADATAS_INLINE void strategies_set_pwSuNbPs   ( strategies_t strat, int nb ) {
 
 METADATAS_INLINE int strategies_useRootRadii        ( const strategies_t strat ) { return strat->_useRootRadii      ; }
 METADATAS_INLINE void strategies_set_RootRadii   ( strategies_t strat, int flag ) { strat->_useRootRadii=flag      ; }
-
-METADATAS_INLINE int strategies_useCASC2021        ( const strategies_t strat ) { return strat->_useCASC2021      ; }
-METADATAS_INLINE void strategies_set_CASC2021   ( strategies_t strat, int flag ) { strat->_useCASC2021=flag      ; }
 
 #ifdef __cplusplus
 }

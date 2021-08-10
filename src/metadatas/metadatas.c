@@ -82,7 +82,7 @@ char * realRat_sprint_for_stat(char * out, const realRat_t x){
     return out;
 }
 
-int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
+int metadatas_fprint(FILE * file, metadatas_t meta, cacheApp_t cache, const realRat_t eps){
     int r=1;
     int nbTaylorShifts  = metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsInTSTests(meta);
     int nbTaylorShiftsR = metadatas_getNbTaylorsRepetedInT0Tests(meta) + metadatas_getNbTaylorsRepetedInTSTests(meta);
@@ -92,6 +92,15 @@ int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps){
     if (metadatas_getVerbo(meta)>=1) {
     r = fprintf(file, "# -------------------Ccluster: ----------------------------------------\n");
     r = fprintf(file, "# -------------------Input:    ----------------------------------------\n");
+    if (metadatas_getVerbo(meta)>=2) {
+    slong degree = cacheApp_getDegree( cache );
+    if (cache->_from_poly) {
+            slong bitsize = cacheApp_getBitsize (cache);
+            r = fprintf(file, "#|pol: %-25s degree: %-10ld bitsize: %10ld|\n", "exact coefficients", degree, bitsize);
+        } else
+            r = fprintf(file, "#|pol: %-25s degree: %-10ld bitsize: %10c|\n", "approximated coefficients", degree, '?');
+    }
+    
     char temp[1000];
     compBox_sprint_for_stat( temp, metadatas_initBref(meta) );
     r = fprintf(file, "#|box:%-65s\n", temp);

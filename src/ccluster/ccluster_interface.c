@@ -63,7 +63,7 @@ void ccluster_interface_func( void(*func)(compApp_poly_t, slong),
         ccluster_algo( qRes, bDis, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     
     if (output==-2) {
 //         printf("gnuplot output: not yet implemented\n");
@@ -166,7 +166,7 @@ void ccluster_global_interface_func( void(*func)(compApp_poly_t, slong),
     
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     
     if (output==-2) {
 //         printf("gnuplot output: not yet implemented\n");
@@ -246,7 +246,7 @@ void ccluster_interface_realRat_poly( const realRat_poly_t poly,
         ccluster_algo( qRes, bDis, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     
     if (output==-2) {
 //         printf("gnuplot output: not yet implemented\n");
@@ -347,7 +347,7 @@ void ccluster_global_interface_realRat_poly( const realRat_poly_t poly,
     
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     
     if (output==-2) {
 //         printf("gnuplot output: not yet implemented\n");
@@ -408,7 +408,7 @@ void ccluster_interface_func_eval( void(*func)(compApp_poly_t, slong),
         ccluster_algo( qRes, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qRes, meta);
@@ -469,7 +469,7 @@ void ccluster_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
         ccluster_algo_global( qRes, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qRes, meta);
@@ -514,7 +514,7 @@ void ccluster_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
 //     ccluster_algo( qResults, initialBox, eps, cache, meta);
 //     
 //     metadatas_count(meta);
-//     metadatas_fprint(stdout, meta, eps);
+//     metadatas_fprint(stdout, meta, cache, eps);
 //     if (verb>=3) {
 //         connCmp_list_print_for_results(stdout, qResults, meta);
 //     }
@@ -566,7 +566,7 @@ void ccluster_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
 //     ccluster_algo_global( qResults, initialBox, eps, cache, meta);
 //     
 //     metadatas_count(meta);
-//     metadatas_fprint(stdout, meta, eps);
+//     metadatas_fprint(stdout, meta, cache, eps);
 //     if (verb>=3) {
 //         connCmp_list_print_for_results(stdout, qResults, meta);
 //     }
@@ -623,7 +623,7 @@ int ccluster_interface_poly( realRat_t * centerRe, realRat_t * centerIm, int * m
     if (cacheApp_getDegree(cache)>0)
         ccluster_algo( qRes, NULL, initialBox, eps, cache, meta);
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qRes, meta);

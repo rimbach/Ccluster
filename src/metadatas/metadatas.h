@@ -161,7 +161,6 @@ METADATAS_INLINE int metadatas_useDeflation      ( const metadatas_t m ) { retur
 METADATAS_INLINE int metadatas_useRealCoeffs     ( const metadatas_t m ) { return strategies_useRealCoeffs     (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_usePowerSums      ( const metadatas_t m ) { return strategies_usePowerSums      (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_useRootRadii      ( const metadatas_t m ) { return strategies_useRootRadii      (metadatas_stratref(m)); }
-METADATAS_INLINE int metadatas_useCASC2021      ( const metadatas_t m ) { return strategies_useCASC2021      (metadatas_stratref(m)); }
 // METADATAS_INLINE int metadatas_pwSuTest         ( const metadatas_t m ) { return strategies_pwSuTest           (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_forTests          ( const metadatas_t m ) { return strategies_forTests          (metadatas_stratref(m)); }
 // /* counters */
@@ -570,8 +569,8 @@ METADATAS_INLINE double metadatas_get_time_DefTsta ( const metadatas_t m ) { ret
 char * compBox_sprint_for_stat(char * out, const compBox_t x);
 char * realRat_sprint_for_stat(char * out, const realRat_t x);
 
-int metadatas_fprint(FILE * file, metadatas_t meta, const realRat_t eps);
-int metadatas_print(metadatas_t meta, const realRat_t eps);
+int metadatas_fprint         (FILE * file, metadatas_t meta, cacheApp_t cache, const realRat_t eps);
+int metadatas_print          (             metadatas_t meta, cacheApp_t cache, const realRat_t eps);
 
 int metadatas_risolate_fprint(FILE * file, metadatas_t meta, cacheApp_t cache, const realRat_t eps);
 
