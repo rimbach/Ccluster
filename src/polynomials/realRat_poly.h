@@ -36,8 +36,13 @@ POLYNOMIALS_INLINE void realRat_poly_init2     (realRat_poly_t poly, slong len) 
 POLYNOMIALS_INLINE void realRat_poly_clear     (realRat_poly_t poly)            { fmpq_poly_clear     (poly);}
 POLYNOMIALS_INLINE void realRat_poly_fit_length(realRat_poly_t poly, slong len) { fmpq_poly_fit_length(poly, len); }
 
-/* canonicalise, i.e. multiple with same roots and integer coeffs */
+/* canonicalise  */
 POLYNOMIALS_INLINE void realRat_poly_canonicalise(realRat_poly_t poly) { fmpq_poly_canonicalise(poly); }
+/* multiple with same roots and integer coeffs */
+POLYNOMIALS_INLINE void realRat_poly_integers(realRat_poly_t poly) { 
+    realRat_poly_canonicalise(poly); 
+    fmpz_one(poly->den);
+}
 /* testing */
 POLYNOMIALS_INLINE int  realRat_poly_is_zero(const realRat_poly_t poly) { return fmpq_poly_is_zero(poly); }
 

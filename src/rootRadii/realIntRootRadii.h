@@ -37,9 +37,6 @@ void realIntRootRadii_getApproximation_comp( compApp_poly_t res, cacheApp_t cach
 void realIntRootRadii_taylor_shift_inplace_real( realApp_poly_t res, slong centerRe, slong prec, metadatas_t meta);
 void realIntRootRadii_taylor_shift_inplace_comp( compApp_poly_t res, slong centerRe, slong centerIm, slong prec, metadatas_t meta);
 
-int realIntRootRadii_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta);
-int realIntRootRadii_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta);
-
 /* assume i<j<k */
 /* assume absPi=|Pi|, absPj=|Pj|, absPk=|Pk| are approximations of integers */
 /* decide if [j,log|Pj|] lies below of on the line passing trough [i,log|Pi|] and [k,log|Pk|]*/
@@ -56,18 +53,20 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
 /* otherwise returns the length of the convex hull */
 slong realIntRootRadii_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec );
 
+/* compute N graeffe iterations and convex hull */
+/* if precision is not sufficient, returns a number i<N and an empty convex hull */
+/* otherwise returns N and the convex hull */
+
+int   realIntRootRadii_GraeffeAndCH_real ( slong convexHull[], slong * lenCH, slong * nprec, realApp_poly_t absCoeffs,
+                                           realApp_poly_t pApprox, int N, slong prec, metadatas_t meta );
+
+int   realIntRootRadii_GraeffeAndCH_comp ( slong convexHull[], slong * lenCH, slong * nprec, realApp_poly_t absCoeffs,
+                                           compApp_poly_t pApprox, int N, slong prec, metadatas_t meta );
+
 /* returns the precision used to carry out root radii */
 slong realIntRootRadii_rootRadii( compAnn_list_t annulii,  /* list of annulii */
                                   slong centerRe,
                                   cacheApp_t cache,        /* polynomial */
-//                                   const realRat_t delta,
-                                  slong prec,
-                                  metadatas_t meta );
-
-slong realIntRootRadii_rootRadii_2( compAnn_list_t annulii,  /* list of annulii */
-                                  slong centerRe,
-                                  cacheApp_t cache,        /* polynomial */
-//                                   const realRat_t delta,
                                   slong prec,
                                   metadatas_t meta );
 
@@ -75,7 +74,6 @@ slong realIntRootRadii_rootRadii_2( compAnn_list_t annulii,  /* list of annulii 
 slong realIntRootRadii_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of annulii */
                                   slong centerIm,
                                   cacheApp_t cache,        /* polynomial */
-//                                   const realRat_t delta,
                                   slong prec,
                                   metadatas_t meta );
 
@@ -83,8 +81,28 @@ void realIntRootRadii_connectedComponents( compAnn_list_t annulii, slong prec );
 
 void realIntRootRadii_containsRealRoot( compAnn_list_t annulii, cacheApp_t cache, slong prec );  /* list of annulii */
 
-void realIntRootRadii_bisect_connCmp( connCmp_list_t dest, 
-                                      connCmp_t cc);
+/* DEPRECATED version */
+int realIntRootRadiiOLD_Ngraeffe_iterations_inplace_real( realApp_poly_t res, int N, slong prec, metadatas_t meta);
+int realIntRootRadiiOLD_Ngraeffe_iterations_inplace_comp( compApp_poly_t res, int N, slong prec, metadatas_t meta);
+
+/* assume convexHull is already initialized, and contains enough space for a convex hull of len points */
+/* returns 0 if needs more precision on the coeffs */
+/* otherwise returns the length of the convex hull */
+slong realIntRootRadiiOLD_convexHull( slong * convexHull, const realApp_ptr abscoeffs, slong len, slong prec );
+
+/* returns the precision used to carry out root radii */
+slong realIntRootRadiiOLD_rootRadii( compAnn_list_t annulii,  /* list of annulii */
+                                  slong centerRe,
+                                  cacheApp_t cache,        /* polynomial */
+                                  slong prec,
+                                  metadatas_t meta );
+
+/* returns the precision used to carry out root radii */
+slong realIntRootRadiiOLD_rootRadii_imagCenter( compAnn_list_t annulii,  /* list of annulii */
+                                  slong centerIm,
+                                  cacheApp_t cache,        /* polynomial */
+                                  slong prec,
+                                  metadatas_t meta );
 
 #ifdef __cplusplus
 }

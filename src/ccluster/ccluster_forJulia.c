@@ -44,7 +44,7 @@ void ccluster_forJulia_func( connCmp_list_t qResults,
         ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
     }
@@ -106,7 +106,7 @@ void ccluster_global_forJulia_func( connCmp_list_t qResults,
         ccluster_algo_global( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
     }
@@ -161,7 +161,7 @@ void ccluster_forJulia_compRat_poly( connCmp_list_t qResults,
         ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
     }
@@ -233,7 +233,7 @@ void ccluster_global_forJulia_compRat_poly( connCmp_list_t qResults,
         ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
     }
@@ -345,7 +345,7 @@ void ccluster_global_forJulia_realRat_poly( connCmp_list_t qResults,
             ccluster_algo_global( qResults, NULL, initBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
@@ -446,7 +446,7 @@ void ccluster_forJulia_refine( connCmp_list_t qResults,
         ccluster_refine( qResults, qMainLoop, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
     }
@@ -509,7 +509,7 @@ int ccluster_global_forJulia_forTcluster_func( connCmp_list_t qResults,
         ccluster_algo_global( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
     }
@@ -560,7 +560,7 @@ void ccluster_forJulia_draw( connCmp_list_t qResults,
     if (cacheApp_getDegree(cache)>0)
         ccluster_algo( qResults, qDiscarded, initialBox, eps, cache, meta);
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
     }
@@ -604,7 +604,7 @@ void ccluster_interface_forJulia ( connCmp_list_t qResults,
     ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
 //         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
@@ -648,7 +648,7 @@ void ccluster_interface_forJulia_draw( connCmp_list_t qResults,
 //     ccluster_algo_draw( qResults, qDiscarded, initialBox, eps, cache, meta);
     ccluster_algo( qResults, qDiscarded, initialBox, eps, cache, meta);
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
 //         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
@@ -724,7 +724,7 @@ void ccluster_interface_forJulia_compRat_poly( connCmp_list_t qResults,
     ccluster_algo( qResults, NULL, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
 //         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
@@ -762,7 +762,7 @@ void ccluster_refine_forJulia( connCmp_list_t qResults,
     
     ccluster_refine( qResults, qMainLoop, eps, cache, meta);
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
 //         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);

@@ -208,6 +208,28 @@ int main(int argc, char **argv){
             }
         }
         
+        if ( (strcmp( argv[arg], "-c" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &c);
+                if (c<=0){
+                    printf("%s ERROR: NON-VALID c (should be >0) \n", argv[0]);
+                    parse = 0;
+                }
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-a" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &a);
+                if (a<=1){
+                    printf("%s ERROR: NON-VALID a (should be >=2) \n", argv[0]);
+                    parse = 0;
+                }
+                arg++;
+            }
+        }
+        
     }
     
     if (!parse) {

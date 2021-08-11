@@ -348,110 +348,6 @@ void risolate_compBox_getNumbersForCounting( int * nbA,  /* nb of annulii inters
     return;
 }
 
-// void risolate_connCmp_getNumbers( int * nbA,    /* nb of segments intersecting the cc */
-//                                     int * nbA0, /* nb of segments intersecting the cc where the nb of real roots is 0 */
-//                                     int * nbA1, /* nb of segments contained in the cc where the nb of real roots is 1 */
-//                                     int * nbA2, /* nb of segments contained in the cc where the nb of real roots is >=1 */
-//                                     const connCmp_t c,
-//                                     cacheApp_t cache, /* need the degree */
-//                                     slong prec ) {
-//     *nbA = 0;
-//     *nbA0 = 0;
-//     *nbA1 = 0;
-//     *nbA2 = 0;
-//     
-//     compAnn_ptr acommon = NULL;
-//     
-//     realApp_t left, right, neginf,negsup;
-//     realApp_init( left );
-//     realApp_init( right );
-//     realApp_init( neginf );
-//     realApp_init( negsup );
-//     realApp_set_realRat( left, connCmp_infReref(c), prec );
-//     realApp_set_realRat( right, connCmp_supReref(c), prec );
-//     
-//     compBox_list_iterator itb = compBox_list_begin( connCmp_boxesref( c ) );
-//     while ( itb != compBox_list_end() ) {
-//         printf("# risolate_rootRadii.c: risolate_connCmp_getNumbers \n");
-//         compBox_ptr b = compBox_list_elmt(itb);
-//         int sgn = realRat_sgn( compRat_realref( compBox_centerref( b ) ) );
-//         printf("# --- new box: "); compBox_print(b); printf("\n");
-//         /* check if it is a common annulus */
-//         compAnn_list_iterator ita = compAnn_list_begin( compBox_annuliref( b, 0 ) );
-//         
-//         if (acommon !=NULL) {
-//             printf("# risolate_rootRadii.c: risolate_connCmp_getNumbers, common annulus: ");
-//             compAnn_printd(acommon, 10); printf("\n");
-//             printf("# risolate_rootRadii.c: risolate_connCmp_getNumbers, cur annulus: ");
-//             compAnn_printd(compAnn_list_elmt(ita), 10); printf("\n");
-//         }
-//         if ( (ita != NULL) && ( compAnn_list_elmt(ita) == acommon )
-//                            && ( compAnn_indMaxref(compAnn_list_elmt(ita)) != cacheApp_getDegree(cache) ) 
-//            ){
-//            
-//             printf("# risolate_rootRadii.c: risolate_connCmp_getNumbers \n");
-//             printf("# common annulus\n");
-//             ita = compAnn_list_next(ita);
-//         }
-//             
-//         while ( ita != compAnn_list_end() ) {
-//             compAnn_ptr a = compAnn_list_elmt(ita);
-//             printf("# ------ new annulus"); compAnn_printd(a, 10); printf("\n");
-//             /*check if the neg and pos segments are included in the cc*/
-//             int posContainedInCC = ( realApp_lt( left, compAnn_radInfref( a ) ) ==1 )
-//                                  &&( realApp_gt( right, compAnn_radSupref( a ) ) ==1 );
-//             realApp_neg( neginf, compAnn_radSupref( a ) );
-//             realApp_neg( negsup, compAnn_radInfref( a ) );
-//             int negContainedInCC = ( realApp_lt( left, neginf ) ==1 )
-//                                  &&( realApp_gt( right, negsup ) ==1 );
-//                 
-//             if ( realApp_is_zero(compAnn_radInfref(a)) && realApp_is_zero(compAnn_radSupref(a)) ) {
-//                 printf("# risolate_rootRadii.c: risolate_connCmp_getNumbers zero annulus \n");
-//                 /* it is the zero annulus */
-//                 if (sgn<=0) { /*add it only once*/
-// //                     *nbA+=1;
-//                     *nbA+= (compAnn_indMaxref(a) - compAnn_indMinref(a) +1 );
-//                     *nbA1+= (compAnn_indMaxref(a) - compAnn_indMinref(a) +1 );
-// //                     printf("# risolate_rootRadii.c: risolate_connCmp_getNumbers, zero annulus \n");
-//                     printf("# nbA: %d, nbA0: %d, nbA1: %d, nbA2: %d\n", *nbA, *nbA0, *nbA1, *nbA2);
-//                 }
-//             } else {
-//                 printf("# risolate_rootRadii.c: risolate_connCmp_getNumbers not zero annulus \n");
-//                 *nbA+=1;
-//                 if (sgn==0) *nbA+=1; /* special case where it is the initial box */
-//                 if ( sgn <= 0 ) {
-//                     if (compAnn_rrInNeref( a ) == 0) *nbA0+=1;
-//                     if ( (compAnn_rrInNeref( a ) == 1) && negContainedInCC ) *nbA1+=1;
-//                     if ( (compAnn_rrInNeref( a ) == 2) && negContainedInCC ) *nbA2+=1;
-//                 }
-//                 if ( sgn >= 0 ) {
-//                     if (compAnn_rrInPoref( a ) == 0) *nbA0+=1;
-//                     if ( (compAnn_rrInPoref( a ) == 1) && posContainedInCC ) *nbA1+=1;
-//                     if ( (compAnn_rrInPoref( a ) == 2) && posContainedInCC ) *nbA2+=1;
-//                 }
-//                 printf("# nbA: %d, nbA0: %d, nbA1: %d, nbA2: %d\n", *nbA, *nbA0, *nbA1, *nbA2);
-//             }
-//             
-//             ita = compAnn_list_next(ita);
-//         }
-//         /* actualize common annulus */
-//         if (sgn<0) {
-//             acommon = compAnn_list_first(compBox_annuliref( b, 0 ));
-//         } else if (sgn>0) {
-//             acommon = compAnn_list_last(compBox_annuliref( b, 0 ));
-//         } else {
-//             acommon = NULL; //it is the first box of the subdivision tree
-//         }
-//         itb = compBox_list_next(itb);
-//     }
-//     
-//     realApp_clear(left);
-//     realApp_clear(right);
-//     realApp_clear( neginf );
-//     realApp_clear( negsup );
-//     return;
-// }
-
 void risolate_connCmp_getNumbers( int * nbA,    /* nb of segments intersecting the cc */
                                     int * nbA0, /* nb of segments intersecting the cc where the nb of real roots is 0 */
                                     int * nbA1, /* nb of segments contained in the cc where the nb of real roots is 1 */
@@ -1104,14 +1000,14 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
 //                             resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
                             resTstar = deflate_real_tstar_test( ccur, cache, ccDisk, connCmp_degDeref(ccur), 0, prec, meta);
                             if (metadatas_getVerbo(meta)>=3)
-                                printf("#------run tstar with deflation for counting: nbSols: %d, required precision: %ld\n", (int) resTstar.nbOfSol, resTstar.appPrec);
+                                printf("#------run tstar with deflation for counting: depth: %ld, nbSols: %d, required precision: %ld\n", depth, (int) resTstar.nbOfSol, resTstar.appPrec);
                         }
                 }
                 
                 if (resTstar.nbOfSol < 0) {
                         resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
                         if (metadatas_getVerbo(meta)>=3)
-                            printf("#------run tstar for counting: nbSols: %d, required precision: %ld\n", (int) resTstar.nbOfSol, resTstar.appPrec);
+                            printf("#------run tstar for counting: depth: %ld, nbSols: %d, required precision: %ld\n", depth, (int) resTstar.nbOfSol, resTstar.appPrec);
                 }
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
                 prec = resTstar.appPrec;
@@ -1141,8 +1037,8 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
                   )
              ) ) {
             
-            if (metadatas_getVerbo(meta)>3) {
-                    printf("#--- Newton iteration\n");
+            if (metadatas_getVerbo(meta)>=3) {
+                    printf("#------ Newton iteration for a cluster of %d roots, depth: %ld------\n", connCmp_nSolsref(ccur), depth );
             }
                 
             if (metadatas_haveToCount(meta)){
@@ -1179,7 +1075,7 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
                         if (connCmp_isDefref(ccur)==0) {
                             if (realRat_cmp_ui(compDsk_radiusref(ccDisk), 1 ) < 0) {
                                if (metadatas_getVerbo(meta)>=3){
-                                    printf("#------Set deflation for a cluster of %d roots------\n", connCmp_nSolsref(ccur) );
+                                    printf("#------Set deflation for a cluster of %d roots, depth: %ld------\n", connCmp_nSolsref(ccur), depth );
                                     printf("#------disk: ");
                                     compDsk_print(ccDisk);
                                     printf("\n");
@@ -1330,72 +1226,19 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     slong prec = CCLUSTER_DEFAULT_PREC;
     /* heuristic to predict the precision: at least the degree */
     while (prec<degree/2)
+//     while (prec<degree)
         prec = 2*prec;
 //     slong precpred = prec;
     /* */
     start2 = clock();
-//     prec = realIntRootRadii_rootRadii_2( annulii, 0, cache, prec, meta );
     prec = realIntRootRadii_rootRadii( annulii, 0, cache, prec, meta );
     
     /* use annulii to get a sharp upper bound on the roots */
 //     slong upperBound = realApp_ceil_si(compAnn_radSupref(compAnn_list_last(annulii)), prec);
     realApp_ceil_realRat(upperBound, compAnn_radSupref(compAnn_list_last(annulii)), prec);
     
-//     if (metadatas_getVerbo(meta)>=2) {
-//         printf("#time in computing 1st RootRadii       : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-//         printf("#precision needed                      : %ld\n", prec);
-//         printf("#precision predicted                   : %ld\n", precpred);
-//         if (metadatas_getVerbo(meta)>=2) {
-//             printf("#Annulii: ");
-//             compAnn_list_printd(annulii, 10);
-//             printf("\n\n");
-//         }
-// //         printf("#upperBound on the norm of the roots:");
-// //         realRat_print(upperBound);
-// //         printf("\n");
-//     }
-    
     start2 = clock();
     realIntRootRadii_connectedComponents( annulii, prec );
-    
-//     if (metadatas_getVerbo(meta)>=2) {
-//         printf("#time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-//         printf("#Annulii: ");
-//         compAnn_list_printd(annulii, 10);
-//         printf("\n\n");
-//     }
-    
-//     /* approximated version */
-//     start2 = clock();
-//     slong prec2 = CCLUSTER_DEFAULT_PREC;
-// //     slong prec2 = 424;
-//     compAnn_list_t annuliiApp;
-//     compAnn_list_init(annuliiApp);
-// //     realRat_set_si(delta, 2*degree, 1);
-//     prec2 = realApp_rootRadii_fromZero( annuliiApp, cache, delta, prec2, meta );
-//     
-//     if (metadatas_getVerbo(meta)>=2) {
-//         printf("#time in computing 1st RootRadii       : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-//         printf("#precision needed                      : %ld\n", prec2);
-// //         if (metadatas_getVerbo(meta)>=3) {
-//             printf("#Annulii: ");
-//             compAnn_list_printd(annuliiApp, 10);
-//             printf("\n\n");
-// //         }
-// //         printf("#upperBound on the norm of the roots:");
-// //         realRat_print(upperBound);
-// //         printf("\n");
-//     }
-//     start2 = clock();
-//     realApp_rootRadii_connectedComponents( annuliiApp, prec );
-//     
-//     if (metadatas_getVerbo(meta)>=2) {
-//         printf("#time in computing connected components: %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-//         printf("#Annulii: ");
-//         compAnn_list_printd(annuliiApp, 10);
-//         printf("\n\n");
-//     }
-//     compAnn_list_clear(annuliiApp);
     
     start2 = clock();
     
@@ -1421,14 +1264,20 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     /* if upperBound is zero, set it to one */
     if ( realRat_is_zero(upperBound) )
         realRat_set_si(upperBound, 1, 1);
-    /* set width to 2*upperBound */
-    realRat_mul_si( upperBound, upperBound, 2);
-    realRat_set( compBox_bwidthref(box), upperBound );
     
+    /* not that efficient: */
+    realRat_mul_si( upperBound, upperBound, 2);
+    realRat_set( compBox_bwidthref(box), upperBound);
+//     realRat_min_2_realRat(compBox_bwidthref(box), compBox_bwidthref(initialBox));
+//     realRat_set_si(compBox_bwidthref(box), 2,1);
+//     while (realRat_cmp(compBox_bwidthref(box), upperBound)<=0)
+//         realRat_mul_si(compBox_bwidthref(box), compBox_bwidthref(box), 2);
     compBox_set(metadatas_initBref(meta), box);
+    /* use initial box instead */
 //     compBox_set(metadatas_initBref(meta), initialBox);
 //     compBox_set(box, initialBox);
-//     compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
+
+    compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
 //     
     compBox_copy_annulii(box, 0, annulii);
 //     

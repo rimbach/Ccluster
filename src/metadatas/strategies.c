@@ -99,6 +99,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_useRootRadii          = 1;
         return;
     }
+    
     if (strcmp( stratName, STRAT_STR_ONLSUBD ) == 0) {
         strat->_useNewton             = 1;
         strat->_useTstarOptim         = 1;

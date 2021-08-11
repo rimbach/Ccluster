@@ -464,7 +464,7 @@ void ccluster_DAC_first_interface_forJulia( connCmp_list_t qResults,
     ccluster_DAC_first( qResults, qAllResults, qMainLoop, discardedCcs, nbSols, initialBox, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
 //         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
@@ -501,7 +501,7 @@ void ccluster_DAC_next_interface_forJulia( connCmp_list_t qResults,
     ccluster_DAC_next( qResults, qAllResults, qMainLoop, discardedCcs,nbSols, eps, cache, meta);
     
     metadatas_count(meta);
-    metadatas_fprint(stdout, meta, eps);
+    metadatas_fprint(stdout, meta, cache, eps);
     if (verb>=3) {
         connCmp_list_print_for_results(stdout, qResults, meta);
 //         connCmp_list_print_for_results(stdout, qResults, 500, 40, meta);
@@ -532,7 +532,7 @@ void ccluster_DAC_next_interface_forJulia( connCmp_list_t qResults,
 //     
 //     ccluster_DAC_first( qRes, qMainLoop, discardedCcs, initialBox, eps, cache, meta);
 //     metadatas_count(meta);
-//     metadatas_fprint(stdout, meta, eps);
+//     metadatas_fprint(stdout, meta, cache, eps);
 //     
 //     if (verb>=3) {
 //         connCmp_list_print_for_results(stdout, qRes, meta);
