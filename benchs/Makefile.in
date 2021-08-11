@@ -43,7 +43,7 @@ cleanISSAC2020:
 benchCASC2021:
 	cd CASC2021 &&\
 	./table_risolate.sh &&\
-	./table_risolate.sh &&\
+	./table_ccluster.sh &&\
 	cd ..
 	
 cleanCASC2021:
