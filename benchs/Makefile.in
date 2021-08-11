@@ -28,7 +28,7 @@ benchMACIS2019:
 	./tableMACIS.sh --degrees="128 191 256 383"\
 	&& cd ..
 
-cleanMACIS2010:
+cleanMACIS2019:
 	rm -rf MACIS2019/tableMACIS
 	
 benchISSAC2020:
@@ -39,7 +39,16 @@ benchISSAC2020:
 	
 cleanISSAC2020:
 	rm -rf ISSAC2020/table2_IR43
+
+benchCASC2021:
+	cd CASC2021 &&\
+	./table_risolate.sh &&\
+	./table_ccluster.sh &&\
+	cd ..
 	
+cleanCASC2021:
+	rm -rf CASC2021/tab_risolate
+
 tableBernoulliM:
 	@echo -e $(BGREEN) "Generate table Bernoulli (table 1) of ICMS2018 paper" $(NORMAL)
 	cd ICMS2018 &&\
