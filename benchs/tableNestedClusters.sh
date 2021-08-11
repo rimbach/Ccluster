@@ -1,26 +1,10 @@
 #!/bin/bash
 
+POLNAME="nestedClusters"
+
 usage()
 {
-   echo "Usage: ./tableNestedClusters <options> <args>"
-}
-
-format_time()
-{
-    TIME1=$1
-    TIME2=$1
-    TIME1=`echo $TIME1 | cut -f1 -d'.'`
-    TIME2=`echo $TIME2 | cut -f2 -d'.'`
-    STIME1=${#TIME1}
-    STIME1=$(( 3 - $STIME1 ))
-    STIME2=$(( 3 < $STIME1 ? 3 : $STIME1 ))
-    STIME2=$(( 0 > $STIME2 ? 0 : $STIME2 ))
-    if [ $STIME2 -eq 0 ]; then
-        echo $TIME1
-    else
-        TIME2=`echo $TIME2 | cut -c-$( echo $STIME2)`
-        echo $TIME1"."$TIME2
-    fi
+   echo "Usage: ./table$POLNAME <options> <args>"
 }
 
 ##########################getting arguments
@@ -32,8 +16,17 @@ while [ "$1" != "" ]; do
          usage
          exit 0
          ;;
-      --itts)
-        ITTS=$VALUE
+      --verbose)
+        VERBOSE=1
+        ;;
+      --iterations)
+        DEGREES=$VALUE
+        ;;
+      --relWidth)
+        RELWIDTH=$VALUE
+        ;;
+      --nbSols)
+        NBSOLS=$VALUE
         ;;
       --epsilonCCL)
         EPSILONCCL=$VALUE
@@ -41,17 +34,26 @@ while [ "$1" != "" ]; do
       --epsilonMPS)
         EPSILONMPS=$VALUE
         ;;
-      --precMPS)
-        PRECMPS=$VALUE
-        ;;
       --blocal)
         BLOCAL="$VALUE"
         ;;
-      --bglobal)
-        BGLOBAL="$VALUE"
-        ;;
       --purge)
         PURGE=1
+        ;;
+      --purgeMPSOLVE)
+        PURGEMPSOLVE=1
+        ;;
+      --purgeCCLLOCAL)
+        PURGECCLLOCAL=1
+        ;;
+      --purgeCCLGLOBAL)
+        PURGECCLGLOBAL=1
+        ;;
+      --mflag)
+        MFLAG="$VALUE"
+        ;;
+      --rep)
+        REP="$VALUE"
         ;;
       *)
         usage
@@ -62,8 +64,26 @@ while [ "$1" != "" ]; do
 done
 
 #default values
-if [ -z "$ITTS" ]; then
-   ITTS="2 3"
+if [ -z "$VERBOSE" ]; then
+   VERBOSE=0
+fi
+ECHO=""
+if [ $VERBOSE -eq 0 ]; then
+     ECHO="echo -e \c "
+else
+     ECHO="echo "
+fi
+
+if [ -z "$DEGREES" ]; then
+   DEGREES="2 3"
+fi
+
+if [ -z "$RELWIDTH" ]; then
+   RELWIDTH="16"
+fi
+
+if [ -z "$NBSOLS" ]; then
+   NBSOLS="3"
 fi
 
 if [ -z "$EPSILONCCL" ]; then
@@ -74,33 +94,32 @@ if [ -z "$EPSILONMPS" ]; then
    EPSILONMPS="16"
 fi
 
-if [ -z "$PRECMPS" ]; then
-   PRECMPS="53"
-fi
-
 if [ -z "$BLOCAL" ]; then
-   BLOCAL="0,1,0,1,2,1"
-fi
-
-if [ -z "$BGLOBAL" ]; then
-   BGLOBAL="global"
+   BLOCAL="0/1,0/1,2/1"
 fi
 
 if [ -z "$PURGE" ]; then
    PURGE=0
 fi
 
-VFLAG="V5"
+if [ -z "$PURGEMPSOLVE" ]; then
+   PURGEMPSOLVE=0
+fi
 
-REP="tableNestedClusters"
+if [ -z "$PURGECCLLOCAL" ]; then
+   PURGECCLLOCAL=0
+fi
 
-if [ -d "$REP" ]; then
-  if [ $PURGE -eq 1 ]; then
-    rm -rf $REP
-    mkdir $REP
-  fi
-else
-  mkdir $REP
+if [ -z "$PURGECCLGLOBAL" ]; then
+   PURGECCLGLOBAL=0
+fi
+
+if [ -z "$MFLAG" ]; then
+   MFLAG="default"
+fi
+
+if [ -z "$REP" ]; then
+   REP="table$POLNAME"
 fi
 
 ##########################solvers
@@ -108,77 +127,25 @@ CCLUSTER_PATH="../"
 CCLUSTER_CALL=$CCLUSTER_PATH"/bin/ccluster"
 GENPOLFILE_CALL=$CCLUSTER_PATH"/bin/genPolFile"
 
-MPSOLVE_CALL="mpsolve -au -Gi -o"$EPSILONMPS" -j1"
-MPSOLVE_CALL_S="mpsolve -as -Gi -o"$EPSILONMPS" -j1"
+MPSOLVE_CALL_S="mpsolve -as -Ga -o"$EPSILONMPS" -j1"
 
-##########################naming
-POL_NAME="Spiral"
+source functions.sh
 
-HEAD_TABLE="\begin{tabular}{l||c|c|c||c|c|c||c|c|}"
-FIRST_LINE="     & \multicolumn{3}{|c||}{\texttt{Ccluster} local (\$[-1,1]^2\$)}"
-FIRST_LINE=$FIRST_LINE"& \multicolumn{3}{|c||}{\texttt{Ccluster} global}"
-FIRST_LINE=$FIRST_LINE"& \texttt{unisolve} & \texttt{secsolve} \\\\\\hline"
-SECOND_LINE="d& (\#Sols:\#Clus) & (depth:size) & \$\tau_\ell\$ (s)"
-SECOND_LINE=$SECOND_LINE"& (\#Sols:\#Clus) & (depth:size) & \$\tau_g\$ (s)"
-SECOND_LINE=$SECOND_LINE"& \$\tau_u\$ (s) & \$\tau_s\$ (s)   \\\\\\hline\hline"
-TAIL_TAB="\end{tabular}"
+init_rep $REP
+TEMPTABFILE="temptabfileNes.txt"
 
-TEMPTABFILE="temptabfileNest.txt"
 touch $TEMPTABFILE
 
-for DEG in $ITTS; do
-    DEGTEMP=$(( 3 ** $DEG ))
-    LINE_TAB=$DEGTEMP
-    FILENAME_CCLUSTER_L_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_local.out"
-    FILENAME_CCLUSTER_G_OUT=$REP"/"$POL_NAME"_"$DEG"_ccluster_global.out"
-    FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG".pol"
-    FILENAME_MPSOLVE_U_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_u.out"
-    FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_mpsolve_s.out"
-    
-    $GENPOLFILE_CALL $POL_NAME $DEG $FILENAME_MPSOLVE_IN -f 2
-    
-    if [ ! -e $FILENAME_CCLUSTER_L_OUT ]; then
-        echo  "Clustering roots for $POL_NAME, itts $DEG, local, output in "$FILENAME_CCLUSTER_L_OUT > /dev/stderr
-        $CCLUSTER_CALL"_nested" $DEG -d $BLOCAL -e $EPSILONCCL -m $VFLAG -v 3 > $FILENAME_CCLUSTER_L_OUT
-    fi
-    if [ ! -e $FILENAME_CCLUSTER_G_OUT ]; then
-        echo  "Clustering roots for $POL_NAME, itts $DEG, global, output in "$FILENAME_CCLUSTER_G_OUT > /dev/stderr
-        $CCLUSTER_CALL"_nested" $DEG -d $BGLOBAL -e $EPSILONCCL -m $VFLAG -v 3 > $FILENAME_CCLUSTER_G_OUT
-    fi
-    $GENPOLFILE_CALL $DEG $PRECMPS > $FILENAME_MPSOLVE_IN
-    if [ ! -e $FILENAME_MPSOLVE_U_OUT ]; then
-        if [ $(( $DEG < 300 ? 0 : 1 )) -eq 0 ]; then
-            echo "Isolating roots in C with MPSOLVE UNISOLVE........." > /dev/stderr
-            (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_U_OUT) &>> $FILENAME_MPSOLVE_U_OUT
-        else
-            echo "real    \$>1000\$" > $FILENAME_MPSOLVE_U_OUT
-        fi
-    fi
-    if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
-        echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
-        (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL_S $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_S_OUT) &>> $FILENAME_MPSOLVE_S_OUT
-    fi
-    TCCLUSTER_L=$(grep "time:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    TDCCLUSTER_L=$(grep "tree depth:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    TSCCLUSTER_L=$(grep "tree size:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBCLUSTERS_L=$(grep "number of clusters:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBSOLUTION_L=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    
-    TCCLUSTER_G=$(grep "time:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-    TDCCLUSTER_G=$(grep "tree depth:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    TSCCLUSTER_G=$(grep "tree size:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBCLUSTERS_G=$(grep "number of clusters:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    NBSOLUTION_G=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-    
-    TMPSOLVE=$(grep "real" $FILENAME_MPSOLVE_U_OUT| cut -f2 -d'l' | tr -d ' ')
-    TMPSOLVE_S=$(grep "real" $FILENAME_MPSOLVE_S_OUT| cut -f2 -d'l' | tr -d ' ')
-    
-    LINE_TAB=$LINE_TAB"&("$NBSOLUTION_L":"$NBCLUSTERS_L")&("$TDCCLUSTER_L":"$TSCCLUSTER_L")&`format_time $TCCLUSTER_L`"
-    LINE_TAB=$LINE_TAB"&("$NBSOLUTION_G":"$NBCLUSTERS_G")&("$TDCCLUSTER_G":"$TSCCLUSTER_G")&`format_time $TCCLUSTER_G`"
-    LINE_TAB=$LINE_TAB"&"$TMPSOLVE"&"$TMPSOLVE_S
-    LINE_TAB=$LINE_TAB"\\\\\\hline"
-    
-    echo $LINE_TAB >> $TEMPTABFILE
+for NS in $NBSOLS; do
+    for RW in $RELWIDTH; do
+        for DEG in $DEGREES; do
+            FILENAME=$REP"/"$POLNAME"_"$NS"_"$RW"_"$DEG
+            gen_with_deg_rw_ns $FILENAME $POLNAME $DEG $RW $NS
+            run_ccluster_local_global $FILENAME $POLNAME $DEG
+            run_mpsolve $FILENAME $POLNAME $DEG 
+            stats_pol_ccluster_l_g_mpsolve $FILENAME $DEG
+        done
+    done
 done
 
 echo $HEAD_TABLE
