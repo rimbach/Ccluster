@@ -30,12 +30,13 @@ void strategies_set_int( strategies_t strat, int useNewton,
     strat->_useAnticipate         = 0;
     strat->_useNBThreads          = 0;
     strat->_additionalFlags       = 0;
-    strat->_useRealCoeffs            = 0;
-    strat->_usePowerSums             = 0;
+    strat->_useRealCoeffs         = 0;
+    strat->_usePowerSums          = 0;
     strat->_forTests              = 0;
 //     strat->_pwSuTest              = 0;
     strat->_pwSuNbPs              = 0;
-    strat->_useRootRadii             = 0;
+    strat->_useRootRadii          = 0;
+    strat->_useScaAndRou          =0;
     
     strat->_useNewton             = useNewton;
     strat->_useTstarOptim         = useTstarOptim;
@@ -64,6 +65,7 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
 //     strat->_pwSuTest              = strat2->_pwSuTest   ;
     strat->_pwSuNbPs           = strat2->_pwSuNbPs;
     strat->_useRootRadii             = strat2->_useRootRadii  ;
+    strat->_useScaAndRou             = strat2->_useScaAndRou  ;
 }
 
 void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
@@ -81,6 +83,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
     strat->_forTests             = 0;
     strat->_pwSuNbPs          = 0;
     strat->_useRootRadii         = 0;
+    strat->_useScaAndRou         = 0;
     
     strat->_useNBThreads          = nbThreads;
     
@@ -94,6 +97,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_usePowerSums          = 0;
         strat->_forTests              = 0;
         strat->_useRootRadii          = 1;
+        strat->_useScaAndRou          = 1;
         return;
     }
     
@@ -107,32 +111,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_usePowerSums          = 0;
         strat->_forTests              = 0;
         strat->_useRootRadii          = 0;
-        return;
-    }
-    
-    if (strcmp( stratName, STRAT_STR_FORTESTS1 ) == 0) {
-        strat->_useNewton             = 1;
-        strat->_useTstarOptim         = 1;
-        strat->_usePredictPrec        = 1;
-        strat->_useAnticipate         = 1;
-        strat->_useRealCoeffs         = 1;
-        strat->_useDeflation          = 1;
-        strat->_usePowerSums          = 0;
-        strat->_forTests              = 1;
-        strat->_useRootRadii          = 1;
-        return;
-    }
-    
-    if (strcmp( stratName, STRAT_STR_FORTESTS2 ) == 0) {
-        strat->_useNewton             = 1;
-        strat->_useTstarOptim         = 1;
-        strat->_usePredictPrec        = 1;
-        strat->_useAnticipate         = 1;
-        strat->_useRealCoeffs         = 1;
-        strat->_useDeflation          = 1;
-        strat->_usePowerSums          = 0;
-        strat->_forTests              = 1;
-        strat->_useRootRadii          = 0;
+        strat->_useScaAndRou          = 1;
         return;
     }
     
@@ -193,30 +172,20 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_pwSuNbPs              = 0;
         return;
     }
-//     if (strcmp( stratName, STRAT_STR_FORTESTS1 ) == 0) {
-//         strat->_useNewton             = 1;
-//         strat->_useTstarOptim         = 1;
-//         strat->_usePredictPrec        = 1;
-//         strat->_useAnticipate         = 1;
-//         strat->_useRealCoeffs         = 1;
-//         strat->_usePowerSums          = 0;
-// //         strat->_forTests              = 1;
-//         strat->_pwSuNbPs              = 2;
-//         return;
-//     }
-    
-//     if (strcmp( stratName, STRAT_STR_FORTESTS2 ) == 0) {
-//         strat->_useNewton             = 1;
-//         strat->_useTstarOptim         = 1;
-//         strat->_usePredictPrec        = 1;
-//         strat->_useAnticipate         = 1;
-//         strat->_useRealCoeffs           = 1;
-//         strat->_usePowerSums          = 1;
-// //         strat->_pwSuTest              = 1;
-//         strat->_forTests              = 1;
-//         strat->_pwSuNbPs              = 3;
-//         return;
-//     }
+
+    if (strcmp( stratName, STRAT_STR_V7 ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_useRealCoeffs         = 1;
+        strat->_useDeflation          = 1;
+        strat->_usePowerSums          = 0;
+        strat->_forTests              = 0;
+        strat->_useRootRadii          = 0;
+        strat->_useScaAndRou          = 0;
+        return;
+    }
     
     if (strcmp( stratName, STRAT_STR_V8 ) == 0) {
         strat->_useNewton             = 1;
@@ -224,22 +193,11 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_usePredictPrec        = 1;
         strat->_useAnticipate         = 1;
         strat->_useRealCoeffs         = 1;
-        strat->_useDeflation          = 0;
+        strat->_useDeflation          = 1;
         strat->_usePowerSums          = 0;
         strat->_forTests              = 0;
         strat->_useRootRadii          = 1;
-        return;
-    }
-    if (strcmp( stratName, STRAT_STR_V7 ) == 0) {
-        strat->_useNewton             = 1;
-        strat->_useTstarOptim         = 1;
-        strat->_usePredictPrec        = 1;
-        strat->_useAnticipate         = 1;
-        strat->_useRealCoeffs         = 1;
-        strat->_useDeflation          = 0;
-        strat->_usePowerSums          = 0;
-        strat->_forTests              = 0;
-        strat->_useRootRadii          = 0;
+        strat->_useScaAndRou          = 0;
         return;
     }
     
