@@ -88,11 +88,19 @@ void counters_by_depth_init( counters_by_depth_t st) {
     st->nbTaylorsRepetedInTSTests = 0;
     st->nbNewton                  = 0;
     st->nbFailingNewton           = 0;
-    st->nbTSTestsInNewton                  = 0;
-    st->nbTaylorsInNewton          = 0;
-    st->nbGraeffeInNewton          = 0;
+    st->nbTSTestsInNewton         = 0;
+    st->nbTaylorsInNewton         = 0;
+    st->nbGraeffeInNewton         = 0;
     st->nbPsCountingTest          = 0;   
     st->nbEval                    = 0;
+    
+    st-> nbCauchyExTests          = 0;
+    st-> nbCauchyExEvalsP         = 0;
+    st-> nbCauchyExEvalsD         = 0;
+    st-> nbCauchyCoTests          = 0;
+    st-> nbCauchyCoEvalsP         = 0;
+    st-> nbCauchyCoEvalsD         = 0;
+
     boxes_by_prec_init( st->bpc );
 }
 
@@ -129,6 +137,9 @@ void counters_init( counters * st) {
     st->RR_nbGraeffeRepeted = 0;
     st->RR_nbTaylors        = 0;
     st->RR_nbTaylorsRepeted = 0;
+    
+    st->Comp_nb_1           = 0;
+    st->Comp_nb_p           = 0;
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_init ( &(st->_mutex), NULL);
 #endif    
@@ -255,7 +266,15 @@ void counters_count ( counters_t st ) {
        st->total->nbTaylorsInNewton         += (st->table)[i].nbTaylorsInNewton         ; 
        st->total->nbGraeffeInNewton         += (st->table)[i].nbGraeffeInNewton         ;
        st->total->nbPsCountingTest          += (st->table)[i].nbPsCountingTest          ;    
-       st->total->nbEval        += (st->table)[i].nbEval           ;
+       st->total->nbEval                    += (st->table)[i].nbEval                    ;
+       
+       st->total->nbCauchyExTests           += (st->table)[i].nbCauchyExTests           ; 
+       st->total->nbCauchyExEvalsP          += (st->table)[i].nbCauchyExEvalsP          ; 
+       st->total->nbCauchyExEvalsD          += (st->table)[i].nbCauchyExEvalsD          ; 
+       st->total->nbCauchyCoTests           += (st->table)[i].nbCauchyCoTests           ;
+       st->total->nbCauchyCoEvalsP          += (st->table)[i].nbCauchyCoEvalsP          ;    
+       st->total->nbCauchyCoEvalsD          += (st->table)[i].nbCauchyCoEvalsD          ;
+       
        boxes_by_prec_add_boxes_by_prec( st->total->bpc, (st->table)[i].bpc ); 
     }
 
@@ -286,6 +305,46 @@ int counters_getNbTaylorsInNewton           ( const counters_t st ){ return st->
 int counters_getNbGraeffeInNewton           ( const counters_t st ){ return st->total->nbGraeffeInNewton         ;}
 int counters_getNbPsCountingTest            ( const counters_t st ){ return st->total->nbPsCountingTest          ;}
 int counters_getNbEval                      ( const counters_t st ){ return st->total->nbEval                    ;}
+
+/* Cauchy root finder */
+void counters_add_CauchyExTest              ( counters_t st, int depth, slong prec ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyExTests                 +=1;
+    boxes_by_prec_add_int( (st->table[depth]).bpc, prec, 1);
+}
+int  counters_getNbCauchyExTests            ( const counters_t st ){ return st->total->nbCauchyExTests                    ;}
+void counters_add_CauchyExEvalsP            ( counters_t st, int depth, int nb ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyExEvalsP                 +=nb;
+}
+int  counters_getNbCauchyExEvalsP           ( const counters_t st ){ return st->total->nbCauchyExEvalsP                    ;}
+void counters_add_CauchyExEvalsD            ( counters_t st, int depth, int nb ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyExEvalsD                 +=nb;
+}
+int  counters_getNbCauchyExEvalsD           ( const counters_t st ){ return st->total->nbCauchyExEvalsD                    ;}
+void counters_add_CauchyCoTest              ( counters_t st, int depth, slong prec ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyCoTests                 +=1;
+    boxes_by_prec_add_int( (st->table[depth]).bpc, prec, 1);
+}
+int  counters_getNbCauchyCoTests            ( const counters_t st ){ return st->total->nbCauchyCoTests                    ;}
+void counters_add_CauchyCoEvalsP            ( counters_t st, int depth, int nb ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyCoEvalsP                 +=nb;
+}
+int  counters_getNbCauchyCoEvalsP           ( const counters_t st ){ return st->total->nbCauchyCoEvalsP                    ;}
+void counters_add_CauchyCoEvalsD            ( counters_t st, int depth, int nb ){
+    counters_adjust_table(st, depth);
+    (st->table[depth]).nbCauchyCoEvalsD                 +=nb;
+}
+int  counters_getNbCauchyCoEvalsD           ( const counters_t st ){ return st->total->nbCauchyCoEvalsD                    ;}
+
+/* compression algorithm */
+void counters_addComp_nb_1                     (counters_t st, int nb ) { (st->Comp_nb_1) += nb;                                ;}
+int  counters_getComp_nb_1                     (const counters_t st ){ return st->Comp_nb_1                                     ;}
+void counters_addComp_nb_p                     (counters_t st, int nb ) { (st->Comp_nb_p) += nb;                                ;}
+int  counters_getComp_nb_p                     (const counters_t st ){ return st->Comp_nb_p                                     ;}
 /* DEPRECATED
 void counters_by_depth_get_lenghts_of_str( counters_by_depth_t res, counters_by_depth_t st){
     

@@ -68,6 +68,24 @@ typedef struct {
     double  _clicks_DefGrae_cumul;
     double  _clicks_DefTsta_cumul;
     
+    /* Cauchy root finder */
+    double  _clicks_CauExTo_cumul; /* time in Cauchy exclusion tests */
+    double  _clicks_CauExEP_cumul; /* time in evaluations in probabilistic exclusion tests */
+    double  _clicks_CauExED_cumul; /* time in evaluations in certifying    exclusion tests */
+    double  _clicks_CauExDS_cumul; /* time in computing divisions in       exclusion tests */
+    double  _clicks_CauExCS_cumul; /* time in computing s0 in              exclusion tests */
+    
+    double  _clicks_CauCoTo_cumul; /* time in Cauchy counting tests */
+    double  _clicks_CauCoEP_cumul; /* time in evaluations in probabilistic counting tests */
+    double  _clicks_CauCoED_cumul; /* time in evaluations in certifying    counting tests */
+    double  _clicks_CauCoDS_cumul; /* time in computing divisions in       counting tests */
+    double  _clicks_CauCoCS_cumul; /* time in computing s0 in              counting tests */
+    /* Compression into rigid disks */
+    double  _clicks_CompCen_cumul; /* time spent in computing center of gravity s1/m */
+    double  _clicks_CompRRP_cumul; /* time spent in probabilistic root radius algorithm */
+    double  _clicks_CompCCT_cumul; /* time spent in probabilistic root radius algorithm */
+    double  _clicks_CompRRD_cumul; /* time spent in deterministiv root radius algorithm */
+    double  _clicks_CompTot_cumul; /* total time spent in compression algorithm */
     
 #ifdef CCLUSTER_HAVE_PTHREAD
     pthread_mutex_t _mutex;
@@ -263,6 +281,82 @@ METADATAS_INLINE double chronos_get_time_RRTaylo ( const chronos_t times ) { ret
 METADATAS_INLINE double chronos_get_time_RRGraef ( const chronos_t times ) { return times->_clicks_RRGraef_cumul; }
 METADATAS_INLINE double chronos_get_time_rootRad ( const chronos_t times ) { return times->_clicks_rootRad_cumul; }
 METADATAS_INLINE double chronos_get_time_RRT0Tes ( const chronos_t times ) { return times->_clicks_RRT0Tes_cumul; }
+
+/* Cauchy root finder */
+METADATAS_INLINE void   chronos_add_time_CauExTo( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CauExTo_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CauExTo ( const chronos_t times ) { return times->_clicks_CauExTo_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CauExEP( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CauExEP_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CauExEP ( const chronos_t times ) { return times->_clicks_CauExEP_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CauExED( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CauExED_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CauExED ( const chronos_t times ) { return times->_clicks_CauExED_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CauExDS( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CauExDS_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CauExDS ( const chronos_t times ) { return times->_clicks_CauExDS_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CauExCS( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CauExCS_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CauExCS ( const chronos_t times ) { return times->_clicks_CauExCS_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CauCoTo( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CauCoTo_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CauCoTo ( const chronos_t times ) { return times->_clicks_CauCoTo_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CauCoEP( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CauCoEP_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CauCoEP ( const chronos_t times ) { return times->_clicks_CauCoEP_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CauCoED( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CauCoED_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CauCoED ( const chronos_t times ) { return times->_clicks_CauCoED_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CauCoDS( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CauCoDS_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CauCoDS ( const chronos_t times ) { return times->_clicks_CauCoDS_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CauCoCS( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CauCoCS_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CauCoCS ( const chronos_t times ) { return times->_clicks_CauCoCS_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CompCen( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CompCen_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CompCen ( const chronos_t times ) { return times->_clicks_CompCen_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CompRRP( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CompRRP_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CompRRP ( const chronos_t times ) { return times->_clicks_CompRRP_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CompCCT( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CompCCT_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CompCCT ( const chronos_t times ) { return times->_clicks_CompCCT_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CompRRD( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CompRRD_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CompRRD ( const chronos_t times ) { return times->_clicks_CompRRD_cumul; }
+
+METADATAS_INLINE void   chronos_add_time_CompTot( chronos_t times, double d, int nbThreads ){
+    times->_clicks_CompTot_cumul += d/CLOCKS_PER_SEC;
+}
+METADATAS_INLINE double chronos_get_time_CompTot ( const chronos_t times ) { return times->_clicks_CompTot_cumul; }
 
 /* DEPRECATED */
 // METADATAS_INLINE void   chronos_tic_Approxi      ( chronos_t times ) { times->_clicks_Approxi = clock(); }

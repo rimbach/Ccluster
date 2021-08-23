@@ -78,6 +78,13 @@ typedef struct {
     /* Power Sums */
     int nbPsCountingTest;
     int nbEval;
+    /* Cauchy root finder */
+    int nbCauchyExTests;
+    int nbCauchyExEvalsP;
+    int nbCauchyExEvalsD;
+    int nbCauchyCoTests;
+    int nbCauchyCoEvalsP;
+    int nbCauchyCoEvalsD;
     
     boxes_by_prec_t bpc;
 } counters_by_depth;
@@ -102,6 +109,10 @@ typedef struct {
         int RR_nbGraeffeRepeted;
         int RR_nbTaylors;
         int RR_nbTaylorsRepeted;
+        
+        /* compression */
+        int Comp_nb_1;
+        int Comp_nb_p;
         
 #ifdef CCLUSTER_HAVE_PTHREAD
         pthread_mutex_t _mutex;
@@ -169,6 +180,27 @@ void counters_add_PsCountingTest( counters_t st, int depth );
 METADATAS_INLINE int counters_boxes_by_prec_fprint ( FILE * file, const counters_t st ) {
     return boxes_by_prec_fprint( file, st->total->bpc);
 }
+
+/* Cauchy root finder */
+void counters_add_CauchyExTest              ( counters_t st, int depth, slong prec );
+int  counters_getNbCauchyExTests            ( const counters_t st );
+void counters_add_CauchyExEvalsP            ( counters_t st, int depth, int nb );
+int  counters_getNbCauchyExEvalsP           ( const counters_t st );
+void counters_add_CauchyExEvalsD            ( counters_t st, int depth, int nb );
+int  counters_getNbCauchyExEvalsD           ( const counters_t st );
+void counters_add_CauchyCoTest              ( counters_t st, int depth, slong prec );
+int  counters_getNbCauchyCoTests            ( const counters_t st );
+void counters_add_CauchyCoEvalsP            ( counters_t st, int depth, int nb );
+int  counters_getNbCauchyCoEvalsP           ( const counters_t st );
+void counters_add_CauchyCoEvalsD            ( counters_t st, int depth, int nb );
+int  counters_getNbCauchyCoEvalsD           ( const counters_t st );
+
+/* compression algorithm */
+void counters_addComp_nb_1                     (counters_t st, int nb );
+int  counters_getComp_nb_1                     (const counters_t st );
+void counters_addComp_nb_p                     (counters_t st, int nb );
+int  counters_getComp_nb_p                     (const counters_t st );
+
 
 /* DEPRECATED */
 // void counters_join_depth( counters_t c1, const counters_by_depth_t c2, int depth);

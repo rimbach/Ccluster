@@ -33,6 +33,16 @@ void realApp_mul_realRat( realApp_t x, const realApp_t y, const realRat_t z, slo
     arb_div_fmpz(x, x, fmpq_denref(z), prec);
 }
 
+void realApp_div_realRat( realApp_t x, const realApp_t y, const realRat_t z, slong prec ){
+    arb_mul_fmpz(x, y, fmpq_denref(z), prec);
+    arb_div_fmpz(x, x, fmpq_numref(z), prec);
+}
+
+void compApp_div_realRat( compApp_t x, const compApp_t y, const realRat_t z, slong prec ){
+    acb_div_fmpz(x, y, fmpq_numref(z), prec);
+    acb_mul_fmpz(x, x, fmpq_denref(z), prec);
+}
+
 void realApp_mul_realRat_in_place( realApp_t x, const realRat_t y, slong prec ){
     arb_mul_fmpz(x, x, fmpq_numref(y), prec);
     arb_div_fmpz(x, x, fmpq_denref(y), prec);

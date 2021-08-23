@@ -40,6 +40,7 @@ NUMBERS_INLINE void realApp_clear(realApp_t x) { arb_clear(x); }
 /* setting */
 NUMBERS_INLINE void realApp_zero      (realApp_t x                                ) { arb_zero     (x); }
 NUMBERS_INLINE void realApp_one       (realApp_t x                                ) { arb_one      (x); }
+NUMBERS_INLINE void realApp_pi        (realApp_t x, slong prec                    ) { arb_const_pi(x, prec); }
 NUMBERS_INLINE void realApp_set       (realApp_t y, const realApp_t x             ) { arb_set      (y, x); }
 NUMBERS_INLINE void realApp_set_fmpq  (realApp_t y, const fmpq_t    x, slong prec ) { arb_set_fmpq (y, x, prec); }
 NUMBERS_INLINE void realApp_set_fmpz  (realApp_t y, const fmpz_t    x, slong prec ) { arb_set_fmpz (y, x); }

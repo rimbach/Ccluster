@@ -146,7 +146,7 @@ int main(int argc, char **argv){
             if (argc>arg+1) {
                 parse = parse*sscanf(argv[arg+1], "%d", &bitsize);
                 if (bitsize<=0){
-                    printf("%s ERROR: NON-VALID BITSIZE (should >0) \n", argv[0]);
+                    printf("%s ERROR: NON-VALID BITSIZE (should be >0) \n", argv[0]);
                     parse = 0;
                 }
                 arg++;
@@ -157,7 +157,7 @@ int main(int argc, char **argv){
             if (argc>arg+1) {
                 parse = parse*sscanf(argv[arg+1], "%d", &nbterms);
                 if (nbterms<=0){
-                    printf("%s ERROR: NON-VALID BITSIZE (should >0) \n", argv[0]);
+                    printf("%s ERROR: NON-VALID BITSIZE (should be >0) \n", argv[0]);
                     parse = 0;
                 }
                 arg++;
@@ -167,8 +167,8 @@ int main(int argc, char **argv){
         if ( (strcmp( argv[arg], "-p" ) == 0) || (strcmp( argv[arg], "--power" ) == 0) ) {
             if (argc>arg+1) {
                 parse = parse*sscanf(argv[arg+1], "%d", &power);
-                if (nbterms<=0){
-                    printf("%s ERROR: NON-VALID POWER (should >0) \n", argv[0]);
+                if (power<=0){
+                    printf("%s ERROR: NON-VALID POWER (should be >0) \n", argv[0]);
                     parse = 0;
                 }
                 arg++;
@@ -178,8 +178,30 @@ int main(int argc, char **argv){
         if ( (strcmp( argv[arg], "-L" ) == 0) || (strcmp( argv[arg], "--precision" ) == 0) ) {
             if (argc>arg+1) {
                 parse = parse*sscanf(argv[arg+1], "%d", &precision);
-                if (nbterms<=0){
-                    printf("%s ERROR: NON-VALID PRECISION (should >0) \n", argv[0]);
+                if (precision<=0){
+                    printf("%s ERROR: NON-VALID PRECISION (should be >0) \n", argv[0]);
+                    parse = 0;
+                }
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-c" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &c);
+                if (c<=0){
+                    printf("%s ERROR: NON-VALID c (should be >0) \n", argv[0]);
+                    parse = 0;
+                }
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-a" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &a);
+                if (a<=1){
+                    printf("%s ERROR: NON-VALID a (should be >=2) \n", argv[0]);
                     parse = 0;
                 }
                 arg++;

@@ -100,13 +100,23 @@ POLYNOMIALS_INLINE void realRat_poly_scalar_mul_si(realRat_poly_t res, const rea
 POLYNOMIALS_INLINE void realRat_poly_scalar_mul_realRat(realRat_poly_t res, const realRat_poly_t poly1, const realRat_t q) {
     fmpq_poly_scalar_mul_fmpq(res, poly1, q);
 }
+/* Finds the quotient Q and remainder R of the Euclidean division of poly1 by poly2.*/
+POLYNOMIALS_INLINE void realRat_poly_divrem( realRat_poly_t Q, realRat_poly_t R, const realRat_poly_t poly1, const realRat_poly_t poly2) {
+    fmpq_poly_divrem( Q, R, poly1, poly2);
+}
+/* Finds the remainder R of the Euclidean division of poly1 by poly2.*/
+POLYNOMIALS_INLINE void realRat_poly_rem( realRat_poly_t R, const realRat_poly_t poly1, const realRat_poly_t poly2) {
+    fmpq_poly_rem( R, poly1, poly2);
+}
 POLYNOMIALS_INLINE void realRat_poly_shift_left(realRat_poly_t res, const realRat_poly_t poly1, slong n) {
     fmpq_poly_shift_left(res, poly1, n);
 }
 POLYNOMIALS_INLINE void realRat_poly_shift_right(realRat_poly_t res, const realRat_poly_t poly1, slong n) {
     fmpq_poly_shift_right(res, poly1, n);
 }
-
+POLYNOMIALS_INLINE void realRat_poly_derivative( realRat_poly_t dest, const realRat_poly_t src) {
+    fmpq_poly_derivative( dest, src);
+}
 /* printing */
 POLYNOMIALS_INLINE int realRat_poly_fprint       (FILE * file, const realRat_poly_t poly) { return fmpq_poly_fprint(file, poly);}
 POLYNOMIALS_INLINE int realRat_poly_fprint_pretty(FILE * file, const realRat_poly_t poly, const char * var) {

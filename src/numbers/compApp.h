@@ -51,6 +51,7 @@ NUMBERS_INLINE void compApp_zero(compApp_t z                   ) { acb_zero(z); 
 NUMBERS_INLINE void compApp_one (compApp_t z                   ) { acb_one (z); }
 NUMBERS_INLINE void compApp_onei(compApp_t z                   ) { acb_onei(z); }
 NUMBERS_INLINE void compApp_set (compApp_t z, const compApp_t x) { acb_set (z, x); }
+NUMBERS_INLINE void compApp_set_round (compApp_t z, const compApp_t x, slong prec) { acb_set_round (z, x, prec); }
 NUMBERS_INLINE void compApp_set_si (compApp_t z, slong x) { acb_set_si (z, x); }
 NUMBERS_INLINE void compApp_set_sisi (compApp_t z, slong re, slong im) { 
     arb_set_si (acb_realref(z), re);
@@ -84,6 +85,7 @@ NUMBERS_INLINE void compApp_pow_si( compApp_t dest, const compApp_t x, slong l, 
 NUMBERS_INLINE void compApp_sqrt  ( compApp_t dest, const compApp_t x, slong prec) { acb_sqrt(dest, x, prec); }
 
 NUMBERS_INLINE void compApp_mul_realApp   ( compApp_t dest, const compApp_t x, const realApp_t y, slong prec) { acb_mul_arb   (dest, x, y, prec); }
+NUMBERS_INLINE void compApp_mul_2exp_si   ( compApp_t dest, const compApp_t x, slong e) { acb_mul_2exp_si   (dest, x, e); }
 
 /* printing */
 NUMBERS_INLINE void compApp_fprint (FILE * file, const compApp_t x)                           { acb_fprint (file, x               ); }
