@@ -37,39 +37,25 @@ extern "C" {
 #define STRAT_REALCOEF 32
 #define STRAT_PWSUTEST 64
 #define STRAT_ROOTRADI 128
-#define STRAT_FORTESTS 256
+#define STRAT_SCAANDRO 256
+#define STRAT_FORTESTS 512
 
-#define STRAT_INT_ONLSUBD 55
 #define STRAT_STR_ONLSUBD "onlySubd"
-
-#define STRAT_INT_DEFAULT 183
 #define STRAT_STR_DEFAULT "default"
 
-#define STRAT_INT_V1 5
 #define STRAT_STR_V1 "V1"
-
-#define STRAT_INT_V3 7
 #define STRAT_STR_V3 "V3"
-
-#define STRAT_INT_V4 23
 #define STRAT_STR_V4 "V4"
-
-#define STRAT_INT_V5 55
 #define STRAT_STR_V5 "V5"
-
-#define STRAT_INT_PWSUTESTV4 87
 #define STRAT_STR_PWSUTESTV4 "psV4"
-
-#define STRAT_INT_V6 119
 #define STRAT_STR_V6 "V6"
+/* CASC 2021 only subd version */
+#define STRAT_STR_V7 "V7"
+/* CASC 2021 root radii + subd version */
+#define STRAT_STR_V8 "V8"
 
 #define STRAT_INT_FORTESTS 247
 #define STRAT_STR_FORTESTS "test"
-
-#define STRAT_INT_V7 183
-#define STRAT_STR_V7 "V7"
-
-#define STRAT_STR_V8 "V8"
 
 #define STRAT_STR_FORTESTS1 "test1"
 #define STRAT_STR_FORTESTS2 "test2"
@@ -90,6 +76,7 @@ typedef struct {
     int _pwSuNbPs;
 //     realRat _pwSuIsoRatio;
     int _useRootRadii;
+    int _useScaAndRou;
 } strategies;
 
 typedef strategies strategies_t[1];
@@ -143,6 +130,9 @@ METADATAS_INLINE void strategies_set_pwSuNbPs   ( strategies_t strat, int nb ) {
 
 METADATAS_INLINE int strategies_useRootRadii        ( const strategies_t strat ) { return strat->_useRootRadii      ; }
 METADATAS_INLINE void strategies_set_RootRadii   ( strategies_t strat, int flag ) { strat->_useRootRadii=flag      ; }
+
+METADATAS_INLINE int strategies_useScaAndRou        ( const strategies_t strat ) { return strat->_useScaAndRou      ; }
+METADATAS_INLINE void strategies_set_ScaAndRou   ( strategies_t strat, int flag ) { strat->_useScaAndRou=flag      ; }
 
 #ifdef __cplusplus
 }

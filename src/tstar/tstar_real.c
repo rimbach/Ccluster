@@ -276,8 +276,9 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
     while( (iteration <= N)&&(restemp==0) ){
         
         if (iteration >= 1) {
-//             if (iteration==1)
-//                 tstar_real_scale_and_round_to_zero( pApprox, res.appPrec, meta);
+            
+            if ( (iteration==1) && (metadatas_useScaAndRou(meta) ) )
+                tstar_real_scale_and_round_to_zero( pApprox, res.appPrec, meta);
             
             tstar_real_graeffe_iterations_inplace( pApprox, 1, res.appPrec, meta);
             nbGraeffe +=1;
@@ -295,8 +296,8 @@ tstar_res tstar_real_optimized( cacheApp_t cache,
                 res.appPrec *=2;
                 tstar_real_getApproximation( pApprox, cache, res.appPrec, meta);
                 tstar_real_taylor_shift_inplace( pApprox, d, res.appPrec, meta);
-//                 if (iteration==1)
-//                     tstar_real_scale_and_round_to_zero( pApprox, res.appPrec, meta);
+                if ( (iteration==1) && (metadatas_useScaAndRou(meta) ) )
+                    tstar_real_scale_and_round_to_zero( pApprox, res.appPrec, meta);
                 tstar_real_graeffe_iterations_inplace( pApprox, iteration, res.appPrec, meta);
                 realApp_poly_sum_abs_coeffs( sum, pApprox, res.appPrec );
                 restemp = realApp_poly_TkGtilda_with_sum( pApprox, sum, res.nbOfSol, res.appPrec);

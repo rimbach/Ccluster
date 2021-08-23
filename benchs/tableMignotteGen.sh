@@ -1,26 +1,10 @@
 #!/bin/bash
 
+POLNAME="MignotteGen"
+
 usage()
 {
-   echo "Usage: ./tableMignotteGen <options> <args>"
-}
-
-format_time()
-{
-    TIME1=$1
-    TIME2=$1
-    TIME1=`echo $TIME1 | cut -f1 -d'.'`
-    TIME2=`echo $TIME2 | cut -f2 -d'.'`
-    STIME1=${#TIME1}
-    STIME1=$(( 3 - $STIME1 ))
-    STIME2=$(( 3 < $STIME1 ? 3 : $STIME1 ))
-    STIME2=$(( 0 > $STIME2 ? 0 : $STIME2 ))
-    if [ $STIME2 -eq 0 ]; then
-        echo $TIME1
-    else
-        TIME2=`echo $TIME2 | cut -c-$( echo $STIME2)`
-        echo $TIME1"."$TIME2
-    fi
+   echo "Usage: ./table$POLNAME <options> <args>"
 }
 
 ##########################getting arguments
@@ -32,6 +16,9 @@ while [ "$1" != "" ]; do
          usage
          exit 0
          ;;
+      --verbose)
+        VERBOSE=1
+        ;;
       --degrees)
         DEGREES=$VALUE
         ;;
@@ -40,6 +27,15 @@ while [ "$1" != "" ]; do
         ;;
       --powers)
         POWERS=$VALUE
+        ;;
+      --degreesRiso)
+        DEGREESRISO=$VALUE
+        ;;
+      --bitsizesRiso)
+        BITSIZESRISO=$VALUE
+        ;;
+      --powersRiso)
+        POWERSRISO=$VALUE
         ;;
       --epsilonCCL)
         EPSILONCCL=$VALUE
@@ -50,11 +46,35 @@ while [ "$1" != "" ]; do
       --blocal)
         BLOCAL="$VALUE"
         ;;
-      --bglobal)
-        BGLOBAL="$VALUE"
+      --blocalRiso)
+        BLOCALRISO="$VALUE"
         ;;
       --purge)
         PURGE=1
+        ;;
+      --purgeMPSOLVE)
+        PURGEMPSOLVE=1
+        ;;
+      --purgeDSC)
+        PURGEDSC=1
+        ;;
+      --purgeCCLLOCAL)
+        PURGECCLLOCAL=1
+        ;;
+      --purgeCCLGLOBAL)
+        PURGECCLGLOBAL=1
+        ;;
+      --purgeRISOLOCAL)
+        PURGECCLLOCAL=1
+        ;;
+      --purgeRISOGLOBAL)
+        PURGERISOGLOBAL=1
+        ;;
+      --mflag)
+        MFLAG="$VALUE"
+        ;;
+      --rep)
+        REP="$VALUE"
         ;;
       *)
         usage
@@ -65,6 +85,16 @@ while [ "$1" != "" ]; do
 done
 
 #default values
+if [ -z "$VERBOSE" ]; then
+   VERBOSE=0
+fi
+ECHO=""
+if [ $VERBOSE -eq 0 ]; then
+     ECHO="echo -e \c "
+else
+     ECHO="echo "
+fi
+
 if [ -z "$DEGREES" ]; then
    DEGREES="64 128"
 fi
@@ -77,6 +107,18 @@ if [ -z "$POWERS" ]; then
    POWERS="2"
 fi
 
+if [ -z "$DEGREESRISO" ]; then
+   DEGREESRISO="64 128"
+fi
+
+if [ -z "$BITSIZESRISO" ]; then
+   BITSIZESRISO="8"
+fi
+
+if [ -z "$POWERSRISO" ]; then
+   POWERSRISO="2"
+fi
+
 if [ -z "$EPSILONCCL" ]; then
    EPSILONCCL="-53"
 fi
@@ -86,49 +128,61 @@ if [ -z "$EPSILONMPS" ]; then
 fi
 
 if [ -z "$BLOCAL" ]; then
-   BLOCAL="0,1,0,1,2,1"
+   BLOCAL="0/1,0/1,2/1"
 fi
 
-if [ -z "$BGLOBAL" ]; then
-   BGLOBAL="global"
+if [ -z "$BLOCALRISO" ]; then
+   BLOCALRISO="0/1,2/1"
 fi
 
 if [ -z "$PURGE" ]; then
    PURGE=0
 fi
-
-VFLAG="V5"
-
-REP="tableMignotteGen"
-
-if [ -d "$REP" ]; then
-  if [ $PURGE -eq 1 ]; then
-    rm -rf $REP
-    mkdir $REP
-  fi
-else
-  mkdir $REP
+if [ -z "$PURGEMPSOLVE" ]; then
+   PURGEMPSOLVE=0
 fi
 
+if [ -z "$PURGEDSC" ]; then
+   PURGEDSC=0
+fi
+
+if [ -z "$PURGECCLLOCAL" ]; then
+   PURGECCLLOCAL=0
+fi
+
+if [ -z "$PURGECCLGLOBAL" ]; then
+   PURGECCLGLOBAL=0
+fi
+
+if [ -z "$PURGERISOLOCAL" ]; then
+   PURGERISOLOCAL=0
+fi
+
+if [ -z "$PURGERISOGLOBAL" ]; then
+   PURGERISOGLOBAL=0
+fi
+
+if [ -z "$MFLAG" ]; then
+   MFLAG="default"
+fi
+
+if [ -z "$REP" ]; then
+   REP="table$POLNAME"
+fi
 ##########################solvers
 CCLUSTER_PATH="../"
 CCLUSTER_CALL=$CCLUSTER_PATH"/bin/ccluster"
+RISOLATE_CALL=$CCLUSTER_PATH"/bin/risolate"
 GENPOLFILE_CALL=$CCLUSTER_PATH"/bin/genPolFile"
 
-MPSOLVE_CALL="mpsolve -au -Gi -o"$EPSILONMPS" -j1"
-MPSOLVE_CALL_S="mpsolve -as -Gi -o"$EPSILONMPS" -j1"
+MPSOLVE_CALL_S="mpsolve -as -Ga -o"$EPSILONMPS" -j1"
 
-##########################naming
-POL_NAME="MignotteGen"
+ANEWDSC_PATH="/work/softs"
+ANEWDSC_CALL=$ANEWDSC_PATH"/test_descartes_linux64"
 
-HEAD_TABLE="\begin{tabular}{l||c|c|c||c|c|c||c|c|}"
-FIRST_LINE="     & \multicolumn{3}{|c||}{\texttt{Ccluster} local (\$[-1,1]^2\$)}"
-FIRST_LINE=$FIRST_LINE"& \multicolumn{3}{|c||}{\texttt{Ccluster} global (\$[-75,75]^2\$)}"
-FIRST_LINE=$FIRST_LINE"& \texttt{unisolve} & \texttt{secsolve} \\\\\\hline"
-SECOND_LINE="d, b& (\#Sols:\#Clus) & (depth:size) & \$\tau_\ell\$ (s)"
-SECOND_LINE=$SECOND_LINE"& (\#Sols:\#Clus) & (depth:size) & \$\tau_g\$ (s)"
-SECOND_LINE=$SECOND_LINE"& \$\tau_u\$ (s) & \$\tau_s\$ (s)   \\\\\\hline\hline"
-TAIL_TAB="\end{tabular}"
+source functions.sh
+
+init_rep $REP
 
 TEMPTABFILE="temptabfileMigG.txt"
 touch $TEMPTABFILE
@@ -136,59 +190,12 @@ touch $TEMPTABFILE
 for DEG in $DEGREES; do
     for BIT in $BITSIZES; do
         for POW in $POWERS; do
-            LINE_TAB=$DEG", "$BIT", $POW"
-            FILEIN=$REP"/"$POL_NAME"_"$DEG"_"$BIT"_"$POW".ccl"
-            FILENAME_CCLUSTER_L_OUT=$REP"/"$POL_NAME"_"$DEG"_"$BIT"_"$POW"_ccluster_local.out"
-            FILENAME_CCLUSTER_G_OUT=$REP"/"$POL_NAME"_"$DEG"_"$BIT"_"$POW"_ccluster_global.out"
-            FILENAME_MPSOLVE_IN=$REP"/"$POL_NAME"_"$DEG"_"$BIT_"$POW"".pol"
-            FILENAME_MPSOLVE_U_OUT=$REP"/"$POL_NAME"_"$DEG"_"$BIT"_"$POW"_mpsolve_u.out"
-            FILENAME_MPSOLVE_S_OUT=$REP"/"$POL_NAME"_"$DEG"_"$BIT"_"$POW"_mpsolve_s.out"
-            
-            $GENPOLFILE_CALL $POL_NAME $DEG $FILEIN -f 1 -b $BIT -p $POW
-            $GENPOLFILE_CALL $POL_NAME $DEG $FILENAME_MPSOLVE_IN -f 2 -b $BIT -p $POW
         
-            if [ ! -e $FILENAME_CCLUSTER_L_OUT ]; then
-                echo  "Clustering roots for $POL_NAME, degree $DEG, bitsize $BIT, power $POW, local, output in "$FILENAME_CCLUSTER_L_OUT > /dev/stderr
-                $CCLUSTER_CALL $FILEIN -d $BLOCAL -e $EPSILONCCL -m $VFLAG -v 3 > $FILENAME_CCLUSTER_L_OUT
-            fi
-            if [ ! -e $FILENAME_CCLUSTER_G_OUT ]; then
-                echo  "Clustering roots for $POL_NAME, degree $DEG, bitsize $BIT, power $POW, global, output in "$FILENAME_CCLUSTER_G_OUT > /dev/stderr
-                $CCLUSTER_CALL $FILEIN -d $BGLOBAL -e $EPSILONCCL -m $VFLAG -v 3 > $FILENAME_CCLUSTER_G_OUT
-            fi
-             
-            if [ ! -e $FILENAME_MPSOLVE_U_OUT ]; then
-                if [ $(( $DEG < 300 ? 0 : 1 )) -eq 0 ]; then
-                    echo "Isolating roots in C with MPSOLVE UNISOLVE........." > /dev/stderr
-                    (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_U_OUT) &>> $FILENAME_MPSOLVE_U_OUT
-                else
-                    echo "real    \$>1000\$" > $FILENAME_MPSOLVE_U_OUT
-                fi
-            fi
-            if [ ! -e $FILENAME_MPSOLVE_S_OUT ]; then
-                echo "Isolating roots in C with MPSOLVE SECSOLVE........." > /dev/stderr
-                (/usr/bin/time -f "real\t%e" $MPSOLVE_CALL_S $FILENAME_MPSOLVE_IN > $FILENAME_MPSOLVE_S_OUT) &>> $FILENAME_MPSOLVE_S_OUT
-            fi
-            TCCLUSTER_L=$(grep "time:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-            TDCCLUSTER_L=$(grep "tree depth:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-            TSCCLUSTER_L=$(grep "tree size:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-            NBCLUSTERS_L=$(grep "number of clusters:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-            NBSOLUTION_L=$(grep "number of solutions:" $FILENAME_CCLUSTER_L_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-            
-            TCCLUSTER_G=$(grep "time:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
-            TDCCLUSTER_G=$(grep "tree depth:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-            TSCCLUSTER_G=$(grep "tree size:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-            NBCLUSTERS_G=$(grep "number of clusters:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-            NBSOLUTION_G=$(grep "number of solutions:" $FILENAME_CCLUSTER_G_OUT| cut -f2 -d':' | cut -f1 -d'|' | tr -d ' ')
-            
-            TMPSOLVE=$(grep "real" $FILENAME_MPSOLVE_U_OUT| cut -f2 -d'l' | tr -d ' ')
-            TMPSOLVE_S=$(grep "real" $FILENAME_MPSOLVE_S_OUT| cut -f2 -d'l' | tr -d ' ')
-            
-            LINE_TAB=$LINE_TAB"&("$NBSOLUTION_L":"$NBCLUSTERS_L")&("$TDCCLUSTER_L":"$TSCCLUSTER_L")&`format_time $TCCLUSTER_L`"
-            LINE_TAB=$LINE_TAB"&("$NBSOLUTION_G":"$NBCLUSTERS_G")&("$TDCCLUSTER_G":"$TSCCLUSTER_G")&`format_time $TCCLUSTER_G`"
-            LINE_TAB=$LINE_TAB"&"$TMPSOLVE"&"$TMPSOLVE_S
-            LINE_TAB=$LINE_TAB"\\\\\\hline"
-            
-            echo $LINE_TAB >> $TEMPTABFILE
+            FILENAME=$REP"/"$POLNAME"_"$DEG"_"$BIT"_"$POW$
+            gen_with_deg_bs_pow $FILENAME $POLNAME $DEG $BIT $POW
+            run_ccluster_local_global $FILENAME $POLNAME $DEG
+            run_mpsolve $FILENAME $POLNAME $DEG 
+            stats_pol_ccluster_l_g_mpsolve $FILENAME $DEG
         done
     done
 done
@@ -196,6 +203,30 @@ done
 echo $HEAD_TABLE
 echo $FIRST_LINE
 echo $SECOND_LINE
+cat $TEMPTABFILE
+echo $TAIL_TAB
+
+rm -rf $TEMPTABFILE
+
+TEMPTABFILE="temptabfileMigG.txt"
+touch $TEMPTABFILE
+
+for DEG in $DEGREESRISO; do
+    for BIT in $BITSIZESRISO; do
+        for POW in $POWERSRISO; do
+        
+            FILENAME=$REP"/"$POLNAME"_"$DEG"_"$BIT"_"$POW$
+            gen_with_deg_bs_pow $FILENAME $POLNAME $DEG $BIT $POW
+            run_risolate_local_global $FILENAME $POLNAME $DEG
+            run_aNewDsc $FILENAME $POLNAME $DEG "0"
+            stats_pol_risolate_l_g_anewdsc $FILENAME $DEG
+        done
+    done
+done
+
+echo $HEAD_TABLE_RISO
+echo $FIRST_LINE_RISO
+echo $SECOND_LINE_RISO
 cat $TEMPTABFILE
 echo $TAIL_TAB
 

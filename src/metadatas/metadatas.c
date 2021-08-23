@@ -91,16 +91,15 @@ int metadatas_fprint(FILE * file, metadatas_t meta, cacheApp_t cache, const real
     
     if (metadatas_getVerbo(meta)>=1) {
     r = fprintf(file, "# -------------------Ccluster: ----------------------------------------\n");
-    r = fprintf(file, "# -------------------Input:    ----------------------------------------\n");
-    if (metadatas_getVerbo(meta)>=2) {
-    slong degree = cacheApp_getDegree( cache );
+    r = fprintf(file, "# -------------------Input polynomial:  -------------------------------\n");
     if (cache->_from_poly) {
-            slong bitsize = cacheApp_getBitsize (cache);
-            r = fprintf(file, "#|pol: %-25s degree: %-10ld bitsize: %10ld|\n", "exact coefficients", degree, bitsize);
-        } else
-            r = fprintf(file, "#|pol: %-25s degree: %-10ld bitsize: %10c|\n", "approximated coefficients", degree, '?');
-    }
-    
+            r = fprintf(file, "#|pol: %-64s|\n", "exact coefficients");
+            r = fprintf(file, "#|degree: %-23ld bitsize: %-28ld|\n", cacheApp_getDegree( cache ), cacheApp_getBitsize (cache));
+        } else {
+            r = fprintf(file, "#|pol: %-64s|\n", "oracle coefficients");
+            r = fprintf(file, "#|degree: %-23ld bitsize: %-28c|\n", cacheApp_getDegree( cache ), '?');
+        }
+    r = fprintf(file, "# -------------------Input parameters:  -------------------------------\n");    
     char temp[1000];
     compBox_sprint_for_stat( temp, metadatas_initBref(meta) );
     r = fprintf(file, "#|box:%-65s\n", temp);
