@@ -27,6 +27,7 @@ void MignotteMul_polynomial( realRat_poly_t dest, int degree, int bitsize, int p
 void WilkRat_polynomial(  realRat_poly_t dest, int degree);
 void WilkMul_polynomial(  realRat_poly_t dest, int degree);
 void WilkMulF_polynomial(  realRat_poly_t dest, int degree, int power);
+void WilkClus_polynomial(realRat_poly_t dest, int degree);
 void Laguerre_polynomial(  realRat_poly_t dest, int degree);
 
 void nestedClusters_polynomial(  realRat_poly_t dest, int nbRoots, int relativeWidth, int iterations);
@@ -55,6 +56,7 @@ int main(int argc, char **argv){
         printf("       %s WilkRat        degree    filename [OPTIONS: format] \n", argv[0]);
         printf("       %s WilkMul        nbOfRoots filename [OPTIONS: format] \n", argv[0]);
         printf("       %s WilkMulF       nbOfRoots filename [OPTIONS: format] \n", argv[0]);
+        printf("       %s WilkClus       nbOfClust filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Mandelbrot     iteration filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Runnels        iteration filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Laguerre       degree    filename [OPTIONS: format] \n", argv[0]);
@@ -112,6 +114,7 @@ int main(int argc, char **argv){
     char WilkMul[] = "WilkMul\0";
     char WilkRat[] = "WilkRat\0";
     char WilkMulF[] = "WilkMulF\0";
+    char WilkClus[] = "WilkClus\0";
     char Mandelbrot[] = "Mandelbrot\0";
     char Runnels[] = "Runnels\0";
     char Laguerre[] = "Laguerre\0";
@@ -285,6 +288,10 @@ int main(int argc, char **argv){
         
     if (strcmp(poly, WilkRat)==0) {
         WilkRat_polynomial( p, firstArg);
+    } else
+        
+    if (strcmp(poly, WilkClus)==0) {
+        WilkClus_polynomial( p, firstArg);
     } else
         
     if (strcmp(poly, Laguerre)==0) {
@@ -713,6 +720,33 @@ void WilkMulF_polynomial(  realRat_poly_t dest, int degree, int power){
     }
     
     realRat_poly_clear(ptemp);
+}
+
+void WilkClus_polynomial(realRat_poly_t dest, int degree){
+    
+    /* p(x) = \prod_{i=1}^{degree} ((i(x+i))^i - 1) */ 
+    realRat_poly_t ptemp;
+    realRat_poly_init2(ptemp,degree+1);
+    realRat_poly_one(dest);
+    realRat_t temp;
+    realRat_init(temp);
+    
+    for (int i=1; i<=degree; i++){
+        realRat_poly_zero(ptemp);
+        realRat_poly_set_coeff_si_ui(ptemp, 1, 1, 1);
+        realRat_poly_set_coeff_si_ui(ptemp, 0, -(i-1), 1);
+        realRat_poly_pow(ptemp, ptemp, (ulong) i);
+        realRat_set_si(temp, i, 1);
+        realRat_pow_si(temp, temp, i*i);
+        realRat_poly_scalar_mul_realRat(ptemp, ptemp, temp);
+        realRat_poly_add_si(ptemp, ptemp, -1);
+        
+        realRat_poly_mul(dest, dest, ptemp);
+    }
+    
+    realRat_clear(temp);
+    realRat_poly_clear(ptemp);
+    
 }
 
 void Laguerre_polynomial(  realRat_poly_t dest, int degree){

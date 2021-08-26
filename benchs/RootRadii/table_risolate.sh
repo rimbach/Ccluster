@@ -96,8 +96,8 @@ if [ -z "$GENERATE" ]; then
 fi
 
 if [ -z "$NBPOLS" ]; then
-#    NBPOLS=20
-   NBPOLS=10
+   NBPOLS=30
+#    NBPOLS=10
 #    NBPOLS=1
 fi
 

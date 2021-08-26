@@ -104,27 +104,40 @@ NORMAL="\e[0m"
 # ./tableWilkinson.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO"  --mflag="default" --rep="tableScaleAndRound"
 
 #tables with Wilkinson rat
-DEGREES="128 191"
-DEGREESRISO="383 512"
-$ECHO_ME $BGREEN "WilkRat Polynomials" $NORMAL
-$ECHO_ME $BGREEN "                     No root radii, No scale and round" $NORMAL
-./tableWilkRat.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="V7" --rep="tableScaleAndRound"
-$ECHO_ME $BGREEN "    No root radii, scale and round" $NORMAL
-./tableWilkRat.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="onlySubd" --rep="tableScaleAndRound"
-$ECHO_ME $BGREEN "    Root radii,    No scale and round" $NORMAL
-./tableWilkRat.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="V8" --rep="tableScaleAndRound"
-$ECHO_ME $BGREEN "    Root radii,    scale and round" $NORMAL
-./tableWilkRat.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO"  --mflag="default" --rep="tableScaleAndRound"
+# DEGREES="128 191"
+# DEGREESRISO="383 512"
+# $ECHO_ME $BGREEN "WilkRat Polynomials" $NORMAL
+# $ECHO_ME $BGREEN "                     No root radii, No scale and round" $NORMAL
+# ./tableWilkRat.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="V7" --rep="tableScaleAndRound"
+# $ECHO_ME $BGREEN "    No root radii, scale and round" $NORMAL
+# ./tableWilkRat.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="onlySubd" --rep="tableScaleAndRound"
+# $ECHO_ME $BGREEN "    Root radii,    No scale and round" $NORMAL
+# ./tableWilkRat.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="V8" --rep="tableScaleAndRound"
+# $ECHO_ME $BGREEN "    Root radii,    scale and round" $NORMAL
+# ./tableWilkRat.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO"  --mflag="default" --rep="tableScaleAndRound"
 
 # #tables with Wilkinson Mul
-DEGREES="10 15 19"
-DEGREESRISO="5"
-$ECHO_ME $BGREEN "WilkMul Polynomials" $NORMAL
+# DEGREES="10 15 19"
+# DEGREESRISO="5"
+# $ECHO_ME $BGREEN "WilkMul Polynomials" $NORMAL
+# $ECHO_ME $BGREEN "                     No root radii, No scale and round" $NORMAL
+# ./tableWilkMul.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="V7" --rep="tableScaleAndRound"
+# $ECHO_ME $BGREEN "    No root radii, scale and round" $NORMAL
+# ./tableWilkMul.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="onlySubd" --rep="tableScaleAndRound"
+# $ECHO_ME $BGREEN "    Root radii,    No scale and round" $NORMAL
+# ./tableWilkMul.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="V8" --rep="tableScaleAndRound"
+# $ECHO_ME $BGREEN "    Root radii,    scale and round" $NORMAL
+# ./tableWilkMul.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO"  --mflag="default" --rep="tableScaleAndRound"
+
+# #tables with Wilkinson Clus
+DEGREES="12 16 20 24 28 32"
+DEGREESRISO="12 16 20 24 28 32"
+$ECHO_ME $BGREEN "WilkClus Polynomials" $NORMAL
 $ECHO_ME $BGREEN "                     No root radii, No scale and round" $NORMAL
-./tableWilkMul.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="V7" --rep="tableScaleAndRound"
+./tableWilkClus.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="V7" --rep="tableScaleAndRound"
 $ECHO_ME $BGREEN "    No root radii, scale and round" $NORMAL
-./tableWilkMul.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="onlySubd" --rep="tableScaleAndRound"
+./tableWilkClus.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="onlySubd" --rep="tableScaleAndRound"
 $ECHO_ME $BGREEN "    Root radii,    No scale and round" $NORMAL
-./tableWilkMul.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="V8" --rep="tableScaleAndRound"
+./tableWilkClus.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO" --mflag="V8" --rep="tableScaleAndRound"
 $ECHO_ME $BGREEN "    Root radii,    scale and round" $NORMAL
-./tableWilkMul.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO"  --mflag="default" --rep="tableScaleAndRound"
+./tableWilkClus.sh --degrees="$DEGREES" --degreesRiso="$DEGREESRISO"  --mflag="default" --rep="tableScaleAndRound"

@@ -876,6 +876,7 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
                          cacheApp_t cache, 
                          metadatas_t meta){
     
+    int level = 4;
     int separationFlag;
     int widthFlag;
     int compactFlag;
@@ -958,7 +959,7 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
         }
         
         //         
-        if (metadatas_getVerbo(meta)>3) {
+        if (metadatas_getVerbo(meta)>=level) {
             printf("#---depth: %d\n", (int) depth);
             compApp_t centerApp;
             realApp_t widthApp;
@@ -999,14 +1000,14 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
                         if (connCmp_isDefref(ccur)) {
 //                             resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
                             resTstar = deflate_real_tstar_test( ccur, cache, ccDisk, connCmp_degDeref(ccur), 0, prec, meta);
-                            if (metadatas_getVerbo(meta)>=3)
+                            if (metadatas_getVerbo(meta)>=level)
                                 printf("#------run tstar with deflation for counting: depth: %ld, nbSols: %d, required precision: %ld\n", depth, (int) resTstar.nbOfSol, resTstar.appPrec);
                         }
                 }
                 
                 if (resTstar.nbOfSol < 0) {
                         resTstar = tstar_real_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, NULL, meta);
-                        if (metadatas_getVerbo(meta)>=3)
+                        if (metadatas_getVerbo(meta)>=level)
                             printf("#------run tstar for counting: depth: %ld, nbSols: %d, required precision: %ld\n", depth, (int) resTstar.nbOfSol, resTstar.appPrec);
                 }
                 connCmp_nSolsref(ccur) = resTstar.nbOfSol;
@@ -1037,7 +1038,7 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
                   )
              ) ) {
             
-            if (metadatas_getVerbo(meta)>=3) {
+            if (metadatas_getVerbo(meta)>=level) {
                     printf("#------ Newton iteration for a cluster of %d roots, depth: %ld------\n", connCmp_nSolsref(ccur), depth );
             }
                 
@@ -1074,7 +1075,7 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
 //                         if (fmpz_cmp_si(connCmp_nwSpdref(ccur),16)==0) {
                         if (connCmp_isDefref(ccur)==0) {
                             if (realRat_cmp_ui(compDsk_radiusref(ccDisk), 1 ) < 0) {
-                               if (metadatas_getVerbo(meta)>=3){
+                               if (metadatas_getVerbo(meta)>=level){
                                     printf("#------Set deflation for a cluster of %d roots, depth: %ld------\n", connCmp_nSolsref(ccur), depth );
                                     printf("#------disk: ");
                                     compDsk_print(ccDisk);
@@ -1104,20 +1105,20 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
         if ( (connCmp_nSols(ccur)==1) && widthFlag && compactFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
-            if (metadatas_getVerbo(meta)>3) {
+            if (metadatas_getVerbo(meta)>=level) {
                 printf("#------validated with %d roots\n", connCmp_nSols(ccur));
             }
         } else
         if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && sepBoundFlag ) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             connCmp_list_push(qResults, ccur);
-            if (metadatas_getVerbo(meta)>3) {
+            if (metadatas_getVerbo(meta)>=level) {
                 printf("#------validated with %d roots\n", connCmp_nSols(ccur));
             }
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
             
-            if (metadatas_getVerbo(meta)>3) {
+            if (metadatas_getVerbo(meta)>=level) {
                     printf("#--- insert in queue\n");
             }
             
@@ -1126,7 +1127,7 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
         
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && (resNewton.nflag==0) && (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)>0) ){
             
-            if (metadatas_getVerbo(meta)>3) {
+            if (metadatas_getVerbo(meta)>=level) {
                     printf("#--- insert in queue and decrease Newton speed\n");
             }
             
@@ -1156,7 +1157,7 @@ void risolate_main_loop_rootRadii( connCmp_list_t qResults,
                 ratio = risolate_connCmp_getZoomRatio_1b( ccur, CCLUSTER_DEFAULT_PREC );
             if (compBox_list_get_size(connCmp_boxesref(ccur))==2)
                 ratio = risolate_connCmp_getZoomRatio_2b( ccur, CCLUSTER_DEFAULT_PREC );
-            if (metadatas_getVerbo(meta)>3) {
+            if (metadatas_getVerbo(meta)>=level) {
                     printf("#--- bisect; ratio: %ld\n", ratio);
             }
             if ( (ratio > 1)||(ratio<-1) )
@@ -1202,6 +1203,7 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
                                        compAnn_list_t annulii,
                                        const compBox_t initialBox, const realRat_t eps, cacheApp_t cache, metadatas_t meta){
     
+    int level = 3;
     clock_t start = clock();
     clock_t start2 = clock();
     
@@ -1217,7 +1219,7 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     int N = risolate_nbGIt_rootRadii( degree, metadatas_getRelPr(meta) );
     metadatas_setNbGIt ( meta, N);
     
-    if (metadatas_getVerbo(meta)>=2) {
+    if (metadatas_getVerbo(meta)>=level) {
 //         printf("#degree  of input polynomial: %ld\n", degree);
 //         printf("#bitsize of input polynomial: %ld\n", bitsize);
         printf("#number of Graeffe iterations for root radii: %d\n", N);
@@ -1244,14 +1246,12 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     
     realIntRootRadii_containsRealRoot( annulii, cache, prec );
     
-//     if (metadatas_getVerbo(meta)>=2) {
-// //         printf("#time in discarding real intervals     : %f \n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
-        if (metadatas_getVerbo(meta)>=3) {
-            printf("#Annulii: ");
-            compAnn_list_printd(annulii, 10);
-            printf("\n\n");
-        }
-//     }
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("#Annulii: ");
+        compAnn_list_printd(annulii, 10);
+        printf("\n\n");
+    }
+        
     start2 = clock();
     if (metadatas_haveToCount(meta))
         metadatas_add_time_rootRad(meta, (double) (start2 - start) );
@@ -1276,7 +1276,28 @@ void risolate_algo_global_rootRadii  ( connCmp_list_t qResults,
     /* use initial box instead */
 //     compBox_set(metadatas_initBref(meta), initialBox);
 //     compBox_set(box, initialBox);
-
+    
+    /*test*/
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("--- width fujiwara: "); realRat_print( compBox_bwidthref(initialBox) ); printf("\n");
+        printf("--- width rr      : "); realRat_print( upperBound ); printf("\n");
+    }
+    
+    realRat_t tempWidth;
+    realRat_init(tempWidth);
+    realRat_div_ui(tempWidth, compBox_bwidthref(initialBox), 2);
+    while( realRat_cmp( tempWidth, upperBound) > 0 )
+        realRat_div_ui(tempWidth, tempWidth, 2);
+    realRat_mul_si(tempWidth, tempWidth, 2);
+    
+    realRat_set( compBox_bwidthref(box), tempWidth);
+    compBox_set(metadatas_initBref(meta), box);
+    realRat_clear(tempWidth);
+    
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("--- width mixt    : "); realRat_print( tempWidth ); printf("\n");
+    }
+    
     compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
 //     
     compBox_copy_annulii(box, 0, annulii);

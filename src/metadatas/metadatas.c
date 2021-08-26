@@ -58,10 +58,18 @@ char * compBox_sprint_for_stat(char * out, const compBox_t x){
     fmpq_get_str( cIm, 10, compRat_imagref(compBox_centerref(x)));
     wid = fmpq_get_str( wid, 10, compBox_bwidthref(x));
     if (strlen(wid)>=15) {
-        slong lnum = fmpz_clog_ui( realRat_numref(compBox_bwidthref(x)), (ulong) 2);
-        slong lden = fmpz_clog_ui( realRat_denref(compBox_bwidthref(x)), (ulong) 2);
-        sprintf(wid, "2^(%d)/2^(%d)", (int) lnum, (int) lden);
-    }
+        slong linf = fmpz_flog_ui( realRat_numref(compBox_bwidthref(x)), (ulong) 2) 
+                   - fmpz_clog_ui( realRat_denref(compBox_bwidthref(x)), (ulong) 2) ;
+        slong lsup = fmpz_clog_ui( realRat_numref(compBox_bwidthref(x)), (ulong) 2) 
+                   - fmpz_flog_ui( realRat_denref(compBox_bwidthref(x)), (ulong) 2) ;
+                   
+        if (linf==lsup) {
+            sprintf(wid, "2^(%d)", (int) linf);
+        } else {
+            sprintf(wid, "2^(%d,+1)", (int) linf);
+        }
+    } 
+    
     sprintf(out, " cRe: %-16s cIm: %-16s wid: %-15s|", cRe, cIm, wid);
     ccluster_free(wid);
     return out;
@@ -234,15 +242,20 @@ int metadatas_fprint(FILE * file, metadatas_t meta, cacheApp_t cache, const real
 
 char * compBox_sprint_for_stat_risolate(char * out, const compBox_t x){
     char cRe[100];
-//     char cIm[100];
     char *wid = NULL;
     fmpq_get_str( cRe, 10, compRat_realref(compBox_centerref(x)));
-//     fmpq_get_str( cIm, 10, compRat_imagref(compBox_centerref(x)));
     wid = fmpq_get_str( wid, 10, compBox_bwidthref(x));
     if (strlen(wid)>=15) {
-        slong lnum = fmpz_clog_ui( realRat_numref(compBox_bwidthref(x)), (ulong) 2);
-        slong lden = fmpz_clog_ui( realRat_denref(compBox_bwidthref(x)), (ulong) 2);
-        sprintf(wid, "2^(%d)/2^(%d)", (int) lnum, (int) lden);
+        slong linf = fmpz_flog_ui( realRat_numref(compBox_bwidthref(x)), (ulong) 2) 
+                   - fmpz_clog_ui( realRat_denref(compBox_bwidthref(x)), (ulong) 2) ;
+        slong lsup = fmpz_clog_ui( realRat_numref(compBox_bwidthref(x)), (ulong) 2) 
+                   - fmpz_flog_ui( realRat_denref(compBox_bwidthref(x)), (ulong) 2) ;
+                   
+        if (linf==lsup) {
+            sprintf(wid, "2^(%d)", (int) linf);
+        } else {
+            sprintf(wid, "2^(%d,+1)", (int) linf);
+        }
     }
     sprintf(out, " center: %-30s wid: %-15s|", cRe, wid);
     ccluster_free(wid);

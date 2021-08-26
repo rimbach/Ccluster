@@ -91,6 +91,9 @@ POLYNOMIALS_INLINE void realRat_poly_mul(realRat_poly_t res, const realRat_poly_
 POLYNOMIALS_INLINE void realRat_poly_add(realRat_poly_t res, const realRat_poly_t poly1, const realRat_poly_t poly2) {
     fmpq_poly_add(res, poly1, poly2);
 }
+POLYNOMIALS_INLINE void realRat_poly_add_si(realRat_poly_t res, const realRat_poly_t poly, slong c) {
+    fmpq_poly_add_si(res, poly, c);
+}
 POLYNOMIALS_INLINE void realRat_poly_sub(realRat_poly_t res, const realRat_poly_t poly1, const realRat_poly_t poly2) {
     fmpq_poly_sub(res, poly1, poly2);
 }
