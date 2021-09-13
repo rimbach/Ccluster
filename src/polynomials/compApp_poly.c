@@ -69,6 +69,65 @@ void compApp_poly_sum_abs_coeffs( realApp_t res, const compApp_poly_t f, slong p
     realApp_clear(temp);
 }
 
+/* bound greatest root radius for monic polynomial */
+void compApp_poly_monic_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, slong prec){
+    
+    compApp_ptr coeffs = f->coeffs;
+    slong deg = (f->length)-1;
+    
+    realApp_t tt;
+    realApp_init(tt);
+    
+    slong i = 1;
+    compApp_abs(lb, coeffs + deg-i, prec);
+    
+    while ( i<deg ) {
+        i=i+1;
+        compApp_abs(tt, coeffs + deg-i, prec);
+//         printf("abs coeff: "); realApp_printd(tt, 10);
+        realApp_root_ui(tt,  tt, (ulong) i, prec);
+//         printf(" tt: "); realApp_printd(tt, 10); printf("\n");
+        realApp_max(lb, lb, tt, prec);
+    }
+    
+    realApp_mul_si(ub, lb, 2, prec);
+    realApp_div_ui(lb, lb, deg, prec);
+    
+    realApp_clear(tt);
+}
+
+/* bound greatest root radius for monic polynomial */
+void compApp_poly_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, slong prec){
+    
+    compApp_ptr coeffs = f->coeffs;
+    slong deg = (f->length)-1;
+    
+    compApp_t t;
+    compApp_init(t);
+    realApp_t tt;
+    realApp_init(tt);
+    
+    slong i = 1;
+    compApp_div(t, coeffs + deg-i, coeffs + deg, prec);
+    compApp_abs(lb, t, prec);
+    
+    while ( i<deg ) {
+        i=i+1;
+        compApp_div(t, coeffs + deg-i, coeffs + deg, prec);
+        compApp_abs(tt, t, prec);
+//         printf("abs coeff: "); realApp_printd(tt, 10);
+        realApp_root_ui(tt,  tt, (ulong) i, prec);
+//         printf(" tt: "); realApp_printd(tt, 10); printf("\n");
+        realApp_max(lb, lb, tt, prec);
+    }
+    
+    realApp_mul_si(ub, lb, 2, prec);
+    realApp_div_ui(lb, lb, deg, prec);
+    
+    compApp_clear(t);
+    realApp_clear(tt);
+}
+
 /* computes the coeff of x^(index) of one Graeffe iteration of f, where f has length and degree len-1 */
 /* requires: the 2*index first coeffs of f */
 void compApp_poly_oneGraeffeIteration_coeff( compApp_ptr coeff, compApp_srcptr f, slong index, slong len, slong prec) {

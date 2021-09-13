@@ -252,6 +252,9 @@ void cacheCauchy_init ( cacheCauchy_t cache,
 //     cache->_cacheQP              = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsizeCache) * sizeof(compApp_poly_t) );
 //     cache->_cacheQPp             = (compApp_poly_t *) ccluster_malloc ( (cache->_allocsizeCache) * sizeof(compApp_poly_t) );
     
+    /* initialize compression */
+//        cache->_nbEvalComp = 0;
+       
     if (metadatas_getVerbo(meta)>=level) {
         printf("#---cacheCauchy: \n");
         printf("#------ assumed isolation ratio                : "); realRat_print(cacheCauchy_isoRatioref(cache)); printf("\n");
@@ -311,6 +314,89 @@ void cacheCauchy_set_bounds( cacheCauchy_t cache, const realRat_t radius, slong 
     realRat_clear(temp);
     
 }
+
+// void cacheCauchy_init_comp ( cacheCauchy_t cache, const realRat_t isoRatio, const compDsk_t Delta, slong nbOfRoots, const realRat_t eps ){
+//     
+//     realRat_t error;
+//     realRat_init  (error);
+//     realRat_div_ui(error, eps, 2);
+//     /* set cache->_errorComp */
+//     realApp_init       ( cacheCauchy_errorCompref(cache)                              );
+//     realApp_set_realRat( cacheCauchy_errorCompref(cache), error, CCLUSTER_DEFAULT_PREC);
+//     /* set cache->_nbEvalComp */
+//     realApp_t qApp, logIsoRatio;
+//     realApp_init(qApp);
+//     realApp_init(logIsoRatio);
+//     realApp_set_realRat(logIsoRatio, isoRatio,                                               CCLUSTER_DEFAULT_PREC);
+//     realApp_log        (logIsoRatio, logIsoRatio,                                            CCLUSTER_DEFAULT_PREC);
+//     realApp_set_realRat(qApp,        compDsk_radiusref(Delta),                               CCLUSTER_DEFAULT_PREC);
+//     realApp_mul_realRat(qApp,        qApp,                     isoRatio,                     CCLUSTER_DEFAULT_PREC);
+//     realApp_mul_si     (qApp,        qApp,                     cacheCauchy_degreeref(cache), CCLUSTER_DEFAULT_PREC);
+//     /* qApp = (rd*isoRatio)/error */
+//     realApp_div_realRat(qApp,        qApp,                     error,                        CCLUSTER_DEFAULT_PREC);
+//     /* qApp = ( 1 + (rd*isoRatio)/error ) */
+//     realApp_add_si     (qApp,        qApp,                     1,                            CCLUSTER_DEFAULT_PREC);
+//     /* qApp = log_{e}       ( 1 + (rd*isoRatio)/error ) */
+//     realApp_log        (qApp,        qApp,                                                   CCLUSTER_DEFAULT_PREC);
+//     /* qApp = log_{isoRatio}( 1 + (rd*isoRatio)/error ) */
+//     realApp_div        (qApp,        qApp,                     logIsoRatio,                  CCLUSTER_DEFAULT_PREC); 
+//     /* qApp = ceil( log_{isoRatio}(1 + (rd*isoRatio)/error ) ) + 1 */
+//     slong q = realApp_ceil_si( qApp, CCLUSTER_DEFAULT_PREC ) + 1;
+//     cacheCauchy_nbEvalCompref(cache) = q;
+// //     printf(" Number of eval Points: %ld\n", cacheCauchy_nbEvalCompref(cache) );
+//     
+//     compApp_ptr pointsComp        = (compApp_ptr) ccluster_malloc( q*sizeof(compApp) );
+//     compApp_ptr pointsShiftedComp = (compApp_ptr) ccluster_malloc( q*sizeof(compApp) );
+//     compApp_ptr fvalsComp         = (compApp_ptr) ccluster_malloc( q*sizeof(compApp) );
+//     compApp_ptr fdervalsComp      = (compApp_ptr) ccluster_malloc( q*sizeof(compApp) );
+//     compApp_ptr fdivsComp         = (compApp_ptr) ccluster_malloc( q*sizeof(compApp) );
+//     
+//     for (slong i=0; i<q; i++){
+//         compApp_init( pointsComp +i );
+//         compApp_init( pointsShiftedComp +i );
+//         compApp_init( fvalsComp +i );
+//         compApp_init( fdervalsComp +i );
+//         compApp_init( fdivsComp +i );
+//     }
+//     
+//     cacheCauchy_pointsCompref(cache)        = pointsComp       ; 
+//     cacheCauchy_pointsShiftedCompref(cache) = pointsShiftedComp; 
+//     cacheCauchy_fvalsCompref(cache)         = fvalsComp        ; 
+//     cacheCauchy_fdervalsCompref(cache)      = fdervalsComp     ; 
+//     cacheCauchy_fdivsCompref(cache)         = fdivsComp        ;
+//     
+//     realRat_clear(error);
+//     realApp_clear(qApp);
+//     realApp_clear(logIsoRatio);
+// }
+// 
+// void cacheCauchy_clear_comp ( cacheCauchy_t cache ){
+//     realApp_clear( cacheCauchy_errorCompref(cache) );
+//     
+//     compApp_ptr pointsComp        = cacheCauchy_pointsCompref(cache)       ;
+//     compApp_ptr pointsShiftedComp = cacheCauchy_pointsShiftedCompref(cache);
+//     compApp_ptr fvalsComp         = cacheCauchy_fvalsCompref(cache)        ;
+//     compApp_ptr fdervalsComp      = cacheCauchy_fdervalsCompref(cache)        ;
+//     compApp_ptr fdivsComp         = cacheCauchy_fdivsCompref(cache)           ;
+//     slong q = cacheCauchy_nbEvalCompref(cache);
+//     
+//     for (slong i=0; i<q; i++){
+//         compApp_clear( pointsComp +i );
+//         compApp_clear( pointsShiftedComp +i );
+//         compApp_clear( fvalsComp +i );
+//         compApp_clear( fdervalsComp +i );
+//         compApp_clear( fdivsComp +i );
+//     }
+//     
+//     ccluster_free(pointsComp        );
+//     ccluster_free(pointsShiftedComp );
+//     ccluster_free(fvalsComp         );
+//     ccluster_free(fdervalsComp      );
+//     ccluster_free(fdivsComp         );
+//     
+//     cacheCauchy_nbEvalCompref(cache) = 0;
+//     
+// }
 
 // //requires: prec is 2^n*CCLUSTER_DEFAULT_PREC
 // compApp_poly_ptr cacheCauchy_getApproximation_RP      ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec ) {

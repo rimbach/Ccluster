@@ -67,6 +67,11 @@ void compApp_poly_taylorShift_in_place( compApp_poly_t f,
 void compApp_poly_taylorShift_in_place_noscale( compApp_poly_t f, 
                                         const compRat_t center, 
                                         slong prec );
+
+// void compApp_poly_taylorShift_in_place_noscale_compApp( compApp_poly_t f, 
+//                                                         const compApp_t center, 
+//                                                         slong prec );
+
 void realApp_poly_taylorShift_in_place_noscale( realApp_poly_t f, 
                                         const realRat_t center, 
                                         slong prec );

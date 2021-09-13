@@ -127,6 +127,9 @@ NUMBERS_INLINE void realApp_log(realApp_t z, const realApp_t x, slong prec) { ar
 NUMBERS_INLINE void realApp_log_base_ui(realApp_t z, const realApp_t x, ulong base, slong prec) { arb_log_base_ui(z, x, base, prec); }
 
 /* other */
+
+NUMBERS_INLINE void realApp_max(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_max(z, x, y, prec); }
+
 NUMBERS_INLINE slong realApp_ceil_si(const realApp_t x, slong prec){
     slong res;
     arf_t ubound;

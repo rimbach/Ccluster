@@ -131,6 +131,11 @@ POLYNOMIALS_INLINE  void compApp_poly_derivative(compApp_poly_t fp, const compAp
     acb_poly_derivative(fp, f, prec);
 }
 
+/* bound greatest root radius for monic polynomial */
+void compApp_poly_monic_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, slong prec);
+/* bound greatest root radius for polynomial */
+void compApp_poly_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, slong prec);
+
 /* sum absolute values of coeffs */
 void compApp_poly_sum_abs_coeffs( realApp_t res, const compApp_poly_t f, slong prec );
 

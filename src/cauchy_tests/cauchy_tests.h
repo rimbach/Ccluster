@@ -77,6 +77,14 @@ int cauchyTest_computeS0Approx_fromVals(compApp_t ps,
                                         int inCounting,
                                         metadatas_t meta);
 
+/* computes approximation sh of h-th powersum */
+void cauchyTest_computeShApprox_fromVals(compApp_t sh,
+                                         slong h,
+                                         cacheCauchy_t cacheCau,
+                                         slong prec,
+                                         int inCounting,
+                                         metadatas_t meta);
+
 /* returns -1: should increase precision
  *         -2: disk is has not expected isolation ratio; should stop
  *          1: OK! */
@@ -119,6 +127,17 @@ cauchyTest_res cauchyTest_computeSsApprox(compApp_ptr ps,
                                           metadatas_t meta, int depth );
 
 cauchyTest_res cauchyTest_deterministic_exclusion_test( const compRat_t center,
+                                                       const realRat_t radius,
+                                                       const realRat_t radius2,
+                                                       slong vangle,           
+                                                       slong vindex,           
+                                                       cacheApp_t cache,
+                                                       cacheCauchy_t cacheCau,
+                                                       slong prec,
+                                                       int inCounting,
+                                                       metadatas_t meta, int depth);
+
+cauchyTest_res cauchyTest_deterministic_exclusion_testNEW( const compRat_t center,
                                                        const realRat_t radius,
                                                        const realRat_t radius2,
                                                        slong vangle,           
@@ -243,6 +262,19 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
                                    cacheApp_t cache,
                                    cacheCauchy_t cacheCau,
                                    const realRat_t eps,
+                                   metadatas_t meta, int depth);
+
+/* Assume Delta is isoRatio-isolated and contains nbOfRoots roots */
+/* Assume SS is initialized to contain at least nbOfRoots + 1 numbers */
+/* Computes nbOfRoots + 1 power sums with error less than eps     */
+cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
+                                   const realRat_t isoRatio,
+                                   const compDsk_t Delta,
+                                   slong nbOfRoots,
+                                   cacheApp_t cache,
+                                   cacheCauchy_t cacheCau,
+                                   const realRat_t eps,
+                                   slong prec,
                                    metadatas_t meta, int depth);
 #ifdef __cplusplus
 }

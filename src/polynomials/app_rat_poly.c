@@ -190,6 +190,16 @@ void compApp_poly_taylorShift_in_place_noscale( compApp_poly_t f,
     compApp_clear(c);
 }
 
+// void compApp_poly_taylorShift_in_place_noscale_compApp( compApp_poly_t f, 
+//                                                         const compApp_t center, 
+//                                                         slong prec ){
+//     
+//     compApp_ptr fptr = f->coeffs;
+//     const slong len  = f->length;
+//     _acb_poly_taylor_shift_convolution(fptr, center, len, prec);
+//     
+// }
+
 void realApp_poly_taylorShift_in_place_noscale( realApp_poly_t f, 
                                         const realRat_t center, 
                                         slong prec ){

@@ -24,6 +24,7 @@
 #include "polynomials/realApp_poly.h"
 #include "polynomials/compApp_poly.h"
 #include "polynomials/app_rat_poly.h"
+#include "geometry/compDsk.h"
 #include "metadatas/metadatas.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -71,12 +72,21 @@ typedef struct {
     compApp_ptr _fdervalsEx;
     compApp_ptr _fdivsEx;
     
-    /* evaluation points for certified*/
+    /* evaluation points for certification*/
     compApp_ptr _pointsCe;
     compApp_ptr _pointsShiftedCe;
     compApp_ptr _fvalsCe;
     compApp_ptr _fdervalsCe;
     compApp_ptr _fdivsCe;
+    
+//     /* evaluation points for compression*/
+//     slong       _nbEvalComp;
+//     compApp_ptr _pointsComp;
+//     compApp_ptr _pointsShiftedComp;
+//     compApp_ptr _fvalsComp;
+//     compApp_ptr _fdervalsComp;
+//     compApp_ptr _fdivsComp;
+//     realApp_ptr _errorComp;
     
     /* case where the coefficients are known: shifted polynomial */
 //     compApp_poly _shiftedPoly;
@@ -129,6 +139,14 @@ typedef cacheCauchy * cacheCauchy_ptr;
 #define cacheCauchy_fdervalsCeref(X)      ((X)->_fdervalsCe)
 #define cacheCauchy_fdivsCeref(X)         ((X)->_fdivsCe)
 
+// #define cacheCauchy_nbEvalCompref(X)         ((X)->_nbEvalComp)
+// #define cacheCauchy_pointsCompref(X)         ((X)->_pointsComp)
+// #define cacheCauchy_pointsShiftedCompref(X)  ((X)->_pointsShiftedComp)
+// #define cacheCauchy_fvalsCompref(X)          ((X)->_fvalsComp)
+// #define cacheCauchy_fdervalsCompref(X)       ((X)->_fdervalsComp)
+// #define cacheCauchy_fdivsCompref(X)          ((X)->_fdivsComp)
+// #define cacheCauchy_errorCompref(X)          ((X)->_errorComp)
+
 // #define cacheCauchy_shiftedPolyref(X)      (&(X)->_shiftedPoly)
 // #define cacheCauchy_shiftedPolyDerref(X)   (&(X)->_shiftedPolyDer)
 
@@ -168,6 +186,10 @@ void cacheCauchy_set_bounds( cacheCauchy_t cache, const realRat_t radius, slong 
 // compApp_poly_ptr cacheCauchy_getApproximation_QP      ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec );
 // compApp_poly_ptr cacheCauchy_getApproximation_RPp     ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec );
 // compApp_poly_ptr cacheCauchy_getApproximation_QPp     ( cacheCauchy_t cacheCau, cacheApp_t cache, slong prec );
+
+// void cacheCauchy_init_comp ( cacheCauchy_t cache, const realRat_t isoRatio, const compDsk_t Delta, slong nbOfRoots, const realRat_t eps );
+
+// void cacheCauchy_clear_comp ( cacheCauchy_t cache );
 
 void cacheCauchy_clear ( cacheCauchy_t cache );
 
