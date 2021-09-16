@@ -49,6 +49,7 @@ cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,
                                                   slong prec,
                                                   metadatas_t meta, int depth){
     
+    int level = 4;
     clock_t start = clock();
     
     cauchyTest_res res;
@@ -57,7 +58,7 @@ cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,
     
     cacheCauchy_set_bounds( cacheCau, compDsk_radiusref(Delta), CCLUSTER_DEFAULT_PREC);
     
-    if (metadatas_getVerbo(meta)>3) {
+    if (metadatas_getVerbo(meta)>=level) {
         printf("#---cauchy probabilistic counting: \n");
         printf("#------ isoRatio: "); realRat_print(cacheCauchy_isoRatioref(cacheCau)); printf("\n");
     }
@@ -91,7 +92,7 @@ cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,
         }
     }
     
-    if (metadatas_getVerbo(meta)>3) {
+    if (metadatas_getVerbo(meta)>=level) {
         printf("#------ res: %i\n", res.nbOfSol);
         printf("#------ s0: "); compApp_printd(s0,10); 
         slong nbOfSol = -1;

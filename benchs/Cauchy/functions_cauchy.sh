@@ -84,6 +84,43 @@ gen_with_deg_bs(){
     
 }
 
+genRand_with_deg_bs(){
+
+    NAME=$1
+    POLNAME=$2
+    DEG=$3
+    BS=$4
+    NBPOLS=$5
+    LOC=$6
+    NAME_IN=$NAME"_nbp.ccl"
+    NAME_IN_MAX=$NAME"_"$NBPOLS".ccl"
+    
+    if [ ! -e $NAME_IN_MAX ]; then
+            echo  "Generating $NBPOLS files for $POLNAME degree $DEG bitsize $BS, pol in " $NAME_IN
+            $GENRANDPOLFI_CALL $POLNAME $DEG -f 1 -b $BS -p $NBPOLS -l $LOC
+    fi
+    
+}
+
+genRand_with_deg_bs_nbterms(){
+
+    NAME=$1
+    POLNAME=$2
+    DEG=$3
+    BS=$4
+    NBT=$5
+    NBPOLS=$6
+    LOC=$7
+    NAME_IN=$NAME"_nbp.ccl"
+    NAME_IN_MAX=$NAME"_"$NBPOLS".ccl"
+    
+    if [ ! -e $NAME_IN_MAX ]; then
+            echo  "Generating $NBPOLS files for $POLNAME degree $DEG bitsize $BS, pol in " $NAME_IN
+            $GENRANDPOLFI_CALL $POLNAME $DEG -f 1 -b $BS -n $NBT -p $NBPOLS -l $LOC
+    fi
+    
+}
+
 gen_with_c_a_k(){
 
     NAME=$1

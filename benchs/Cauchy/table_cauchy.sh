@@ -144,7 +144,30 @@ else
   mkdir $REP
 fi
 
-DEGREES="64 128 191 256"
+POLNAME="randomSparse"
+DEGREES="64"
+NBTERMS="5 10"
+BITSIZES="8"
+NBPOLS="2"
+for NBT in $NBTERMS; do
+for DEG in $DEGREES; do
+for BIT in $BITSIZES; do
+    REPNAME=$REP
+    NAME=$REPNAME"/"$POLNAME"_"$DEG"_"$BIT"_"$NBT
+    
+    genRand_with_deg_bs_nbterms $NAME $POLNAME $DEG $BIT $NBT $NBPOLS $REPNAME
+    for CURIND in `seq 1 $NBPOLS`; do
+        NAME=$REPNAME"/"$POLNAME"_"$DEG"_"$BIT"_"$NBT"_"$CURIND
+        run_ccluster $NAME $POLNAME $DEG $EPSILONCCL
+        run_cauchy   $NAME $POLNAME $DEG $EPSILONCAU
+#         stats_pol_rand $NAME
+    done
+            
+done
+done
+done
+
+DEGREES="64 128 191 256 391"
 # DEGREES="128 191"
 # POLNAMES="Bernoulli Wilkinson"
 POLNAMES="Bernoulli"
@@ -187,7 +210,7 @@ done
 done
 echo "\\hline" >> $TEMPTABFILE
 
-DEGREES="5 6 7 8 9 10"
+DEGREES="5 6 7 8 9"
 POLNAMES="Mandelbrot"
 
 for POLNAME in $POLNAMES; do
@@ -207,7 +230,7 @@ done
 done
 echo "\\hline" >> $TEMPTABFILE
 
-DEGREES="5 6 7 8 9 10 11"
+DEGREES="5 6 7 8 9 10"
 POLNAMES="Runnels"
 
 for POLNAME in $POLNAMES; do

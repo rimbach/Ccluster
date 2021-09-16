@@ -53,6 +53,8 @@ void realApp_poly_scale_realRat_in_place( realApp_ptr fptr, const realRat_t r, s
 
 void compApp_poly_scale_realRat_in_place( compApp_ptr fptr, const realRat_t r, slong len, slong prec );
 
+void compApp_poly_scale_realRat_in_place_monic( compApp_ptr fptr, const realRat_t r, slong len, slong prec );
+
 void realApp_poly_taylorShift_in_place( realApp_poly_t f, 
                                         const realRat_t center, 
                                         const realRat_t radius, 

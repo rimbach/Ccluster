@@ -41,7 +41,7 @@
 extern "C" {
 #endif
 
-void cauchy_global_interface_func( void(*func)(compApp_poly_t, slong), 
+int cauchy_global_interface_func( void(*func)(compApp_poly_t, slong), 
                                      const realRat_t eps,
                                      const realRat_t isoRatio,
                                      int nbPows,
@@ -50,7 +50,7 @@ void cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
                                      int output,
                                      int verb);
 
-void cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
+int cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
                                            const realRat_t eps,
                                            const realRat_t isoRatio,
                                            int nbPows,
@@ -60,7 +60,7 @@ void cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
                                            int verb);
 
 /* version with function for fast evaluation */
-void cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
+int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                    void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong), 
                                    const realRat_t eps, 
                                    const realRat_t isoRatio,
@@ -71,7 +71,7 @@ void cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                    int verb);
 
 /* implemented in cauchy.c */
-void cauchy_algo_global( connCmp_list_t qResults,
+int cauchy_algo_global( connCmp_list_t qResults,
                            compBox_list_t bDiscarded,
                            const compBox_t initialBox, 
                            const realRat_t eps, 
@@ -79,7 +79,7 @@ void cauchy_algo_global( connCmp_list_t qResults,
                            cacheCauchy_t cacheCau,
                            metadatas_t meta);
 
-void cauchy_main_loop( connCmp_list_t qResults, 
+int cauchy_main_loop( connCmp_list_t qResults, 
                          compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t discardedCcs, 

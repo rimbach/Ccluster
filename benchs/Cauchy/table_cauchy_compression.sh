@@ -97,9 +97,9 @@ else
   mkdir $REP
 fi
 
-KS="3 4"
+KS="3 4 5"
 POLNAME="nestedClusters"
-AS="16 256"
+AS="16 256 4096"
 # AS="16 256 4096"
 CS="3"
 for C in $CS; do

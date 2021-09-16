@@ -18,11 +18,10 @@ cauchyTest_res cauchyTest_probabilistic_exclusion_test( const compRat_t center,
                                          slong vindex,           
                                           cacheApp_t cache,
                                           cacheCauchy_t cacheCau,
-//                                         slong nbPoints,
-//                                         slong nbPowerSums,
                                           slong prec,
                                           metadatas_t meta, int depth){
     
+    int level=5;
     clock_t start = clock();
     
     cauchyTest_res res;
@@ -30,21 +29,16 @@ cauchyTest_res cauchyTest_probabilistic_exclusion_test( const compRat_t center,
     
     cacheCauchy_set_bounds( cacheCau, radius, CCLUSTER_DEFAULT_PREC);
     
-    if (metadatas_getVerbo(meta)>3) {
+    if (metadatas_getVerbo(meta)>=level) {
         printf("#---cauchy probabilistic exclusion test: \n");
-//         printf("------ isoRatio: "); realRat_print(metadatas_getIsoRatio(meta)); printf("\n");
         printf("#------ isoRatio: "); realRat_print(cacheCauchy_isoRatioref(cacheCau)); printf("\n");
     }
     
-//     slong q1 = cacheCauchy_nbEvalExref(cacheCau);
-//     slong q2 = cacheCauchy_nbEvalCeref(cacheCau);
-//     slong quo = cacheCauchy_quotientref(cacheCau);
     realApp_ptr wP  = cacheCauchy_wanErrExref(cacheCau);
-//     realApp_ptr wP2 = cacheCauchy_wanErrCeref(cacheCau);
     
     slong nbPowerSums = cacheCauchy_nbPwSuExref(cacheCau);
     
-//     if (metadatas_getVerbo(meta)>=3) {
+//     if (metadatas_getVerbo(meta)>=level) {
 // //         printf("------ number of eval points q1: %ld\n", q1);
 //         printf("------ number of eval points q1: %ld\n", cacheCauchy_nbEvalExref(cacheCau));
 // //         printf("------ number of eval points q2: %ld\n", q2);
@@ -75,7 +69,7 @@ cauchyTest_res cauchyTest_probabilistic_exclusion_test( const compRat_t center,
         j++;
     }
     
-    if (metadatas_getVerbo(meta)>3) {
+    if (metadatas_getVerbo(meta)>=level) {
         printf("#------ res: %i\n", res.nbOfSol);
         for (int j=0; j<nbPowerSums; j++) {
             printf("#------ s%d: ",j); compApp_printd(ps+j,10); 
@@ -86,43 +80,6 @@ cauchyTest_res cauchyTest_probabilistic_exclusion_test( const compRat_t center,
             printf("\n");
         }
     }
-    
-//     int alreadyEvaluated = 0;
-//     compApp_t s0;
-//     compApp_init(s0);
-    
-//     if (res.nbOfSol==0) {
-//         
-//         alreadyEvaluated = 0;
-//         slong g = 0;
-//         while ((g<q1)&&(res.nbOfSol==0)) {
-//             
-//             res = cauchyTest_computeS0Approx(s0, center, radius,
-//                                              radius2, vangle, vindex,
-//                                              quo*g, &alreadyEvaluated, cache, cacheCau, CAUCHYTEST_CERTIFIED, res.appPrec, meta, depth );
-//             
-//             res.nbOfSol = ( res.nbOfSol==-2? 1:0 );
-//             
-//             if (res.nbOfSol==0) {
-//                 realApp_add_error( compApp_realref(s0), wP2 );
-//                 realApp_add_error( compApp_imagref(s0), wP2 );
-//                 res.nbOfSol = ( compApp_contains_zero(s0)==1? 0:1 );
-//             }
-//             
-// //             if (res.nbOfSol != 0)
-// //                 printf("ici\n");
-//             g = g+1;
-//         }
-//         
-//         if (metadatas_getVerbo(meta)>=3) {
-//             printf("------ res: %i\n", res.nbOfSol);
-//             printf("------ s0: "); compApp_printd(s0,10); printf("\n");
-// //         }
-//         }
-//         
-//     }
-    
-//     compApp_clear(s0);
     
     for (int j=0; j<nbPowerSums; j++)
         compApp_clear( ps +j );

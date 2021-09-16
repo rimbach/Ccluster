@@ -104,8 +104,9 @@ void compApp_poly_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, 
     
     compApp_t t;
     compApp_init(t);
-    realApp_t tt;
+    realApp_t tt, m;
     realApp_init(tt);
+    realApp_init(m);
     
     slong i = 1;
     compApp_div(t, coeffs + deg-i, coeffs + deg, prec);
@@ -116,8 +117,19 @@ void compApp_poly_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, 
         compApp_div(t, coeffs + deg-i, coeffs + deg, prec);
         compApp_abs(tt, t, prec);
 //         printf("abs coeff: "); realApp_printd(tt, 10);
-        realApp_root_ui(tt,  tt, (ulong) i, prec);
-//         printf(" tt: "); realApp_printd(tt, 10); printf("\n");
+//         printf(" contains 0? %d", realApp_contains_zero(tt));
+        if (realApp_contains_zero(tt)) {
+            realApp_get_mid_realApp(m, tt);
+            realApp_get_rad_realApp(tt, tt);
+            realApp_add(tt, tt, m, prec);
+            realApp_root_ui(tt,  tt, (ulong) i, prec);
+            realApp_zero(m);
+            realApp_union(tt, tt, m, prec);
+//             printf(" tt: "); realApp_printd(tt, 10); printf("\n");
+        } else {
+            realApp_root_ui(tt,  tt, (ulong) i, prec);
+//             printf(" tt: "); realApp_printd(tt, 10); printf("\n");
+        }
         realApp_max(lb, lb, tt, prec);
     }
     
@@ -126,6 +138,7 @@ void compApp_poly_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, 
     
     compApp_clear(t);
     realApp_clear(tt);
+    realApp_clear(m);
 }
 
 /* computes the coeff of x^(index) of one Graeffe iteration of f, where f has length and degree len-1 */

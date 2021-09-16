@@ -293,7 +293,7 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
 //         if (res.appPrec == prec) res.appPrec *=2;
         
         /*improvement: if one solution, try to validate with interval newton*/
-        /* to avoid a costly taylor-shift in the tstar tes                  */ 
+        /* to avoid a costly counting test                  */ 
         newton_res nres;
         nres.nflag = 0;
         if (connCmp_nSolsref(CC)==1) {
@@ -302,9 +302,6 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
             nres = newton_cauchy_interval( ndisk, cache, cacheCau, res.appPrec, meta);
             if (metadatas_getVerbo(meta)>level) {
                 printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: nres.nflag: %d\n", nres.nflag);
-//                 newton_res nrest;
-//                 nrest = newton_interval( ndisk, cache, res.appPrec, meta);
-//                 printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: nrest.nflag: %d\n", nrest.nflag);
             }
         }
         
@@ -335,19 +332,13 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
                 cres = cauchyTest_deterministic_verification( ndisk, connCmp_nSolsref(CC), cacheCauchy_isoRatioref(cacheCau),
                                                                cache, cacheCau, res.appPrec, meta, depth);
                 res.appPrec = cres.appPrec;
-//                 cres = cauchyTest_probabilistic_counting( ndisk, cache, cacheCau, res.appPrec, meta, depth);
-//                 res.appPrec = cres.appPrec;
-//                 if (cres.nbOfSol == connCmp_nSolsref(CC)) {
-//                     cres = cauchyTest_deterministic_counting( ndisk, cacheCauchy_isoRatioref(cacheCau), cache, cacheCau, res.appPrec, meta, depth);
-//                     res.appPrec = cres.appPrec;
-//                 }
                 res.nflag = (cres.nbOfSol == connCmp_nSolsref(CC));
-                if (metadatas_getVerbo(meta)>=level) {
-                    printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: cauchy test res %d\n", cres.nbOfSol);
-                    /* version with Tstar test: only for debug*/
-                    tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, NULL, meta);
-                    printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: tstar  test res %d\n\n", tres.nbOfSol);
-                }
+//                 if (metadatas_getVerbo(meta)>=level) {
+//                     printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: cauchy test res %d\n", cres.nbOfSol);
+//                     /* version with Tstar test: only for debug*/
+//                     tstar_res tres = tstar_interface( cache, ndisk, connCmp_nSolsref(CC), 0, 1, res.appPrec, depth, NULL, meta);
+//                     printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: tstar  test res %d\n\n", tres.nbOfSol);
+//                 }
             }
         }
 //         printf("number of sols in ndisk from pellet test: %d\n\n", tres.nbOfSol);

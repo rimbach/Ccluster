@@ -18,7 +18,7 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
 //                                      int nbSols, 
                                      slong prec, metadatas_t meta){
     
-//     int level = 4;
+    int level = 4;
     
     tstar_res res;
     res.appPrec = prec;
@@ -58,37 +58,29 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
 //             continue;
 //         }
         
-        /* deterministic exclusion test */
+        /* exclusion test */
         cauchyTest_res resCauchy;
+        resCauchy.nbOfSol = 1;
         resCauchy.appPrec = CCLUSTER_DEFAULT_PREC;
-//         resCauchy = cauchyTest_deterministic_exclusion_testNEW( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
-//                                                             NULL, 0,0,
-//                                                             cache, cacheCau, resCauchy.appPrec, CAUCHYTEST_INEXCLUSI, meta, depth);
-//         
-//         if (metadatas_getVerbo(meta)>=level) {
-//             printf("#---cauchy deterministic exclusion test New: res: %d\n", resCauchy.nbOfSol );
-//         }
-        
+
+#ifdef CERTIFIED        
         resCauchy = cauchyTest_deterministic_exclusion_test( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
                                                             NULL, 0,0,
                                                             cache, cacheCau, resCauchy.appPrec, CAUCHYTEST_INEXCLUSI, meta, depth);
-        
-//         if (metadatas_getVerbo(meta)>=level) {
-//             printf("#---cauchy deterministic exclusion test: res: %d\n", resCauchy.nbOfSol );
-//         }
-        
-//         resCauchy = cauchyTest_probabilistic_exclusion_test( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
-//                                                             NULL, 0,0,
-//                                                             cache, cacheCau, resCauchy.appPrec, meta, depth);
+        if (metadatas_getVerbo(meta)>=level) {
+            printf("#---cauchy deterministic exclusion test: res: %d\n", resCauchy.nbOfSol );
+        }
+#else
+        resCauchy = cauchyTest_probabilistic_exclusion_test( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
+                                                            NULL, 0,0,
+                                                            cache, cacheCau, resCauchy.appPrec, meta, depth);
+        if (metadatas_getVerbo(meta)>=level) {
+            printf("#---cauchy probabilistic exclusion test: res: %d\n", resCauchy.nbOfSol );
+        }
+#endif
         
         res.appPrec = resCauchy.appPrec;
         res.nbOfSol = resCauchy.nbOfSol;
-        /* fin test */
-//         res = tstar_interface( cache, bdisk, compBox_get_nbMSol(btemp), 1, 0, res.appPrec, depth, meta);  
-//         
-//         if (metadatas_getVerbo(meta)>=3) {
-//             printf("------ result of tstar test: %d\n", res.nbOfSol);
-//         }
         
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
@@ -385,10 +377,14 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
         realRat_clear(epsp);
         return appPrec;
     }
+    
+#ifdef DEFLATION
     /* here m>1 */
     
     /* compute the factor of P(c+rx) which m roots ly in in D(c,r) */
-    realRat_div_ui(epsp, epsp, 1000000);
+//     realRat_div_ui(epsp, epsp, 100000000);
+    realRat_set_si(epsp, 1, 2);
+    realRat_pow_si(epsp, epsp, 212);
     cauchyTest_res resT;
     compApp_ptr SS = (compApp_ptr) ccluster_malloc ( (m+1)*sizeof(compApp) );
     for (slong i=0; i<m+1; i++)
@@ -410,23 +406,23 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
 //             printf("%ld-th coeff: ", j); compApp_printd( coeffs + j, 10); printf("\n");
 //         }
     }
+//     if (metadatas_getVerbo(meta)>=level) {
+//         printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; computed factor:\n");
+//         compApp_poly_printd( factor, 10 );
+//         printf("\n");
+//     }
+    /* scale by 1/r */
+    realRat_t rinv;
+    realRat_init(rinv);
+    realRat_inv( rinv, compDsk_radiusref(Delta) );
+    compApp_poly_scale_realRat_in_place_monic( factor->coeffs, rinv, factor->length, resT.appPrec );
+    realRat_clear(rinv);
+    
     if (metadatas_getVerbo(meta)>=level) {
         printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; computed factor:\n");
         compApp_poly_printd( factor, 10 );
         printf("\n");
     }
-    /* scale by 1/r */
-    realRat_t rinv;
-    realRat_init(rinv);
-    realRat_inv( rinv, compDsk_radiusref(Delta) );
-    compApp_poly_scale_realRat_in_place( factor->coeffs, rinv, factor->length, resT.appPrec );
-    realRat_clear(rinv);
-    
-//     if (metadatas_getVerbo(meta)>=level) {
-//         printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; computed factor:\n");
-//         compApp_poly_printd( factor, 10 );
-//         printf("\n");
-        
         
 //         for( slong i=0; i < (factor->length)-1; i++)
 //             compApp_div( (factor->coeffs) + i, (factor->coeffs) + i, (factor->coeffs) + (factor->length)-1, resT.appPrec);
@@ -460,7 +456,8 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
         printf("\n");
     }
 //     compRat_zero(nc);
-    compRat_sub(nc, nc, compDsk_centerref(Delta) );
+    compRat_sub(nc, nc, compDsk_centerref(Delta));
+//     compRat_neg(nc, compDsk_centerref(Delta) );
     compApp_poly_taylorShift_in_place_noscale( factor, nc, resT.appPrec );
     compRat_clear(nc);
     
@@ -487,13 +484,80 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
         realApp_printd( ub, 10 ); printf("\n");
     }
     
+    compApp_poly_oneGraeffeIteration_in_place( factor, resT.appPrec);
+    compApp_poly_bound_r1( lb, ub, factor, resT.appPrec);
+    realApp_root_ui(lb,  lb, 2, prec);
+    realApp_root_ui(ub,  ub, 2, prec);
+    
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; computed bounds for r1:\n");
+        realApp_printd( lb, 10 ); printf("\n");
+        realApp_printd( ub, 10 ); printf("\n");
+    }
+    
+    compApp_poly_oneGraeffeIteration_in_place( factor, resT.appPrec);
+    compApp_poly_bound_r1( lb, ub, factor, resT.appPrec);
+    realApp_root_ui(lb,  lb, 4, prec);
+    realApp_root_ui(ub,  ub, 4, prec);
+    
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; computed bounds for r1:\n");
+        realApp_printd( lb, 10 ); printf("\n");
+        realApp_printd( ub, 10 ); printf("\n");
+    }
+    
+    compApp_poly_oneGraeffeIteration_in_place( factor, resT.appPrec);
+    compApp_poly_bound_r1( lb, ub, factor, resT.appPrec);
+    realApp_root_ui(lb,  lb, 8, prec);
+    realApp_root_ui(ub,  ub, 8, prec);
+    
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; computed bounds for r1:\n");
+        realApp_printd( lb, 10 ); printf("\n");
+        realApp_printd( ub, 10 ); printf("\n");
+    }
+    
+    compApp_poly_oneGraeffeIteration_in_place( factor, resT.appPrec);
+    compApp_poly_bound_r1( lb, ub, factor, resT.appPrec);
+    realApp_root_ui(lb,  lb, 16, prec);
+    realApp_root_ui(ub,  ub, 16, prec);
+    
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; computed bounds for r1:\n");
+        realApp_printd( lb, 10 ); printf("\n");
+        realApp_printd( ub, 10 ); printf("\n");
+    }
+    
+    compApp_poly_oneGraeffeIteration_in_place( factor, resT.appPrec);
+    compApp_poly_bound_r1( lb, ub, factor, resT.appPrec);
+    realApp_root_ui(lb,  lb, 32, prec);
+    realApp_root_ui(ub,  ub, 32, prec);
+    
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; computed bounds for r1:\n");
+        realApp_printd( lb, 10 ); printf("\n");
+        realApp_printd( ub, 10 ); printf("\n");
+    }
+    
+    compApp_poly_oneGraeffeIteration_in_place( factor, resT.appPrec);
+    compApp_poly_bound_r1( lb, ub, factor, resT.appPrec);
+    realApp_root_ui(lb,  lb, 64, prec);
+    realApp_root_ui(ub,  ub, 64, prec);
+    
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("#---------cauchy.c: cauchy_compressionIntoRigidDisk; computed bounds for r1:\n");
+        realApp_printd( lb, 10 ); printf("\n");
+        realApp_printd( ub, 10 ); printf("\n");
+    }
+    
     realApp_clear(lb);
     realApp_clear(ub);
     compApp_poly_clear(factor);
     for (slong i=0; i<m+1; i++)
         compApp_clear( SS + i );
     ccluster_free(SS);
-    
+ 
+#endif
     /* set epsp = eps/theta */
     realRat_div(epsp, eps, theta);
     
@@ -612,7 +676,7 @@ connCmp_ptr cauchy_actualizeCCafterCompression( connCmp_ptr CC, const compDsk_t 
     return nCC;
 }
 
-void cauchy_main_loop( connCmp_list_t qResults,  
+int cauchy_main_loop( connCmp_list_t qResults,  
                          compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t discardedCcs, 
@@ -662,7 +726,9 @@ void cauchy_main_loop( connCmp_list_t qResults,
     realRat_set_si(four, 4, 1);
     realRat_set_si(three, 3, 1);
     
-    while (!connCmp_list_is_empty(qMainLoop)) {
+    int failure = 0;
+    
+    while ( (failure==0)&&(!connCmp_list_is_empty(qMainLoop)) ) {
         
         //         if (metadatas_getVerbo(meta)>0) {
 //             printf("ccluster.c, ccluster_main_loop, size of queue: %d \n", connCmp_list_get_size(qMainLoop) );
@@ -675,30 +741,30 @@ void cauchy_main_loop( connCmp_list_t qResults,
         /* try to upper bound the number of roots in ccur */
         /* at least one sol per connected comp in qMainLoop, */
         /* 2 if use real coeffs and the CC does not contain the real line */
-        slong nbMaxSol=connCmp_nSolsref(ccur);
-        if (nbMaxSol==-1) {
-            nbMaxSol=0;
-            connCmp_list_iterator it = connCmp_list_begin(qMainLoop);
-            while (it!=connCmp_list_end()){
-                
-                if (connCmp_nSolsref( connCmp_list_elmt( it ) ) > -1) {
-                    nbMaxSol += connCmp_nSolsref( connCmp_list_elmt( it ) ) ;
-                    if ( (metadatas_useRealCoeffs(meta)) && (connCmp_is_imaginary_positive(connCmp_list_elmt( it ))) )
-                        nbMaxSol += connCmp_nSolsref( connCmp_list_elmt( it ) ) ; 
-                } else {
-                    nbMaxSol += 1 ;
-                    if ( (metadatas_useRealCoeffs(meta)) && (connCmp_is_imaginary_positive(connCmp_list_elmt( it ))) )
-                        nbMaxSol += 1 ; 
-                }
-                    
-                it = connCmp_list_next(it);
-            }
-            nbMaxSol += nbSolsInQResults;
-//             printf("nbMaxSol: %ld\n", nbMaxSol);
-            nbMaxSol = cacheApp_getDegree(cache) - nbMaxSol;
-            if ( (metadatas_useRealCoeffs(meta)) && (connCmp_is_imaginary_positive(ccur)) )
-                nbMaxSol = nbMaxSol/2;
-        }
+//         slong nbMaxSol=connCmp_nSolsref(ccur);
+//         if (nbMaxSol==-1) {
+//             nbMaxSol=0;
+//             connCmp_list_iterator it = connCmp_list_begin(qMainLoop);
+//             while (it!=connCmp_list_end()){
+//                 
+//                 if (connCmp_nSolsref( connCmp_list_elmt( it ) ) > -1) {
+//                     nbMaxSol += connCmp_nSolsref( connCmp_list_elmt( it ) ) ;
+//                     if ( (metadatas_useRealCoeffs(meta)) && (connCmp_is_imaginary_positive(connCmp_list_elmt( it ))) )
+//                         nbMaxSol += connCmp_nSolsref( connCmp_list_elmt( it ) ) ; 
+//                 } else {
+//                     nbMaxSol += 1 ;
+//                     if ( (metadatas_useRealCoeffs(meta)) && (connCmp_is_imaginary_positive(connCmp_list_elmt( it ))) )
+//                         nbMaxSol += 1 ; 
+//                 }
+//                     
+//                 it = connCmp_list_next(it);
+//             }
+//             nbMaxSol += nbSolsInQResults;
+// //             printf("nbMaxSol: %ld\n", nbMaxSol);
+//             nbMaxSol = cacheApp_getDegree(cache) - nbMaxSol;
+//             if ( (metadatas_useRealCoeffs(meta)) && (connCmp_is_imaginary_positive(ccur)) )
+//                 nbMaxSol = nbMaxSol/2;
+//         }
         
         /* Real Coeff */
         pushConjugFlag = 0;
@@ -749,8 +815,8 @@ void cauchy_main_loop( connCmp_list_t qResults,
 //             printf("#------length of results queue :         %d\n", connCmp_list_get_size(qResults));
             printf("#------number of boxes in ccur:          %d\n", connCmp_nb_boxes(ccur));
             printf("#------connCmp_nSolsref(ccur):           %d\n", connCmp_nSolsref(ccur)); 
-            if (connCmp_nSolsref(ccur) == -1)
-                printf("#------max number of roots in ccur:      %ld\n", nbMaxSol); 
+//             if (connCmp_nSolsref(ccur) == -1)
+//                 printf("#------max number of roots in ccur:      %ld\n", nbMaxSol); 
             printf("#------separation Flag: %d\n", separationFlag);
             printf("#------widthFlag: %d\n", widthFlag); 
             printf("#------compactFlag: %d\n", compactFlag);
@@ -769,13 +835,21 @@ void cauchy_main_loop( connCmp_list_t qResults,
                     }
                     
                     realRat_mul_si(compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 2);
-                    
                     cauchyTest_res resCauchy = cauchyTest_probabilistic_counting( ccDisk, cache, cacheCau, prec, meta, depth);
                     realRat_div_ui(compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 2);
                     connCmp_nSolsref(ccur) = resCauchy.nbOfSol;
                     prec = resCauchy.appPrec;
-                    if (metadatas_getVerbo(meta)>=level)
+                    
+#ifndef CERTIFIED
+                    if (resCauchy.nbOfSol == -1) {
+                        failure = 1;
+                        continue;
+                        printf("#FAILURE: A DISC IS NOT 2-ISOLATED \n");
+                    }
+#endif                    
+                    if (metadatas_getVerbo(meta)>=level) {
                         printf("#------nb sols: %d\n", (int) connCmp_nSolsref(ccur));
+                    }
                      
 //                     resTstar = tstar_interface( cache, ccDisk, cacheApp_getDegree(cache), 0, 0, prec, depth, meta);
 //                     connCmp_nSolsref(ccur) = resTstar.nbOfSol;
@@ -1081,9 +1155,11 @@ void cauchy_main_loop( connCmp_list_t qResults,
     realRat_clear(threeWidth);
     compRat_clear(initPoint);
     connCmp_list_clear(ltemp);
+    
+    return failure;
 }
 
-void cauchy_algo_global( connCmp_list_t qResults, 
+int cauchy_algo_global( connCmp_list_t qResults, 
                            compBox_list_t bDiscarded,
                            const compBox_t initialBox, 
                            const realRat_t eps, 
@@ -1116,7 +1192,7 @@ void cauchy_algo_global( connCmp_list_t qResults,
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
 //     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
-    cauchy_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, cacheCau, meta);
+    int failure = cauchy_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, cacheCau, meta);
     
     
 //     realRat_clear(factor);
@@ -1126,6 +1202,8 @@ void cauchy_algo_global( connCmp_list_t qResults,
     
 //     chronos_toc_CclusAl(metadatas_chronref(meta));
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
+    
+    return failure;
 }
 
 int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheApp_t cache, cacheCauchy_t cacheCau){

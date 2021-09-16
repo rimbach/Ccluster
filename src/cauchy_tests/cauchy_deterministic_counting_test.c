@@ -207,7 +207,11 @@ cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
     resEx.nbOfSol = 0;
     resEx.appPrec = res.appPrec;
     for (int vindex = 0; vindex < nbCenters && (resEx.nbOfSol==0) ; vindex++){
+#ifdef CERTIFIED
         resEx = cauchyTest_deterministic_exclusion_test( center, ExRad, Rad, nbCenters, vindex, cache, cacheCau, resEx.appPrec, CAUCHYTEST_INCOUNTIN, meta, depth );
+#elseif
+        resEx = cauchyTest_probabilistic_exclusion_test( center, ExRad, Rad, nbCenters, vindex, cache, cacheCau, resEx.appPrec, meta, depth );
+#endif
     }
     
     if (resEx.nbOfSol != 0) {
