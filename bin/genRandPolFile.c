@@ -146,12 +146,22 @@ int main(int argc, char **argv){
     
     for (int nbp = 1; nbp<=nbpols; nbp++){
         
-        if (format==1) {
-            sprintf(filename, "%s/%s_%d_%d_%d.ccl", location, poly, firstArg, bitsize, nbp );
-        } else if (format==2) {
-            sprintf(filename, "%s/%s_%d_%d_%d.mpl", location, poly, firstArg, bitsize, nbp );
-        } else if (format==3) {
-            sprintf(filename, "%s/%s_%d_%d_%d.dsc", location, poly, firstArg, bitsize, nbp );
+        if (strcmp(poly, randomDense)==0) {
+            if (format==1) {
+                sprintf(filename, "%s/%s_%d_%d_%d.ccl", location, poly, firstArg, bitsize, nbp );
+            } else if (format==2) {
+                sprintf(filename, "%s/%s_%d_%d_%d.mpl", location, poly, firstArg, bitsize, nbp );
+            } else if (format==3) {
+                sprintf(filename, "%s/%s_%d_%d_%d.dsc", location, poly, firstArg, bitsize, nbp );
+            }
+        } else {
+            if (format==1) {
+                sprintf(filename, "%s/%s_%d_%d_%d_%d.ccl", location, poly, firstArg, bitsize, nbterms, nbp );
+            } else if (format==2) {
+                sprintf(filename, "%s/%s_%d_%d_%d_%d.mpl", location, poly, firstArg, bitsize, nbterms, nbp );
+            } else if (format==3) {
+                sprintf(filename, "%s/%s_%d_%d_%d_%d.dsc", location, poly, firstArg, bitsize, nbterms, nbp );
+            }
         }
         
 //         printf("filename: %s \n", filename);
