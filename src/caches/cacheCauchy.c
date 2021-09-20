@@ -117,6 +117,78 @@ void cacheCauchy_uBoundApp( realApp_t ubApp, slong degree, const realRat_t isoRa
     realRat_clear(ub);
 }
 
+void cacheCauchy_init_sparseEval ( cacheCauchy_t cache, 
+                                   cacheApp_t cachePol ) {
+    
+    compApp_poly_ptr app = cacheApp_getApproximation ( cachePol, CCLUSTER_DEFAULT_PREC );
+    cacheCauchy_inNZCref(cache) = (slong *) ccluster_malloc ( (cacheCauchy_degreeref(cache) + 1)*sizeof(slong) );
+    
+    cacheCauchy_nbNZCref(cache)=0;
+    
+    for (slong ind=0; ind <= cacheCauchy_degreeref(cache); ind++) {
+        if ( ! compApp_is_zero( (app->coeffs) + ind ) ) {
+            cacheCauchy_inNZCref(cache)[cacheCauchy_nbNZCref(cache)]=ind;
+            cacheCauchy_nbNZCref(cache)+=1;
+        }
+    }
+    
+}
+
+void cacheCauchy_sparseEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, cacheApp_t cachePol,
+                              const compApp_t point, slong prec) {
+    
+    compApp_poly_ptr app    = cacheApp_getApproximation ( cachePol, prec );
+    
+    slong nbNZC = cacheCauchy_nbNZCref(cache);
+    slong * inNZC = cacheCauchy_inNZCref(cache);
+    
+    compApp_set( fval, (app->coeffs) + 0);
+    compApp_zero( fderval );
+    
+    compApp_t x, xp, mon;
+    compApp_init(x);
+    compApp_init(xp);
+    compApp_init(mon);
+    
+    slong ind=0;
+    if (inNZC[ind] == 0)
+        ind++;
+    compApp_pow_si( x, point, inNZC[ind], prec );
+    compApp_pow_si( xp, point, inNZC[ind]-1, prec );
+    
+    while ( ind < nbNZC ){
+        compApp_mul(mon, (app->coeffs) + inNZC[ind], x, prec);
+        compApp_add(fval, fval, mon, prec);
+        
+        compApp_mul(mon, (app->coeffs) + inNZC[ind], xp, prec);
+        compApp_mul_si( mon, mon, inNZC[ind], prec);
+        compApp_add(fderval, fderval, mon, prec);
+        
+        ind++;
+        
+        if (ind < nbNZC) {
+            compApp_pow_si(mon, point, inNZC[ind] - inNZC[ind-1], prec);
+            compApp_mul( x, x, mon, prec);
+            compApp_mul( xp, xp, mon, prec);
+        }
+    }
+    
+//     printf("\n");
+    
+    compApp_clear(x);
+    compApp_clear(xp);
+    compApp_clear(mon);
+    
+}
+
+void cacheCauchy_rectangularEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, cacheApp_t cachePol,
+                                   const compApp_t point, slong prec) {
+    
+    compApp_poly_ptr app    = cacheApp_getApproximation ( cachePol, prec );
+    compApp_poly_evaluate2_rectangular(fval, fderval, app, point, prec);
+    
+}
+
 void cacheCauchy_init ( cacheCauchy_t cache, 
                         void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),
                         slong degree,
@@ -129,6 +201,11 @@ void cacheCauchy_init ( cacheCauchy_t cache,
     
     cacheCauchy_evalFastref(cache) = evalFast;
     cacheCauchy_degreeref(cache) = degree;
+    
+    /* for sparse evaluation */
+    cacheCauchy_nbNZCref(cache) = 0;
+    cacheCauchy_inNZCref(cache) = NULL;
+    cacheCauchy_choiceref(cache) = -1;
     
     realRat_init(cacheCauchy_isoRatioref(cache));
     realRat_set(cacheCauchy_isoRatioref(cache), isoRatio);
@@ -561,6 +638,8 @@ void cacheCauchy_set_bounds( cacheCauchy_t cache, const realRat_t radius, slong 
 // 
 void cacheCauchy_clear ( cacheCauchy_t cache ){
     
+    if (cacheCauchy_inNZCref(cache))
+        ccluster_free( cacheCauchy_inNZCref(cache) );
     realRat_clear(cacheCauchy_isoRatioref(cache));
     realApp_clear(cacheCauchy_precfdivref(cache));
     

@@ -39,6 +39,8 @@ int   cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     
     cacheCauchy_init(cacheCau, NULL, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
     
+    cacheCauchy_init_sparseEval ( cacheCau, cache );
+    
     /* automaticly set initialBox */
     /* with evaluation function */
     cauchyRootRadii_root_bound( compBox_bwidthref(initialBox), cacheCau, cache, meta );
@@ -123,6 +125,8 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
     metadatas_init(meta, initialBox, strat, verb);
     
     cacheCauchy_init(cacheCau, NULL, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
+    
+    cacheCauchy_init_sparseEval ( cacheCau, cache );
     
     /* automaticly set initialBox */
     /* with evaluation function */

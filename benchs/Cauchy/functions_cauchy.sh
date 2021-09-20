@@ -363,6 +363,87 @@ stats_pol()
     echo $LINE_TAB >> $TEMPTABFILE
 }
 
+stats_pol_rand()
+{
+    NAME=$1
+    DEG=$2
+    NBPOLS=$3
+    
+    NBSOLS=0
+    TSIZE_CCL=0
+    TDEPT_CCL=0
+    NBEXT_CCL=0
+    TTIME_CCL=0
+    TSIZE_CAU=0
+    TDEPT_CAU=0
+    NBEXT_CAU=0
+    TTIME_CAU=0
+    
+    for CURIND in `seq 1 $NBPOLS`; do
+        NAME_OUTCCL=$NAME"_"$CURIND".out_ccl"
+        NAME_OUTCAU=$NAME"_"$CURIND".out_cau"
+        
+        NBSOLS_T=$(grep "number of solutions"              $NAME_OUTCCL| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        TSIZE_CCL_T=$(grep "tree size:"                    $NAME_OUTCCL| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        TDEPT_CCL_T=$(grep "tree depth:"                   $NAME_OUTCCL| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        NBEXT_CCL_T=$(grep "total number DT:"              $NAME_OUTCCL| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        TTIME_CCL_T=$(grep "total time:"                   $NAME_OUTCCL| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        
+        TSIZE_CAU_T=$(grep "tree size:"                    $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        TDEPT_CAU_T=$(grep "tree depth:"                   $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        NBEXT_CAU_T=$(grep "total number ET:"              $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        TTIME_CAU_T=$(grep "total time:"                   $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        
+        NBSOLS=`echo     $NBSOLS+$NBSOLS_T|bc -l`
+        TSIZE_CCL=`echo     $TSIZE_CCL+$TSIZE_CCL_T|bc -l`
+        TDEPT_CCL=`echo     $TDEPT_CCL+$TDEPT_CCL_T|bc -l`
+        NBEXT_CCL=`echo     $NBEXT_CCL+$NBEXT_CCL_T|bc -l`
+        TTIME_CCL=`echo     $TTIME_CCL+$TTIME_CCL_T|bc -l`
+        TSIZE_CAU=`echo     $TSIZE_CAU+$TSIZE_CAU_T|bc -l`
+        TDEPT_CAU=`echo     $TDEPT_CAU+$TDEPT_CAU_T|bc -l`
+        NBEXT_CAU=`echo     $NBEXT_CAU+$NBEXT_CAU_T|bc -l`
+        TTIME_CAU=`echo     $TTIME_CAU+$TTIME_CAU_T|bc -l`
+    done
+    
+    NBSOLS=`echo     $NBSOLS    /$NBPOLS     |bc -l`
+    TSIZE_CCL=`echo     $TSIZE_CCL    /$NBPOLS     |bc -l`
+    TDEPT_CCL=`echo     $TDEPT_CCL    /$NBPOLS     |bc -l`
+    NBEXT_CCL=`echo     $NBEXT_CCL    /$NBPOLS     |bc -l`
+    TTIME_CCL=`echo     $TTIME_CCL    /$NBPOLS     |bc -l`
+    TSIZE_CAU=`echo     $TSIZE_CAU    /$NBPOLS     |bc -l`
+    TDEPT_CAU=`echo     $TDEPT_CAU    /$NBPOLS     |bc -l`
+    NBEXT_CAU=`echo     $NBEXT_CAU    /$NBPOLS     |bc -l`
+    TTIME_CAU=`echo     $TTIME_CAU    /$NBPOLS     |bc -l`
+    
+    TTIME_CCL=`format_time $TTIME_CCL`
+    TTIME_CAU=`format_time $TTIME_CAU`
+#     echo $TTIME_CCL
+    COLORCCL="\\coblue{"
+    COLORCAU="\\cored{"
+    TEST=`echo "$TTIME_CCL > $TTIME_CAU" | bc -l`
+    if [ $TEST -eq 1 ]; then
+        COLORCCL="\\cored{"
+        COLORCAU="\\coblue{"
+    fi
+    
+    K=$DEG
+    D=$NBSOLS
+    TEST=`echo "$K == $D" | bc -l`
+    if [ $TEST -eq 1 ]; then
+        K=" "
+    fi
+    
+    LINE_TAB="$K & `format_time $D`"
+    LINE_TAB=$LINE_TAB" & `format_time $TSIZE_CCL` & `format_time $TDEPT_CCL`"
+    LINE_TAB=$LINE_TAB" & $COLORCCL$TTIME_CCL}           & `format_time $NBEXT_CCL`"
+    LINE_TAB=$LINE_TAB" & `format_time $TSIZE_CAU` & `format_time $TDEPT_CAU`"
+    LINE_TAB=$LINE_TAB" & $COLORCAU$TTIME_CAU}       & `format_time $NBEXT_CAU`"
+    LINE_TAB=$LINE_TAB"\\\\"
+    
+#     echo $LINE_TAB
+    echo $LINE_TAB >> $TEMPTABFILE
+}
+
 stats_pol_comp()
 {
     NAME=$1

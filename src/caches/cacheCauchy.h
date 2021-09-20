@@ -27,6 +27,8 @@
 #include "geometry/compDsk.h"
 #include "metadatas/metadatas.h"
 
+#include "caches/cacheApp.h"
+
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include <pthread.h>
 #endif
@@ -42,6 +44,12 @@ typedef struct {
     
     void(*_evalFast)(compApp_t, compApp_t, const compApp_t, slong);
     slong   _degree;
+    
+    /* for sparse evaluation */
+    slong    _nbNZC;    /* number of non-zero coefficients */
+    slong  * _inNZC;  /* table containing the degrees of the non-zero coefficients 
+                         when initialized, contains _degree+1 elements*/
+    int      _choice; /* -1 per default;  */
     
     realRat _isoRatio; /* assumed isolation ratio */
     realApp _precfdiv; /* si* : 1/4 */
@@ -111,6 +119,9 @@ typedef cacheCauchy * cacheCauchy_ptr;
 
 #define cacheCauchy_evalFastref(X)   (X->_evalFast)
 #define cacheCauchy_degreeref(X)   (X->_degree)
+#define cacheCauchy_nbNZCref(X)   (X->_nbNZC)
+#define cacheCauchy_inNZCref(X)   (X->_inNZC)
+#define cacheCauchy_choiceref(X)   (X->_choice)
 #define cacheCauchy_isoRatioref(X) (&(X)->_isoRatio)
 #define cacheCauchy_precfdivref(X) (&(X)->_precfdiv)
 #define cacheCauchy_nbPwSuExref(X)   (X->_nbPwSuEx)
@@ -167,6 +178,14 @@ void cacheCauchy_upperBoundUnit( realRat_t upperBoundUnit, slong degree, const r
 
 void cacheCauchy_lBoundApp( realApp_t lbApp, slong degree, const realRat_t isoRatio, const realRat_t radius, slong prec);
 void cacheCauchy_uBoundApp( realApp_t ubApp, slong degree, const realRat_t isoRatio, const realRat_t radius, slong prec);
+
+void cacheCauchy_init_sparseEval ( cacheCauchy_t cache, 
+                                   cacheApp_t cachePol );
+
+void cacheCauchy_sparseEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, cacheApp_t cachePol,
+                              const compApp_t point, slong prec);
+void cacheCauchy_rectangularEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, cacheApp_t cachePol,
+                                   const compApp_t point, slong prec);
 
 void cacheCauchy_init ( cacheCauchy_t cache, 
                         void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong),

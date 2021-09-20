@@ -145,11 +145,12 @@ else
 fi
 
 POLNAME="randomSparse"
-DEGREES="64"
-NBTERMS="5 10"
+DEGREES="64 128 191 256"
+NBTERMS="5 10 20"
 BITSIZES="8"
-NBPOLS="2"
+NBPOLS="10"
 for NBT in $NBTERMS; do
+    echo "\\multicolumn{$NBCOLS}{c}{$POLNAME polynomials with $NBT terms} \\\\\\hline" >> $TEMPTABFILE
 for DEG in $DEGREES; do
 for BIT in $BITSIZES; do
     REPNAME=$REP
@@ -160,9 +161,11 @@ for BIT in $BITSIZES; do
         NAME=$REPNAME"/"$POLNAME"_"$DEG"_"$BIT"_"$NBT"_"$CURIND
         run_ccluster $NAME $POLNAME $DEG $EPSILONCCL
         run_cauchy   $NAME $POLNAME $DEG $EPSILONCAU
-#         stats_pol_rand $NAME
     done
-            
+    
+    NAME=$REPNAME"/"$POLNAME"_"$DEG"_"$BIT"_"$NBT
+    stats_pol_rand $NAME $DEG $NBPOLS
+    
 done
 done
 done

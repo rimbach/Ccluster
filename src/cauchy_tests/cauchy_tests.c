@@ -107,15 +107,36 @@ void cauchyTest_evaluateAtPoints( cacheApp_t cache,
     
     if (cacheCauchy_evalFastref(cacheCau) == NULL) {
         
-        compApp_poly_ptr app    = cacheApp_getApproximation ( cache, prec );
+        if (cacheCauchy_choiceref(cacheCau) == -1) {
+            
+            clock_t start2 = clock();
+            for (slong i=0; i<nbPoints; i++)
+                cacheCauchy_rectangularEval ( fvals + i, fdervals + i, cacheCau, cache, pointsShifted + i, prec);
+            double timeInRectangular = (double) (clock() - start2);
+            start2 = clock();
+            for (slong i=0; i<nbPoints; i++)
+                cacheCauchy_sparseEval ( fvals + i, fdervals + i, cacheCau, cache, pointsShifted + i, prec);
+            double timeInSparse = (double) (clock() - start2);
+            if (timeInRectangular <= timeInSparse)
+                cacheCauchy_choiceref(cacheCau) = 0;
+            else
+                cacheCauchy_choiceref(cacheCau) = 1;
+        }
+        
+//         compApp_poly_ptr app    = cacheApp_getApproximation ( cache, prec );
 //      
         for (slong i=0; i<nbPoints; i++)
             if ( ( reUseEvals ) && ( (i%quo)==0 ) ) {
                 compApp_set( fvals+i, cacheCauchy_fvalsExref(cacheCau) + i/quo );
                 compApp_set( fdervals+i, cacheCauchy_fdervalsExref(cacheCau) + i/quo );
             }
-            else 
-                compApp_poly_evaluate2_rectangular(fvals + i, fdervals + i, app, pointsShifted + i, prec);
+            else {
+                if (cacheCauchy_choiceref(cacheCau) == 1)
+                    cacheCauchy_sparseEval ( fvals + i, fdervals + i, cacheCau, cache, pointsShifted + i, prec);
+                else
+                    cacheCauchy_rectangularEval ( fvals + i, fdervals + i, cacheCau, cache, pointsShifted + i, prec);
+                
+            }
     }
     else {
         for (slong i=0; i<nbPoints; i++) {
