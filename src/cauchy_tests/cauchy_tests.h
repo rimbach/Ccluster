@@ -232,6 +232,24 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial( const compRat_t 
                                                                      slong prec,
                                                                      metadatas_t meta, int depth);
 
+cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_rinfrsup( const compRat_t c,
+                                                                              const realRat_t rinf,
+                                                                              const realRat_t rsup,
+                                                                              slong m,
+                                                                              cacheApp_t cache,
+                                                                              cacheCauchy_t cacheCau,
+                                                                              slong prec,
+                                                                              metadatas_t meta, int depth);
+
+cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_isoRatio( const compRat_t c,
+                                                                              const realRat_t r,
+                                                                              const realRat_t theta,
+                                                                              slong m,
+                                                                              cacheApp_t cache,
+                                                                              cacheCauchy_t cacheCau,
+                                                                              slong prec,
+                                                                              metadatas_t meta, int depth);
+
 /* this version works for any iso ratio, not necessarily the one
  * defined in CacheCau 
  * the disk has to be isolated as isoRatio
@@ -252,30 +270,50 @@ cauchyTest_res cauchyTest_computeS0compDsk_probabilistic( const realRat_t isoRat
                                                           cacheCauchy_t cacheCau,
                                                           metadatas_t meta, int depth);
 
-/* Assume Delta is isoRatio-isolated and contains nbOfRoots roots */
+/* Assume Delta is theta-isolated and contains nbOfRoots roots */
 /* Computes a disk res with radius less than eps */
 /* containing s1(p, Delta) */
+/* if it returns res.nbOfSol = -2 then Delta is not theta-isolated */
 slong cauchyTest_computeS1compDsk( compDsk_t res,
-                                   const realRat_t isoRatio,
-                                   const compDsk_t Delta,
-                                   slong nbOfRoots,
-                                   cacheApp_t cache,
-                                   cacheCauchy_t cacheCau,
-                                   const realRat_t eps,
-                                   metadatas_t meta, int depth);
+                                            const realRat_t theta,
+                                            const compDsk_t Delta,
+                                            slong nbOfRoots,
+                                            cacheApp_t cache,
+                                            cacheCauchy_t cacheCau,
+                                            const realRat_t eps,
+                                            metadatas_t meta, int depth);
 
-/* Assume Delta is isoRatio-isolated and contains nbOfRoots roots */
-/* Assume SS is initialized to contain at least nbOfRoots + 1 numbers */
-/* Computes nbOfRoots + 1 power sums with error less than eps     */
+/* Assume Delta is isoRatio-isolated and contains m roots     */
+/* Let h be a non-negative integer                            */
+/* Assume SS is initialized to contain at least h + 1 numbers */
+/* Computes h + 1 first power sums with error less than eps   */
 cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
                                    const realRat_t isoRatio,
                                    const compDsk_t Delta,
-                                   slong nbOfRoots,
+                                   slong m,
+                                   slong h,
                                    cacheApp_t cache,
                                    cacheCauchy_t cacheCau,
                                    const realRat_t eps,
                                    slong prec,
                                    metadatas_t meta, int depth);
+
+/* Assume Delta is isoRatio-isolated and contains m roots     */
+/* Let N be a non-negative integer                            */
+/* Assume SS is initialized to contain at least m + 1 numbers */
+/* Computes power sums sN, s2N, ..., smN with error less than eps   */
+cauchyTest_res cauchyTest_computeSgNcompDsk( compApp_ptr SgN,
+                                             const realRat_t isoRatio,
+                                             const compDsk_t Delta,
+                                             slong m,
+                                             ulong N,
+                                             slong h,
+                                             cacheApp_t cache,
+                                             cacheCauchy_t cacheCau,
+                                             const realRat_t eps,
+                                             slong prec,
+                                             metadatas_t meta, int depth);
+
 #ifdef __cplusplus
 }
 #endif

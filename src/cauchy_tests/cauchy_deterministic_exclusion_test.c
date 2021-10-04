@@ -304,7 +304,7 @@ cauchyTest_res cauchyTest_deterministic_exclusion_testNEW( const compRat_t cente
                 realApp_one(mu);
                 realApp_div_ui(mu, mu, 2*q2 + 1, res.appPrec);
                 
-                if (metadatas_getVerbo(meta)>=level) {
+                if (metadatas_getVerbo(meta)>=2) {
                     printf("#--- max of fdivs:"); realApp_printd( max, 10); printf("\n");
                     printf("#--- mu          :"); realApp_printd( mu,  10); printf("\n");
                     printf("#--- max < mu?  :%d\n", realApp_lt(max, mu));

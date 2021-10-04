@@ -42,6 +42,9 @@ while [ "$1" != "" ]; do
       --epsilonCAU)
         EPSILONCAU=$VALUE
         ;;
+      --epsilonMPL)
+        EPSILONMPL=$VALUE
+        ;;
       --purge)
         PURGE=1
         ;;
@@ -50,6 +53,9 @@ while [ "$1" != "" ]; do
         ;;
       --purgeCAU)
         PURGECAU=1
+        ;;
+      --purgeMPL)
+        PURGEMPL=1
         ;;
 #       --generate)
 #         GENERATE=1
@@ -81,6 +87,10 @@ if [ -z "$EPSILONCAU" ]; then
    EPSILONCAU="-53"
 fi
 
+if [ -z "$EPSILONMPL" ]; then
+   EPSILONMPL="16"
+fi
+
 if [ -z "$PURGE" ]; then
    PURGE=0
 fi
@@ -93,6 +103,9 @@ if [ -z "$PURGECAU" ]; then
    PURGECAU=0
 fi
 
+if [ -z "$PURGEMPL" ]; then
+   PURGEMPL=0
+fi
 # if [ -z "$GENERATE" ]; then
 #    GENERATE=0
 # fi
@@ -126,10 +139,13 @@ GENRANDPOLFI_CALL=$CCLUSTER_PATH"/bin/genRandPolFile"
 CCLUSTER_OPTS="-v 2 -m onlySubd"
 CAUCHY_OPTS="-v 2"
 
+MPSOLVE_OPTS="-as -Ga -j1"
+MPSOLVE_CALL_S="../../../softs/MPSolve/src/mpsolve/mpsolve"
+
 TEMPTABFILE="temptab_cauchy.txt"
 touch $TEMPTABFILE
 
-NBCOLS=10
+NBCOLS=11
 
 source ./functions_cauchy.sh
 
@@ -161,6 +177,7 @@ for BIT in $BITSIZES; do
         NAME=$REPNAME"/"$POLNAME"_"$DEG"_"$BIT"_"$NBT"_"$CURIND
         run_ccluster $NAME $POLNAME $DEG $EPSILONCCL
         run_cauchy   $NAME $POLNAME $DEG $EPSILONCAU
+        run_mpsolve  $NAME $POLNAME $DEG $EPSILONMPL
     done
     
     NAME=$REPNAME"/"$POLNAME"_"$DEG"_"$BIT"_"$NBT
@@ -186,13 +203,14 @@ for DEG in $DEGREES; do
     gen_with_deg $NAME $POLNAME $DEG
     run_ccluster $NAME $POLNAME $DEG $EPSILONCCL
     run_cauchy   $NAME $POLNAME $DEG $EPSILONCAU
+    run_mpsolve  $NAME $POLNAME $DEG $EPSILONMPL
     
     stats_pol $NAME $DEG
 done 
 done
 echo "\\hline" >> $TEMPTABFILE
 
-DEGREES="64 128 191 256 391 512 717"
+DEGREES="64 128 191 256 391 512 717 1024 1523 2048 3051 4096"
 BITS="14"
 POLNAMES="Mignotte"
 
@@ -207,13 +225,14 @@ for DEG in $DEGREES; do
     gen_with_deg_bs         $NAME $POLNAME $DEG $BITS
     run_ccluster            $NAME $POLNAME $DEG       $EPSILONCCL
     run_cauchy_mignotte     $NAME $POLNAME $DEG $BITS $EPSILONCAU
+    run_mpsolve             $NAME $POLNAME $DEG       $EPSILONMPL
     
     stats_pol $NAME $DEG
 done 
 done
 echo "\\hline" >> $TEMPTABFILE
 
-DEGREES="5 6 7 8 9"
+DEGREES="5 6 7 8 9 10"
 POLNAMES="Mandelbrot"
 
 for POLNAME in $POLNAMES; do
@@ -225,15 +244,16 @@ for DEG in $DEGREES; do
     NAME=$REPNAME"/"$POLNAME"_"$DEG
     
     gen_with_deg            $NAME $POLNAME $DEG
-    run_ccluster            $NAME $POLNAME $DEG $EPSILONCCL
+    run_ccluster_with_ind   $NAME $POLNAME $DEG $EPSILONCCL
     run_cauchy_mandelbrot   $NAME $POLNAME $DEG $EPSILONCAU
+    run_mpsolve             $NAME $POLNAME $DEG $EPSILONMPL
     
     stats_pol $NAME $DEG
 done 
 done
 echo "\\hline" >> $TEMPTABFILE
 
-DEGREES="5 6 7 8 9 10"
+DEGREES="5 6 7 8 9 10 11"
 POLNAMES="Runnels"
 
 for POLNAME in $POLNAMES; do
@@ -245,8 +265,9 @@ for DEG in $DEGREES; do
     NAME=$REPNAME"/"$POLNAME"_"$DEG
     
     gen_with_deg            $NAME $POLNAME $DEG
-    run_ccluster            $NAME $POLNAME $DEG $EPSILONCCL
+    run_ccluster_with_ind   $NAME $POLNAME $DEG $EPSILONCCL
     run_cauchy_runnels      $NAME $POLNAME $DEG $EPSILONCAU
+    run_mpsolve             $NAME $POLNAME $DEG $EPSILONMPL
     
     stats_pol $NAME $DEG
 done 

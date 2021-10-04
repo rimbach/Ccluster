@@ -122,6 +122,9 @@ NUMBERS_INLINE void realApp_mul_2exp_si(realApp_t y, const realApp_t x, slong e)
 NUMBERS_INLINE void realApp_sqr (realApp_t z, const realApp_t x, slong prec) { arb_sqr (z, x, prec); }
 NUMBERS_INLINE void realApp_sqrt(realApp_t z, const realApp_t x, slong prec) { arb_sqrt(z, x, prec); }
 
+/* assume x is positive and compute its e-th root */
+               void realApp_pos_root_ui   ( realApp_t dest, const realApp_t x, ulong e, slong prec);
+               
 /* logarithm */
 NUMBERS_INLINE void realApp_log(realApp_t z, const realApp_t x, slong prec) { arb_log(z, x, prec); }
 NUMBERS_INLINE void realApp_log_base_ui(realApp_t z, const realApp_t x, ulong base, slong prec) { arb_log_base_ui(z, x, base, prec); }

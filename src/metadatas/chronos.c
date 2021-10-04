@@ -51,9 +51,9 @@ void chronos_init( chronos_t times ){
     times->_clicks_CauCoCS_cumul = 0.0;
     
     times->_clicks_CompCen_cumul = 0.0;
-    times->_clicks_CompRRP_cumul = 0.0;
-    times->_clicks_CompCCT_cumul = 0.0;
-    times->_clicks_CompRRD_cumul = 0.0;
+    times->_clicks_CompRR1_cumul = 0.0;
+    times->_clicks_CompRR2_cumul = 0.0;
+    times->_clicks_CompRR3_cumul = 0.0;
     times->_clicks_CompTot_cumul = 0.0;
 
 #ifdef CCLUSTER_HAVE_PTHREAD

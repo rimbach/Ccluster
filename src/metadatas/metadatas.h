@@ -825,44 +825,44 @@ METADATAS_INLINE void metadatas_add_time_CompCen(metadatas_t m, double d){
 }
 METADATAS_INLINE double metadatas_get_time_CompCen ( const metadatas_t m ) { return chronos_get_time_CompCen (metadatas_chronref(m)); }
 
-METADATAS_INLINE void metadatas_add_time_CompRRP(metadatas_t m, double d){
+METADATAS_INLINE void metadatas_add_time_CompRR1(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
-    chronos_add_time_CompRRP( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+    chronos_add_time_CompRR1( metadatas_chronref(m), d, metadatas_useNBThreads(m));
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_unlock(m);
 #endif
 }
-METADATAS_INLINE double metadatas_get_time_CompCCT ( const metadatas_t m ) { return chronos_get_time_CompCCT (metadatas_chronref(m)); }
+METADATAS_INLINE double metadatas_get_time_CompRR1 ( const metadatas_t m ) { return chronos_get_time_CompRR1 (metadatas_chronref(m)); }
 
-METADATAS_INLINE void metadatas_add_time_CompCCT(metadatas_t m, double d){
+METADATAS_INLINE void metadatas_add_time_CompRR2(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
-    chronos_add_time_CompCCT( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+    chronos_add_time_CompRR2( metadatas_chronref(m), d, metadatas_useNBThreads(m));
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_unlock(m);
 #endif
 }
-METADATAS_INLINE double metadatas_get_time_CompRRP ( const metadatas_t m ) { return chronos_get_time_CompRRP (metadatas_chronref(m)); }
+METADATAS_INLINE double metadatas_get_time_CompRR2 ( const metadatas_t m ) { return chronos_get_time_CompRR2 (metadatas_chronref(m)); }
 
-METADATAS_INLINE void metadatas_add_time_CompRRD(metadatas_t m, double d){
+METADATAS_INLINE void metadatas_add_time_CompRR3(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
-    chronos_add_time_CompRRD( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+    chronos_add_time_CompRR3( metadatas_chronref(m), d, metadatas_useNBThreads(m));
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_unlock(m);
 #endif
 }
-METADATAS_INLINE double metadatas_get_time_CompRRD ( const metadatas_t m ) { return chronos_get_time_CompRRD (metadatas_chronref(m)); }
+METADATAS_INLINE double metadatas_get_time_CompRR3 ( const metadatas_t m ) { return chronos_get_time_CompRR3 (metadatas_chronref(m)); }
 
 METADATAS_INLINE void metadatas_add_time_CompTot(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD

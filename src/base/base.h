@@ -35,6 +35,8 @@
 /* for Cauchy Root Finder */
 // #define DEFLATION
 // #define CERTIFIED
+// #define CAUCHY_CERTIFIED
+// #define DEFLATION_TURAN
 
 #include <stdlib.h> /* for size_t */
 #include "flint/flint.h" /* for memory managment */ 

@@ -651,6 +651,74 @@ cauchyTest_res cauchyTest_computeSsApprox(compApp_ptr ps,
     
 }
 
+void cauchyTest_computePointPointShifted( compApp_t point, compApp_t pointShifted, 
+                                          const compApp_t center, slong q, slong i, const realRat_t radius,
+                                          slong prec ) {
+
+    realApp_set_si     ( compApp_realref(point), 2*i );
+    realApp_div_ui     ( compApp_realref(point), compApp_realref(point), q, prec );
+    realApp_zero       ( compApp_imagref(point) );
+    compApp_exp_pi_i   ( point,                  point, prec);
+    compApp_mul_realRat( pointShifted,           point, radius, prec );
+    compApp_add        ( pointShifted,           pointShifted, center, prec );
+    
+}
+
+void cauchyTest_eval ( compApp_t fval, compApp_t fderval, const compApp_t point, cacheApp_t cache, cacheCauchy_t cacheCau, slong prec ){
+    
+//     clock_t start = clock();
+    
+    if (cacheCauchy_evalFastref(cacheCau) == NULL) {
+        compApp_poly_ptr P = cacheApp_getApproximation ( cache, prec );
+        compApp_poly_evaluate2_rectangular(fval, fderval, P, point, prec);
+    } else
+        (cacheCauchy_evalFastref(cacheCau))( fval, fderval, point, prec);
+    
+//     return (double) (clock() - start);
+}
+
+void cauchyTest_computeBounds ( realApp_t ubound, realApp_t lbound, 
+                                const realRat_t theta, const realRat_t r, slong d, slong prec ) {
+    
+    realApp_set_realRat( ubound, theta,         prec);
+    realApp_add_si     ( ubound, ubound, -1,    prec);
+    realApp_mul_realRat( ubound, ubound, r,     prec);
+    realApp_div_realRat( ubound, ubound, theta, prec);
+    realApp_pow_ui     ( lbound, ubound, d,     prec);
+    realApp_inv        ( ubound, ubound,        prec);
+    realApp_mul_si     ( ubound, ubound, d,     prec);
+
+}    
+    
+int  cauchyTest_compute_fdiv_checkPrecAndBounds( compApp_t fdiv, 
+                                                 const compApp_t fval, 
+                                                 const compApp_t fderval,
+                                                 const realApp_t lbound,
+                                                 const realApp_t ubound,
+                                                 slong prec ) {
+    
+    int res = 1;
+    
+    realApp_t modulus;
+    realApp_init(modulus);
+    compApp_abs(modulus, fval, prec);
+    
+    if (realApp_lt( modulus, lbound )){
+        res=-2;
+    } else if (compApp_contains_zero( fval )){
+        res=-1;
+    } else {
+        compApp_div(fdiv, fderval, fval, prec);
+        compApp_abs(modulus, fdiv, prec);
+        if (realApp_gt( modulus, ubound )) {
+            res = -2;
+        }
+    }
+       
+    realApp_clear(modulus);
+    return res;
+}
+
 slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
                                    const compDsk_t Delta,
                                    cacheApp_t cache,
@@ -691,14 +759,9 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
     realApp_init(radRe);
     realApp_init(radIm);
     
-    compApp_t c, a;
-    realRat_t argu;
+    compApp_t c;
     
     compApp_init(c);
-    compApp_init(a);
-    realRat_init(argu);
-    
-    compApp_poly_ptr app = NULL;
     
     int enoughPrec = 0;
     while (enoughPrec == 0) {
@@ -709,21 +772,11 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
         compApp_zero(s0star);
         compApp_set_compRat(c, compDsk_centerref(Delta), appPrec);
         
-        if (cacheCauchy_evalFastref(cacheCau) == NULL)
-            app = cacheApp_getApproximation ( cache, appPrec );
-        
         for(slong i=0; i<q; i++) {
-            realRat_set_si(argu, 2*i, q);
-            compApp_set_realRat(a, argu, appPrec);
-            acb_exp_pi_i( point, a, appPrec);
-            compApp_mul_realRat(pointShifted, point, compDsk_radiusref(Delta), appPrec);
-            compApp_add( pointShifted, c, pointShifted, appPrec);
+            cauchyTest_computePointPointShifted( point, pointShifted, c, q, i, compDsk_radiusref(Delta), appPrec );
             
             start = clock();
-            if (cacheCauchy_evalFastref(cacheCau) == NULL)
-                compApp_poly_evaluate2_rectangular(fval, fderval, app, pointShifted, appPrec);
-            else
-                (cacheCauchy_evalFastref(cacheCau))( fval, fderval, pointShifted, appPrec);
+            cauchyTest_eval ( fval, fderval, pointShifted, cache, cacheCau, appPrec );
             evalTime += (double) (clock() - start);
             
             if (compApp_contains_zero( fval )){
@@ -779,8 +832,6 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
     realApp_clear(radRe);
     realApp_clear(radIm);
     compApp_clear(c);
-    compApp_clear(a);
-    realRat_clear(argu);
     
     if (metadatas_haveToCount(meta)) {
         metadatas_add_time_CauCoED(meta, evalTime);
@@ -788,6 +839,76 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
     }
     
     return res;
+}
+
+/* computes e = m*theta^(-h) + (d-m)*theta^(h)             */
+/*          q = log ( e / eps ) / log ( theta ) + 1 */
+void  cauchyTest_compute_required_numOfPoints ( realApp_t e, realApp_t q,
+                                                const realApp_t theta_h, 
+                                                const realApp_t eps,
+                                                const realApp_t logtheta, 
+                                                slong m, slong d,
+                                                slong prec ) {
+    
+    realApp_mul_si     (e, theta_h,    d-m,               prec);
+    realApp_inv        (q, theta_h,                       prec);
+    realApp_mul_si     (q, q,          m,                 prec);
+    realApp_add        (e, e,          q,                 prec);
+    
+    realApp_div        (q, e,          eps,               prec);
+    realApp_add_si     (q, q,          1,                 prec);
+    realApp_log        (q, q,                             prec);
+    realApp_div        (q, q,          logtheta,          prec);
+    
+}
+
+/* want to compute sN, s2N, ..., sgN, ..., shN with max error eps */
+slong  cauchyTest_compute_q_and_errors ( realApp_ptr errors,
+                                         const realRat_t theta, 
+                                         const realRat_t eps, 
+                                         slong m, slong d, slong h, slong N,
+                                         slong prec ) {
+    
+    realApp_t epsApp, qApp, thetaTotheN, thetaTothegN, logtheta;
+    realApp_init(epsApp);
+    realApp_init(qApp);
+    realApp_init(thetaTotheN);
+    realApp_init(thetaTothegN);
+    realApp_init(logtheta);
+    
+    realApp_set_realRat(epsApp,       eps,            prec);
+    realApp_set_realRat(logtheta,     theta,          prec);
+    realApp_log        (logtheta,     logtheta,       prec);
+    realApp_set_realRat(thetaTotheN,  theta,          prec);
+    realApp_pow_ui     (thetaTotheN,  thetaTotheN, N, prec);
+    realApp_set        (thetaTothegN, thetaTotheN);
+    
+    slong qmax = 0;
+    
+    for (slong g = 1; g <= h; g++) {
+        cauchyTest_compute_required_numOfPoints ( errors + (g-1), qApp, thetaTothegN, epsApp, logtheta, m, d, prec);
+        slong q = realApp_ceil_si( qApp, prec ) + 1;
+        qmax = CCLUSTER_MAX( qmax, q );
+        
+        realApp_mul(thetaTothegN, thetaTothegN,  thetaTotheN,  prec);
+    }
+    
+    qmax = CCLUSTER_MAX( qmax, h*N + 1 );
+    
+    realApp_set_realRat( thetaTotheN, theta, prec);
+    realApp_pow_ui     ( thetaTotheN, thetaTotheN, qmax, prec);
+    realApp_add_si     ( thetaTotheN, thetaTotheN, -1, prec);
+    for (slong g = 1; g <= h; g++) {
+        realApp_div( errors + (g-1), errors + (g-1), thetaTotheN, prec);
+    }
+    
+    realApp_clear(epsApp);
+    realApp_clear(qApp);
+    realApp_clear(thetaTotheN);
+    realApp_clear(thetaTothegN);
+    realApp_clear(logtheta);
+    
+    return qmax;
 }
 
 slong cauchyTest_computeS1compDsk( compDsk_t res,
@@ -799,24 +920,31 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
                                    const realRat_t eps,
                                    metadatas_t meta, int depth) {
     
-    int level = 5;
+    int level = 4;
     slong appPrec = CCLUSTER_DEFAULT_PREC;
     
     realRat_t error;
     realRat_init(error);
-//     realRat_set_si(error, 2, 1);
-//     realRat_pow_si(error, error, -prec-1); /* error = (1/2)*2^{-prec} */
     realRat_div_ui(error, eps, 2);
+    realRat_div(error, error, compDsk_radiusref(Delta) );
     realApp_t errAp;
     realApp_init(errAp);
     realApp_set_realRat(errAp, error, CCLUSTER_DEFAULT_PREC);    /* errAp = contains error */
+    
+//     if (metadatas_getVerbo(meta)>=level) {
+//         printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: nb of eval points: %ld\n", q);
+//         printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: error on S1: ");
+//         realApp_printd(errorS1, 10);
+//         printf("\n");
+//     }
     
     realApp_t qApp, logIsoRatio;
     realApp_init(qApp);
     realApp_init(logIsoRatio);
     realApp_set_realRat(logIsoRatio, isoRatio,                                               CCLUSTER_DEFAULT_PREC);
     realApp_log        (logIsoRatio, logIsoRatio,                                            CCLUSTER_DEFAULT_PREC);
-    realApp_set_realRat(qApp,        compDsk_radiusref(Delta),                               CCLUSTER_DEFAULT_PREC);
+//     realApp_set_realRat(qApp,        compDsk_radiusref(Delta),                               CCLUSTER_DEFAULT_PREC);
+    realApp_one        (qApp);
     realApp_mul_realRat(qApp,        qApp,                     isoRatio,                     CCLUSTER_DEFAULT_PREC);
     realApp_mul_si     (qApp,        qApp,                     cacheCauchy_degreeref(cacheCau), CCLUSTER_DEFAULT_PREC);
     realApp_div_realRat(qApp,        qApp,                     error,                        CCLUSTER_DEFAULT_PREC);
@@ -853,14 +981,8 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
     realApp_init(radRe);
     realApp_init(radIm);
     
-    compApp_t c, a;
-    realRat_t argu;
-    
+    compApp_t c;
     compApp_init(c);
-    compApp_init(a);
-    realRat_init(argu);
-    
-    compApp_poly_ptr app = NULL;
     
     int enoughPrec = 0;
     while (enoughPrec == 0) {
@@ -872,20 +994,9 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
         compApp_zero(s1);
         compApp_set_compRat(c, compDsk_centerref(Delta), appPrec);
         
-        if (cacheCauchy_evalFastref(cacheCau) == NULL)
-            app = cacheApp_getApproximation ( cache, appPrec );
-        
         for(slong i=0; i<q; i++) {
-            realRat_set_si(argu, 2*i, q);
-            compApp_set_realRat(a, argu, appPrec);
-            acb_exp_pi_i( point, a, appPrec);
-            compApp_mul_realRat(pointShifted, point, compDsk_radiusref(Delta), appPrec);
-            compApp_add( pointShifted, c, pointShifted, appPrec);
-            
-            if (cacheCauchy_evalFastref(cacheCau) == NULL)
-                compApp_poly_evaluate2_rectangular(fval, fderval, app, pointShifted, appPrec);
-            else
-                (cacheCauchy_evalFastref(cacheCau))( fval, fderval, pointShifted, appPrec);
+            cauchyTest_computePointPointShifted( point, pointShifted, c, q, i, compDsk_radiusref(Delta), appPrec );
+            cauchyTest_eval ( fval, fderval, pointShifted, cache, cacheCau, appPrec );
             
             if (compApp_contains_zero( fval )){
                 if (metadatas_getVerbo(meta)>=level) {
@@ -933,7 +1044,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
 //     }
         
     /* the radius of the ball s1 is less than errAp => it is less than error = eps/2 */
-    /* s1 approximates rs1(p_\Delta,0,1) with |s1 - rs1(p_\Delta,0,1)|\geq errAp */
+    /* s1 approximates rs1(p_\Delta,0,1) with |s1 - rs1(p_\Delta,0,1)|\leq errAp */
     /* thus the disk center(s1), 2*error contains rs1(p_\Delta,0,1) */
     compRat_t mc;
     compRat_init(mc);
@@ -961,31 +1072,31 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
     realApp_clear(radIm);
     
     compApp_clear(c);
-    compApp_clear(a);
-    realRat_clear(argu);
     compRat_clear(mc);
     
     return appPrec;
 }
 
-/* Assume Delta is isoRatio-isolated and contains nbOfRoots roots */
-/* Assume SS is initialized to contain at least nbOfRoots + 1 numbers */
-/* Computes nbOfRoots + 1 power sums with error less than eps     */
+/* Assume Delta is isoRatio-isolated and contains m roots     */
+/* Let h be a non-negative integer                            */
+/* Assume SS is initialized to contain at least h numbers */
+/* Computes h first power sums  s1, s2, ..., sh with error less than eps   */
 cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
-                                   const realRat_t isoRatio,
-                                   const compDsk_t Delta,
-                                   slong nbOfRoots,
-                                   cacheApp_t cache,
-                                   cacheCauchy_t cacheCau,
-                                   const realRat_t eps,
-                                   slong prec,
-                                   metadatas_t meta, int depth){
+                                            const realRat_t isoRatio,
+                                            const compDsk_t Delta,
+                                            slong m,
+                                            slong h,
+                                            cacheApp_t cache,
+                                            cacheCauchy_t cacheCau,
+                                            const realRat_t eps,
+                                            slong prec,
+                                            metadatas_t meta, int depth){
     
-    int level = 3;
+    int level = 4;
     slong appPrec = CCLUSTER_DEFAULT_PREC;
-    
-    /* number of power sums to compute */
-    slong n = nbOfRoots + 1;
+    slong degree  = cacheCauchy_degreeref(cacheCau);
+    /* number of power sums to compute s1, ..., sh: h */
+
     /* compute the required number of points */
     realRat_t error;
     realRat_init(error);
@@ -994,71 +1105,17 @@ cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
     realApp_init(errAp);
     realApp_set_realRat(errAp, error, CCLUSTER_DEFAULT_PREC);    /* errAp = contains error */
     
-    realApp_ptr errorsSS = (realApp_ptr) ccluster_malloc ( n*sizeof(realApp));
-    for (slong i = 0; i < n; i++)
-        realApp_init( errorsSS + i );
+    /* initialize the vector of errors on the sjs */
+    realApp_ptr errorsSS = (realApp_ptr) ccluster_malloc ( h*sizeof(realApp));
+    for (slong j = 0; j < h; j++)
+        realApp_init( errorsSS + j );
     
-    realApp_t qApp, IsoRatioTotheN, IsoRatioInvTotheN, logIsoRatio;
-    realApp_init(qApp);
-    realApp_init(IsoRatioTotheN);
-    realApp_init(IsoRatioInvTotheN);
-    realApp_init(logIsoRatio);
-    realApp_set_realRat(logIsoRatio, isoRatio,                                               CCLUSTER_DEFAULT_PREC);
-    realApp_log        (logIsoRatio, logIsoRatio,                                            CCLUSTER_DEFAULT_PREC);
-    realApp_one(IsoRatioTotheN);
-    slong qmax = 0;
-    
-    for (slong i = 0; i < n; i++) {
-        realApp_mul_si     (errorsSS + i, IsoRatioTotheN, cacheCauchy_degreeref(cacheCau)-nbOfRoots, CCLUSTER_DEFAULT_PREC);
-        realApp_inv        (IsoRatioInvTotheN, IsoRatioTotheN,                               CCLUSTER_DEFAULT_PREC);
-        realApp_mul_si     (IsoRatioInvTotheN, IsoRatioInvTotheN, nbOfRoots,                         CCLUSTER_DEFAULT_PREC);
-        realApp_add        (errorsSS + i, errorsSS + i, IsoRatioInvTotheN,                   CCLUSTER_DEFAULT_PREC);
-        
-        realApp_div_realRat(qApp,         errorsSS + i,             error,                   CCLUSTER_DEFAULT_PREC);
-        realApp_add_si     (qApp,         qApp,                     1,                       CCLUSTER_DEFAULT_PREC);
-        realApp_log        (qApp,         qApp,                                              CCLUSTER_DEFAULT_PREC);
-        realApp_div        (qApp,         qApp,                     logIsoRatio,             CCLUSTER_DEFAULT_PREC);
-        slong q = realApp_ceil_si( qApp, CCLUSTER_DEFAULT_PREC ) + 1;
-        qmax = CCLUSTER_MAX( qmax, q );
-        
-        realApp_mul_realRat(IsoRatioTotheN,    IsoRatioTotheN,     isoRatio,                 CCLUSTER_DEFAULT_PREC);
-    }
-    
-//     if (metadatas_getVerbo(meta)>=level) {
-//         printf("#------------cauchy_tests.c: cauchyTest_computeSScompDsk: nb of eval points: %ld\n", qmax);
-//     }
-    
-    qmax = CCLUSTER_MAX( qmax, n );
-    
-    if (metadatas_getVerbo(meta)>=level) {
-        printf("#------------cauchy_tests.c: cauchyTest_computeSScompDsk: nb of eval points: %ld\n", qmax);
-        printf("#------------cauchy_tests.c: cauchyTest_computeSScompDsk: required max erro: ");
-        realApp_printd( errAp, 10);
-        printf("\n");
-    }
-    
-    realApp_set_realRat( IsoRatioTotheN, isoRatio,       CCLUSTER_DEFAULT_PREC);
-    realApp_pow_ui     ( IsoRatioTotheN, IsoRatioTotheN, qmax, CCLUSTER_DEFAULT_PREC);
-    realApp_add_si     ( IsoRatioTotheN, IsoRatioTotheN, -1,   CCLUSTER_DEFAULT_PREC);
-    for (slong i = 0; i < n; i++) {
-        realApp_div( errorsSS + i, errorsSS + i, IsoRatioTotheN, CCLUSTER_DEFAULT_PREC);
-//         if (metadatas_getVerbo(meta)>=level) {
-//             printf("#------------cauchy_tests.c: cauchyTest_computeSScompDsk: %ld-th error:", i);
-//             realApp_printd( errorsSS + i, 10);
-//             printf("\n");
-//         }
-    }
+    slong qmax = cauchyTest_compute_q_and_errors ( errorsSS, isoRatio, error, m, degree, h, 1, CCLUSTER_DEFAULT_PREC );
     
     realApp_t ubound, lbound;
     realApp_init( ubound );
     realApp_init( lbound );
-    realApp_set_realRat( ubound, isoRatio,   CCLUSTER_DEFAULT_PREC);
-    realApp_add_si     ( ubound, ubound, -1, CCLUSTER_DEFAULT_PREC);
-    realApp_mul_realRat( ubound, ubound, compDsk_radiusref(Delta), CCLUSTER_DEFAULT_PREC);
-    realApp_div_realRat( ubound, ubound, isoRatio,                 CCLUSTER_DEFAULT_PREC);
-    realApp_pow_ui     ( lbound, ubound, cacheCauchy_degreeref(cacheCau), CCLUSTER_DEFAULT_PREC);
-    realApp_inv        ( ubound, ubound,                           CCLUSTER_DEFAULT_PREC);
-    realApp_mul_si     ( ubound, ubound, cacheCauchy_degreeref(cacheCau), CCLUSTER_DEFAULT_PREC);
+    cauchyTest_computeBounds ( ubound, lbound, isoRatio, compDsk_radiusref(Delta), degree, CCLUSTER_DEFAULT_PREC );
     if (metadatas_getVerbo(meta)>=level) {
             printf("#------------cauchy_tests.c: cauchyTest_computeSScompDsk: lb:");
             realApp_printd( lbound, 10);
@@ -1069,21 +1126,15 @@ cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
     }
     /* compute the power sums */
     compApp_t fval, fderval, fdiv;
-    realApp_t modulus, radRe, radIm;
-    compApp_t c, a;
-    realRat_t argu;
+    realApp_t radRe, radIm;
+    compApp_t c;
     
-    compApp_init( fval         );
-    compApp_init( fderval      );
-    compApp_init( fdiv         );
-    realApp_init( modulus);
+    compApp_init(fval         );
+    compApp_init(fderval      );
+    compApp_init(fdiv         );
     realApp_init(radRe);
     realApp_init(radIm);
     compApp_init(c);
-    compApp_init(a);
-    realRat_init(argu);
-    
-    compApp_poly_ptr app = NULL;
     
     int enoughPrec = -1;
     /* compute the points */
@@ -1095,73 +1146,43 @@ cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
         enoughPrec = 1;
         compApp_set_compRat(c, compDsk_centerref(Delta), appPrec);
         
-        if (cacheCauchy_evalFastref(cacheCau) == NULL)
-            app = cacheApp_getApproximation ( cache, appPrec );
-        
         compApp_ptr points = (compApp_ptr) ccluster_malloc ( qmax*sizeof(compApp) );
         compApp_ptr pointsShifted = (compApp_ptr) ccluster_malloc ( qmax*sizeof(compApp) );
         
         for(slong i=0; i<qmax; i++) {
             compApp_init (points + i);
             compApp_init (pointsShifted + i);
-            
-            realRat_set_si(argu, 2*i, qmax);
-            compApp_set_realRat(a, argu, appPrec);
-            acb_exp_pi_i( points + i, a, appPrec);
-            compApp_mul_realRat(pointsShifted + i, points + i, compDsk_radiusref(Delta), appPrec);
-            compApp_add( pointsShifted + i, c, pointsShifted + i, appPrec);
+            cauchyTest_computePointPointShifted( points + i, pointsShifted + i, c, qmax, i, compDsk_radiusref(Delta), appPrec );
         }
         
         /* initialize power sums */
-        for (slong j = 0; j< n; j++)
+        for (slong j = 0; j<h ; j++)
             compApp_zero( SS + j );
         
         for(slong i=0; (i<qmax) && (enoughPrec==1) ; i++) {
             
-            if (cacheCauchy_evalFastref(cacheCau) == NULL)
-                compApp_poly_evaluate2_rectangular(fval, fderval, app, pointsShifted + i, appPrec);
-            else
-                (cacheCauchy_evalFastref(cacheCau))( fval, fderval, pointsShifted + i, appPrec);
-            
-            /* check if fval has modulus less that lbound */
-            compApp_abs(modulus, fval, appPrec);
-            if (realApp_lt( modulus, lbound )){
-                enoughPrec=-2;
-                if (metadatas_getVerbo(meta)>=level) {
-                    printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: fval has modulus less than lbound, %ld\n", i);
-                }
-            } else if (compApp_contains_zero( fval )){
-                enoughPrec=-1;
-                if (metadatas_getVerbo(meta)>=level) {
-                    printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: fval contains 0, i: %ld\n", i);
-                }
+            cauchyTest_eval ( fval, fderval, pointsShifted + i, cache, cacheCau, appPrec );
+            enoughPrec = cauchyTest_compute_fdiv_checkPrecAndBounds( fdiv, fval, fderval, lbound, ubound, appPrec );
+            if (enoughPrec==1) {
+                for (slong j = 0; j< h; j++) 
+                        compApp_addmul(SS+j , fdiv, points + ((j+2)*i)%qmax, appPrec);
             } else {
-                /* compute fdiv */
-                compApp_div(fdiv, fderval, fval, appPrec);
-                compApp_abs(modulus, fdiv, appPrec);
-                /* check if the ratio is less than the upper bound */
-                if (realApp_gt( modulus, ubound )) {
-                    enoughPrec = -2;
-                    if (metadatas_getVerbo(meta)>=level) {
-                        printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: ratio has modulus more than ubound, %ld\n", i);
-                    }
-                } else {
-                    for (slong j = 0; j< n; j++) 
-                        compApp_addmul(SS+j , fdiv, points + ((j+1)*i)%qmax, appPrec); 
+                if (metadatas_getVerbo(meta)>=level) {
+                    printf("#------------cauchy_tests.c: cauchyTest_computeSgNcompDsk: return of compute fdiv for %ld-th point: %d\n", i, enoughPrec);
                 }
             }
             
         }
         
         if (enoughPrec==1) {
-            for (slong j = 0; j< n; j++) {
+            for (slong j = 0; j<h ; j++) {
                 compApp_div_si(SS+j, SS+j, qmax, appPrec);
                 compApp_mul_realRat(SS+j, SS+j, compDsk_radiusref(Delta), appPrec);
             }
             /* no need to scale by the radius because points are already */
             
             /* check if precisions are ok */
-            for (slong j = 0; j< n; j++) {
+            for (slong j = 0; j<h ; j++) {
                 realApp_get_rad_realApp( radRe, compApp_realref(SS+j) );
                 realApp_get_rad_realApp( radIm, compApp_imagref(SS+j) );
                 if ( (realApp_ge( radRe, errAp )) || (realApp_ge( radIm, errAp )) ) {
@@ -1197,16 +1218,16 @@ cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
     }
     
     
-    for (slong i = 0; i < n; i++)
+    for (slong i = 0; i <h ; i++)
         realApp_clear( errorsSS + i );
     ccluster_free(errorsSS);
     
     realRat_clear(error);
     realApp_clear(errAp);
-    realApp_clear(qApp);
-    realApp_clear(IsoRatioTotheN);
-    realApp_clear(IsoRatioInvTotheN);
-    realApp_clear(logIsoRatio);
+//     realApp_clear(qApp);
+//     realApp_clear(IsoRatioTotheN);
+//     realApp_clear(IsoRatioInvTotheN);
+//     realApp_clear(logIsoRatio);
     
     realApp_clear( ubound );
     realApp_clear( lbound );
@@ -1214,12 +1235,9 @@ cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
     compApp_clear( fval         );
     compApp_clear( fderval      );
     compApp_clear( fdiv         );
-    realApp_clear( modulus);
     realApp_clear(radRe);
     realApp_clear(radIm);
     compApp_clear(c);
-    compApp_clear(a);
-    realRat_clear(argu);
     
     cauchyTest_res res;
     res.appPrec = appPrec;
@@ -1227,10 +1245,186 @@ cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
     
     if (metadatas_getVerbo(meta)>=level) {
         printf("#------------cauchy_tests.c: cauchyTest_computeSScompDsk: power sums:\n");
-        for (slong j=0; j<n; j++) {
+        for (slong j=0; j<h ; j++) {
             printf("#--------------- %ld-th: ", j); compApp_printd( SS+j, 10); printf("\n");
         }
     }
+    
+    return res;
+}
+
+/* Assume Delta is isoRatio-isolated and contains m roots           */
+/* Let N be a non-negative integer                                  */
+/* Assume SgN is initialized to contain at least h numbers          */
+/* Computes power sums sN, s2N, ..., shN with error less than eps   */
+cauchyTest_res cauchyTest_computeSgNcompDsk( compApp_ptr SgN,
+                                             const realRat_t isoRatio,
+                                             const compDsk_t Delta,
+                                             slong m,
+                                             ulong N,
+                                             slong h,
+                                             cacheApp_t cache,
+                                             cacheCauchy_t cacheCau,
+                                             const realRat_t eps,
+                                             slong prec,
+                                             metadatas_t meta, int depth){
+    
+    int level = 3;
+    slong appPrec = prec;
+    slong degree  = cacheCauchy_degreeref(cacheCau);
+    /* compute power sums sN, ..., shN: h */
+
+    /* compute the required number of points */
+    realRat_t error;
+    realRat_init(error);
+    realRat_div_ui(error, eps, 2);
+    realApp_t errAp;
+    realApp_init(errAp);
+    realApp_set_realRat(errAp, error, CCLUSTER_DEFAULT_PREC);    /* errAp = contains error */
+    
+    realApp_ptr errorsSgN = (realApp_ptr) ccluster_malloc ( m*sizeof(realApp));
+    for (slong g = 1; g <= h; g++)
+        realApp_init( errorsSgN + (g-1) );
+    
+    slong qmax = cauchyTest_compute_q_and_errors ( errorsSgN, isoRatio, error, m, degree, h, N, CCLUSTER_DEFAULT_PREC );
+    
+    if (metadatas_getVerbo(meta)>=level) {
+            printf("#------------cauchy_tests.c: cauchyTest_computeSgNcompDsk: number of eval points: %ld\n", qmax);
+    }
+    
+    realApp_t ubound, lbound;
+    realApp_init( ubound );
+    realApp_init( lbound );
+    cauchyTest_computeBounds ( ubound, lbound, isoRatio, compDsk_radiusref(Delta), degree, CCLUSTER_DEFAULT_PREC );
+//     if (metadatas_getVerbo(meta)>=level) {
+//             printf("#------------cauchy_tests.c: cauchyTest_computeSgNcompDsk: lb:");
+//             realApp_printd( lbound, 10);
+//             printf("\n");
+//             printf("#------------cauchy_tests.c: cauchyTest_computeSgNcompDsk: ub:");
+//             realApp_printd( ubound, 10);
+//             printf("\n");
+//     }
+    /* compute the power sums */
+    compApp_t fval, fderval, fdiv, temp;
+    realApp_t radRe, radIm;
+    compApp_t c;
+    
+    compApp_init(fval         );
+    compApp_init(fderval      );
+    compApp_init(fdiv         );
+    realApp_init(radRe);
+    realApp_init(radIm);
+    compApp_init(temp);
+    compApp_init(c);
+    
+    int enoughPrec = -1;
+    /* compute the points */
+    while (enoughPrec == -1) {
+        if (metadatas_getVerbo(meta)>=level) {
+            printf("#------------cauchy_tests.c: cauchyTest_computeSgNcompDsk: precision: %ld\n",  appPrec);
+        }
+        
+        enoughPrec = 1;
+        compApp_set_compRat(c, compDsk_centerref(Delta), appPrec);
+        
+        compApp_ptr points = (compApp_ptr) ccluster_malloc ( qmax*sizeof(compApp) );
+        compApp_ptr pointsShifted = (compApp_ptr) ccluster_malloc ( qmax*sizeof(compApp) );
+        
+        for(slong i=0; i<qmax; i++) {
+            compApp_init (points + i);
+            compApp_init (pointsShifted + i);
+            cauchyTest_computePointPointShifted( points + i, pointsShifted + i, c, qmax, i, compDsk_radiusref(Delta), appPrec );
+        }
+        
+        /* initialize power sums */
+        for (slong g = 1; g <= h ; g++)
+            compApp_zero( SgN + (g-1) );
+        
+        for(slong i=0; (i<qmax) && (enoughPrec==1) ; i++) {
+            cauchyTest_eval ( fval, fderval, pointsShifted + i, cache, cacheCau, appPrec );
+            enoughPrec = cauchyTest_compute_fdiv_checkPrecAndBounds( fdiv, fval, fderval, lbound, ubound, appPrec );
+            if (!(enoughPrec==1)) {
+                if (metadatas_getVerbo(meta)>=level) {
+                    printf("#------------cauchy_tests.c: cauchyTest_computeSgNcompDsk: return of compute fdiv for %ld-th point: %d\n", i, enoughPrec);
+                }
+            } else {
+                for (slong g = 1; g <= h && (enoughPrec==1); g++) {
+//                         compApp_addmul(SgN+(g-1) , fdiv, points + ((g*N+1)*i)%qmax, appPrec); 
+                        compApp_mul( temp, fdiv, points + ((g*N+1)*i)%qmax, appPrec);
+                        compApp_div_si(temp, temp, qmax, appPrec);
+                        compApp_mul_realRat(temp, temp, compDsk_radiusref(Delta), appPrec);
+                        compApp_add( SgN+(g-1), SgN+(g-1), temp, appPrec ); 
+                        /* check precision */
+                        realApp_get_rad_realApp( radRe, compApp_realref(SgN + (g-1)) );
+                        realApp_get_rad_realApp( radIm, compApp_imagref(SgN + (g-1)) );
+                        if ( (realApp_ge( radRe, errAp )) || (realApp_ge( radIm, errAp )) ) {
+                            enoughPrec=-1;
+                            if (metadatas_getVerbo(meta)>=level) {
+                                printf("#------------cauchy_tests.c: cauchyTest_computeSgNcompDsk: s%ld not precise enough after %ld evals:",(g*N), i);
+                                compApp_printd( SgN + (g-1), 10);
+                                printf("\n");
+                            }
+                        }
+                    }
+            }
+        }
+        
+        if (enoughPrec==1) {
+            
+            /* add errors */
+            for (slong g = 1; g<=h ; g++) {
+                realApp_add_error( compApp_realref(SgN + (g-1)), errorsSgN + (g-1) );
+                realApp_add_error( compApp_imagref(SgN + (g-1)), errorsSgN + (g-1) );
+            }
+        }
+        
+        if (enoughPrec==-1) {
+            appPrec = 2*appPrec;
+        } else {
+            if (metadatas_getVerbo(meta)>=level) {
+                printf("#------------cauchy_tests.c: cauchyTest_computeSgNcompDsk: SgN precise enough\n");
+            }
+        }
+        
+        for ( slong i =0; i<qmax; i++ ) {
+            compApp_clear(points + i);
+            compApp_clear(pointsShifted + i);
+        }
+        
+        ccluster_free(points);
+        ccluster_free(pointsShifted);
+        
+    }
+    
+    
+    for (slong g = 1; g <= h ; g++)
+        realApp_clear( errorsSgN + (g-1) );
+    ccluster_free(errorsSgN);
+    
+    realRat_clear(error);
+    realApp_clear(errAp);
+    
+    realApp_clear( ubound );
+    realApp_clear( lbound );
+    
+    compApp_clear( fval         );
+    compApp_clear( fderval      );
+    compApp_clear( fdiv         );
+    realApp_clear(radRe);
+    realApp_clear(radIm);
+    compApp_clear(temp);
+    compApp_clear(c);
+    
+    cauchyTest_res res;
+    res.appPrec = appPrec;
+    res.nbOfSol = enoughPrec;
+    
+//     if (metadatas_getVerbo(meta)>=level) {
+//         printf("#------------cauchy_tests.c: cauchyTest_computeSgNcompDsk: power sums:\n");
+//         for (slong g=1; g<=m ; g++) {
+//             printf("#--------------- %ld-th: ", g*N); compApp_printd( SgN+(g-1), 10); printf("\n");
+//         }
+//     }
     
     return res;
 }

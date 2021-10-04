@@ -84,9 +84,7 @@ void compApp_poly_monic_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly
     while ( i<deg ) {
         i=i+1;
         compApp_abs(tt, coeffs + deg-i, prec);
-//         printf("abs coeff: "); realApp_printd(tt, 10);
-        realApp_root_ui(tt,  tt, (ulong) i, prec);
-//         printf(" tt: "); realApp_printd(tt, 10); printf("\n");
+        realApp_pos_root_ui(tt,  tt, (ulong) i, prec);
         realApp_max(lb, lb, tt, prec);
     }
     
@@ -116,20 +114,7 @@ void compApp_poly_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, 
         i=i+1;
         compApp_div(t, coeffs + deg-i, coeffs + deg, prec);
         compApp_abs(tt, t, prec);
-//         printf("abs coeff: "); realApp_printd(tt, 10);
-//         printf(" contains 0? %d", realApp_contains_zero(tt));
-        if (realApp_contains_zero(tt)) {
-            realApp_get_mid_realApp(m, tt);
-            realApp_get_rad_realApp(tt, tt);
-            realApp_add(tt, tt, m, prec);
-            realApp_root_ui(tt,  tt, (ulong) i, prec);
-            realApp_zero(m);
-            realApp_union(tt, tt, m, prec);
-//             printf(" tt: "); realApp_printd(tt, 10); printf("\n");
-        } else {
-            realApp_root_ui(tt,  tt, (ulong) i, prec);
-//             printf(" tt: "); realApp_printd(tt, 10); printf("\n");
-        }
+        realApp_pos_root_ui(tt,  tt, (ulong) i, prec);
         realApp_max(lb, lb, tt, prec);
     }
     

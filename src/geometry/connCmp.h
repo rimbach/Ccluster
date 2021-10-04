@@ -305,6 +305,9 @@ void connCmp_set_conjugate                      ( connCmp_t res, const connCmp_t
 
 void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc, const compBox_t initBox   );
 
+/* assume inflation maintain the number of roots in cc */
+void connCmp_infate_realRat_inPlace             ( connCmp_t cc,  const realRat_t factor, const compBox_t initBox   );
+
 /* DEPRECATED
 void connCmp_find_point_outside_connCmp_for_julia( realRat_t resRe, realRat_t resIm, const connCmp_t cc, const compBox_t initialBox );
 */

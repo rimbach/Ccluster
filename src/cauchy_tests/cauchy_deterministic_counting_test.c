@@ -105,7 +105,7 @@ cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
                                                       slong prec,
                                                       metadatas_t meta, int depth){
     
-    int level =3;
+    int level =4;
     cauchyTest_res res;
     res.appPrec = prec;
     
@@ -164,7 +164,7 @@ cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
                                            slong prec,
                                            metadatas_t meta, int depth){
     
-    int level =3;
+    int level =4;
     clock_t start = clock();
     
     cauchyTest_res res;
@@ -209,7 +209,7 @@ cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
     for (int vindex = 0; vindex < nbCenters && (resEx.nbOfSol==0) ; vindex++){
 #ifdef CERTIFIED
         resEx = cauchyTest_deterministic_exclusion_test( center, ExRad, Rad, nbCenters, vindex, cache, cacheCau, resEx.appPrec, CAUCHYTEST_INCOUNTIN, meta, depth );
-#elseif
+#else
         resEx = cauchyTest_probabilistic_exclusion_test( center, ExRad, Rad, nbCenters, vindex, cache, cacheCau, resEx.appPrec, meta, depth );
 #endif
     }
@@ -316,6 +316,100 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial( const compRat_t 
     
     return res;
     
+}
+
+cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_rinfrsup( const compRat_t c,
+                                                                              const realRat_t rinf,
+                                                                              const realRat_t rsup,
+                                                                              slong m,
+                                                                              cacheApp_t cache,
+                                                                              cacheCauchy_t cacheCau,
+                                                                              slong prec,
+                                                                              metadatas_t meta, int depth){
+    
+    int level = 4;
+    
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("------validation of a cluster with %ld roots\n", m);
+        printf("---------rinf: "); realRat_print(rinf); printf("\n");
+        printf("---------rsup: "); realRat_print(rsup); printf("\n");
+    }
+        
+    realRat_t shift, ri, thetai;
+    realRat_init(shift);
+    realRat_init(ri);
+    realRat_init(thetai);
+    
+    /* set shift to (rsup - rinf)/(m+2) */
+    realRat_sub(shift, rsup, rinf);
+    realRat_div_ui(shift, shift, m+2);
+    
+    cauchyTest_res res;
+    res.appPrec = prec;
+    res.nbOfSol = m;
+    
+    compDsk_t Delta;
+    compDsk_init(Delta);
+    compRat_set( compDsk_centerref(Delta), c);
+    
+    for (slong i = 0; (i<=m)&&(res.nbOfSol==m); i++) {
+        /* set ri to rinf + (i+1)*shift */
+        realRat_mul_si(ri, shift, i+1);
+        realRat_add( ri, ri, rinf );
+        /*set thetai to (ri + shift/2)/ri */
+        realRat_div_ui(thetai, shift, 2);
+        realRat_add(thetai, thetai, ri);
+        realRat_div(thetai, thetai, ri);
+        
+        if (metadatas_getVerbo(meta)>=level) {
+            printf("---------i=%ld; isoRatio: ", i); realRat_print(thetai);
+            printf("\n");
+        }
+        
+        /* call */
+        realRat_set(compDsk_radiusref(Delta), ri);
+        
+        res = cauchyTest_probabilistic_counting_withIsoRatio( thetai, Delta, cache, cacheCau, res.appPrec, meta, depth);
+        
+        if (metadatas_getVerbo(meta)>=level) {
+            printf("---------i=%ld; res.nbOfSol: %d\n", i, res.nbOfSol); 
+        }
+    }
+    
+    if (res.nbOfSol != m)
+        res.nbOfSol=-1;
+    
+    realRat_clear(shift);
+    realRat_clear(ri);
+    realRat_clear(thetai);
+    compDsk_clear(Delta);
+    
+    return res;
+}
+
+cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_isoRatio( const compRat_t c,
+                                                                              const realRat_t r,
+                                                                              const realRat_t theta,
+                                                                              slong m,
+                                                                              cacheApp_t cache,
+                                                                              cacheCauchy_t cacheCau,
+                                                                              slong prec,
+                                                                              metadatas_t meta, int depth){
+    
+    realRat_t rinf, rsup;
+    realRat_init(rinf);
+    realRat_init(rsup);
+    realRat_mul(rsup, r, theta);
+    realRat_div(rinf, r, theta);
+    
+    cauchyTest_res res = cauchyTest_deterministic_counting_combinatorial_with_rinfrsup( c, rinf, rsup, m, cache, cacheCau, prec,
+                                                                                        meta, depth);
+    
+    realRat_clear(rinf);
+    realRat_clear(rsup);
+    
+    return res;
+
 }
 
 /* OLD version: */

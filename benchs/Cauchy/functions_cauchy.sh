@@ -61,12 +61,17 @@ gen_with_deg(){
     POLNAME=$2
     DEG=$3
     NAME_IN=$NAME".ccl"
+    NAME_IN_MPL=$NAME".mpl"
     
     if [ ! -e $NAME_IN ]; then
             echo  "Generating file for $POLNAME degree $DEG, pol in " $NAME_IN
             $GENPOLFI_CALL $POLNAME $DEG $NAME_IN -f 1
     fi
     
+    if [ ! -e $NAME_IN_MPL ]; then
+            echo  "Generating file for $POLNAME degree $DEG, pol in " $NAME_IN_MPL
+            $GENPOLFI_CALL $POLNAME $DEG $NAME_IN_MPL -f 2
+    fi
 }
 
 gen_with_deg_bs(){
@@ -76,10 +81,16 @@ gen_with_deg_bs(){
     DEG=$3
     BS=$4
     NAME_IN=$NAME".ccl"
+    NAME_IN_MPL=$NAME".mpl"
     
     if [ ! -e $NAME_IN ]; then
             echo  "Generating file for $POLNAME degree $DEG, pol in " $NAME_IN
             $GENPOLFI_CALL $POLNAME $DEG $NAME_IN -f 1 -b $BS
+    fi
+    
+    if [ ! -e $NAME_IN_MPL ]; then
+            echo  "Generating file for $POLNAME degree $DEG, pol in " $NAME_IN_MPL
+            $GENPOLFI_CALL $POLNAME $DEG $NAME_IN_MPL -f 2 -b $BS
     fi
     
 }
@@ -95,9 +106,17 @@ genRand_with_deg_bs(){
     NAME_IN=$NAME"_nbp.ccl"
     NAME_IN_MAX=$NAME"_"$NBPOLS".ccl"
     
+    NAME_IN_MPL=$NAME"_nbp.mpl"
+    NAME_IN_MAX_MPL=$NAME"_"$NBPOLS".mpl"
+    
     if [ ! -e $NAME_IN_MAX ]; then
             echo  "Generating $NBPOLS files for $POLNAME degree $DEG bitsize $BS, pol in " $NAME_IN
             $GENRANDPOLFI_CALL $POLNAME $DEG -f 1 -b $BS -p $NBPOLS -l $LOC
+    fi
+    
+    if [ ! -e $NAME_IN_MAX_MPL ]; then
+            echo  "Generating $NBPOLS files for $POLNAME degree $DEG bitsize $BS, pol in " $NAME_IN_MPL
+            $GENRANDPOLFI_CALL $POLNAME $DEG -f 2 -b $BS -p $NBPOLS -l $LOC
     fi
     
 }
@@ -114,9 +133,17 @@ genRand_with_deg_bs_nbterms(){
     NAME_IN=$NAME"_nbp.ccl"
     NAME_IN_MAX=$NAME"_"$NBPOLS".ccl"
     
+    NAME_IN_MPL=$NAME"_nbp.mpl"
+    NAME_IN_MAX_MPL=$NAME"_"$NBPOLS".mpl"
+    
     if [ ! -e $NAME_IN_MAX ]; then
             echo  "Generating $NBPOLS files for $POLNAME degree $DEG bitsize $BS, pol in " $NAME_IN
             $GENRANDPOLFI_CALL $POLNAME $DEG -f 1 -b $BS -n $NBT -p $NBPOLS -l $LOC
+    fi
+    
+    if [ ! -e $NAME_IN_MAX_MPL ]; then
+            echo  "Generating $NBPOLS files for $POLNAME degree $DEG bitsize $BS, pol in " $NAME_IN_MPL
+            $GENRANDPOLFI_CALL $POLNAME $DEG -f 2 -b $BS -n $NBT -p $NBPOLS -l $LOC
     fi
     
 }
@@ -129,10 +156,16 @@ gen_with_c_a_k(){
     A=$4
     K=$5
     NAME_IN=$NAME".ccl"
+    NAME_IN_MPL=$NAME".mpl"
     
     if [ ! -e $NAME_IN ]; then
             echo  "Generating file for $POLNAME c=$C, a=$A, k=$K, pol in " $NAME_IN
             $GENPOLFI_CALL $POLNAME $K $NAME_IN -f 1 -c $C -a $A
+    fi
+    
+    if [ ! -e $NAME_IN_MPL ]; then
+            echo  "Generating file for $POLNAME c=$C, a=$A, k=$K, pol in " $NAME_IN_MPL
+            $GENPOLFI_CALL $POLNAME $K $NAME_IN_MPL -f 2 -c $C -a $A
     fi
     
 }
@@ -150,6 +183,7 @@ run_ccluster()
         rm -f $NAME_OUT
     fi
     
+    if [ $DEG -le 1000 ]; then
     if [ ! -e $NAME_OUT ]; then
             echo  "Clustering complex roots for $POLNAME degree $DEG, global, default, output in " $NAME_OUT
 #             ./ccluster $NAME_IN "global" $EPSILONCCL "default" 2 > $NAME_OUT
@@ -157,7 +191,54 @@ run_ccluster()
 #             echo $CALL
             $CALL > $NAME_OUT
     fi
+    fi
+}
+
+run_ccluster_with_ind()
+{
+    NAME=$1
+    POLNAME=$2
+    IND=$3
+    EPS=$4
+    NAME_IN=$NAME".ccl"
+    NAME_OUT=$NAME".out_ccl"
     
+    if [ $PURGECCL -eq 1 ]; then
+        rm -f $NAME_OUT
+    fi
+    
+    if [ $IND -le 9 ]; then
+    if [ ! -e $NAME_OUT ]; then
+            echo  "Clustering complex roots for $POLNAME degree $IND, global, default, output in " $NAME_OUT
+#             ./ccluster $NAME_IN "global" $EPSILONCCL "default" 2 > $NAME_OUT
+            CALL="$CCLUSTER_CALL $NAME_IN -e $EPS $CCLUSTER_OPTS"
+#             echo $CALL
+            $CALL > $NAME_OUT
+    fi
+    fi
+}
+
+run_mpsolve()
+{
+    NAME=$1
+    POLNAME=$2
+    DEG=$3
+    EPS=$4
+    NAME_IN=$NAME".mpl"
+    NAME_OUT=$NAME".out_mpl"
+    
+    if [ $PURGEMPL -eq 1 ]; then
+        rm -f $NAME_OUT
+    fi
+    
+    if [ ! -e $NAME_OUT ]; then
+            echo  "mpsolve isolating complex roots for $POLNAME degree $DEG, global, default, output in " $NAME_OUT
+#             ./ccluster $NAME_IN "global" $EPSILONCCL "default" 2 > $NAME_OUT
+            CALL="$MPSOLVE_CALL_S $MPSOLVE_OPTS $NAME_IN -o$EPS"
+#             echo $CALL
+            (/usr/bin/time -f "real\t%e" $CALL > $NAME_OUT) &>> $NAME_OUT
+#             $CALL &>> $NAME_OUT
+    fi
 }
 
 run_cauchy()
@@ -321,6 +402,7 @@ stats_pol()
     NAME=$1
     NAME_OUTCCL=$NAME".out_ccl"
     NAME_OUTCAU=$NAME".out_cau"
+    NAME_OUTMPL=$NAME".out_mpl"
     DEG=$2
     
     NBSOLS=$(grep "number of solutions"              $NAME_OUTCCL| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
@@ -334,8 +416,11 @@ stats_pol()
     NBEXT_CAU=$(grep "total number ET:"              $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     TTIME_CAU=$(grep "total time:"                   $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     
+    TTIME_MPL=$(grep "real"                          $NAME_OUTMPL| cut -f2 -d'l' | tr -d ' ')
+    
     TTIME_CCL=`format_time $TTIME_CCL`
     TTIME_CAU=`format_time $TTIME_CAU`
+    TTIME_MPL=`format_time $TTIME_MPL`
 #     echo $TTIME_CCL
     COLORCCL="\\coblue{"
     COLORCAU="\\cored{"
@@ -356,7 +441,8 @@ stats_pol()
     LINE_TAB=$LINE_TAB" & `format_numb $TSIZE_CCL $LENP` & `format_numb $TDEPT_CCL 2`"
     LINE_TAB=$LINE_TAB" & $COLORCCL$TTIME_CCL}           & `format_numb $NBEXT_CCL $LENP`"
     LINE_TAB=$LINE_TAB" & `format_numb $TSIZE_CAU $LENP` & `format_numb $TDEPT_CAU 2`"
-    LINE_TAB=$LINE_TAB" & $COLORCAU$TTIME_CAU}       & `format_numb $NBEXT_CAU $LENP`"
+    LINE_TAB=$LINE_TAB" & $COLORCAU$TTIME_CAU}           & `format_numb $NBEXT_CAU $LENP`"
+    LINE_TAB=$LINE_TAB" & $TTIME_MPL "
     LINE_TAB=$LINE_TAB"\\\\"
     
 #     echo $LINE_TAB
@@ -378,10 +464,12 @@ stats_pol_rand()
     TDEPT_CAU=0
     NBEXT_CAU=0
     TTIME_CAU=0
+    TTIME_MPL=0
     
     for CURIND in `seq 1 $NBPOLS`; do
         NAME_OUTCCL=$NAME"_"$CURIND".out_ccl"
         NAME_OUTCAU=$NAME"_"$CURIND".out_cau"
+        NAME_OUTMPL=$NAME"_"$CURIND".out_mpl"
         
         NBSOLS_T=$(grep "number of solutions"              $NAME_OUTCCL| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
         TSIZE_CCL_T=$(grep "tree size:"                    $NAME_OUTCCL| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
@@ -394,6 +482,8 @@ stats_pol_rand()
         NBEXT_CAU_T=$(grep "total number ET:"              $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
         TTIME_CAU_T=$(grep "total time:"                   $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
         
+        TTIME_MPL_T=$(grep "real"                          $NAME_OUTMPL| cut -f2 -d'l' | tr -d ' ')
+        
         NBSOLS=`echo     $NBSOLS+$NBSOLS_T|bc -l`
         TSIZE_CCL=`echo     $TSIZE_CCL+$TSIZE_CCL_T|bc -l`
         TDEPT_CCL=`echo     $TDEPT_CCL+$TDEPT_CCL_T|bc -l`
@@ -403,6 +493,7 @@ stats_pol_rand()
         TDEPT_CAU=`echo     $TDEPT_CAU+$TDEPT_CAU_T|bc -l`
         NBEXT_CAU=`echo     $NBEXT_CAU+$NBEXT_CAU_T|bc -l`
         TTIME_CAU=`echo     $TTIME_CAU+$TTIME_CAU_T|bc -l`
+        TTIME_MPL=`echo     $TTIME_MPL+$TTIME_MPL_T|bc -l`
     done
     
     NBSOLS=`echo     $NBSOLS    /$NBPOLS     |bc -l`
@@ -414,9 +505,11 @@ stats_pol_rand()
     TDEPT_CAU=`echo     $TDEPT_CAU    /$NBPOLS     |bc -l`
     NBEXT_CAU=`echo     $NBEXT_CAU    /$NBPOLS     |bc -l`
     TTIME_CAU=`echo     $TTIME_CAU    /$NBPOLS     |bc -l`
+    TTIME_MPL=`echo     $TTIME_MPL    /$NBPOLS     |bc -l`
     
     TTIME_CCL=`format_time $TTIME_CCL`
     TTIME_CAU=`format_time $TTIME_CAU`
+    TTIME_MPL=`format_time $TTIME_MPL`
 #     echo $TTIME_CCL
     COLORCCL="\\coblue{"
     COLORCAU="\\cored{"
@@ -438,6 +531,7 @@ stats_pol_rand()
     LINE_TAB=$LINE_TAB" & $COLORCCL$TTIME_CCL}           & `format_time $NBEXT_CCL`"
     LINE_TAB=$LINE_TAB" & `format_time $TSIZE_CAU` & `format_time $TDEPT_CAU`"
     LINE_TAB=$LINE_TAB" & $COLORCAU$TTIME_CAU}       & `format_time $NBEXT_CAU`"
+    LINE_TAB=$LINE_TAB" & $TTIME_MPL "
     LINE_TAB=$LINE_TAB"\\\\"
     
 #     echo $LINE_TAB

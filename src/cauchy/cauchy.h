@@ -31,6 +31,7 @@
 #include "ccluster/ccluster.h"
 
 #include "cauchy_rootRadii/cauchy_rootRadii.h"
+#include "turan_rootRadii/turan_rootRadii.h"
 #include "cauchy_tests/cauchy_tests.h"
 
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -102,6 +103,7 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
                               compBox_list_t bDiscarded,
                               cacheApp_t cache, 
                               cacheCauchy_t cacheCau,
+                              slong nbMSols, 
                               metadatas_t meta, 
                               slong nbThreads); 
 
@@ -109,7 +111,7 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
                                      compBox_list_t bDiscarded,
                                      cacheApp_t cache,
                                      cacheCauchy_t cacheCau,
-//                                      int nbSols, 
+                                     slong nbMSols, 
                                      slong prec, metadatas_t meta);
 
 /* assume Delta = D(c,r) contains m and has isolation ratio theta >=2 */
@@ -123,6 +125,8 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
                                        slong prec, metadatas_t meta, slong depth);
 
 connCmp_ptr cauchy_actualizeCCafterCompression( connCmp_ptr CC, const compDsk_t Delta, slong appPrec, metadatas_t meta );
+
+
 
 int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheApp_t cache, cacheCauchy_t cacheCau);
 

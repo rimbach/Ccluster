@@ -15,7 +15,8 @@
 /*         0 otherwise                                                 */
 int _cauchyRootRadii_stoppingCriterion ( const realRat_t radInf, const realRat_t radSup, const realRat_t relativeError, const realRat_t eps, const metadatas_t meta ) {
     
-    if (metadatas_getVerbo(meta)>=4) {
+    int level = 5;
+    if (metadatas_getVerbo(meta)>=level) {
         printf("#------------cauchyRootRadii_root_radius.c: radInf        is "); realRat_print(radInf); printf("\n");
         printf("#                                           radSup        is "); realRat_print(radSup); printf("\n");
         printf("#                                           eps           is "); realRat_print(eps   ); printf("\n");
@@ -32,7 +33,7 @@ int _cauchyRootRadii_stoppingCriterion ( const realRat_t radInf, const realRat_t
         realRat_clear(temp);
     }
     
-    if (metadatas_getVerbo(meta)>=4) {
+    if (metadatas_getVerbo(meta)>=level) {
         printf("#                                           stop          is %d \n", stop);
     }
     
@@ -147,7 +148,7 @@ void cauchyRootRadii_root_radius( const compRat_t center,
                                   cacheApp_t cache,
                                   metadatas_t meta ){
     
-    int level = 3;
+    int level = 4;
     cauchyTest_res cres;
     cres.appPrec = CCLUSTER_DEFAULT_PREC;
     slong precForT = CCLUSTER_DEFAULT_PREC;

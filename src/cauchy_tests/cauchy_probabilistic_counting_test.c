@@ -131,7 +131,7 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
                                                                cacheCauchy_t cacheCau,
                                                                slong prec,
                                                                metadatas_t meta, int depth){
-    int level = 5;
+    int level = 4;
     cauchyTest_res res;
     res.nbOfSol = -1;
     res.appPrec = prec;
