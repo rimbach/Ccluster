@@ -271,6 +271,11 @@ int ccluster_nbGIt_rootRadii( slong degree, const realRat_t delta ){
     double log2_1pdelta = fmpz_dlog( realRat_numref(oneplusdelta) ) - fmpz_dlog( realRat_denref(oneplusdelta) );
     log2_1pdelta = log2_1pdelta / log(2);
     int N = (int) ceil( log2( log2(2*degree)/log2_1pdelta ) );
+    
+//     printf("N = %d\n", N);
+//     int N2 = (int) ceil( log2( log2(4*degree)/log2_1pdelta ) );
+//     printf("N2 = %d\n", N2);
+    
     return N;
 }
 
