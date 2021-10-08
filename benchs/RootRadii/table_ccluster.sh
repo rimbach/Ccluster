@@ -357,6 +357,7 @@ stats_pol()
 #     DSC_TTIME=$(grep "real" $NAME_OUTDSC| cut -f2 -d'l' | tr -d ' ')
     
     LINE_TAB3="`format_numb $DEG $LENP` & `format_numb $BITSI $LENP`"
+    LINE_TAB3=$LINE_TAB3" & `format_numb $RR_NSOLS $LENP`"
     LINE_TAB3=$LINE_TAB3" & `format_time $TTIME`     & `format_numb $NBEXT $LENP`"
     LINE_TAB3=$LINE_TAB3" & `format_time $RR_TTIME`  & `format_numb $RR_NBEXT $LENP`"
 #     LINE_TAB3=$LINE_TAB3" & `format_numb $RR_PRECN $LENP` "
@@ -532,6 +533,7 @@ for DEG in $DEGREES; do
     LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\"   
     
     LINE_TAB3="`format_numb $DEG $LENP` & `format_numb $BIT $LENP`"
+    LINE_TAB3=$LINE_TAB3" & `format_numb $RR_NSOLS $LENP`"
     LINE_TAB3=$LINE_TAB3" & `format_time $TTIME`  (`format_time $TTIME_SQ`)   & `format_time $NBEXT`"
     LINE_TAB3=$LINE_TAB3" & `format_time $RR_TTIME` (`format_time $RR_TTIME_SQ`) & `format_time $RR_NBEXT`"
 #     LINE_TAB3=$LINE_TAB3" & `format_time $RR_PRECN` "
