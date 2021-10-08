@@ -392,6 +392,7 @@ stats_pol()
     LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\"  
     
     LINE_TAB3="`format_numb $DEG $LENP` & `format_numb $BITSI $LENP` & `format_numb $NSOLS $LENP`"
+    LINE_TAB3=$LINE_TAB3" & `format_numb $RR_NSOLS $LENP`"
     LINE_TAB3=$LINE_TAB3" & `format_time $TTIME`     & `format_numb $NBEXT $LENP`,`format_numb $NBCOT $LENP`"
     LINE_TAB3=$LINE_TAB3" & `format_time $RR_TTIME`  & `format_numb $RR_NBEXT $LENP`,`format_numb $RR_NBCOT $LENP`"
 #     LINE_TAB3=$LINE_TAB3" & `format_numb $RR_PRECN $LENP` "
@@ -569,6 +570,7 @@ for DEG in $DEGREES; do
             LINE_TAB2=$LINE_TAB2" & `percent_time $RR_TINGR $RR_TTIME`\\\\" 
             
             LINE_TAB3="`format_numb $DEG $LENP` & `format_numb $BIT $LENP` & `format_time $NSOLS`"
+            LINE_TAB3=$LINE_TAB3" & `format_time $RR_NSOLS`"
             LINE_TAB3=$LINE_TAB3" & `format_time $TTIME` (`format_time $TTIME_SQ`) & `format_time $NBEXT`,`format_time $NBCOT`"
             LINE_TAB3=$LINE_TAB3" & `format_time $RR_TTIME` (`format_time $RR_TTIME_SQ`)  & `format_time $RR_NBEXT`,`format_time $RR_NBCOT`"
         #     LINE_TAB3=$LINE_TAB3" & `format_time $RR_PRECN` "
