@@ -43,41 +43,45 @@ extern "C" {
 #endif
 
 int cauchy_global_interface_func( void(*func)(compApp_poly_t, slong), 
-                                     const realRat_t eps,
-                                     const realRat_t isoRatio,
-                                     int nbPows,
-                                     char * stratstr,
-                                     int nbThreads,
-                                     int output,
-                                     int verb);
+                                  const realRat_t eps,
+                                  const realRat_t isoRatio,
+                                  int nbPows,
+                                  int certified,
+                                  char * stratstr,
+                                  int nbThreads,
+                                  int output,
+                                  int verb);
 
 int cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
-                                           const realRat_t eps,
-                                           const realRat_t isoRatio,
-                                           int nbPows,
-                                           char * stratstr,
-                                           int nbThreads,
-                                           int output,
-                                           int verb);
+                                          const realRat_t eps,
+                                          const realRat_t isoRatio,
+                                          int nbPows,
+                                          int certified,
+                                          char * stratstr,
+                                          int nbThreads,
+                                          int output,
+                                          int verb);
 
 /* version with function for fast evaluation */
 int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
-                                   void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong), 
-                                   const realRat_t eps, 
-                                   const realRat_t isoRatio,
-                                   int nbPows,
-                                   char * stratstr,
-                                   int nbThreads,
-                                   int output,
-                                   int verb);
+                                       void(*evalFast)(compApp_t, compApp_t, const compApp_t, slong), 
+                                       const realRat_t eps, 
+                                       const realRat_t isoRatio,
+                                       int nbPows,
+                                       int certified,
+                                       char * stratstr,
+                                       int nbThreads,
+                                       int output,
+                                       int verb);
 
 /* implemented in cauchy.c */
 int cauchy_algo_global( connCmp_list_t qResults,
                            compBox_list_t bDiscarded,
                            const compBox_t initialBox, 
-                           const realRat_t eps, 
+                           const realRat_t eps,
                            cacheApp_t cache, 
                            cacheCauchy_t cacheCau,
+                        int certified,
                            metadatas_t meta);
 
 int cauchy_main_loop( connCmp_list_t qResults, 
@@ -87,6 +91,7 @@ int cauchy_main_loop( connCmp_list_t qResults,
                          const realRat_t eps, 
                          cacheApp_t cache, 
                          cacheCauchy_t cacheCau,
+                      int certified,
                          metadatas_t meta);
 
 void cauchy_prep_loop( compBox_list_t bDiscarded,
@@ -128,7 +133,7 @@ connCmp_ptr cauchy_actualizeCCafterCompression( connCmp_ptr CC, const compDsk_t 
 
 
 
-int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheApp_t cache, cacheCauchy_t cacheCau);
+int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheApp_t cache, cacheCauchy_t cacheCau, int certified);
 
 
 

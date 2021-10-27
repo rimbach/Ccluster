@@ -83,6 +83,7 @@ NUMBERS_INLINE void compApp_addmul( compApp_t dest, const compApp_t x, const com
 NUMBERS_INLINE void compApp_exp_pi_i( compApp_t dest, const compApp_t x, slong prec) { acb_exp_pi_i(dest, x, prec); }
 NUMBERS_INLINE void compApp_pow_si( compApp_t dest, const compApp_t x, slong l, slong prec) { acb_pow_si(dest, x, l, prec); }
 NUMBERS_INLINE void compApp_sqrt  ( compApp_t dest, const compApp_t x, slong prec) { acb_sqrt(dest, x, prec); }
+NUMBERS_INLINE void compApp_sqr   ( compApp_t dest, const compApp_t x, slong prec) { acb_sqr (dest, x, prec); }
 
 NUMBERS_INLINE void compApp_mul_realApp   ( compApp_t dest, const compApp_t x, const realApp_t y, slong prec) { acb_mul_arb   (dest, x, y, prec); }
 NUMBERS_INLINE void compApp_div_realApp   ( compApp_t dest, const compApp_t x, const realApp_t y, slong prec) { acb_div_arb   (dest, x, y, prec); }

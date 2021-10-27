@@ -183,7 +183,7 @@ run_ccluster()
         rm -f $NAME_OUT
     fi
     
-    if [ $DEG -le 1000 ]; then
+    if [ $DEG -le $LIMDEGCCL ]; then
     if [ ! -e $NAME_OUT ]; then
             echo  "Clustering complex roots for $POLNAME degree $DEG, global, default, output in " $NAME_OUT
 #             ./ccluster $NAME_IN "global" $EPSILONCCL "default" 2 > $NAME_OUT
@@ -207,7 +207,7 @@ run_ccluster_with_ind()
         rm -f $NAME_OUT
     fi
     
-    if [ $IND -le 9 ]; then
+    if [ $IND -le $LIMINDCCL ]; then
     if [ ! -e $NAME_OUT ]; then
             echo  "Clustering complex roots for $POLNAME degree $IND, global, default, output in " $NAME_OUT
 #             ./ccluster $NAME_IN "global" $EPSILONCCL "default" 2 > $NAME_OUT
@@ -404,6 +404,7 @@ stats_pol()
     NAME_OUTCAU=$NAME".out_cau"
     NAME_OUTMPL=$NAME".out_mpl"
     DEG=$2
+    
     
     NBSOLS=$(grep "number of solutions"              $NAME_OUTCCL| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
     TSIZE_CCL=$(grep "tree size:"                    $NAME_OUTCCL| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')

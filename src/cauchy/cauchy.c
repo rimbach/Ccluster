@@ -66,21 +66,12 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
         resCauchy.nbOfSol = 1;
         resCauchy.appPrec = CCLUSTER_DEFAULT_PREC;
 
-#ifdef CERTIFIED        
-        resCauchy = cauchyTest_deterministic_exclusion_test( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
-                                                            NULL, 0,0,
-                                                            cache, cacheCau, resCauchy.appPrec, CAUCHYTEST_INEXCLUSI, meta, depth);
-        if (metadatas_getVerbo(meta)>=level) {
-            printf("#---cauchy deterministic exclusion test: res: %d\n", resCauchy.nbOfSol );
-        }
-#else
         resCauchy = cauchyTest_probabilistic_exclusion_test( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
                                                             NULL, 0,0,
                                                             cache, cacheCau, resCauchy.appPrec, meta, depth);
         if (metadatas_getVerbo(meta)>=level) {
-            printf("#---cauchy probabilistic exclusion test: res: %d\n", resCauchy.nbOfSol );
+            printf("#---cauchy exclusion test: res: %d\n", resCauchy.nbOfSol );
         }
-#endif
         
         res.appPrec = resCauchy.appPrec;
         res.nbOfSol = resCauchy.nbOfSol;
@@ -239,9 +230,8 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
                 connCmp_decrease_nwSpd(ctemp);
                 /* copy the number of sols */
                 connCmp_nSolsref(ctemp) = connCmp_nSolsref(cc);
-                /* test */
                 connCmp_isSep(ctemp) = connCmp_isSep(cc);
-                /*end test */
+                connCmp_isSepCertref(ctemp) = connCmp_isSepCertref(cc);
                 connCmp_isRigref(ctemp) = connCmp_isRigref(cc);
             }
             connCmp_list_push(dest, ctemp);
@@ -480,6 +470,9 @@ newton_res cauchy_newton ( connCmp_ptr * ccur,
         connCmp_increase_nwSpd(*ccur);
         connCmp_newSuref(*ccur) = 1;
         connCmp_appPrref(*ccur) = resNewton.appPrec;
+        
+        /* it was separated; 8 time the new cc disk is included in four times the old one */
+        connCmp_isSepCertref(*ccur) = 1;
     
     }
     else {
@@ -534,6 +527,112 @@ void cauchy_conjugate ( connCmp_ptr * ccurConj, int * pushConjugFlag, int * sepa
     }
 }
 
+connCmp_ptr cauchy_connCmp_set_conjugate_closure(connCmp_ptr cc, metadatas_t meta){
+    
+    connCmp_ptr ccurConjClo = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
+    connCmp_init( ccurConjClo );
+    connCmp_set_conjugate_closure(ccurConjClo, cc, metadatas_initBref(meta));
+    connCmp_clear(cc);
+    ccluster_free(cc);
+    return ccurConjClo;
+                
+}
+
+int  cauchy_compDsk_is_separated( const compDsk_t d, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs ){
+    int res = 1;
+    connCmp_list_iterator it = connCmp_list_begin(qMainLoop);
+    while ( res && (it!=connCmp_list_end()) ) {
+        res = res && (! connCmp_intersection_is_not_empty_compDsk( connCmp_list_elmt(it) , d));
+        it = connCmp_list_next(it);
+    }
+    it = connCmp_list_begin(discardedCcs);
+    while ( res && (it!=connCmp_list_end()) ) {
+        res = res && (! connCmp_intersection_is_not_empty_compDsk( connCmp_list_elmt(it) , d));
+        it = connCmp_list_next(it);
+    }
+    return res;
+}
+
+int cauchy_connCmp_is_separated( connCmp_t cc, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, metadatas_t meta ) {
+    
+    if (connCmp_isSepref(cc) == 1)
+        return 1;
+    
+    compBox_t componentBox;
+    compDsk_t ccDisk;
+    compBox_init(componentBox);
+    compDsk_init(ccDisk);
+    connCmp_componentBox(componentBox, cc, metadatas_initBref(meta));
+    compBox_get_containing_dsk(ccDisk, componentBox);
+    realRat_mul_si( compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 4);
+    
+    int res = cauchy_compDsk_is_separated( ccDisk, qMainLoop, discardedCcs );
+    
+    if (res && metadatas_useRealCoeffs(meta) && connCmp_is_imaginary_positive(cc) ) {
+        /* check if the cc is separated from its complex conjugate */
+        realRat_neg( compRat_imagref(compDsk_centerref(ccDisk)), compRat_imagref(compDsk_centerref(ccDisk)) );
+        res = res&&(!connCmp_intersection_is_not_empty_compDsk( cc, ccDisk));
+    }
+    
+    connCmp_isSepref(cc) = res;
+        
+    compBox_clear(componentBox);
+    compDsk_clear(ccDisk);
+    
+    return res;
+}
+
+int cauchy_connCmp_is_separated_certified( connCmp_t cc, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, metadatas_t meta ) {
+    
+    if (connCmp_isSepCertref(cc) == 1)
+        return 1;
+    
+    compBox_t componentBox;
+    compDsk_t sixCCDisk, twoCCDisk;
+    compBox_init(componentBox);
+    compDsk_init(sixCCDisk);
+    compDsk_init(twoCCDisk);
+    connCmp_componentBox(componentBox, cc, metadatas_initBref(meta));
+    compBox_get_containing_dsk(sixCCDisk, componentBox);
+    realRat_mul_si( compDsk_radiusref(sixCCDisk), compDsk_radiusref(sixCCDisk), 6);
+    
+    int res = 1;
+    connCmp_list_iterator it = connCmp_list_begin(qMainLoop);
+    while ( res && (it!=connCmp_list_end()) ) {
+        connCmp_componentBox(componentBox, connCmp_list_elmt(it), metadatas_initBref(meta));
+        compBox_get_containing_dsk(twoCCDisk, componentBox);
+        realRat_mul_si( compDsk_radiusref(twoCCDisk), compDsk_radiusref(twoCCDisk), 2);
+        res = res && (! compDsk_intersect_compDsk(sixCCDisk, twoCCDisk) );
+        it = connCmp_list_next(it);
+    }
+    it = connCmp_list_begin(discardedCcs);
+    while ( res && (it!=connCmp_list_end()) ) {
+        connCmp_componentBox(componentBox, connCmp_list_elmt(it), metadatas_initBref(meta));
+        compBox_get_containing_dsk(twoCCDisk, componentBox);
+        realRat_mul_si( compDsk_radiusref(twoCCDisk), compDsk_radiusref(twoCCDisk), 2);
+        res = res && (! compDsk_intersect_compDsk(sixCCDisk, twoCCDisk) );
+        it = connCmp_list_next(it);
+    }
+    
+    if (res && metadatas_useRealCoeffs(meta) && connCmp_is_imaginary_positive(cc) ) {
+        /* check if the cc is separated from its complex conjugate */
+        connCmp_componentBox(componentBox, cc, metadatas_initBref(meta));
+        compBox_get_containing_dsk(twoCCDisk, componentBox);
+        realRat_mul_si( compDsk_radiusref(twoCCDisk), compDsk_radiusref(twoCCDisk), 2);
+        
+        realRat_neg( compRat_imagref(compDsk_centerref(sixCCDisk)), compRat_imagref(compDsk_centerref(sixCCDisk)) );
+        res = res && (! compDsk_intersect_compDsk(sixCCDisk, twoCCDisk) );
+    }
+    
+    connCmp_isSepCertref(cc) = res;
+        
+    compBox_clear(componentBox);
+    compDsk_clear(sixCCDisk);
+    compDsk_clear(twoCCDisk);
+    
+    return res;
+}
+
 int cauchy_main_loop( connCmp_list_t qResults,  
                          compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
@@ -541,6 +640,7 @@ int cauchy_main_loop( connCmp_list_t qResults,
                          const realRat_t eps, 
                          cacheApp_t cache, 
                          cacheCauchy_t cacheCau,
+                         int certified,
                          metadatas_t meta){
     
     /* for prints */
@@ -578,8 +678,7 @@ int cauchy_main_loop( connCmp_list_t qResults,
     clock_t start=clock();
     
     /* Real Coeff */
-    connCmp_ptr ccurConjClo, ccurConj;
-    ccurConjClo = NULL;
+    connCmp_ptr ccurConj;
     ccurConj = NULL;
     int pushConjugFlag = 0;
     
@@ -587,8 +686,14 @@ int cauchy_main_loop( connCmp_list_t qResults,
     realRat_set_si(three, 3, 1);
     realRat_set_si(two, 2, 1);
     realRat_set(neps, eps);
+    if (certified) 
+        realRat_div_ui(neps, eps, 2);
     
     int failure = 0;
+    
+    double timeInRealCoeffs = 0.0;
+    double timeInMaxNumberOfRoots = 0.0;
+    double timeInIsSeparated = 0.0;
     
     while ( (failure==0)&&(!connCmp_list_is_empty(qMainLoop)) ) {
         
@@ -606,21 +711,19 @@ int cauchy_main_loop( connCmp_list_t qResults,
         /* try to upper bound the number of roots in ccur */
         /* at least one sol per connected comp in qMainLoop, */
         /* 2 if use real coeffs and the CC does not contain the real line */
+        clock_t start2=clock();
         slong nbMaxSol= cauchy_MaxNumberOfRootsInCC( ccur, qMainLoop, nbSolsInQResults, cache,  meta );
+        timeInMaxNumberOfRoots += (double) (clock() - start2);
         
         /* Real Coeff */
+        start2=clock();
         pushConjugFlag = 0;
-        if (metadatas_useRealCoeffs(meta)){
-            /* test if the component contains the real line in its interior */
-            if (!connCmp_is_imaginary_positive(ccur)) {
-                ccurConjClo = ( connCmp_ptr ) ccluster_malloc (sizeof(connCmp));
-                connCmp_init( ccurConjClo );
-                connCmp_set_conjugate_closure(ccurConjClo, ccur, metadatas_initBref(meta));
-                connCmp_clear(ccur);
-                ccluster_free(ccur);
-                ccur = ccurConjClo;
-            }
+        if (metadatas_useRealCoeffs(meta)) {
+            /* if the component contains the real line in its interior */
+            if (!connCmp_is_imaginary_positive(ccur))
+                ccur = cauchy_connCmp_set_conjugate_closure( ccur, meta);
         }
+        timeInRealCoeffs += (double) (clock() - start2);
         
         connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
         compBox_get_containing_dsk(ccDisk, componentBox);
@@ -629,19 +732,11 @@ int cauchy_main_loop( connCmp_list_t qResults,
         prec = connCmp_appPr(ccur);
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
-        separationFlag = ccluster_compDsk_is_separated(fourCCDisk, qMainLoop, discardedCcs);
+        start2=clock();
+        separationFlag = cauchy_connCmp_is_separated( ccur, qMainLoop, discardedCcs, meta );
+        timeInIsSeparated += (double) (clock() - start2);
         
-        /* Real Coeff */
-        if ( (separationFlag)&&(metadatas_useRealCoeffs(meta)) ) {
-            if (connCmp_is_imaginary_positive(ccur)) {
-                /* check if ccur is separated from its complex conjugate */
-                realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
-                separationFlag = separationFlag&&(!compBox_intersection_is_not_empty_compDsk ( componentBox, fourCCDisk));
-                realRat_neg( compRat_imagref(compDsk_centerref(fourCCDisk)), compRat_imagref(compDsk_centerref(fourCCDisk)) );
-            }
-        }
-      
-        widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), eps)<=0);
+        widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), neps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
         rigidFlag      = 0;
         isolaFlag      = 0;
@@ -675,13 +770,11 @@ int cauchy_main_loop( connCmp_list_t qResults,
                     prec = resCauchy.appPrec;
                     slong m = connCmp_nSols(ccur);
                     
-#ifndef CERTIFIED
                     if (resCauchy.nbOfSol == -1) {
                         failure = 1;
                         continue;
                         printf("#FAILURE: A DISC IS NOT 2-ISOLATED \n");
-                    }
-#endif                    
+                    }                   
                     if (metadatas_getVerbo(meta)>=level) {
                         printf("#------nb sols: %d\n", (int) connCmp_nSolsref(ccur));
                     }
@@ -694,9 +787,6 @@ int cauchy_main_loop( connCmp_list_t qResults,
                             printf("#------Disk: "); compDsk_print(twoCCDisk); printf("\n");
                         }
 
-#ifdef CAUCHY_CERTIFIED
-                        realRat_div_ui(neps, eps, m+2);
-#endif
                         ccur = cauchy_compression( ccur, &rigidFlag, &widthFlag, &isolaFlag, 
                                                    twoCCDisk, m, neps, cache, cacheCau, prec, meta, depth );
                         
@@ -713,41 +803,6 @@ int cauchy_main_loop( connCmp_list_t qResults,
                     
                 
             }
-        }
-        
-        if (connCmp_nSolsref(ccur)!=-1){
-#ifdef CAUCHY_CERTIFIED
-             slong m = connCmp_nSolsref(ccur);
-             realRat_div_ui(neps, eps, m+2);
-#endif             
-             realRat_mul(threeWidth, three, connCmp_widthref(ccur));
-             widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), neps)<=0);
-             compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
-             depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
-#ifdef CAUCHY_CERTIFIED
-             realRat_mul_si( compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), m+2);
-             separationFlag = ccluster_compDsk_is_separated(ccDisk, qMainLoop, discardedCcs);
-             /* Real Coeff */
-             if ( (separationFlag)&&(metadatas_useRealCoeffs(meta)) ) {
-                 if (connCmp_is_imaginary_positive(ccur)) {
-                     /* check if ccur is separated from its complex conjugate */
-                     realRat_neg( compRat_imagref(compDsk_centerref(ccDisk)), compRat_imagref(compDsk_centerref(ccDisk)) );
-                     separationFlag = separationFlag&&(!compBox_intersection_is_not_empty_compDsk ( componentBox, ccDisk));
-                     realRat_neg( compRat_imagref(compDsk_centerref(ccDisk)), compRat_imagref(compDsk_centerref(ccDisk)) );
-                 }
-             }
-             realRat_div_ui( compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), m+2);
-#endif          
-             if (metadatas_getVerbo(meta)>=level) {
-                 printf("#------New Disk: "); compDsk_print( ccDisk ); printf("\n");
-                 printf("#------separation Flag: %d\n", separationFlag);
-                 printf("#------widthFlag      : %d\n", widthFlag); 
-                 printf("#------compactFlag    : %d\n", compactFlag);
-                 printf("#------depth          : %ld\n", depth);
-                 printf("#------rigidFlag: %d\n", rigidFlag); 
-                 printf("#------isolaFlag: %d\n", isolaFlag); 
-                 printf("\n");
-             }
         }
         
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
@@ -769,45 +824,57 @@ int cauchy_main_loop( connCmp_list_t qResults,
             }
         }
         
+        if (certified && (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag) {
+            start2=clock();
+            separationFlag = cauchy_connCmp_is_separated_certified( ccur, qMainLoop, discardedCcs, meta );
+            timeInIsSeparated += (double) (clock() - start2);
+            if (metadatas_getVerbo(meta)>=level)
+                printf("#------is separated Certified: %d\n", separationFlag );
+        }
+            
         /* Real Coeff */
+        start2=clock();
         if ( metadatas_useRealCoeffs(meta)
             && ( ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) ) ) {
             
             cauchy_conjugate ( &ccurConj, &pushConjugFlag, &separationFlag, ccur, meta );
 
         }
+        timeInRealCoeffs += (double) (clock() - start2);
 
         if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && (connCmp_nSols(ccur)<cacheApp_getDegree(cache))) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
             
-#ifdef CAUCHY_CERTIFIED 
-        slong m = connCmp_nSols(ccur);
-        
-//         compDsk_inflate_realRat(twoCCDisk, ccDisk, two);
-//         cauchyTest_res resCert = cauchyTest_deterministic_counting_combinatorial_with_isoRatio( compDsk_centerref(twoCCDisk),
-//                                                                                                 compDsk_radiusref(twoCCDisk),
-//                                                                                                 two, m, cache, cacheCau, prec, 
-//                                                                                                 meta, depth);
-        realRat_mul_si(compDsk_radiusref(twoCCDisk), compDsk_radiusref(ccDisk), m+2);
-        cauchyTest_res resCert; 
-        resCert.nbOfSol = 1;
-        if (m>1) {
-            resCert = cauchyTest_deterministic_counting_combinatorial_with_rinfrsup( compDsk_centerref(ccDisk),
-                                                                                                compDsk_radiusref(ccDisk),
-                                                                                                compDsk_radiusref(twoCCDisk),
-                                                                                                m, cache, cacheCau, prec, 
-                                                                                                meta, depth);
-        }
-        if (resCert.nbOfSol == -1) {
-                        failure = 1;
-                        printf("#FAILURE: CERTIFICATION FAILED: A DISK is NOT 2-ISOLATED \n");
-                        continue;
+            if (certified) { 
+                slong m = connCmp_nSols(ccur);
+                realRat_mul_si(compDsk_radiusref(twoCCDisk), compDsk_radiusref(ccDisk), 2);
+                cauchyTest_res resCert; 
+                resCert.nbOfSol = 1;
+                if (m>1) {
+                    slong q = cauchyTest_getNbEvals_counting_combinatorial_with_isoRatio(compDsk_centerref(ccDisk), compDsk_radiusref(twoCCDisk), two, m, cacheCau);
+                    if (metadatas_getVerbo(meta)>=2) {
+                        printf("#precision before Pellet counting: %ld\n", prec);
+                        printf("#number of eval points with Pellet: %ld\n", cacheApp_getDegree(cache)+1);
+                        printf("#number of eval points with Combin: %ld\n", q);
                     }
-                    
-        /* else inflate the cc */
-        realRat_set_si(mp2, m+2, 1);
-        connCmp_infate_realRat_inPlace(ccur,  mp2, metadatas_initBref(meta) );
-#endif
+                    resCert = cauchyTest_Pellet_counting( compDsk_centerref(ccDisk), compDsk_radiusref(twoCCDisk), two, m, cache, cacheCau, prec, 
+                                                            meta, depth);
+                    if (metadatas_getVerbo(meta)>=level) {
+                        printf("#result: %d, precision: %ld\n", resCert.nbOfSol, resCert.appPrec);
+                    }
+                }
+                
+                if (resCert.nbOfSol == -1) {
+                                failure = 1;
+                                printf("#FAILURE: CERTIFICATION FAILED: A DISK is NOT 2-ISOLATED \n");
+                                continue;
+                            }
+                            
+                /* else inflate the cc */
+        //         realRat_set_si(mp2, m+2, 1);
+                metadatas_add_nbClusterCertified( meta, 1);
+                connCmp_infate_realRat_inPlace(ccur,  two, metadatas_initBref(meta) );
+            }
             
             connCmp_list_push(qResults, ccur);
             nbSolsInQResults += connCmp_nSols(ccur);
@@ -817,12 +884,17 @@ int cauchy_main_loop( connCmp_list_t qResults,
             
 //             printf("metadatas_useRealCoeffs(meta): %d, pushConjugFlag: %d\n", metadatas_useRealCoeffs(meta), pushConjugFlag);
             /* Real Coeff */
+            start2=clock();
             if ((metadatas_useRealCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
                 connCmp_list_push(qResults, ccurConj);
                 nbSolsInQResults += connCmp_nSols(ccur);
+                if (certified) {
+                    metadatas_add_nbClusterCertified( meta, 1);
+                }
             }
+            timeInRealCoeffs += (double) (clock() - start2);
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
             
@@ -865,6 +937,9 @@ int cauchy_main_loop( connCmp_list_t qResults,
     realRat_clear(threeWidth);
     connCmp_list_clear(ltemp);
     
+    printf("time in realCoeffs: %f\n", timeInRealCoeffs/CLOCKS_PER_SEC);
+    printf("time in MaxNumberOfRoots: %f\n", timeInMaxNumberOfRoots/CLOCKS_PER_SEC);
+    printf("time in IsSeparated: %f\n", timeInIsSeparated/CLOCKS_PER_SEC);
     return failure;
 }
 
@@ -874,6 +949,7 @@ int cauchy_algo_global( connCmp_list_t qResults,
                            const realRat_t eps, 
                            cacheApp_t cache, 
                            cacheCauchy_t cacheCau,
+                           int certified,
                            metadatas_t meta){
     
     clock_t start = clock();
@@ -901,7 +977,7 @@ int cauchy_algo_global( connCmp_list_t qResults,
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
 //     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
-    int failure = cauchy_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, cacheCau, meta);
+    int failure = cauchy_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, cacheCau, certified, meta);
     
     
 //     realRat_clear(factor);
@@ -915,12 +991,8 @@ int cauchy_algo_global( connCmp_list_t qResults,
     return failure;
 }
 
-int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheApp_t cache, cacheCauchy_t cacheCau){
+int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheApp_t cache, cacheCauchy_t cacheCau, int certified){
     int r=1;
-//     int nbTaylorShifts  = metadatas_getNbTaylorsInT0Tests(meta) + metadatas_getNbTaylorsInTSTests(meta);
-//     int nbTaylorShiftsR = metadatas_getNbTaylorsRepetedInT0Tests(meta) + metadatas_getNbTaylorsRepetedInTSTests(meta);
-//     int nbGraeffe       = metadatas_getNbGraeffeInT0Tests(meta) + metadatas_getNbGraeffeInTSTests(meta);
-//     int nbGraeffeR      = metadatas_getNbGraeffeRepetedInT0Tests(meta) + metadatas_getNbGraeffeRepetedInTSTests(meta);
     char temp[1000];
     
     if (metadatas_getVerbo(meta)>=1) {
@@ -949,16 +1021,13 @@ int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, 
     int len = 0;
     //TODO find a better way for this...
     if ( metadatas_useNewton(meta) &&
-         metadatas_useTstarOptim(meta) &&
-         metadatas_usePredictPrec(meta) &&
-         metadatas_useAnticipate(meta) &&
-         metadatas_useRealCoeffs(meta) ) len += sprintf( temp + len, " default");
+         metadatas_useRealCoeffs(meta) &&
+         metadatas_useCompression(meta)
+       ) len += sprintf( temp + len, " default");
     else {    
         if (metadatas_useNewton(meta)) len += sprintf( temp + len, " newton");
-        if (metadatas_useTstarOptim(meta)) len += sprintf( temp + len, " tstarOpt");
-        if (metadatas_usePredictPrec(meta)) len += sprintf( temp + len, " predPrec");
-        if (metadatas_useAnticipate(meta)) len += sprintf( temp + len, " anticip");
         if (metadatas_useRealCoeffs(meta)) len += sprintf( temp + len, " realCoeffs");
+        if (metadatas_useCompression(meta)) len += sprintf( temp + len, " compression");
     }
     if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
@@ -970,27 +1039,23 @@ int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, 
     r = fprintf(file, "#|strat:%-63s|\n", temp);
     
     if (metadatas_getVerbo(meta)>=2) {
-//         metadatas_count(meta);
     r = fprintf(file, "# -------------------Cauchy exclusion tests----------------------------\n");
     r = fprintf(file, "#|%-39s %14d %14s|\n", "total number ET:",                       metadatas_getNbCauchyExTests(meta),  " " );
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of evals for proba. ET:",         metadatas_getNbCauchyExEvalsP(meta),  " " );
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of evals for certi. ET:",         metadatas_getNbCauchyExEvalsD(meta),  " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in tests  ET:",          metadatas_get_time_CauExTo(meta),    " " );
-    r = fprintf(file, "#|%-39s %14f %14s|\n", "time   in evals for proba. ET:",         metadatas_get_time_CauExEP(meta),    " " );
-    r = fprintf(file, "#|%-39s %14f %14s|\n", "time   in evals for certi. ET:",         metadatas_get_time_CauExED(meta),    " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of evals            ET:",         metadatas_getNbCauchyExEvals(meta),  " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time   in evals            ET:",         metadatas_get_time_CauExEv(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing divs     ET:",         metadatas_get_time_CauExDS(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing s0s      ET:",         metadatas_get_time_CauExCS(meta),    " " );
     r = fprintf(file, "# -------------------Cauchy counting tests----------------------------\n");
     r = fprintf(file, "#|%-39s %14d %14s|\n", "total number CT:",                       metadatas_getNbCauchyCoTests(meta),  " " );
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of evals for proba. CT:",         metadatas_getNbCauchyCoEvalsP(meta),  " " );
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of evals for certi. CT:",         metadatas_getNbCauchyCoEvalsD(meta),  " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in tests  CT:",          metadatas_get_time_CauCoTo(meta),    " " );
-    r = fprintf(file, "#|%-39s %14f %14s|\n", "time   in evals for proba. CT:",         metadatas_get_time_CauCoEP(meta),    " " );
-    r = fprintf(file, "#|%-39s %14f %14s|\n", "time   in evals for certi. CT:",         metadatas_get_time_CauCoED(meta),    " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of evals            CT:",         metadatas_getNbCauchyCoEvals(meta),  " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "time   in evals            CT:",         metadatas_get_time_CauCoEv(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing divs     CT:",         metadatas_get_time_CauCoDS(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in computing s0s      ET:",         metadatas_get_time_CauCoCS(meta),    " " );
 //     r = fprintf(file, "# ---------------------------------------------------------------------\n");
 //     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in shift for FFT        :",         metadatas_get_time_Taylors(meta),    " " );
+    if (metadatas_useCompression(meta)) {
     r = fprintf(file, "# -------------------Compression into rigid discs---------------------\n");
     r = fprintf(file, "#|%-39s %14d %14s|\n", "total number for clus of  1 root:",       metadatas_getComp_nb_1(meta),  " " );
     r = fprintf(file, "#|%-39s %14d %14s|\n", "total number for clus of >1 root:",       metadatas_getComp_nb_p(meta),  " " );
@@ -1002,47 +1067,30 @@ int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, 
 #endif
 //     r = fprintf(file, "#|%-39s %14f %14s|\n", "time spent in RR algo 3:",                metadatas_get_time_CompRR3(meta),    " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in compression:",        metadatas_get_time_CompTot(meta),    " " );
+    }
     if (metadatas_useNewton(meta)){
     r = fprintf(file, "# -------------------Newton Iterations---------------------------------\n");
-    r = fprintf(file, "#|%-39s %14d %14s|\n", "total number NE:",                       metadatas_getNbNewton(meta),         " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "total number NE:",                     metadatas_getNbNewton(meta),         " " );
     r = fprintf(file, "#|%-39s %14d %14s|\n", "number of fails:",                    metadatas_getNbFailingNewton(meta),  " " );
     r = fprintf(file, "#|%-39s %14f %14s|\n", "total time spent in newton:",         metadatas_get_time_Newtons(meta),    " " );
     }
+    if (certified) {
+    r = fprintf(file, "# -------------------Final Certification-------------------------------\n");
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of certified clusters:",       metadatas_get_nbClusterCertified(meta),         " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "number of Pellet's counting tests:",  metadatas_get_nbCertifiedWithPellet(meta),      " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "total time in Pellet:",               metadatas_get_time_CertPel(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "      time in Evaluations:",          metadatas_get_time_CertPEv(meta),    " " );
+    r = fprintf(file, "#|%-39s %14ld %14s|\n", "        nb of Evaluations:",          metadatas_get_nbEvalsInPellet(meta),      " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "      time in Interpolations:",       metadatas_get_time_CertPIn(meta),    " " );
+    r = fprintf(file, "#|%-39s %14f %14s|\n", "      time in DLG iterations:",       metadatas_get_time_CertPGr(meta),    " " );
+    r = fprintf(file, "#|%-39s %14d %14s|\n", "        nb of DLG iterations:",       metadatas_get_nbGraeffeInPellet(meta),      " " );
+    }
     r = fprintf(file, "# -------------------Other---------------------------------------------\n");
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in getApproximation:",           metadatas_get_time_Approxi(meta),    " " );
-//     if (metadatas_useAnticipate(meta)){
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Anticipate:",                 metadatas_get_time_Anticip(meta),    " " );
-//     }
-//     if (metadatas_usePowerSums(meta)){
-// //     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of Ps counting tests:",  metadatas_getNbPsCountingTest(meta),    " " );
-//     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests:",          metadatas_get_time_PSTests(meta),    " " );
-// #ifdef CCLUSTER_STATS_PS_MACIS
-//     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests V:",        metadatas_get_time_PSTestV(meta),    " " );
-//     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests D:",        metadatas_get_time_PSTests(meta)-metadatas_get_time_PSTestV(meta),    " " );
-//     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Cauchy exclusion tests:",     metadatas_get_time_PSTests(meta),    " " );
-    double timeInEval = metadatas_get_time_CauExEP(meta) + metadatas_get_time_CauExED(meta)
-                      + metadatas_get_time_CauCoEP(meta) + metadatas_get_time_CauCoED(meta);
+    double timeInEval = metadatas_get_time_CauExEv(meta) + metadatas_get_time_CauCoEv(meta) + metadatas_get_time_CertPEv(meta);
     r = fprintf(file, "#|%-39s %14f %14s|\n", "time in Evaluation:",                 timeInEval,    " " );
-    int    nbOfEvals  = metadatas_getNbCauchyExEvalsP(meta) + metadatas_getNbCauchyExEvalsD(meta)
-                      + metadatas_getNbCauchyCoEvalsP(meta) + metadatas_getNbCauchyCoEvalsD(meta);
+    int    nbOfEvals  = metadatas_getNbCauchyExEvals(meta) + metadatas_getNbCauchyCoEvals(meta) + metadatas_get_nbEvalsInPellet(meta);
     r = fprintf(file, "#|%-39s %14d %14s|\n", "total number of evaluations:",        nbOfEvals,    " " );
-//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of -2:",                 metadatas_getNbM2(meta),    " " );
-//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of -1:",                 metadatas_getNbM1(meta),    " " );
-//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of errors:",             metadatas_getNbEr(meta),    " " );
-// #endif 
-// #ifdef CCLUSTER_STATS_PS
-//     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests V:",        metadatas_get_time_PSTestV(meta),    " " );
-//     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Ps counting tests D:",        metadatas_get_time_PSTests(meta)-metadatas_get_time_PSTestV(meta),    " " );
-//     r = fprintf(file, "|%-39s %14f %14s|\n", "time in Evaluation:",                 metadatas_get_time_Evaluat(meta),    " " );
-//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of evaluations:",        metadatas_getNbEval(meta),    " " );
-//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of True Negative:",      metadatas_getNbTN(meta),    " " );
-//     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive:",     metadatas_getNbFP(meta),    " " );
-// //     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of True Negative 1:",      metadatas_getNbTN1(meta),    " " );
-// //     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive 1:",     metadatas_getNbFP1(meta),    " " );
-// //     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of True Negative 2:",      metadatas_getNbTN2(meta),    " " );
-// //     r = fprintf(file, "|%-39s %14d %14s|\n", "total number of False Positive 2:",     metadatas_getNbFP2(meta),    " " );
-// #endif 
-//     }
     r = fprintf(file, "# -------------------Precision-----------------------------------------\n");
     r = metadatas_boxes_by_prec_fprint ( file, meta );
      

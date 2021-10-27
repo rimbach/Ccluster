@@ -134,6 +134,127 @@ void cacheCauchy_init_sparseEval ( cacheCauchy_t cache,
     
 }
 
+// void cacheCauchy_sparseEval2 ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, cacheApp_t cachePol,
+//                               const compApp_t point, slong prec) {
+//     
+//     compApp_poly_ptr app    = cacheApp_getApproximation ( cachePol, prec );
+//     
+// //     compApp_poly_printd(app, 10);
+// //     printf("\n");
+//     
+//     slong nbNZC = cacheCauchy_nbNZCref(cache);
+//     slong * inNZC = cacheCauchy_inNZCref(cache);
+//     
+//     int log2deg = (int) ceil(log2( (inNZC[nbNZC-1]) - 1 ));
+// //     printf("deg: %ld, log2deg: %d\n", inNZC[nbNZC-1], log2deg);
+//     compApp_ptr pows = (compApp_ptr) ccluster_malloc (log2deg*sizeof(compApp));
+//     compApp_t powp, powd;
+//     compApp_init(powp);
+//     compApp_init(powd);
+//     
+//     compApp_zero( fval );
+//     compApp_zero( fderval );
+//     
+//     compApp_init(pows+0);
+//     compApp_set(pows+0, point);
+//     for (int i=1; i<log2deg; i++){
+//         compApp_init(pows+i);
+//         compApp_sqr(pows+i, pows+(i-1), prec); 
+//     }
+//     
+//     for (slong i=0; i<nbNZC; i++){
+// //         printf("i: %ld, inNZC[i]: %ld\n", i, inNZC[i]);
+//         if ( inNZC[i]==0 ){
+//             compApp_zero(powd);
+//             compApp_one (powp);
+//         } else if ( inNZC[i]==1 ){ 
+//             compApp_one(powd);
+//             compApp_set (powp, point);
+//         } else if ( inNZC[i]==2 ){
+//             compApp_set (powd, pows + 0);
+//             compApp_set (powp, pows + 1);
+//         } else {
+//             compApp_one (powd);
+//             slong pow = inNZC[i] - 1;
+//             int indmax = (int) ceil(log2( pow ));
+// //             printf("pow: %ld, ind: %d\n", pow, indmax);
+//             for(int ind = 0; ind<indmax; ind++){
+//                 if (pow%2)
+//                     compApp_mul( powd, powd, pows + ind, prec );
+//                 pow=pow>>1;
+//             }
+//             compApp_mul(powp, powd, point, prec);
+//         }
+//         compApp_mul_si(powd, powd, inNZC[i], prec);
+//         compApp_addmul(fval,    powp, (app->coeffs) + inNZC[i], prec);
+//         compApp_addmul(fderval, powd, (app->coeffs) + inNZC[i], prec);
+//     }
+//     
+//     for (int i=0; i<log2deg; i++)
+//         compApp_clear(pows+i);
+//     
+//     ccluster_free(pows);
+//     compApp_clear(powp);
+//     compApp_clear(powd);   
+// }
+
+void cacheCauchy_sparseEval2 ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, cacheApp_t cachePol,
+                              const compApp_t point, slong prec) {
+    
+    compApp_poly_ptr app    = cacheApp_getApproximation ( cachePol, prec );
+    
+    slong nbNZC = cacheCauchy_nbNZCref(cache);
+    slong * inNZC = cacheCauchy_inNZCref(cache);
+    
+//     printf("nbNZC: %ld\n", nbNZC);
+//     printf("inNZC: [ ");
+//     for (slong i=0; i<nbNZC; i++)
+//         printf("%ld, ", inNZC[i]);
+//     printf(" ]\n");
+//     compApp_poly_printd(app, 10);
+//     printf("\n");
+    
+    compApp_t xp, mon;
+    compApp_init(xp);
+    compApp_init(mon);
+     
+    compApp_set( fval, (app->coeffs) + inNZC[nbNZC-1] );
+    compApp_mul_si( fderval, fval, inNZC[nbNZC-1], prec );
+    
+//     printf("fval   : "); compApp_printd(fval,    10); printf("\n");
+//     printf("fderval: "); compApp_printd(fderval, 10); printf("\n");
+    
+    for (slong ind = nbNZC-2; ind >=0; ind--){
+//         printf("ind: %ld, inNZC[%ld]: %ld, pow: %ld,\n", ind, ind, inNZC[ind], inNZC[ind+1]-inNZC[ind]);
+        if ((ind==0)&&(inNZC[0]==0)){
+            compApp_pow_si( xp, point, inNZC[ind+1]-inNZC[ind] -1 , prec );
+            compApp_mul( fderval, fderval, xp, prec);
+            compApp_mul(xp, xp, point, prec);
+            compApp_mul(fval, fval, xp, prec);
+        } else {
+            compApp_pow_si( xp, point, inNZC[ind+1]-inNZC[ind] , prec );
+            compApp_mul( fderval, fderval, xp, prec);
+            compApp_mul( fval, fval, xp, prec);
+        }
+        compApp_mul_si( mon, (app->coeffs) + inNZC[ind], inNZC[ind], prec);
+        compApp_add( fval, fval, (app->coeffs) + inNZC[ind], prec);
+        compApp_add( fderval, fderval, mon, prec);
+    }
+    
+    if (inNZC[0] > 0) {
+        compApp_pow_si( xp, point, inNZC[0] - 1 , prec );
+        compApp_mul( fderval, fderval, xp, prec );
+        compApp_mul(xp, xp, point, prec);
+        compApp_mul(fval, fval, xp, prec);
+//     compApp_mul_si( mon, (app->coeffs) + inNZC[0], inNZC[0], prec);
+//     compApp_add( fval, fval, (app->coeffs) + inNZC[0], prec);
+//     compApp_add( fderval, fderval, mon, prec);
+    }
+    
+    compApp_clear(xp);
+    compApp_clear(mon);
+}
+
 void cacheCauchy_sparseEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, cacheApp_t cachePol,
                               const compApp_t point, slong prec) {
     
@@ -153,12 +274,14 @@ void cacheCauchy_sparseEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t c
     slong ind=0;
     if (inNZC[ind] == 0)
         ind++;
-    compApp_pow_si( x, point, inNZC[ind], prec );
+//     compApp_pow_si( x, point, inNZC[ind], prec );
     compApp_pow_si( xp, point, inNZC[ind]-1, prec );
+    compApp_mul(x, xp, point, prec);
     
     while ( ind < nbNZC ){
         compApp_mul(mon, (app->coeffs) + inNZC[ind], x, prec);
         compApp_add(fval, fval, mon, prec);
+//         compApp_addmul(fval, (app->coeffs) + inNZC[ind], x, prec);
         
         compApp_mul(mon, (app->coeffs) + inNZC[ind], xp, prec);
         compApp_mul_si( mon, mon, inNZC[ind], prec);
@@ -167,6 +290,15 @@ void cacheCauchy_sparseEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t c
         ind++;
         
         if (ind < nbNZC) {
+            /* write (inNZC[ind]-1) = q*(inNZC[ind-1]-1) + r */
+//             slong q = (inNZC[ind]-1) / (inNZC[ind-1]-1);
+//             slong r = (inNZC[ind]-1) % (inNZC[ind-1]-1);
+//             compApp_pow_si( mon, point, r, prec);
+//             compApp_pow_si( xp, xp, q, prec );
+//             compApp_mul(xp, xp, mon, prec);
+//             compApp_mul(x, xp, point, prec);
+            
+            /* old */
             compApp_pow_si(mon, point, inNZC[ind] - inNZC[ind-1], prec);
             compApp_mul( x, x, mon, prec);
             compApp_mul( xp, xp, mon, prec);

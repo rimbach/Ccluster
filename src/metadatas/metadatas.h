@@ -587,31 +587,18 @@ METADATAS_INLINE void metadatas_add_time_CauExTo(metadatas_t m, double d){
 }
 METADATAS_INLINE double metadatas_get_time_CauExTo ( const metadatas_t m ) { return chronos_get_time_CauExTo (metadatas_chronref(m)); }
 
-METADATAS_INLINE void metadatas_add_time_CauExEP(metadatas_t m, double d){
+METADATAS_INLINE void metadatas_add_time_CauExEv(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
-    chronos_add_time_CauExEP( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+    chronos_add_time_CauExEv( metadatas_chronref(m), d, metadatas_useNBThreads(m));
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_unlock(m);
 #endif
 }
-METADATAS_INLINE double metadatas_get_time_CauExEP ( const metadatas_t m ) { return chronos_get_time_CauExEP (metadatas_chronref(m)); }
-
-METADATAS_INLINE void metadatas_add_time_CauExED(metadatas_t m, double d){
-#ifdef CCLUSTER_HAVE_PTHREAD
-                if (metadatas_useNBThreads(m) >1)
-                    metadatas_lock(m);
-#endif
-    chronos_add_time_CauExED( metadatas_chronref(m), d, metadatas_useNBThreads(m));
-#ifdef CCLUSTER_HAVE_PTHREAD
-                if (metadatas_useNBThreads(m) >1)
-                    metadatas_unlock(m);
-#endif
-}
-METADATAS_INLINE double metadatas_get_time_CauExED ( const metadatas_t m ) { return chronos_get_time_CauExED (metadatas_chronref(m)); }
+METADATAS_INLINE double metadatas_get_time_CauExEv ( const metadatas_t m ) { return chronos_get_time_CauExEv (metadatas_chronref(m)); }
 
 METADATAS_INLINE void metadatas_add_time_CauExDS(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -652,31 +639,18 @@ METADATAS_INLINE void metadatas_add_time_CauCoTo(metadatas_t m, double d){
 }
 METADATAS_INLINE double metadatas_get_time_CauCoTo ( const metadatas_t m ) { return chronos_get_time_CauCoTo (metadatas_chronref(m)); }
 
-METADATAS_INLINE void metadatas_add_time_CauCoEP(metadatas_t m, double d){
+METADATAS_INLINE void metadatas_add_time_CauCoEv(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
-    chronos_add_time_CauCoEP( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+    chronos_add_time_CauCoEv( metadatas_chronref(m), d, metadatas_useNBThreads(m));
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_unlock(m);
 #endif
 }
-METADATAS_INLINE double metadatas_get_time_CauCoEP ( const metadatas_t m ) { return chronos_get_time_CauCoEP (metadatas_chronref(m)); }
-
-METADATAS_INLINE void metadatas_add_time_CauCoED(metadatas_t m, double d){
-#ifdef CCLUSTER_HAVE_PTHREAD
-                if (metadatas_useNBThreads(m) >1)
-                    metadatas_lock(m);
-#endif
-    chronos_add_time_CauCoED( metadatas_chronref(m), d, metadatas_useNBThreads(m));
-#ifdef CCLUSTER_HAVE_PTHREAD
-                if (metadatas_useNBThreads(m) >1)
-                    metadatas_unlock(m);
-#endif
-}
-METADATAS_INLINE double metadatas_get_time_CauCoED ( const metadatas_t m ) { return chronos_get_time_CauCoED (metadatas_chronref(m)); }
+METADATAS_INLINE double metadatas_get_time_CauCoEv ( const metadatas_t m ) { return chronos_get_time_CauCoEv (metadatas_chronref(m)); }
 
 METADATAS_INLINE void metadatas_add_time_CauCoDS(metadatas_t m, double d){
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -717,31 +691,18 @@ METADATAS_INLINE void metadatas_add_CauchyExTest ( metadatas_t m, int depth, slo
 }
 METADATAS_INLINE int  metadatas_getNbCauchyExTests ( const metadatas_t m ){ return counters_getNbCauchyExTests   (metadatas_countref(m));}
 
-METADATAS_INLINE void metadatas_add_CauchyExEvalsP ( metadatas_t m, int depth, int nb ) {
+METADATAS_INLINE void metadatas_add_CauchyExEvals ( metadatas_t m, int depth, int nb ) {
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
-    counters_add_CauchyExEvalsP(metadatas_countref(m), depth, nb );
+    counters_add_CauchyExEvals(metadatas_countref(m), depth, nb );
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_unlock(m);
 #endif
 }
-METADATAS_INLINE int  metadatas_getNbCauchyExEvalsP ( const metadatas_t m ){ return counters_getNbCauchyExEvalsP   (metadatas_countref(m));}
-
-METADATAS_INLINE void metadatas_add_CauchyExEvalsD ( metadatas_t m, int depth, int nb ) {
-#ifdef CCLUSTER_HAVE_PTHREAD
-                if (metadatas_useNBThreads(m) >1)
-                    metadatas_lock(m);
-#endif
-    counters_add_CauchyExEvalsD(metadatas_countref(m), depth, nb );
-#ifdef CCLUSTER_HAVE_PTHREAD
-                if (metadatas_useNBThreads(m) >1)
-                    metadatas_unlock(m);
-#endif
-}
-METADATAS_INLINE int  metadatas_getNbCauchyExEvalsD ( const metadatas_t m ){ return counters_getNbCauchyExEvalsD   (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbCauchyExEvals ( const metadatas_t m ){ return counters_getNbCauchyExEvals   (metadatas_countref(m));}
 
 METADATAS_INLINE void metadatas_add_CauchyCoTest ( metadatas_t m, int depth, slong prec ) {
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -756,32 +717,18 @@ METADATAS_INLINE void metadatas_add_CauchyCoTest ( metadatas_t m, int depth, slo
 }
 METADATAS_INLINE int  metadatas_getNbCauchyCoTests ( const metadatas_t m ){ return counters_getNbCauchyCoTests   (metadatas_countref(m));}
 
-METADATAS_INLINE void metadatas_add_CauchyCoEvalsP ( metadatas_t m, int depth, int nb ) {
+METADATAS_INLINE void metadatas_add_CauchyCoEvals ( metadatas_t m, int depth, int nb ) {
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_lock(m);
 #endif
-    counters_add_CauchyCoEvalsP(metadatas_countref(m), depth, nb );
+    counters_add_CauchyCoEvals(metadatas_countref(m), depth, nb );
 #ifdef CCLUSTER_HAVE_PTHREAD
                 if (metadatas_useNBThreads(m) >1)
                     metadatas_unlock(m);
 #endif
 }
-METADATAS_INLINE int  metadatas_getNbCauchyCoEvalsP ( const metadatas_t m ){ return counters_getNbCauchyCoEvalsP   (metadatas_countref(m));}
-
-METADATAS_INLINE void metadatas_add_CauchyCoEvalsD ( metadatas_t m, int depth, int nb ) {
-#ifdef CCLUSTER_HAVE_PTHREAD
-                if (metadatas_useNBThreads(m) >1)
-                    metadatas_lock(m);
-#endif
-    counters_add_CauchyCoEvalsD(metadatas_countref(m), depth, nb );
-#ifdef CCLUSTER_HAVE_PTHREAD
-                if (metadatas_useNBThreads(m) >1)
-                    metadatas_unlock(m);
-#endif
-}
-
-METADATAS_INLINE int  metadatas_getNbCauchyCoEvalsD ( const metadatas_t m ){ return counters_getNbCauchyCoEvalsD   (metadatas_countref(m));}
+METADATAS_INLINE int  metadatas_getNbCauchyCoEvals ( const metadatas_t m ){ return counters_getNbCauchyCoEvals   (metadatas_countref(m));}
 
 /* compression algorithm */
 METADATAS_INLINE int  metadatas_getComp_nb_1 ( const metadatas_t m ){ return counters_getComp_nb_1   (metadatas_countref(m));}
@@ -876,6 +823,115 @@ METADATAS_INLINE void metadatas_add_time_CompTot(metadatas_t m, double d){
 #endif
 }
 METADATAS_INLINE double metadatas_get_time_CompTot ( const metadatas_t m ) { return chronos_get_time_CompTot (metadatas_chronref(m)); }
+
+/* Cauchy root finder: certification */
+METADATAS_INLINE int  metadatas_get_nbClusterCertified ( const metadatas_t m ){ return counters_get_nbClusterCertified   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_nbClusterCertified ( metadatas_t m, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_nbClusterCertified(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE int  metadatas_get_nbCertifiedWithPellet ( const metadatas_t m ){ return counters_get_nbCertifiedWithPellet   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_nbCertifiedWithPellet ( metadatas_t m, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_nbCertifiedWithPellet(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE slong  metadatas_get_nbEvalsInPellet ( const metadatas_t m ){ return counters_get_nbEvalsInPellet   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_nbEvalsInPellet ( metadatas_t m, slong nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_nbEvalsInPellet(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE int  metadatas_get_nbGraeffeInPellet ( const metadatas_t m ){ return counters_get_nbGraeffeInPellet   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_nbGraeffeInPellet ( metadatas_t m, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_nbGraeffeInPellet(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE void metadatas_add_time_CertPel(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CertPel( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CertPel ( const metadatas_t m ) { return chronos_get_time_CertPel (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CertPEv(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CertPEv( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CertPEv ( const metadatas_t m ) { return chronos_get_time_CertPEv (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CertPIn(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CertPIn( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CertPIn ( const metadatas_t m ) { return chronos_get_time_CertPIn (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CertPGr(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CertPGr( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CertPGr ( const metadatas_t m ) { return chronos_get_time_CertPGr (metadatas_chronref(m)); }
 
 /* printing */
 char * compBox_sprint_for_stat(char * out, const compBox_t x);

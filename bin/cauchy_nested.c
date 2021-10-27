@@ -65,6 +65,9 @@ int main(int argc, char **argv){
 //         printf("                     global [default] finds all the roots\n");
 //         printf("                     a box, for instance 0,1/2,100 i.e. the square centered in 0 +i*(1/2) of width 100\n");
 //         printf("                     if a bounded box B is given, ccluster finds all natural clusters in B, and possibly some in (5/4)B \n");
+        printf("      -c, --certified: certify the output\n");
+        printf("                       1 [default] output is certified\n");
+        printf("                       0 output is not certified; whp correct!\n");
         printf("      -e , --epsilon: the size of output clusters\n");
         printf("                     +inf [default] output natural clusters wits less roots than degree of input polynomial\n");
         printf("                                                                 or size less than 2^(-53)\n");
@@ -114,6 +117,7 @@ int main(int argc, char **argv){
     realRat_t eps;
     realRat_t isoRatio;
     int nbPows = 3;
+    int certified = 1;
     
     char stDefault[] = "C2"; 
     st = stDefault;
@@ -130,6 +134,14 @@ int main(int argc, char **argv){
     /* loop on arguments to figure out options */
     
     for (int arg = 2; arg< argc; arg++) {
+        
+        if ( (strcmp( argv[arg], "-c" ) == 0) || (strcmp( argv[arg], "--certified" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &certified);
+                certified = (certified == 0? 0 : 1);
+                arg++;
+            }
+        }
         
         if ( (strcmp( argv[arg], "-v" ) == 0) || (strcmp( argv[arg], "--verbose" ) == 0) ) {
             if (argc>arg+1) {
@@ -235,7 +247,7 @@ int main(int argc, char **argv){
     
     if (parse==1) {
 //        cauchy_global_interface_func( getApprox_Nested, eps, isoRatio, nbPows, st, nbthreads, output, verbosity); 
-       cauchy_global_interface_func_eval( getApprox_Nested, Nested_evaluate, eps, isoRatio, nbPows, st, nbthreads, output, verbosity);
+       cauchy_global_interface_func_eval( getApprox_Nested, Nested_evaluate, eps, isoRatio, nbPows, certified, st, nbthreads, output, verbosity);
     }
     
     realRat_clear(eps);

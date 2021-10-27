@@ -306,8 +306,8 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
     realRat_clear(argu);
     
     if (metadatas_haveToCount(meta)) {
-        metadatas_add_time_CauCoED(meta, evalTime);
-        metadatas_add_CauchyCoEvalsD(meta, depth, q);
+        metadatas_add_time_CauCoEv(meta, evalTime);
+        metadatas_add_CauchyCoEvals(meta, depth, q);
     }
     
     return res;

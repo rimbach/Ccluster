@@ -34,7 +34,6 @@
 
 /* for Cauchy Root Finder */
 // #define DEFLATION
-// #define CERTIFIED
 // #define CAUCHY_CERTIFIED
 // #define DEFLATION_TURAN
 

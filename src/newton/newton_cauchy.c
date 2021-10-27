@@ -388,6 +388,7 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
         fmpz_set(connCmp_nwSpdref(nCC), connCmp_nwSpdref(CC));
         /* test */
         connCmp_isSep(nCC) = connCmp_isSep(CC);
+        connCmp_isSepCertref(nCC) = connCmp_isSepCertref(CC);
         /* end test */
         /*connCmp_appPrref(nCC) = res.appPrec;*/ /*adjust the precision in the main loop*/
         

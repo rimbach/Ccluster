@@ -667,6 +667,7 @@ connCmp_ptr cauchy_actualizeCCafterCompression( connCmp_ptr CC, const compDsk_t 
         connCmp_insert_compBox(nCC, compBox_list_pop(ltemp));
     connCmp_nSols(nCC) = connCmp_nSols(CC);
     connCmp_isSep(nCC) = connCmp_isSep(CC);
+    connCmp_isSepCertref(nCC) = connCmp_isSepCertref(CC);
     fmpz_set(connCmp_nwSpdref(nCC), connCmp_nwSpdref(CC));
     connCmp_appPrref(nCC) = appPrec;
     

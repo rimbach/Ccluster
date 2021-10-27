@@ -23,6 +23,8 @@
 
 #include "geometry/compDsk.h"
 
+#include "tstar/pelletTest.h"
+
 #include "acb_poly.h"
 
 #include <acb_dft.h>
@@ -232,6 +234,18 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial( const compRat_t 
                                                                      slong prec,
                                                                      metadatas_t meta, int depth);
 
+slong cauchyTest_getNbEvals_counting_combinatorial_with_rinfrsup(  const compRat_t c,
+                                                                   const realRat_t rinf,
+                                                                   const realRat_t rsup,
+                                                                   slong m,
+                                                                   cacheCauchy_t cacheCau);
+
+slong cauchyTest_getNbEvals_counting_combinatorial_with_isoRatio( const compRat_t c,
+                                                                  const realRat_t r,
+                                                                  const realRat_t theta,
+                                                                  slong m,
+                                                                  cacheCauchy_t cacheCau);
+
 cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_rinfrsup( const compRat_t c,
                                                                               const realRat_t rinf,
                                                                               const realRat_t rsup,
@@ -249,6 +263,37 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_isoRatio( co
                                                                               cacheCauchy_t cacheCau,
                                                                               slong prec,
                                                                               metadatas_t meta, int depth);
+
+void cauchyTest_computePointPointShifted( compApp_t point, compApp_t pointShifted, 
+                                          const compApp_t center, slong q, slong i, const realRat_t radius,
+                                          slong prec );
+void cauchyTest_eval ( compApp_t fval, compApp_t fderval, const compApp_t point, cacheApp_t cache, cacheCauchy_t cacheCau, slong prec );
+void cauchyTest_computeBounds ( realApp_t ubound, realApp_t lbound, 
+                                const realRat_t theta, const realRat_t r, slong d, slong prec );
+int  cauchyTest_compute_fdiv_checkPrecAndBounds( compApp_t fdiv, 
+                                                 const compApp_t fval, 
+                                                 const compApp_t fderval,
+                                                 const realApp_t lbound,
+                                                 const realApp_t ubound,
+                                                 slong prec );
+
+// int cauchyTest_shift_and_DLGs( compApp_poly_t dest, const compRat_t c, const realRat_t r, const realRat_t theta, cacheApp_t cache, 
+//                                cacheCauchy_t cacheCau, slong prec, metadatas_t meta );
+
+int cauchyTest_shift( compApp_poly_t dest, const compRat_t c, const realRat_t r, const realRat_t theta, cacheApp_t cache, 
+                               cacheCauchy_t cacheCau, slong prec, metadatas_t meta );
+
+cauchyTest_res cauchyTest_Pellet_counting( const compRat_t c, const realRat_t r, const realRat_t theta, slong m,
+                                                                              cacheApp_t cache,
+                                                                              cacheCauchy_t cacheCau,
+                                                                              slong prec,
+                                                                              metadatas_t meta, int depth);
+
+// cauchyTest_res cauchyTest_schroeders_counting( const compRat_t c, const realRat_t r, const realRat_t theta, slong m,
+//                                                                               cacheApp_t cache,
+//                                                                               cacheCauchy_t cacheCau,
+//                                                                               slong prec,
+//                                                                               metadatas_t meta, int depth);
 
 /* this version works for any iso ratio, not necessarily the one
  * defined in CacheCau 

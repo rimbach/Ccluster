@@ -184,6 +184,9 @@ void cacheCauchy_init_sparseEval ( cacheCauchy_t cache,
 
 void cacheCauchy_sparseEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, cacheApp_t cachePol,
                               const compApp_t point, slong prec);
+void cacheCauchy_sparseEval2 ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, cacheApp_t cachePol,
+                              const compApp_t point, slong prec);
+
 void cacheCauchy_rectangularEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, cacheApp_t cachePol,
                                    const compApp_t point, slong prec);
 

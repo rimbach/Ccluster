@@ -160,11 +160,16 @@ else
   mkdir $REP
 fi
 
+LIMDEGCCL=512
+LIMINDCCL=9
+
 POLNAME="randomSparse"
-DEGREES="64 128 191 256"
+# DEGREES="64 128 191 256 391 512 717 1024 1523 2048"
+DEGREES="512 717 1024 1523 2048 3051"
 NBTERMS="5 10 20"
-BITSIZES="8"
-NBPOLS="10"
+# BITSIZES="16"
+BITSIZES="256"
+NBPOLS="2"
 for NBT in $NBTERMS; do
     echo "\\multicolumn{$NBCOLS}{c}{$POLNAME polynomials with $NBT terms} \\\\\\hline" >> $TEMPTABFILE
 for DEG in $DEGREES; do

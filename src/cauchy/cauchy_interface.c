@@ -15,6 +15,7 @@ int   cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
                                      const realRat_t eps,
                                      const realRat_t isoRatio,
                                      int nbPows,
+                                     int certified,
                                      char * stratstr,
                                      int nbThreads,
                                      int output,
@@ -62,7 +63,7 @@ int   cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    int failure = cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, meta);
+    int failure = cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, certified, meta);
     
     metadatas_count(meta);
     
@@ -76,7 +77,7 @@ int   cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     
     if (!failure) {
     
-        metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau);
+        metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau, certified);
     
         if (output==-2) {
             connCmp_list_gnuplot(stdout, qRes, meta, 0);
@@ -102,6 +103,7 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
                                            const realRat_t eps,
                                            const realRat_t isoRatio,
                                            int nbPows,
+                                           int certified,
                                            char * stratstr,
                                            int nbThreads,
                                            int output,
@@ -149,7 +151,7 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    int failure = cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, meta);
+    int failure = cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, certified, meta);
     metadatas_count(meta);
     
     if ( metadatas_getNbSolutions(meta) != (int) cacheCauchy_degreeref(cacheCau) ){
@@ -161,7 +163,7 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
     
     if (!failure) {
     
-        metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau);
+        metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau, certified);
     
         if (output==-2) {
             connCmp_list_gnuplot(stdout, qRes, meta, 0);
@@ -189,6 +191,7 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                    const realRat_t eps, 
                                    const realRat_t isoRatio,
                                    int nbPows,
+                                   int certified,
                                    char * stratstr,
                                    int nbThreads,
                                    int output,
@@ -234,7 +237,7 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    int failure = cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, meta);
+    int failure = cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, certified, meta);
     metadatas_count(meta);
     
     if ( metadatas_getNbSolutions(meta) != (int) cacheCauchy_degreeref(cacheCau) ){
@@ -246,7 +249,7 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     
     if (!failure) {
 
-        metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau);
+        metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau, certified);
         
         if (output==-2) {
             connCmp_list_gnuplot(stdout, qRes, meta, 0);

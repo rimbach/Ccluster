@@ -79,12 +79,10 @@ typedef struct {
     int nbPsCountingTest;
     int nbEval;
     /* Cauchy root finder */
-    int nbCauchyExTests;
-    int nbCauchyExEvalsP;
-    int nbCauchyExEvalsD;
-    int nbCauchyCoTests;
-    int nbCauchyCoEvalsP;
-    int nbCauchyCoEvalsD;
+    int   nbCauchyExTests;
+    slong nbCauchyExEvals;
+    int   nbCauchyCoTests;
+    slong nbCauchyCoEvals;
     
     boxes_by_prec_t bpc;
 } counters_by_depth;
@@ -113,6 +111,12 @@ typedef struct {
         /* compression */
         int Comp_nb_1;
         int Comp_nb_p;
+        
+        /* Cauchy root finder: certification */
+        int   nbClusterCertified;
+        int   nbCertifiedWithPellet;
+        slong nbEvalsInPellet;
+        int   nbGraeffeInPellet;
         
 #ifdef CCLUSTER_HAVE_PTHREAD
         pthread_mutex_t _mutex;
@@ -184,16 +188,12 @@ METADATAS_INLINE int counters_boxes_by_prec_fprint ( FILE * file, const counters
 /* Cauchy root finder */
 void counters_add_CauchyExTest              ( counters_t st, int depth, slong prec );
 int  counters_getNbCauchyExTests            ( const counters_t st );
-void counters_add_CauchyExEvalsP            ( counters_t st, int depth, int nb );
-int  counters_getNbCauchyExEvalsP           ( const counters_t st );
-void counters_add_CauchyExEvalsD            ( counters_t st, int depth, int nb );
-int  counters_getNbCauchyExEvalsD           ( const counters_t st );
+void counters_add_CauchyExEvals            ( counters_t st, int depth, int nb );
+slong  counters_getNbCauchyExEvals           ( const counters_t st );
 void counters_add_CauchyCoTest              ( counters_t st, int depth, slong prec );
 int  counters_getNbCauchyCoTests            ( const counters_t st );
-void counters_add_CauchyCoEvalsP            ( counters_t st, int depth, int nb );
-int  counters_getNbCauchyCoEvalsP           ( const counters_t st );
-void counters_add_CauchyCoEvalsD            ( counters_t st, int depth, int nb );
-int  counters_getNbCauchyCoEvalsD           ( const counters_t st );
+void counters_add_CauchyCoEvals            ( counters_t st, int depth, int nb );
+slong  counters_getNbCauchyCoEvals           ( const counters_t st );
 
 /* compression algorithm */
 void counters_addComp_nb_1                     (counters_t st, int nb );
@@ -201,6 +201,15 @@ int  counters_getComp_nb_1                     (const counters_t st );
 void counters_addComp_nb_p                     (counters_t st, int nb );
 int  counters_getComp_nb_p                     (const counters_t st );
 
+/* Cauchy root finder: certification */
+void  counters_add_nbClusterCertified          (      counters_t st, int nb );
+int   counters_get_nbClusterCertified          (const counters_t st );
+void  counters_add_nbCertifiedWithPellet       (      counters_t st, int nb );
+int   counters_get_nbCertifiedWithPellet       (const counters_t st );
+void  counters_add_nbEvalsInPellet             (      counters_t st, slong nb );
+slong counters_get_nbEvalsInPellet             (const counters_t st );
+void  counters_add_nbGraeffeInPellet           (      counters_t st, int nb );
+int   counters_get_nbGraeffeInPellet           (const counters_t st );
 
 /* DEPRECATED */
 // void counters_join_depth( counters_t c1, const counters_by_depth_t c2, int depth);

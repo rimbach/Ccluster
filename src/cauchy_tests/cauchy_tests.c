@@ -153,21 +153,21 @@ void cauchyTest_evaluateAtPoints( cacheApp_t cache,
     if (metadatas_haveToCount(meta)) {
         slong nbEvals = nbPoints - reUseEvals*cacheCauchy_nbEvalExref(cacheCau);
         if (inCounting == CAUCHYTEST_INCOUNTIN) {
-            if (certified == CAUCHYTEST_CERTIFIED) {
-                metadatas_add_time_CauCoED(meta, (double) (clock() - start));
-                metadatas_add_CauchyCoEvalsD(meta, depth, nbEvals);
-            } else {
-                metadatas_add_time_CauCoEP(meta, (double) (clock() - start));
-                metadatas_add_CauchyCoEvalsP(meta, depth, nbEvals);
-            }
+//             if (certified == CAUCHYTEST_CERTIFIED) {
+//                 metadatas_add_time_CauCoED(meta, (double) (clock() - start));
+//                 metadatas_add_CauchyCoEvalsD(meta, depth, nbEvals);
+//             } else {
+                metadatas_add_time_CauCoEv(meta, (double) (clock() - start));
+                metadatas_add_CauchyCoEvals(meta, depth, nbEvals);
+//             }
         } else {
-            if (certified == CAUCHYTEST_CERTIFIED) {
-                metadatas_add_time_CauExED(meta, (double) (clock() - start));
-                metadatas_add_CauchyExEvalsD(meta, depth, nbEvals);
-            } else {
-                metadatas_add_time_CauExEP(meta, (double) (clock() - start));
-                metadatas_add_CauchyExEvalsP(meta, depth, nbEvals);
-            }
+//             if (certified == CAUCHYTEST_CERTIFIED) {
+//                 metadatas_add_time_CauExED(meta, (double) (clock() - start));
+//                 metadatas_add_CauchyExEvalsD(meta, depth, nbEvals);
+//             } else {
+                metadatas_add_time_CauExEv(meta, (double) (clock() - start));
+                metadatas_add_CauchyExEvals(meta, depth, nbEvals);
+//             }
         }
     }
 }
@@ -443,96 +443,6 @@ int cauchyTest_computeSsApprox_fromVals(compApp_ptr ps,
     return res;
 }
 
-void cauchyTest_shiftFFT(                 const compRat_t center,
-                                          const realRat_t radius,
-                                          const realRat_t radius2,
-                                          slong vangle,           
-                                          slong vindex,           
-                                          cacheApp_t cache,
-                                          cacheCauchy_t cacheCau,
-                                          int certified,
-                                          slong prec,
-                                          int inCounting,
-                                          metadatas_t meta, int depth ) {
-    
-    // //             printf("here\n");
-    
-                clock_t start = clock();
-                
-                slong nbPoints = cacheCauchy_nbEvalCeref(cacheCau);
-                
-                compApp_poly_t shiftedPoly;
-                compApp_poly_init2( shiftedPoly, nbPoints );
-                /* compute approximation of the pol */
-                compApp_poly_set(shiftedPoly, cacheApp_getApproximation ( cache, prec ) );
-                
-                compApp_t c;
-                compApp_init(c);
-                realRat_t argu;
-                realRat_init(argu);
-                compApp_t a;
-                compApp_init(a);
-                /* compute approximation of the center */
-                if (radius2==NULL)
-                    compApp_set_compRat(c, center, 2*prec);
-                else {
-                    compApp_set_compRat         (c,    center,   2*prec);
-                    realRat_set_si              (argu, 2*vindex, vangle);
-                    compApp_set_realRat         (a,    argu,     2*prec);
-                    acb_exp_pi_i                (a,    a,        2*prec);
-                    compApp_mul_realRat_in_place(a,    radius2,  2*prec);
-                    compApp_add                 (c,    c, a,     2*prec);
-                }
-                /* shift in the center */
-                clock_t start2 = clock();
-                _acb_poly_taylor_shift_convolution(shiftedPoly->coeffs, c, shiftedPoly->length, prec);
-                compApp_poly_scale_realRat_in_place( shiftedPoly->coeffs, radius, shiftedPoly->length, prec );
-                if (metadatas_haveToCount(meta))
-                    metadatas_add_time_Taylors(meta, (double) (clock() - start2) );
-                
-                /* compute fft */
-                acb_dft_pre_t t;
-                acb_dft_precomp_init(t, nbPoints, prec);
-                acb_dft_precomp(cacheCauchy_fvalsCeref(cacheCau), shiftedPoly->coeffs, t, prec);
-                /* derivative */
-                compApp_poly_derivative( shiftedPoly, shiftedPoly, prec);
-                slong index = 0;
-                while (index < shiftedPoly->length){
-                    compApp_div_realRat( (shiftedPoly->coeffs) + index, (shiftedPoly->coeffs) + index, radius, prec );
-                    index++;
-                }
-                compApp_zero((shiftedPoly->coeffs) + (shiftedPoly->length));
-                acb_dft_precomp(cacheCauchy_fdervalsCeref(cacheCau), shiftedPoly->coeffs, t, prec);
-                
-                compApp_poly_clear(shiftedPoly);
-                compApp_clear(c);
-                realRat_clear(argu);
-                compApp_clear(a);
-                acb_dft_precomp_clear(t);
-                
-    if (metadatas_haveToCount(meta)) {
-        slong nbEvals = nbPoints;
-        if (inCounting == CAUCHYTEST_INCOUNTIN) {
-            if (certified == CAUCHYTEST_CERTIFIED) {
-                metadatas_add_time_CauCoED(meta, (double) (clock() - start));
-                metadatas_add_CauchyCoEvalsD(meta, depth, nbEvals);
-            } else {
-                metadatas_add_time_CauCoEP(meta, (double) (clock() - start));
-                metadatas_add_CauchyCoEvalsP(meta, depth, nbEvals);
-            }
-        } else {
-            if (certified == CAUCHYTEST_CERTIFIED) {
-                metadatas_add_time_CauExED(meta, (double) (clock() - start));
-                metadatas_add_CauchyExEvalsD(meta, depth, nbEvals);
-            } else {
-                metadatas_add_time_CauExEP(meta, (double) (clock() - start));
-                metadatas_add_CauchyExEvalsP(meta, depth, nbEvals);
-            }
-        }
-    }
-    
-}
-
 cauchyTest_res cauchyTest_computeS0Approx(compApp_t ps,
                                           const compRat_t center,
                                           const realRat_t radius,
@@ -669,8 +579,27 @@ void cauchyTest_eval ( compApp_t fval, compApp_t fderval, const compApp_t point,
 //     clock_t start = clock();
     
     if (cacheCauchy_evalFastref(cacheCau) == NULL) {
-        compApp_poly_ptr P = cacheApp_getApproximation ( cache, prec );
-        compApp_poly_evaluate2_rectangular(fval, fderval, P, point, prec);
+        if (cacheCauchy_choiceref(cacheCau) == 1) {
+            cacheCauchy_sparseEval ( fval, fderval, cacheCau, cache, point, prec);
+//             cacheCauchy_sparseEval2 ( fval, fderval, cacheCau, cache, point, prec);
+//     printf("----------------------------\n");
+//     printf("   fval:"); compApp_printd(fval, 10); printf("\n");
+//     printf("fderval:"); compApp_printd(fderval, 10); printf("\n");
+//     cacheCauchy_sparseEval2 ( fval, fderval, cacheCau, cache, point, prec);
+//     printf("----------------------------\n");
+//     printf("   fval:"); compApp_printd(fval, 10); printf("\n");
+//     printf("fderval:"); compApp_printd(fderval, 10); printf("\n");
+//     cacheCauchy_rectangularEval ( fval, fderval, cacheCau, cache, point, prec);
+//     printf("----------------------------\n");
+//     printf("   fval:"); compApp_printd(fval, 10); printf("\n");
+//     printf("fderval:"); compApp_printd(fderval, 10); printf("\n");
+//     printf("----------------------------\n");
+        }
+        else
+            cacheCauchy_rectangularEval ( fval, fderval, cacheCau, cache, point, prec);
+                
+//         compApp_poly_ptr P = cacheApp_getApproximation ( cache, prec );
+//         compApp_poly_evaluate2_rectangular(fval, fderval, P, point, prec);
     } else
         (cacheCauchy_evalFastref(cacheCau))( fval, fderval, point, prec);
     
@@ -833,10 +762,10 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
     realApp_clear(radIm);
     compApp_clear(c);
     
-    if (metadatas_haveToCount(meta)) {
-        metadatas_add_time_CauCoED(meta, evalTime);
-        metadatas_add_CauchyCoEvalsD(meta, depth, q);
-    }
+//     if (metadatas_haveToCount(meta)) {
+//         metadatas_add_time_CauCoED(meta, evalTime);
+//         metadatas_add_CauchyCoEvalsD(meta, depth, q);
+//     }
     
     return res;
 }
@@ -1428,3 +1357,94 @@ cauchyTest_res cauchyTest_computeSgNcompDsk( compApp_ptr SgN,
     
     return res;
 }
+
+/* DEPRECATED */
+// void cauchyTest_shiftFFT(                 const compRat_t center,
+//                                           const realRat_t radius,
+//                                           const realRat_t radius2,
+//                                           slong vangle,           
+//                                           slong vindex,           
+//                                           cacheApp_t cache,
+//                                           cacheCauchy_t cacheCau,
+//                                           int certified,
+//                                           slong prec,
+//                                           int inCounting,
+//                                           metadatas_t meta, int depth ) {
+//     
+//     // //             printf("here\n");
+//     
+//                 clock_t start = clock();
+//                 
+//                 slong nbPoints = cacheCauchy_nbEvalCeref(cacheCau);
+//                 
+//                 compApp_poly_t shiftedPoly;
+//                 compApp_poly_init2( shiftedPoly, nbPoints );
+//                 /* compute approximation of the pol */
+//                 compApp_poly_set(shiftedPoly, cacheApp_getApproximation ( cache, prec ) );
+//                 
+//                 compApp_t c;
+//                 compApp_init(c);
+//                 realRat_t argu;
+//                 realRat_init(argu);
+//                 compApp_t a;
+//                 compApp_init(a);
+//                 /* compute approximation of the center */
+//                 if (radius2==NULL)
+//                     compApp_set_compRat(c, center, 2*prec);
+//                 else {
+//                     compApp_set_compRat         (c,    center,   2*prec);
+//                     realRat_set_si              (argu, 2*vindex, vangle);
+//                     compApp_set_realRat         (a,    argu,     2*prec);
+//                     acb_exp_pi_i                (a,    a,        2*prec);
+//                     compApp_mul_realRat_in_place(a,    radius2,  2*prec);
+//                     compApp_add                 (c,    c, a,     2*prec);
+//                 }
+//                 /* shift in the center */
+//                 clock_t start2 = clock();
+//                 _acb_poly_taylor_shift_convolution(shiftedPoly->coeffs, c, shiftedPoly->length, prec);
+//                 compApp_poly_scale_realRat_in_place( shiftedPoly->coeffs, radius, shiftedPoly->length, prec );
+//                 if (metadatas_haveToCount(meta))
+//                     metadatas_add_time_Taylors(meta, (double) (clock() - start2) );
+//                 
+//                 /* compute fft */
+//                 acb_dft_pre_t t;
+//                 acb_dft_precomp_init(t, nbPoints, prec);
+//                 acb_dft_precomp(cacheCauchy_fvalsCeref(cacheCau), shiftedPoly->coeffs, t, prec);
+//                 /* derivative */
+//                 compApp_poly_derivative( shiftedPoly, shiftedPoly, prec);
+//                 slong index = 0;
+//                 while (index < shiftedPoly->length){
+//                     compApp_div_realRat( (shiftedPoly->coeffs) + index, (shiftedPoly->coeffs) + index, radius, prec );
+//                     index++;
+//                 }
+//                 compApp_zero((shiftedPoly->coeffs) + (shiftedPoly->length));
+//                 acb_dft_precomp(cacheCauchy_fdervalsCeref(cacheCau), shiftedPoly->coeffs, t, prec);
+//                 
+//                 compApp_poly_clear(shiftedPoly);
+//                 compApp_clear(c);
+//                 realRat_clear(argu);
+//                 compApp_clear(a);
+//                 acb_dft_precomp_clear(t);
+//                 
+//     if (metadatas_haveToCount(meta)) {
+//         slong nbEvals = nbPoints;
+//         if (inCounting == CAUCHYTEST_INCOUNTIN) {
+//             if (certified == CAUCHYTEST_CERTIFIED) {
+//                 metadatas_add_time_CauCoED(meta, (double) (clock() - start));
+//                 metadatas_add_CauchyCoEvalsD(meta, depth, nbEvals);
+//             } else {
+//                 metadatas_add_time_CauCoEP(meta, (double) (clock() - start));
+//                 metadatas_add_CauchyCoEvalsP(meta, depth, nbEvals);
+//             }
+//         } else {
+//             if (certified == CAUCHYTEST_CERTIFIED) {
+//                 metadatas_add_time_CauExED(meta, (double) (clock() - start));
+//                 metadatas_add_CauchyExEvalsD(meta, depth, nbEvals);
+//             } else {
+//                 metadatas_add_time_CauExEP(meta, (double) (clock() - start));
+//                 metadatas_add_CauchyExEvalsP(meta, depth, nbEvals);
+//             }
+//         }
+//     }
+//     
+// }
