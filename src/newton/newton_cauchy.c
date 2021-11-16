@@ -13,7 +13,6 @@
 
 newton_res newton_cauchy_first_condition( compApp_t fcenter, 
                                           compApp_t fpcenter, 
-                                          cacheApp_t cache, 
                                           cacheCauchy_t cacheCau, 
                                           const compRat_t c, 
                                           const realRat_t d, 
@@ -40,16 +39,9 @@ newton_res newton_cauchy_first_condition( compApp_t fcenter,
     
     compApp_set_compRat( center, c, res.appPrec );
     realApp_set_realRat( diam, d, res.appPrec);
-    if (cacheCauchy_evalFastref(cacheCau) == NULL) {
-        tstar_getApproximation( pApprox, cache, res.appPrec, meta);
-        compApp_poly_evaluate2(fcenter, fpcenter, pApprox, center, res.appPrec);
-    } else {
-//         printf("\n\n  prec: %ld\n", res.appPrec);
-//         printf("     point: "); compApp_printd(center, 20); printf("\n");
-        (cacheCauchy_evalFastref(cacheCau))(fcenter, fpcenter, center, res.appPrec);
-//         printf("  f(point): "); compApp_printd(fcenter, 20); printf("\n");
-//         printf(" f'(point): "); compApp_printd(fpcenter, 20); printf("\n");
-    }
+    
+    cacheCauchy_eval( fcenter, fpcenter, center, 1, cacheCau, res.appPrec);
+    
     compApp_abs(fcenterabs, fcenter, res.appPrec);
     compApp_abs(fpcenterabs, fpcenter, res.appPrec);
     realApp_mul(fpcenterabs, fpcenterabs, diam, res.appPrec);
@@ -59,12 +51,9 @@ newton_res newton_cauchy_first_condition( compApp_t fcenter,
         res.appPrec *=2;
         compApp_set_compRat( center, c, res.appPrec );
         realApp_set_realRat( diam, d, res.appPrec);
-        if (cacheCauchy_evalFastref(cacheCau) == NULL) {
-            tstar_getApproximation( pApprox, cache, res.appPrec, meta);
-            compApp_poly_evaluate2(fcenter, fpcenter, pApprox, center, res.appPrec);
-        } else {
-            (cacheCauchy_evalFastref(cacheCau))(fcenter, fpcenter, center, res.appPrec);
-        }
+
+        cacheCauchy_eval( fcenter, fpcenter, center, 1, cacheCau, res.appPrec);
+        
         compApp_abs(fcenterabs, fcenter, res.appPrec);
         compApp_abs(fpcenterabs, fpcenter, res.appPrec);
         realApp_mul(fpcenterabs, fpcenterabs, diam, res.appPrec);
@@ -84,8 +73,7 @@ newton_res newton_cauchy_first_condition( compApp_t fcenter,
     return res;
 }
 
-newton_res newton_cauchy_iteration( compApp_t iteration, 
-                                    cacheApp_t cache, 
+newton_res newton_cauchy_iteration( compApp_t iteration,
                                     cacheCauchy_t cacheCau,
                                     const connCmp_t CC, 
                                     const compRat_t c, 
@@ -125,12 +113,9 @@ newton_res newton_cauchy_iteration( compApp_t iteration,
     while ( (realApp_is_finite(iterationError)==0)||(realApp_ge(iterationError, errorBoundApp)==1)) {
         res.appPrec *=2;
         compApp_set_compRat( center, c, res.appPrec );
-        if (cacheCauchy_evalFastref(cacheCau) == NULL) {
-            tstar_getApproximation( pApprox, cache, res.appPrec, meta);
-            compApp_poly_evaluate2(fcenter, fpcenter, pApprox, center, res.appPrec);
-        } else {
-            (cacheCauchy_evalFastref(cacheCau))(fcenter, fpcenter, center, res.appPrec);
-        }
+ 
+        cacheCauchy_eval( fcenter, fpcenter, center, 1, cacheCau, res.appPrec);
+        
         compApp_div(iteration, fcenter, fpcenter, res.appPrec);
         compApp_mul_si(iteration, iteration, connCmp_nSolsref(CC), res.appPrec);
         compApp_sub(iteration, center, iteration, res.appPrec);
@@ -151,8 +136,7 @@ newton_res newton_cauchy_iteration( compApp_t iteration,
 /* performs a newton test for the compBox b contained in the compDisk d;
  * returns 1 if interval newton certifies the existence of a solution in b;
  *         0 otherwise */
-newton_res newton_cauchy_interval(  compDsk_t d, 
-                                    cacheApp_t cache, 
+newton_res newton_cauchy_interval(  compDsk_t d,
                                     cacheCauchy_t cacheCau,
                                     slong prec, 
                                     metadatas_t meta) {
@@ -192,24 +176,15 @@ newton_res newton_cauchy_interval(  compDsk_t d,
     compApp_set_imag_realApp(ball, bIm);
     compApp_set_compRat(cBall, compDsk_centerref(d), res.appPrec );
     
-    if (cacheCauchy_evalFastref(cacheCau) == NULL) {
-        tstar_getApproximation( pApprox, cache, res.appPrec, meta);
-        compApp_poly_derivative(ppApprox, pApprox, res.appPrec);
-        compApp_poly_evaluate(fpBall, ppApprox, ball, res.appPrec);
-    } else {
-        (cacheCauchy_evalFastref(cacheCau))(dummy, fpBall, ball, res.appPrec);
-    }
+    cacheCauchy_eval( dummy, fpBall, ball, 1, cacheCau, res.appPrec);
     
     if (compApp_contains_zero(fpBall)){
         res.nflag=0; /* do nothing */
 //         printf("fpBall contains 0: %d, fpBall: ", compApp_contains_zero(fpBall)); compApp_print(fpBall); printf("\n");
     }
     else {
-        if (cacheCauchy_evalFastref(cacheCau) == NULL) {
-            compApp_poly_evaluate(fcBall, pApprox, cBall, res.appPrec);
-        } else {
-            (cacheCauchy_evalFastref(cacheCau))(fcBall, dummy, cBall, res.appPrec);
-        }
+        cacheCauchy_eval( fcBall, dummy, cBall, 1, cacheCau, res.appPrec);
+        
         compApp_div( fcBall, fcBall, fpBall, res.appPrec);
         compApp_sub( fcBall, cBall, fcBall, res.appPrec);
         if (compApp_contains(ball, fcBall)) {
@@ -239,7 +214,6 @@ newton_res newton_cauchy_interval(  compDsk_t d,
 
 newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
                                          connCmp_t CC,
-                                         cacheApp_t cache,
                                          cacheCauchy_t cacheCau,
                                          const compRat_t c,
                                          slong prec, 
@@ -272,12 +246,12 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
     
 //     slong precsave = prec;
     
-    res = newton_cauchy_first_condition( fcenter, fpcenter, cache, cacheCau, c, fourcc, res.appPrec, meta);
+    res = newton_cauchy_first_condition( fcenter, fpcenter, cacheCau, c, fourcc, res.appPrec, meta);
 //     printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: firstCondOk (nflag: %d) prec avant: %ld, prec apres: %ld \n", res.nflag, prec, res.appPrec);
     
     if (res.nflag){
 //         precsave = res.appPrec;
-        res = newton_cauchy_iteration( iteration, cache, cacheCau, CC, c, fcenter, fpcenter, res.appPrec, meta);
+        res = newton_cauchy_iteration( iteration, cacheCau, CC, c, fcenter, fpcenter, res.appPrec, meta);
         compApp_get_compRat( compDsk_centerref(ndisk), iteration);
         realRat_set_si(compDsk_radiusref(ndisk),1,8);
         realRat_div_fmpz(compDsk_radiusref(ndisk), compDsk_radiusref(ndisk), connCmp_nwSpdref(CC));
@@ -299,7 +273,7 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
         if (connCmp_nSolsref(CC)==1) {
             if (metadatas_getVerbo(meta)>=level)
                 printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: the CC contains one solution: try to validate with interval newton\n");
-            nres = newton_cauchy_interval( ndisk, cache, cacheCau, res.appPrec, meta);
+            nres = newton_cauchy_interval( ndisk, cacheCau, res.appPrec, meta);
             if (metadatas_getVerbo(meta)>level) {
                 printf("#newton_cauchy.c, newton_cauchy_newton_connCmp: nres.nflag: %d\n", nres.nflag);
             }
@@ -317,7 +291,7 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
                 cres = cauchyTest_deterministic_counting_combinatorial( compDsk_centerref(ndisk),
                                                                         compDsk_radiusref(ndisk),
                                                                         connCmp_nSolsref(CC),
-                                                                        cache, cacheCau, res.appPrec,
+                                                                        cacheCau, res.appPrec,
                                                                         meta, depth);
                 res.appPrec = cres.appPrec;
                 res.nflag = (cres.nbOfSol == connCmp_nSolsref(CC));
@@ -329,8 +303,8 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
             } else {
 //             if (res.nflag==0){
                 /* version with exclusion of discs on contour */
-                cres = cauchyTest_deterministic_verification( ndisk, connCmp_nSolsref(CC), cacheCauchy_isoRatioref(cacheCau),
-                                                               cache, cacheCau, res.appPrec, meta, depth);
+                cres = cauchyTest_rootFreeAnnulus_verification( ndisk, connCmp_nSolsref(CC), cacheCauchy_isoRatioref(cacheCau),
+                                                               cacheCau, res.appPrec, meta, depth);
                 res.appPrec = cres.appPrec;
                 res.nflag = (cres.nbOfSol == connCmp_nSolsref(CC));
 //                 if (metadatas_getVerbo(meta)>=level) {

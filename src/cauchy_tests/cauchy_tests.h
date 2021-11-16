@@ -33,8 +33,6 @@
 extern "C" {
 #endif
     
-#define CAUCHYTEST_CERTIFIED 1
-#define CAUCHYTEST_UNCERTIFI 0
 #define CAUCHYTEST_INCOUNTIN 1
 #define CAUCHYTEST_INEXCLUSI 0  
     
@@ -49,12 +47,9 @@ void cauchyTest_getEvaluationPoints( const compRat_t center,
                                      slong vangle,
                                      slong vindex,
                                      cacheCauchy_t cacheCau,
-                                     int certified,
                                      slong prec );
 
-void cauchyTest_evaluateAtPoints( cacheApp_t cache,
-                                  cacheCauchy_t cacheCau,
-                                  int certified,
+void cauchyTest_evaluateAtPoints( cacheCauchy_t cacheCau,
                                   slong prec,
                                   int inCounting,
                                   metadatas_t meta, int depth);
@@ -63,7 +58,6 @@ void cauchyTest_evaluateAtPoints( cacheApp_t cache,
  *         -2: disk is has not expected isolation ratio; should stop
  *          1: OK! */
 int cauchyTest_computeFdivs_fromVals(cacheCauchy_t cacheCau,
-                                     int certified,
                                      slong prec,
                                      int inCounting,
                                      metadatas_t meta);
@@ -72,9 +66,8 @@ int cauchyTest_computeFdivs_fromVals(cacheCauchy_t cacheCau,
  *         -2: disk is has not expected isolation ratio; should stop
  *          1: OK! */
 int cauchyTest_computeS0Approx_fromVals(compApp_t ps,
+                                        const realRat_t radius,
                                         cacheCauchy_t cacheCau,
-                                        int certified,
-                                        slong rotation,
                                         slong prec,
                                         int inCounting,
                                         metadatas_t meta);
@@ -82,6 +75,7 @@ int cauchyTest_computeS0Approx_fromVals(compApp_t ps,
 /* computes approximation sh of h-th powersum */
 void cauchyTest_computeShApprox_fromVals(compApp_t sh,
                                          slong h,
+                                         const realRat_t radius,
                                          cacheCauchy_t cacheCau,
                                          slong prec,
                                          int inCounting,
@@ -91,9 +85,8 @@ void cauchyTest_computeShApprox_fromVals(compApp_t sh,
  *         -2: disk is has not expected isolation ratio; should stop
  *          1: OK! */
 int cauchyTest_computeSsApprox_fromVals(compApp_ptr ps,
+                                        const realRat_t radius,
                                         cacheCauchy_t cacheCau,
-//                                         int certified,
-//                                         slong rotation,
                                         slong prec,
                                         int inCounting,
                                         metadatas_t meta);
@@ -103,12 +96,9 @@ cauchyTest_res cauchyTest_computeS0Approx(compApp_t ps,
                                           const realRat_t radius,
                                           const realRat_t radius2,
                                           slong vangle,           
-                                          slong vindex,           
-                                          slong rotation,
+                                          slong vindex,  
                                           int *alreadyEvaluated,
-                                          cacheApp_t cache,
                                           cacheCauchy_t cacheCau,
-                                          int certified,
                                           slong prec,
                                           int inCounting,
                                           metadatas_t meta, int depth );
@@ -118,58 +108,22 @@ cauchyTest_res cauchyTest_computeSsApprox(compApp_ptr ps,
                                           const realRat_t radius,
                                           const realRat_t radius2,
                                           slong vangle,           
-                                          slong vindex,           
-//                                           slong rotation,
-//                                           int *alreadyEvaluated,
-                                          cacheApp_t cache,
+                                          slong vindex,
                                           cacheCauchy_t cacheCau,
-                                          int certified,
                                           slong prec,
                                           int inCounting,
                                           metadatas_t meta, int depth );
-
-cauchyTest_res cauchyTest_deterministic_exclusion_test( const compRat_t center,
-                                                       const realRat_t radius,
-                                                       const realRat_t radius2,
-                                                       slong vangle,           
-                                                       slong vindex,           
-                                                       cacheApp_t cache,
-                                                       cacheCauchy_t cacheCau,
-                                                       slong prec,
-                                                       int inCounting,
-                                                       metadatas_t meta, int depth);
-
-cauchyTest_res cauchyTest_deterministic_exclusion_testNEW( const compRat_t center,
-                                                       const realRat_t radius,
-                                                       const realRat_t radius2,
-                                                       slong vangle,           
-                                                       slong vindex,           
-                                                       cacheApp_t cache,
-                                                       cacheCauchy_t cacheCau,
-                                                       slong prec,
-                                                       int inCounting,
-                                                       metadatas_t meta, int depth);
 
 cauchyTest_res cauchyTest_probabilistic_exclusion_test( const compRat_t center,
                                                        const realRat_t radius,
                                                        const realRat_t radius2,
                                                        slong vangle,           
                                                        slong vindex,           
-                                                       cacheApp_t cache,
                                                        cacheCauchy_t cacheCau,
                                                        slong prec,
                                                        metadatas_t meta, int depth);
 
-cauchyTest_res cauchyTest_probabilistic_verification( const compDsk_t Delta,
-                                                      slong nbOfRoots,
-                                                      const realRat_t a,
-                                                      cacheApp_t cache,
-                                                      cacheCauchy_t cacheCau,
-                                                      slong prec,
-                                                      metadatas_t meta, int depth);
-
 cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,           
-                                                  cacheApp_t cache,
                                                   cacheCauchy_t cacheCau,
                                                   slong prec,
                                                   metadatas_t meta, int depth);
@@ -181,26 +135,25 @@ cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,
  * returns the number of roots in Delta */
 cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t isoRatio,
                                                                const compDsk_t Delta,
-                                                               cacheApp_t cache,
                                                                cacheCauchy_t cacheCau,
                                                                slong prec,
                                                                metadatas_t meta, int depth);
 
+/* rootFreeAnnulus Counter */
+/* implemented in cauchy_rootFreeAnnulus.c */
 void cauchyTest_fmatheta( realRat_t res, const realRat_t a, const realRat_t theta );
 void cauchyTest_fpatheta( realRat_t res, const realRat_t a, const realRat_t theta );
     
-cauchyTest_res cauchyTest_deterministic_counting( const compDsk_t Delta, 
-                                                  const realRat_t a,
-                                                  cacheApp_t cache,
-                                                  cacheCauchy_t cacheCau,
-                                                  slong prec,
-                                                  metadatas_t meta, int depth);
+// cauchyTest_res cauchyTest_rootFreeAnnulus_counting( const compDsk_t Delta, 
+//                                                   const realRat_t a,
+//                                                   cacheCauchy_t cacheCau,
+//                                                   slong prec,
+//                                                   metadatas_t meta, int depth);
 
 /* this version verifies that there are nbOfRoots roots in Delta */
-cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
+cauchyTest_res cauchyTest_rootFreeAnnulus_verification( const compDsk_t Delta,
                                                       slong nbOfRoots,
                                                       const realRat_t a,
-                                                      cacheApp_t cache,
                                                       cacheCauchy_t cacheCau,
                                                       slong prec,
                                                       metadatas_t meta, int depth);
@@ -213,23 +166,13 @@ cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
 cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
                                            const realRat_t radInf,  
                                            const realRat_t radSup,
-                                           cacheApp_t cache,
                                            cacheCauchy_t cacheCau,
                                            slong prec,
                                            metadatas_t meta, int depth);
 
-// cauchyTest_res cauchyTest_deterministic_counting_with_radInf_radSup( const compRat_t center,
-//                                                                      const realRat_t radInf,  
-//                                                                      const realRat_t radSup,
-//                                                                      cacheApp_t cache,
-//                                                                      cacheCauchy_t cacheCau,
-//                                                                      slong prec,
-//                                                                      metadatas_t meta, int depth);
-
 cauchyTest_res cauchyTest_deterministic_counting_combinatorial( const compRat_t center,
                                                                      realRat_t radius,
                                                                      slong nbOfRoots,
-                                                                     cacheApp_t cache,
                                                                      cacheCauchy_t cacheCau,
                                                                      slong prec,
                                                                      metadatas_t meta, int depth);
@@ -250,7 +193,6 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_rinfrsup( co
                                                                               const realRat_t rinf,
                                                                               const realRat_t rsup,
                                                                               slong m,
-                                                                              cacheApp_t cache,
                                                                               cacheCauchy_t cacheCau,
                                                                               slong prec,
                                                                               metadatas_t meta, int depth);
@@ -259,7 +201,6 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_isoRatio( co
                                                                               const realRat_t r,
                                                                               const realRat_t theta,
                                                                               slong m,
-                                                                              cacheApp_t cache,
                                                                               cacheCauchy_t cacheCau,
                                                                               slong prec,
                                                                               metadatas_t meta, int depth);
@@ -267,7 +208,7 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_isoRatio( co
 void cauchyTest_computePointPointShifted( compApp_t point, compApp_t pointShifted, 
                                           const compApp_t center, slong q, slong i, const realRat_t radius,
                                           slong prec );
-void cauchyTest_eval ( compApp_t fval, compApp_t fderval, const compApp_t point, cacheApp_t cache, cacheCauchy_t cacheCau, slong prec );
+// void cauchyTest_eval ( compApp_ptr fvals, compApp_ptr fdervals, compApp_t points, slong nbPoints, cacheCauchy_t cacheCau, slong prec );
 void cauchyTest_computeBounds ( realApp_t ubound, realApp_t lbound, 
                                 const realRat_t theta, const realRat_t r, slong d, slong prec );
 int  cauchyTest_compute_fdiv_checkPrecAndBounds( compApp_t fdiv, 
@@ -280,17 +221,15 @@ int  cauchyTest_compute_fdiv_checkPrecAndBounds( compApp_t fdiv,
 // int cauchyTest_shift_and_DLGs( compApp_poly_t dest, const compRat_t c, const realRat_t r, const realRat_t theta, cacheApp_t cache, 
 //                                cacheCauchy_t cacheCau, slong prec, metadatas_t meta );
 
-int cauchyTest_shift( compApp_poly_t dest, const compRat_t c, const realRat_t r, const realRat_t theta, cacheApp_t cache, 
+int cauchyTest_shift( compApp_poly_t dest, const compRat_t c, const realRat_t r, const realRat_t theta,
                                cacheCauchy_t cacheCau, slong prec, metadatas_t meta );
 
 cauchyTest_res cauchyTest_Pellet_counting( const compRat_t c, const realRat_t r, const realRat_t theta, slong m,
-                                                                              cacheApp_t cache,
                                                                               cacheCauchy_t cacheCau,
                                                                               slong prec,
                                                                               metadatas_t meta, int depth);
 
 // cauchyTest_res cauchyTest_schroeders_counting( const compRat_t c, const realRat_t r, const realRat_t theta, slong m,
-//                                                                               cacheApp_t cache,
 //                                                                               cacheCauchy_t cacheCau,
 //                                                                               slong prec,
 //                                                                               metadatas_t meta, int depth);
@@ -301,7 +240,6 @@ cauchyTest_res cauchyTest_Pellet_counting( const compRat_t c, const realRat_t r,
  * returns the number of roots in Delta */
 slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
                                    const compDsk_t Delta,
-                                   cacheApp_t cache,
                                    cacheCauchy_t cacheCau,
                                    metadatas_t meta, int depth);
 
@@ -311,7 +249,6 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
  * can fail */
 cauchyTest_res cauchyTest_computeS0compDsk_probabilistic( const realRat_t isoRatio,
                                                           const compDsk_t Delta,
-                                                          cacheApp_t cache,
                                                           cacheCauchy_t cacheCau,
                                                           metadatas_t meta, int depth);
 
@@ -323,7 +260,6 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
                                             const realRat_t theta,
                                             const compDsk_t Delta,
                                             slong nbOfRoots,
-                                            cacheApp_t cache,
                                             cacheCauchy_t cacheCau,
                                             const realRat_t eps,
                                             metadatas_t meta, int depth);
@@ -337,7 +273,6 @@ cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
                                    const compDsk_t Delta,
                                    slong m,
                                    slong h,
-                                   cacheApp_t cache,
                                    cacheCauchy_t cacheCau,
                                    const realRat_t eps,
                                    slong prec,
@@ -353,11 +288,32 @@ cauchyTest_res cauchyTest_computeSgNcompDsk( compApp_ptr SgN,
                                              slong m,
                                              ulong N,
                                              slong h,
-                                             cacheApp_t cache,
                                              cacheCauchy_t cacheCau,
                                              const realRat_t eps,
                                              slong prec,
                                              metadatas_t meta, int depth);
+
+/* DEPRECATED */
+
+// cauchyTest_res cauchyTest_deterministic_exclusion_test( const compRat_t center,
+//                                                        const realRat_t radius,
+//                                                        const realRat_t radius2,
+//                                                        slong vangle,           
+//                                                        slong vindex,    
+//                                                        cacheCauchy_t cacheCau,
+//                                                        slong prec,
+//                                                        int inCounting,
+//                                                        metadatas_t meta, int depth);
+// 
+// cauchyTest_res cauchyTest_deterministic_exclusion_testNEW( const compRat_t center,
+//                                                        const realRat_t radius,
+//                                                        const realRat_t radius2,
+//                                                        slong vangle,           
+//                                                        slong vindex,    
+//                                                        cacheCauchy_t cacheCau,
+//                                                        slong prec,
+//                                                        int inCounting,
+//                                                        metadatas_t meta, int depth);
 
 #ifdef __cplusplus
 }

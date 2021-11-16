@@ -72,6 +72,7 @@ void * gen_list_last(gen_list_t l);
 void * gen_list_data_at_index(const gen_list_t l, int index);
 
 void gen_list_insert_sorted(gen_list_t l, void * data, int (isless_func)(const void * d1, const void * d2));
+
 void gen_list_insert_sorted_unique(gen_list_t l, void * data, int (isless_func)(const void * d1, const void * d2),
                                                               int (isequal_func)(const void * d1, const void * d2));
 
@@ -115,6 +116,11 @@ LISTS_INLINE void * gen_list_elmt(gen_list_iterator it){
 /* remove element just after it, if it is not NULL */
 void * gen_list_remove_at( gen_list_t l, gen_list_iterator it);
  
+/* insert sorted from end to beginning */
+/* first tries to insert as the previous element of it */
+/* returns an iterator on the element inserted in the list */
+gen_list_iterator gen_list_insert_sorted_from_end(gen_list_t l, void * data, gen_list_iterator it, int (isless_func)(const void * d1, const void * d2));
+
 #ifdef __cplusplus
 }
 #endif

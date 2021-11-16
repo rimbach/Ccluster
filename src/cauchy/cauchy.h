@@ -77,9 +77,7 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
 /* implemented in cauchy.c */
 int cauchy_algo_global( connCmp_list_t qResults,
                            compBox_list_t bDiscarded,
-                           const compBox_t initialBox, 
                            const realRat_t eps,
-                           cacheApp_t cache, 
                            cacheCauchy_t cacheCau,
                         int certified,
                            metadatas_t meta);
@@ -89,7 +87,6 @@ int cauchy_main_loop( connCmp_list_t qResults,
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t discardedCcs, 
                          const realRat_t eps, 
-                         cacheApp_t cache, 
                          cacheCauchy_t cacheCau,
                       int certified,
                          metadatas_t meta);
@@ -98,7 +95,6 @@ void cauchy_prep_loop( compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t qPrepLoop, 
                          connCmp_list_t discardedCcs, 
-                         cacheApp_t cache,
                          cacheCauchy_t cacheCau,
                          metadatas_t meta);
 
@@ -106,7 +102,6 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
                               connCmp_t cc, 
                               connCmp_list_t discardedCcs, 
                               compBox_list_t bDiscarded,
-                              cacheApp_t cache, 
                               cacheCauchy_t cacheCau,
                               slong nbMSols, 
                               metadatas_t meta, 
@@ -114,7 +109,6 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
 
 slong cauchy_discard_compBox_list( compBox_list_t boxes, 
                                      compBox_list_t bDiscarded,
-                                     cacheApp_t cache,
                                      cacheCauchy_t cacheCau,
                                      slong nbMSols, 
                                      slong prec, metadatas_t meta);
@@ -125,7 +119,6 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
 /* either r' <= eps */
 /*     or res is m/((2m-2)*theta) rigid */
 slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slong m, const realRat_t theta, const realRat_t eps,
-                                       cacheApp_t cache,
                                        cacheCauchy_t cacheCau,
                                        slong prec, metadatas_t meta, slong depth);
 
@@ -133,7 +126,7 @@ connCmp_ptr cauchy_actualizeCCafterCompression( connCmp_ptr CC, const compDsk_t 
 
 
 
-int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheApp_t cache, cacheCauchy_t cacheCau, int certified);
+int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheCauchy_t cacheCau, int certified);
 
 
 

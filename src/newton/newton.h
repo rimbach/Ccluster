@@ -82,8 +82,7 @@ newton_res newton_risolate_newton_connCmp( connCmp_t nCC,
 //                                             metadatas_t meta);
 
 newton_res newton_cauchy_first_condition( compApp_t fx, 
-                                          compApp_t fpx, 
-                                          cacheApp_t cache, 
+                                          compApp_t fpx,  
                                           cacheCauchy_t cacheCau, 
                                           const compRat_t c, 
                                           const realRat_t d, 
@@ -91,7 +90,6 @@ newton_res newton_cauchy_first_condition( compApp_t fx,
                                           metadatas_t meta);
 
 newton_res newton_cauchy_iteration( compApp_t iteration, 
-                                    cacheApp_t cache, 
                                     cacheCauchy_t cacheCau,
                                     const connCmp_t CC, 
                                     const compRat_t c, 
@@ -100,14 +98,12 @@ newton_res newton_cauchy_iteration( compApp_t iteration,
                                     slong prec, metadatas_t meta);
 
 newton_res newton_cauchy_interval(  compDsk_t d, 
-                                    cacheApp_t cache, 
                                     cacheCauchy_t cacheCau,
                                     slong prec, 
                                     metadatas_t meta);
 
 newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
                                          connCmp_t CC,
-                                         cacheApp_t cache,
                                          cacheCauchy_t cacheCau,
                                          const compRat_t c,
                                          slong prec, 

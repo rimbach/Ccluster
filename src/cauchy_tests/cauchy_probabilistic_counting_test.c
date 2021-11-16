@@ -11,40 +11,7 @@
 
 #include "cauchy_tests/cauchy_tests.h"
 
-cauchyTest_res cauchyTest_probabilistic_verification( const compDsk_t Delta,
-                                                      slong nbOfRoots,
-                                                      const realRat_t a,
-                                                      cacheApp_t cache,
-                                                      cacheCauchy_t cacheCau,
-                                                      slong prec,
-                                                      metadatas_t meta, int depth){
-    
-    int level = 5;
-    cauchyTest_res res;
-    res.appPrec = prec;
-    
-    /* call probabilistic counting test */
-    if (realRat_cmp(a, cacheCauchy_isoRatioref(cacheCau))==0) {
-        res = cauchyTest_probabilistic_counting( Delta, cache, cacheCau, res.appPrec, meta, depth);
-    }
-    else {
-        res = cauchyTest_probabilistic_counting_withIsoRatio( a, Delta, cache, cacheCau, res.appPrec, meta, depth);
-    }
-    
-    if (metadatas_getVerbo(meta)>=level) {
-            printf("#------------------cauchyTest_probabilistic_verification: res of proba counting is %d\n", res.nbOfSol);
-    }
-
-    if ( res.nbOfSol != nbOfRoots )
-        res.nbOfSol = -1;
-    else
-        res.nbOfSol = nbOfRoots;
-    
-    return res;
-}
-
-cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,         
-                                                  cacheApp_t cache,
+cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,
                                                   cacheCauchy_t cacheCau,
                                                   slong prec,
                                                   metadatas_t meta, int depth){
@@ -68,8 +35,7 @@ cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,
     int alreadyEvaluated = 0;
     
     res = cauchyTest_computeS0Approx(s0, compDsk_centerref(Delta), compDsk_radiusref(Delta),
-                                     NULL, 0, 0, 
-                                    0, &alreadyEvaluated, cache, cacheCau, CAUCHYTEST_UNCERTIFI, prec, CAUCHYTEST_INCOUNTIN, meta, depth );
+                                     NULL, 0, 0, &alreadyEvaluated, cacheCau, prec, CAUCHYTEST_INCOUNTIN, meta, depth );
     
     res.nbOfSol = ( res.nbOfSol==-2? -1:0 );
     
@@ -127,7 +93,6 @@ cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,
  * returns the number of roots in Delta */
 cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t isoRatio,
                                                                const compDsk_t Delta,
-                                                               cacheApp_t cache,
                                                                cacheCauchy_t cacheCau,
                                                                slong prec,
                                                                metadatas_t meta, int depth){
@@ -169,19 +134,15 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
     realApp_init(radRe);
     realApp_init(radIm);
     
-    realApp_t lb, ub, modulus;
+    realApp_t lb, ub;
     realApp_init(lb);
     realApp_init(ub);
-    realApp_init(modulus);
     
-    compApp_t c, a;
-    realRat_t argu;
+    compApp_t c;
     
     compApp_init(c);
-    compApp_init(a);
-    realRat_init(argu);
     
-    compApp_poly_ptr app = NULL;
+//     compApp_poly_ptr app = NULL;
     
     int enoughPrec = 0;
     while (enoughPrec == 0) {
@@ -195,52 +156,18 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
         compApp_zero(s0star);
         compApp_set_compRat(c, compDsk_centerref(Delta), res.appPrec);
         
-        if (cacheCauchy_evalFastref(cacheCau) == NULL)
-            app = cacheApp_getApproximation ( cache, res.appPrec );
-        
-        for(slong i=0; i<q; i++) {
-            realRat_set_si(argu, 2*i, q);
-            compApp_set_realRat(a, argu, res.appPrec);
-            acb_exp_pi_i( point, a, res.appPrec);
-            compApp_mul_realRat(pointShifted, point, compDsk_radiusref(Delta), res.appPrec);
-            compApp_add( pointShifted, c, pointShifted, res.appPrec);
+        for(slong i=0; (i<q)&&(enoughPrec==1); i++) {
+            
+            cauchyTest_computePointPointShifted( point, pointShifted, c, q, i, compDsk_radiusref(Delta), res.appPrec);
             
             start = clock();
-            if (cacheCauchy_evalFastref(cacheCau) == NULL)
-                compApp_poly_evaluate2_rectangular(fval, fderval, app, pointShifted, res.appPrec);
-            else
-                (cacheCauchy_evalFastref(cacheCau))( fval, fderval, pointShifted, res.appPrec);
+            cacheCauchy_eval( fval, fderval, pointShifted, 1, cacheCau, res.appPrec);
             evalTime += (double) (clock() - start);
             
-            compApp_abs(modulus, fval, res.appPrec);
-            
-            if (compApp_contains_zero( fval )){
-//                 if (metadatas_getVerbo(meta)>=level)
-//                     printf("#------------------cauchyTest_probabilistic_counting_withIsoRatio: fval contains 0, i: %ld\n", i);
-                if (realApp_lt( modulus, lb )){
-                    enoughPrec=-2;
-                    break;
-                }
-                else {
-                    res.appPrec = 2*res.appPrec;
-                    enoughPrec = 0;
-                    break;
-                }
-            } else if (realApp_lt( modulus, lb )) {
-                enoughPrec=-2;
-                break;
-            } else if (!realApp_ge( modulus, lb )){
+            enoughPrec = cauchyTest_compute_fdiv_checkPrecAndBounds( fdiv, fval, fderval, lb, ub, res.appPrec );
+            if (enoughPrec==-1) {
                 res.appPrec = 2*res.appPrec;
                 enoughPrec = 0;
-                break;
-            }
-            
-            compApp_div(fdiv, fderval, fval, res.appPrec);
-            /* check if the ratio is less than the upper bound */
-            compApp_abs(modulus, fdiv, res.appPrec);
-            if (realApp_gt( modulus, ub )) {
-                enoughPrec=-2;
-                break;
             }
             
             compApp_mul(fdiv, fdiv, point, res.appPrec);
@@ -262,9 +189,6 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
             }
                 
         }
-//         if (metadatas_getVerbo(meta)>=level)
-//             if (enoughPrec == 1)
-//                 printf("#------------------cauchyTest_probabilistic_counting_withIsoRatio: s0star precise enough\n");
         
     }
     
@@ -291,7 +215,6 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
 //     realApp_clear(qApp);
     realApp_clear(lb);
     realApp_clear(ub);
-    realApp_clear(modulus);
     realApp_clear(errAp);
     compApp_clear( point        );
     compApp_clear( pointShifted );
@@ -302,8 +225,6 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
     realApp_clear(radRe);
     realApp_clear(radIm);
     compApp_clear(c);
-    compApp_clear(a);
-    realRat_clear(argu);
     
     if (metadatas_haveToCount(meta)) {
         metadatas_add_time_CauCoEv(meta, evalTime);

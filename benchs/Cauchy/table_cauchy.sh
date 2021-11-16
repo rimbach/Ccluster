@@ -165,7 +165,7 @@ LIMINDCCL=9
 
 POLNAME="randomSparse"
 # DEGREES="64 128 191 256 391 512 717 1024 1523 2048"
-DEGREES="512 717 1024 1523 2048 3051"
+DEGREES="512 717 1024 1523 2048 3051 4096 6099"
 NBTERMS="5 10 20"
 # BITSIZES="16"
 BITSIZES="256"
@@ -215,7 +215,8 @@ done
 done
 echo "\\hline" >> $TEMPTABFILE
 
-DEGREES="64 128 191 256 391 512 717 1024 1523 2048 3051 4096"
+# DEGREES="64 128 191 256 391 512 717 1024 1523 2048 3051 4096"
+DEGREES="512 717 1024 1523 2048 3051 4096 6099 8192"
 BITS="14"
 POLNAMES="Mignotte"
 
@@ -229,7 +230,8 @@ for DEG in $DEGREES; do
     
     gen_with_deg_bs         $NAME $POLNAME $DEG $BITS
     run_ccluster            $NAME $POLNAME $DEG       $EPSILONCCL
-    run_cauchy_mignotte     $NAME $POLNAME $DEG $BITS $EPSILONCAU
+#     run_cauchy_mignotte     $NAME $POLNAME $DEG $BITS $EPSILONCAU
+    run_cauchy              $NAME $POLNAME $DEG $EPSILONCAU
     run_mpsolve             $NAME $POLNAME $DEG       $EPSILONMPL
     
     stats_pol $NAME $DEG
@@ -237,7 +239,7 @@ done
 done
 echo "\\hline" >> $TEMPTABFILE
 
-DEGREES="5 6 7 8 9 10"
+DEGREES="5 6 7 8 9 10 11"
 POLNAMES="Mandelbrot"
 
 for POLNAME in $POLNAMES; do
@@ -258,7 +260,7 @@ done
 done
 echo "\\hline" >> $TEMPTABFILE
 
-DEGREES="5 6 7 8 9 10 11"
+DEGREES="5 6 7 8 9 10 11 12"
 POLNAMES="Runnels"
 
 for POLNAME in $POLNAMES; do

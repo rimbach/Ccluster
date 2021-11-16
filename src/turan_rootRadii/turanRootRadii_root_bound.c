@@ -18,7 +18,6 @@ slong turanRootRadii_root_bound( realApp_t rm,
                                  ulong           N,
                                  const realRat_t eps,
                                  cacheCauchy_t cacheCau,
-                                 cacheApp_t cache,
                                  slong prec,
                                  metadatas_t meta, int depth) {
     
@@ -71,7 +70,7 @@ slong turanRootRadii_root_bound( realApp_t rm,
     
     while ( enoughPrec == -1 ) {
         realRat_pow_si(epsprime, epsprime, 2);
-        res = cauchyTest_computeSgNcompDsk( sgNs, theta, Delta, m, N, m, cache, cacheCau, epsprime, res.appPrec, meta, depth);
+        res = cauchyTest_computeSgNcompDsk( sgNs, theta, Delta, m, N, m, cacheCau, epsprime, res.appPrec, meta, depth);
         
         if (res.nbOfSol==-2)
             break;

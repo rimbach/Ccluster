@@ -11,232 +11,9 @@
 
 #include "cauchy_tests/cauchy_tests.h"
 
-void cauchyTest_fmatheta( realRat_t res, const realRat_t a, const realRat_t theta ) {
-    
-    realRat_t t1, t2;
-    realRat_init(t1);
-    realRat_init(t2);
-    
-    /* res = (5/4)theta */
-    realRat_set_si( res, 5, 4 );
-    realRat_mul   ( res, res, theta );
-    realRat_one(t1);
-    realRat_one(t2);
-    /* t1 = (1-(5/4)theta) */
-    realRat_sub(t1, t1, res);
-    /* t2 = (1+(5/4)theta) */
-    realRat_add(t2, t2, res);
-    /* res = a^2*t1 + t2 */
-    realRat_mul(res, a, a);
-    realRat_mul(res, res, t1);
-    realRat_add(res, res, t2);
-    /* res = (1/(2a))*(a^2*t1 + t2) */
-    realRat_div(res, res, a);
-    realRat_div_ui(res, res, 2);
-    
-    realRat_clear(t1);
-    realRat_clear(t2);
-}
-
-void cauchyTest_fpatheta( realRat_t res, const realRat_t a, const realRat_t theta ){
-    
-    realRat_t t1, t2;
-    realRat_init(t1);
-    realRat_init(t2);
-    
-    /* res = (5/4)theta */
-    realRat_set_si( res, 5, 4 );
-    realRat_mul   ( res, res, theta );
-    realRat_one(t1);
-    realRat_one(t2);
-    /* t1 = (1+(5/4)theta) */
-    realRat_add(t1, t1, res);
-    /* t2 = (1-(5/4)theta) */
-    realRat_sub(t2, t2, res);
-    /* res = a^2*t1 + t2 */
-    realRat_mul(res, a, a);
-    realRat_mul(res, res, t1);
-    realRat_add(res, res, t2);
-    /* res = (1/(2a))*(a^2*t1 + t2) */
-    realRat_div(res, res, a);
-    realRat_div_ui(res, res, 2);
-    
-    realRat_clear(t1);
-    realRat_clear(t2);
-}
-
-/* version for any disk */
-cauchyTest_res cauchyTest_deterministic_counting( const compDsk_t Delta,
-                                                  const realRat_t a,
-                                                  cacheApp_t cache,
-                                                  cacheCauchy_t cacheCau,
-                                                  slong prec,
-                                                  metadatas_t meta, int depth){
-    
-    realRat_t radInf, radSup;
-    realRat_init(radInf);
-    realRat_init(radSup);
-    
-    realRat_set(radInf, compDsk_radiusref(Delta));
-    realRat_div(radInf, radInf, a);
-    realRat_set(radSup, compDsk_radiusref(Delta));
-    realRat_mul(radSup, radSup, a);
-    
-    cauchyTest_res res = cauchyTest_rootFreeAnnulus( compDsk_centerref(Delta), radInf, radSup,
-                                                     cache, cacheCau, prec, meta, depth);
-    
-    if (res.nbOfSol==0) {
-        /* Delta is a-isolated */
-        res.nbOfSol = cauchyTest_computeS0compDsk( a, Delta, cache, cacheCau, meta, depth);
-    }
-    
-    realRat_clear(radInf);
-    realRat_clear(radSup);
-    
-    return res;
-                
-}
-
-cauchyTest_res cauchyTest_deterministic_verification( const compDsk_t Delta,
-                                                      slong nbOfRoots,
-                                                      const realRat_t a,
-                                                      cacheApp_t cache,
-                                                      cacheCauchy_t cacheCau,
-                                                      slong prec,
-                                                      metadatas_t meta, int depth){
-    
-    int level =4;
-    cauchyTest_res res;
-    res.appPrec = prec;
-    
-    realRat_t radInf, radSup;
-    realRat_init(radInf);
-    realRat_init(radSup);
-    
-    realRat_set(radInf, compDsk_radiusref(Delta));
-    realRat_div(radInf, radInf, a);
-    realRat_set(radSup, compDsk_radiusref(Delta));
-    realRat_mul(radSup, radSup, a);
-    
-    /* first call probabilistic test */
-    if (realRat_cmp(a, cacheCauchy_isoRatioref(cacheCau))==0) {
-        res = cauchyTest_probabilistic_counting( Delta, cache, cacheCau, res.appPrec, meta, depth);
-    }
-    else {
-        res = cauchyTest_probabilistic_counting_withIsoRatio( a, Delta, cache, cacheCau, res.appPrec, meta, depth);
-    }
-    
-    if (metadatas_getVerbo(meta)>=level) {
-            printf("#------------------cauchyTest_deterministic_verification: res of proba counting is %d\n", res.nbOfSol);
-    }
-
-    if ( res.nbOfSol != nbOfRoots )
-        res.nbOfSol = -1;
-    else {
-        res = cauchyTest_rootFreeAnnulus( compDsk_centerref(Delta), radInf, radSup,
-                                          cache, cacheCau, prec, meta, depth);
-        if (res.nbOfSol == 0)
-           res.nbOfSol = nbOfRoots;
-        else
-           res.nbOfSol = -1;
-        
-        if (metadatas_getVerbo(meta)>=level) {
-            printf("#------------------cauchyTest_deterministic_verification: res of verification is %d\n", res.nbOfSol);
-        }
-    }
-    
-    realRat_clear(radInf);
-    realRat_clear(radSup);
-    
-    return res;
-}
-
-/* certification that A(center, radInf, radSup) contains no root: */
-/* if  0 then A(center, radInf, radSup) contains no root */
-/* if -1 then A(center, (radSup+radInf)/2 - (5/4)*isoRatio*(radSup-radInf)/2,  */
-/*                      (radSup+radInf)/2 + (5/4)*isoRatio*(radSup-radInf)/2 ) */
-/*             contains a root */
-cauchyTest_res cauchyTest_rootFreeAnnulus( const compRat_t center,
-                                           const realRat_t radInf,  
-                                           const realRat_t radSup,
-                                           cacheApp_t cache,
-                                           cacheCauchy_t cacheCau,
-                                           slong prec,
-                                           metadatas_t meta, int depth){
-    
-    int level =4;
-    clock_t start = clock();
-    
-    cauchyTest_res res;
-    res.appPrec = prec;
-    
-    realRat_t Rad, ExRad, ratio;
-    realApp_t nbCentersApp;
-    realRat_init(Rad);
-    realRat_init(ExRad);
-    realRat_init(ratio);
-    realApp_init(nbCentersApp);
-    
-    /* Rad = (radSup + radInf)/2 */
-    realRat_add(Rad, radInf, radSup);
-    realRat_div_ui(Rad, Rad, 2);
-    /* ExRad = (radSup - radInf)/2 */
-    realRat_sub(ExRad, radSup, radInf);
-    realRat_div_ui(ExRad, ExRad, 2);
-    /* ratio = Rad/ExRad */
-    realRat_div(ratio, Rad, ExRad);
-    /* nbCenters = ceil ( 2*pi*ratio ) */
-    realApp_pi(nbCentersApp, CCLUSTER_DEFAULT_PREC);
-    realApp_mul_si(nbCentersApp, nbCentersApp, 2, CCLUSTER_DEFAULT_PREC);
-    realApp_mul_realRat(nbCentersApp, nbCentersApp, ratio, CCLUSTER_DEFAULT_PREC);
-    slong nbCenters = realApp_ceil_si(nbCentersApp, CCLUSTER_DEFAULT_PREC);
-    
-    if (metadatas_getVerbo(meta)>=level) {
-        printf("#---------cauchy RootFreeAnnulus: \n");
-        printf("#------------nb of discs on contour for certification: %d \n", (int) nbCenters);
-        printf("#------------radius of discs on contour for certification: 5/4*"); realRat_print( ExRad ); printf("\n");
-        printf("#------------isoRatio for exclusion: "); realRat_print( cacheCauchy_isoRatioref(cacheCau) ); printf("\n");
-    }
-    
-    /* try to prove that A(c, Rad-ExRad, Rad+ExRad) contains no root */
-    /*ExRad = (5/4)*ExRad */
-    realRat_mul_si( ExRad, ExRad, 5);
-    realRat_div_ui( ExRad, ExRad, 4);
-    
-    cauchyTest_res resEx;
-    resEx.nbOfSol = 0;
-    resEx.appPrec = res.appPrec;
-    for (int vindex = 0; vindex < nbCenters && (resEx.nbOfSol==0) ; vindex++){
-        resEx = cauchyTest_probabilistic_exclusion_test( center, ExRad, Rad, nbCenters, vindex, cache, cacheCau, resEx.appPrec, meta, depth );
-    }
-    
-    if (resEx.nbOfSol != 0) {
-        res.nbOfSol = -1;
-        if (metadatas_getVerbo(meta)>=level) {
-            printf("#------------certification failed!\n");
-        }
-    } else {
-    /* D(c,Rad) is isoRatio-isolated */
-        res.nbOfSol = 0;
-    }
-    
-    realRat_clear(Rad);
-    realRat_clear(ExRad);
-    realRat_clear(ratio);
-    realApp_clear(nbCentersApp);
-    
-    if (metadatas_haveToCount(meta)) {
-        metadatas_add_time_CauCoTo(meta, (double) (clock() - start));
-        metadatas_add_CauchyCoTest(meta, depth, res.appPrec);
-    }
-    
-    return res;
-}
-
 cauchyTest_res cauchyTest_deterministic_counting_combinatorial( const compRat_t center,
                                                                 realRat_t radius,
                                                                 slong nbOfRoots,
-                                                                cacheApp_t cache,
                                                                 cacheCauchy_t cacheCau,
                                                                 slong prec,
                                                                 metadatas_t meta, int depth){
@@ -273,8 +50,7 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial( const compRat_t 
         int alreadyEvaluated = 0;
         /* apply counting test to D(center, rad) */
         res = cauchyTest_computeS0Approx(s0, center, rad,
-                                         NULL, 0, 0, 
-                                         0, &alreadyEvaluated, cache, cacheCau, CAUCHYTEST_UNCERTIFI, prec, CAUCHYTEST_INCOUNTIN, meta, depth );
+                                         NULL, 0, 0, &alreadyEvaluated, cacheCau, prec, CAUCHYTEST_INCOUNTIN, meta, depth );
     
         res.nbOfSol = ( res.nbOfSol==-2? -1:0 );
         if (res.nbOfSol==0) {
@@ -375,7 +151,6 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_rinfrsup( co
                                                                               const realRat_t rinf,
                                                                               const realRat_t rsup,
                                                                               slong m,
-                                                                              cacheApp_t cache,
                                                                               cacheCauchy_t cacheCau,
                                                                               slong prec,
                                                                               metadatas_t meta, int depth){
@@ -422,7 +197,7 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_rinfrsup( co
         /* call */
         realRat_set(compDsk_radiusref(Delta), ri);
         
-        res = cauchyTest_probabilistic_counting_withIsoRatio( thetai, Delta, cache, cacheCau, res.appPrec, meta, depth);
+        res = cauchyTest_probabilistic_counting_withIsoRatio( thetai, Delta, cacheCau, res.appPrec, meta, depth);
         
         if (metadatas_getVerbo(meta)>=level) {
             printf("---------i=%ld; res.nbOfSol: %d\n", i, res.nbOfSol); 
@@ -444,7 +219,6 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_isoRatio( co
                                                                               const realRat_t r,
                                                                               const realRat_t theta,
                                                                               slong m,
-                                                                              cacheApp_t cache,
                                                                               cacheCauchy_t cacheCau,
                                                                               slong prec,
                                                                               metadatas_t meta, int depth){
@@ -455,7 +229,7 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_isoRatio( co
     realRat_mul(rsup, r, theta);
     realRat_div(rinf, r, theta);
     
-    cauchyTest_res res = cauchyTest_deterministic_counting_combinatorial_with_rinfrsup( c, rinf, rsup, m, cache, cacheCau, prec,
+    cauchyTest_res res = cauchyTest_deterministic_counting_combinatorial_with_rinfrsup( c, rinf, rsup, m, cacheCau, prec,
                                                                                         meta, depth);
     
     realRat_clear(rinf);
@@ -465,7 +239,7 @@ cauchyTest_res cauchyTest_deterministic_counting_combinatorial_with_isoRatio( co
 
 }
 
-int cauchyTest_shift( compApp_poly_t dest, const compRat_t c, const realRat_t r, const realRat_t theta, cacheApp_t cache, 
+int cauchyTest_shift( compApp_poly_t dest, const compRat_t c, const realRat_t r, const realRat_t theta, 
                                cacheCauchy_t cacheCau, slong prec, metadatas_t meta ){
     
     int level = 4;
@@ -505,7 +279,7 @@ int cauchyTest_shift( compApp_poly_t dest, const compRat_t c, const realRat_t r,
     slong nbEvals = 0;
     clock_t start = clock();
     for(nbEvals=0; (nbEvals<q) && (res==1); nbEvals++) {
-        cauchyTest_eval ( pvals + nbEvals, pder, rootsShifted + nbEvals, cache, cacheCau, prec );
+        cacheCauchy_eval( pvals + nbEvals, pder, rootsShifted + nbEvals, 1, cacheCau, prec );
         res = cauchyTest_compute_fdiv_checkPrecAndBounds( pdiv, pvals + nbEvals, pder, lbound, ubound, prec );
     }
     if (metadatas_haveToCount(meta)) {
@@ -559,7 +333,6 @@ int cauchyTest_shift( compApp_poly_t dest, const compRat_t c, const realRat_t r,
 }
 
 cauchyTest_res cauchyTest_Pellet_counting( const compRat_t c, const realRat_t r, const realRat_t theta, slong m,
-                                                                              cacheApp_t cache,
                                                                               cacheCauchy_t cacheCau,
                                                                               slong prec,
                                                                               metadatas_t meta, int depth){
@@ -583,10 +356,10 @@ cauchyTest_res cauchyTest_Pellet_counting( const compRat_t c, const realRat_t r,
     if (metadatas_getVerbo(meta)>=level) {
         printf("#---Pellet counting: m: %ld initial prec: %ld\n", m, res.appPrec);
     }
-    res.nbOfSol = cauchyTest_shift( pShifted, c, r, theta, cache, cacheCau, res.appPrec, meta );
+    res.nbOfSol = cauchyTest_shift( pShifted, c, r, theta, cacheCau, res.appPrec, meta );
     while ( res.nbOfSol == -1 ) {
         res.appPrec = 2*res.appPrec;
-        res.nbOfSol = cauchyTest_shift( pShifted, c, r, theta, cache, cacheCau, res.appPrec, meta );
+        res.nbOfSol = cauchyTest_shift( pShifted, c, r, theta, cacheCau, res.appPrec, meta );
     }
     if (metadatas_getVerbo(meta)>=level) {
         printf("#---Pellet counting: res, prec after first shift: %d, %ld\n", res.nbOfSol, res.appPrec);
@@ -621,7 +394,7 @@ cauchyTest_res cauchyTest_Pellet_counting( const compRat_t c, const realRat_t r,
             
             while( res.nbOfSol == -2 ){
                 res.appPrec *=2;
-                res.nbOfSol = cauchyTest_shift( pShifted, c, r, theta, cache, cacheCau, res.appPrec, meta );
+                res.nbOfSol = cauchyTest_shift( pShifted, c, r, theta, cacheCau, res.appPrec, meta );
                 for (int i = 0; i<iteration; i++)
                     compApp_poly_oneGraeffeIteration_in_place( pShifted, res.appPrec);
                 compApp_poly_sum_abs_coeffs( sum, pShifted, res.appPrec );

@@ -15,8 +15,7 @@ cauchyTest_res cauchyTest_probabilistic_exclusion_test( const compRat_t center,
                                           const realRat_t radius,
                                          const realRat_t radius2,
                                          slong vangle,           
-                                         slong vindex,           
-                                          cacheApp_t cache,
+                                         slong vindex, 
                                           cacheCauchy_t cacheCau,
                                           slong prec,
                                           metadatas_t meta, int depth){
@@ -58,7 +57,7 @@ cauchyTest_res cauchyTest_probabilistic_exclusion_test( const compRat_t center,
         compApp_init( ps +j );
     res = cauchyTest_computeSsApprox(ps, center, radius, 
                                      radius2, vangle, vindex, 
-                                     cache, cacheCau, CAUCHYTEST_UNCERTIFI, prec, CAUCHYTEST_INEXCLUSI, meta, depth );
+                                     cacheCau, prec, CAUCHYTEST_INEXCLUSI, meta, depth );
     
     res.nbOfSol = ( res.nbOfSol==-2? 1:0 );
     int j=0;

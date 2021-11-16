@@ -268,31 +268,30 @@ run_cauchy_comp()
 {
     NAME=$1
     POLNAME=$2
-    EPS=$3
+    DEG=$3
+    EPS=$4
     NAME_IN=$NAME".ccl"
     NAME_OUT_WO=$NAME".out_cau_wo"
-    NAME_OUT_WI=$NAME".out_cau"
+    NAME_OUT=$NAME".out_cau"
     
-    if [ $PURGECAUWO -eq 1 ]; then
-        rm -f $NAME_OUT_WO
+    if [ $PURGECAU -eq 1 ]; then
+        rm -f $NAME_OUT $NAME_OUT_WO
     fi
     
+    if [ $DEG -le $LIMDEGCAU_WO ]; then
     if [ ! -e $NAME_OUT_WO ]; then
             echo  "Clustering complex roots for $NAME with cauchy  without compression output in " $NAME_OUT_WO
             CALL="$CAUCHY_CALL $NAME_IN -e $EPS -m \"C1\" $CAUCHY_OPTS"
             $CALL > $NAME_OUT_WO
     fi
-    
-    if [ $PURGECAUWI -eq 1 ]; then
-        rm -f $NAME_OUT_WI
     fi
     
-    if [ ! -e $NAME_OUT_WI ]; then
-            echo  "Clustering complex roots for $NAME with cauchy  with    compression output in " $NAME_OUT_WI
+    if [ ! -e $NAME_OUT ]; then
+            echo  "Clustering complex roots for $NAME with cauchy  with    compression output in " $NAME_OUT
 #             CALL="$CAUCHY_CALL $NAME_IN -e $EPS -m \"C2\" $CAUCHY_OPTS"
             CALL="$CAUCHY_CALL $NAME_IN -e $EPS $CAUCHY_OPTS"
 #             echo $CALL
-            $CALL > $NAME_OUT_WI
+            $CALL > $NAME_OUT
     fi
 }
 
@@ -352,6 +351,34 @@ run_cauchy_mandelbrot()
     
 }
 
+run_cauchy_mandelbrot_comp()
+{
+    NAME=$1
+    POLNAME=$2
+    DEG=$3
+    EPS=$4
+    NAME_IN=$NAME".ccl"
+    NAME_OUT=$NAME".out_cau"
+    NAME_OUT_WO=$NAME".out_cau_wo"
+    
+    if [ $PURGECAU -eq 1 ]; then
+        rm -f $NAME_OUT $NAME_OUT_WO
+    fi
+    
+    if [ ! -e $NAME_OUT ]; then
+            echo  "Clustering complex roots for $POLNAME iteration $DEG, with cauchy output in " $NAME_OUT
+#             ./ccluster $NAME_IN "global" $EPSILONCCL "default" 2 > $NAME_OUT
+            CALL="$CAUCHY_MANDELBROT_CALL $DEG -e $EPS $CAUCHY_OPTS"
+            $CALL > $NAME_OUT
+    fi
+    
+    if [ ! -e $NAME_OUT_WO ]; then
+            echo  "Clustering complex roots for $POLNAME iteration $DEG with cauchy without compression output in " $NAME_OUT_WO
+            CALL="$CAUCHY_MANDELBROT_CALL $DEG -e $EPS -m \"C1\" $CAUCHY_OPTS"
+            $CALL > $NAME_OUT_WO
+    fi
+}
+
 run_cauchy_runnels()
 {
     NAME=$1
@@ -366,10 +393,39 @@ run_cauchy_runnels()
     fi
     
     if [ ! -e $NAME_OUT ]; then
-            echo  "Clustering complex roots for $POLNAME degree $DEG, with cauchy output in " $NAME_OUT
+            echo  "Clustering complex roots for $POLNAME iteration $DEG, with cauchy output in " $NAME_OUT
 #             ./ccluster $NAME_IN "global" $EPSILONCCL "default" 2 > $NAME_OUT
             CALL="$CAUCHY_RUNNELS_CALL $DEG -e $EPS $CAUCHY_OPTS"
             $CALL > $NAME_OUT
+    fi
+    
+}
+
+run_cauchy_runnels_comp()
+{
+    NAME=$1
+    POLNAME=$2
+    DEG=$3
+    EPS=$4
+    NAME_IN=$NAME".ccl"
+    NAME_OUT=$NAME".out_cau"
+    NAME_OUT_WO=$NAME".out_cau_wo"
+    
+    if [ $PURGECAU -eq 1 ]; then
+        rm -f $NAME_OUT $NAME_OUT_WO
+    fi
+    
+    if [ ! -e $NAME_OUT ]; then
+            echo  "Clustering complex roots for $POLNAME iteration $DEG, with cauchy output in " $NAME_OUT
+#             ./ccluster $NAME_IN "global" $EPSILONCCL "default" 2 > $NAME_OUT
+            CALL="$CAUCHY_RUNNELS_CALL $DEG -e $EPS $CAUCHY_OPTS"
+            $CALL > $NAME_OUT
+    fi
+    
+    if [ ! -e $NAME_OUT_WO ]; then
+            echo  "Clustering complex roots for $POLNAME iteration $DEG with cauchy without compression output in " $NAME_OUT_WO
+            CALL="$CAUCHY_RUNNELS_CALL $DEG -e $EPS -m \"C1\" $CAUCHY_OPTS"
+            $CALL > $NAME_OUT_WO
     fi
     
 }
@@ -444,6 +500,63 @@ stats_pol()
     LINE_TAB=$LINE_TAB" & `format_numb $TSIZE_CAU $LENP` & `format_numb $TDEPT_CAU 2`"
     LINE_TAB=$LINE_TAB" & $COLORCAU$TTIME_CAU}           & `format_numb $NBEXT_CAU $LENP`"
     LINE_TAB=$LINE_TAB" & $TTIME_MPL "
+    LINE_TAB=$LINE_TAB"\\\\"
+    
+#     echo $LINE_TAB
+    echo $LINE_TAB >> $TEMPTABFILE
+}
+
+stats_pol_procedural()
+{
+    NAME=$1
+    NAME_OUTCAU=$NAME".out_cau"
+    NAME_OUTCAU_WO=$NAME".out_cau_wo"
+    NAME_OUTMPL=$NAME".out_mpl"
+    DEG=$2
+    
+    
+    NBSOLS=$(grep "number of solutions"              $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    
+    TSIZE_CAU=$(grep "tree size:"                    $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDEPT_CAU=$(grep "tree depth:"                   $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    NBEXT_CAU=$(grep "total number ET:"              $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TTIME_CAU=$(grep "total time:"                   $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    COTIME_CAU=$(grep "total time spent in compression:" $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    CETIME_CAU=$(grep "total time in Pellet:"            $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    EVTIME_CAU=$(grep "time in Evaluation:"              $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    
+    TSIZE_CAU_WO=$(grep "tree size:"                    $NAME_OUTCAU_WO| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TDEPT_CAU_WO=$(grep "tree depth:"                   $NAME_OUTCAU_WO| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    NBEXT_CAU_WO=$(grep "total number ET:"              $NAME_OUTCAU_WO| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    TTIME_CAU_WO=$(grep "total time:"                   $NAME_OUTCAU_WO| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    
+    TTIME_MPL=$(grep "real"                          $NAME_OUTMPL| cut -f2 -d'l' | tr -d ' ')
+    
+    TTIME_CAU=`format_time $TTIME_CAU`
+    TTIME_MPL=`format_time $TTIME_MPL`
+#     echo $TTIME_CCL
+    COLORMPL="\\coblue{"
+    COLORCAU="\\cored{"
+    TEST=`echo "$TTIME_MPL > $TTIME_CAU" | bc -l`
+    if [ $TEST -eq 1 ]; then
+        COLORMPL="\\cored{"
+        COLORCAU="\\coblue{"
+    fi
+    
+    K=$DEG
+    D=$NBSOLS
+    TEST=`echo "$K == $D" | bc -l`
+    if [ $TEST -eq 1 ]; then
+        K=" "
+    fi
+    
+    LINE_TAB="$K & $D"
+#     LINE_TAB=$LINE_TAB" & `format_numb $TSIZE_CAU_WO $LENP` & `format_numb $TDEPT_CAU_WO 2`"
+    LINE_TAB=$LINE_TAB" & `format_time $TTIME_CAU_WO`       & `format_numb $NBEXT_CAU_WO $LENP`"
+#     LINE_TAB=$LINE_TAB" & `format_numb $TSIZE_CAU $LENP` & `format_numb $TDEPT_CAU 2`"
+    LINE_TAB=$LINE_TAB" & $COLORCAU$TTIME_CAU}           & `format_numb $NBEXT_CAU $LENP`"
+    LINE_TAB=$LINE_TAB" & `format_time $EVTIME_CAU` & `format_time $COTIME_CAU`   & `format_time $CETIME_CAU`"
+    LINE_TAB=$LINE_TAB" & $COLORMPL$TTIME_MPL} "
     LINE_TAB=$LINE_TAB"\\\\"
     
 #     echo $LINE_TAB
@@ -533,6 +646,108 @@ stats_pol_rand()
     LINE_TAB=$LINE_TAB" & `format_time $TSIZE_CAU` & `format_time $TDEPT_CAU`"
     LINE_TAB=$LINE_TAB" & $COLORCAU$TTIME_CAU}       & `format_time $NBEXT_CAU`"
     LINE_TAB=$LINE_TAB" & $TTIME_MPL "
+    LINE_TAB=$LINE_TAB"\\\\"
+    
+#     echo $LINE_TAB
+    echo $LINE_TAB >> $TEMPTABFILE
+}
+
+stats_pol_rand_procedural()
+{
+    NAME=$1
+    DEG=$2
+    NBPOLS=$3
+    
+    NBSOLS=0
+    TSIZE_CAU_WO=0
+    TDEPT_CAU_WO=0
+    NBEXT_CAU_WO=0
+    TTIME_CAU_WO=0
+    TSIZE_CAU=0
+    TDEPT_CAU=0
+    NBEXT_CAU=0
+    TTIME_CAU=0
+    COTIME_CAU=0
+    CETIME_CAU=0
+    EVTIME_CAU=0
+    TTIME_MPL=0
+    
+    for CURIND in `seq 1 $NBPOLS`; do
+        NAME_OUTCAU=$NAME"_"$CURIND".out_cau"
+        NAME_OUTCAU_WO=$NAME"_"$CURIND".out_cau_wo"
+        NAME_OUTMPL=$NAME"_"$CURIND".out_mpl"
+        
+        NBSOLS_T=$(grep "number of solutions"              $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+    
+        TSIZE_CAU_T=$(grep "tree size:"                    $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        TDEPT_CAU_T=$(grep "tree depth:"                   $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        NBEXT_CAU_T=$(grep "total number ET:"              $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        TTIME_CAU_T=$(grep "total time:"                   $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        COTIME_CAU_T=$(grep "total time spent in compression:" $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        CETIME_CAU_T=$(grep "total time in Pellet:"            $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        EVTIME_CAU_T=$(grep "time in Evaluation:"              $NAME_OUTCAU| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        
+        TSIZE_CAU_WO_T=$(grep "tree size:"                    $NAME_OUTCAU_WO| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        TDEPT_CAU_WO_T=$(grep "tree depth:"                   $NAME_OUTCAU_WO| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        NBEXT_CAU_WO_T=$(grep "total number ET:"              $NAME_OUTCAU_WO| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        TTIME_CAU_WO_T=$(grep "total time:"                   $NAME_OUTCAU_WO| cut -f2 -d':'| cut -f1 -d's' | cut -f1 -d'|' | tr -d ' ')
+        
+        TTIME_MPL_T=$(grep "real"                          $NAME_OUTMPL| cut -f2 -d'l' | tr -d ' ')
+        
+        NBSOLS=`echo     $NBSOLS+$NBSOLS_T|bc -l`
+        TSIZE_CAU_WO=`echo     $TSIZE_CAU_WO+$TSIZE_CAU_WO_T|bc -l`
+        TDEPT_CAU_WO=`echo     $TDEPT_CAU_WO+$TDEPT_CAU_WO_T|bc -l`
+        NBEXT_CAU_WO=`echo     $NBEXT_CAU_WO+$NBEXT_CAU_WO_T|bc -l`
+        TTIME_CAU_WO=`echo     $TTIME_CAU_WO+$TTIME_CAU_WO_T|bc -l`
+        TSIZE_CAU=`echo     $TSIZE_CAU+$TSIZE_CAU_T|bc -l`
+        TDEPT_CAU=`echo     $TDEPT_CAU+$TDEPT_CAU_T|bc -l`
+        NBEXT_CAU=`echo     $NBEXT_CAU+$NBEXT_CAU_T|bc -l`
+        TTIME_CAU=`echo     $TTIME_CAU+$TTIME_CAU_T|bc -l`
+        COTIME_CAU=`echo     $COTIME_CAU+$COTIME_CAU_T|bc -l`
+        CETIME_CAU=`echo     $CETIME_CAU+$CETIME_CAU_T|bc -l`
+        EVTIME_CAU=`echo     $EVTIME_CAU+$EVTIME_CAU_T|bc -l`
+        TTIME_MPL=`echo     $TTIME_MPL+$TTIME_MPL_T|bc -l`
+    done
+    
+    NBSOLS=`echo     $NBSOLS    /$NBPOLS     |bc -l`
+    TSIZE_CAU_WO=`echo     $TSIZE_CAU_WO    /$NBPOLS     |bc -l`
+    TDEPT_CAU_WO=`echo     $TDEPT_CAU_WO    /$NBPOLS     |bc -l`
+    NBEXT_CAU_WO=`echo     $NBEXT_CAU_WO    /$NBPOLS     |bc -l`
+    TTIME_CAU_WO=`echo     $TTIME_CAU_WO    /$NBPOLS     |bc -l`
+    TSIZE_CAU=`echo     $TSIZE_CAU    /$NBPOLS     |bc -l`
+    TDEPT_CAU=`echo     $TDEPT_CAU    /$NBPOLS     |bc -l`
+    NBEXT_CAU=`echo     $NBEXT_CAU    /$NBPOLS     |bc -l`
+    TTIME_CAU=`echo     $TTIME_CAU    /$NBPOLS     |bc -l`
+    COTIME_CAU=`echo     $COTIME_CAU    /$NBPOLS     |bc -l`
+    CETIME_CAU=`echo     $CETIME_CAU    /$NBPOLS     |bc -l`
+    EVTIME_CAU=`echo     $EVTIME_CAU    /$NBPOLS     |bc -l`
+    TTIME_MPL=`echo     $TTIME_MPL    /$NBPOLS     |bc -l`
+    
+    TTIME_CAU=`format_time $TTIME_CAU`
+    TTIME_MPL=`format_time $TTIME_MPL`
+#     echo $TTIME_CCL
+    COLORMPL="\\coblue{"
+    COLORCAU="\\cored{"
+    TEST=`echo "$TTIME_MPL > $TTIME_CAU" | bc -l`
+    if [ $TEST -eq 1 ]; then
+        COLORMPL="\\cored{"
+        COLORCAU="\\coblue{"
+    fi
+    
+    K=$DEG
+    D=$NBSOLS
+    TEST=`echo "$K == $D" | bc -l`
+    if [ $TEST -eq 1 ]; then
+        K=" "
+    fi
+    
+    LINE_TAB="$K & `format_time $D`"
+#     LINE_TAB=$LINE_TAB" & `format_numb $TSIZE_CAU_WO $LENP` & `format_numb $TDEPT_CAU_WO 2`"
+    LINE_TAB=$LINE_TAB" & `format_time $TTIME_CAU_WO`       & `format_time $NBEXT_CAU_WO $LENP`"
+#     LINE_TAB=$LINE_TAB" & `format_numb $TSIZE_CAU $LENP` & `format_numb $TDEPT_CAU 2`"
+    LINE_TAB=$LINE_TAB" & $COLORCAU$TTIME_CAU}           & `format_time $NBEXT_CAU $LENP`"
+    LINE_TAB=$LINE_TAB" & `format_time $EVTIME_CAU` & `format_time $COTIME_CAU`   & `format_time $CETIME_CAU`"
+    LINE_TAB=$LINE_TAB" & $COLORMPL$TTIME_MPL} "
     LINE_TAB=$LINE_TAB"\\\\"
     
 #     echo $LINE_TAB

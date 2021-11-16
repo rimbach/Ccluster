@@ -37,6 +37,16 @@
 // #define CAUCHY_CERTIFIED
 // #define DEFLATION_TURAN
 
+// #define CCLUSTER_TIMINGS
+#ifdef CCLUSTER_TIMINGS
+double time_in_cauchyTest_getEvaluationPoints;
+double time_in_cauchyTest_rootsOfUnits;
+double time_in_cauchyTest_shift_points;
+double time_in_cauchyTest_computeSsApprox;
+double time_in_cauchyTest_computeSsApprox_fromVals;
+double time_in_cacheCauchy_set_bounds;
+#endif
+
 #include <stdlib.h> /* for size_t */
 #include "flint/flint.h" /* for memory managment */ 
 

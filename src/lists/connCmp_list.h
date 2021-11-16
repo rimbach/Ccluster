@@ -98,6 +98,7 @@ LISTS_INLINE connCmp_ptr connCmp_list_connCmp_at_index(connCmp_list_t l, int ind
 LISTS_INLINE void connCmp_list_insert_sorted(connCmp_list_t l, connCmp_ptr b){
 //     gen_list_insert_sorted(l, b, connCmp_isless_for_list);
     gen_list_insert_sorted(l, b, connCmp_isgreater_for_list);
+//     gen_list_insert_sorted_from_end(l, b, connCmp_isgreater_for_list);
 }
 
 LISTS_INLINE void connCmp_list_insert_sorted_b(connCmp_list_t l, connCmp_ptr b){
@@ -138,6 +139,12 @@ LISTS_INLINE connCmp_list_iterator connCmp_list_end(){
 }
 LISTS_INLINE connCmp_ptr connCmp_list_elmt(connCmp_list_iterator it){
     return (connCmp_ptr) gen_list_elmt(it);
+}
+
+LISTS_INLINE connCmp_list_iterator connCmp_list_insert_sorted_from_end(connCmp_list_t l, connCmp_ptr b, connCmp_list_iterator it){
+//     gen_list_insert_sorted(l, b, connCmp_isless_for_list);
+//     gen_list_insert_sorted(l, b, connCmp_isgreater_for_list);
+    return gen_list_insert_sorted_from_end(l, b, it, connCmp_isgreater_for_list);
 }
 
 #endif

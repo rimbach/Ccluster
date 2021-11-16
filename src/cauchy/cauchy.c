@@ -11,12 +11,29 @@
 
 #include "cauchy/cauchy.h"
 
+#ifdef CCLUSTER_TIMINGS
+double time_in_cauchy_discard_compBox_list;
+double time_in_cauchy_bisect_connCmp;
+double time_in_cauchy_MaxNumberOfRootsInCC;
+double time_in_cauchy_compression;
+double time_in_cauchy_newton;
+double time_in_cauchy_connCmp_is_separated;
+double time_in_cauchy_connCmp_is_separated_certified;
+double time_in_cauchy_main_loop;
+double time_in_proba_counting;
+double time_in_real_coeffs;
+double time_in_certified;
+double time_in_insert_sorted;
+#endif
+
 slong cauchy_discard_compBox_list( compBox_list_t boxes, 
                                      compBox_list_t bDiscarded,
-                                     cacheApp_t cache, 
                                      cacheCauchy_t cacheCau,
                                      slong nbMSols, 
                                      slong prec, metadatas_t meta){
+#ifdef CCLUSTER_TIMINGS    
+    clock_t start=clock();
+#endif
     
     int level = 4;
     
@@ -68,7 +85,7 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
 
         resCauchy = cauchyTest_probabilistic_exclusion_test( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
                                                             NULL, 0,0,
-                                                            cache, cacheCau, resCauchy.appPrec, meta, depth);
+                                                            cacheCau, resCauchy.appPrec, meta, depth);
         if (metadatas_getVerbo(meta)>=level) {
             printf("#---cauchy exclusion test: res: %d\n", resCauchy.nbOfSol );
         }
@@ -152,19 +169,23 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
     compDsk_clear(bdisk);
     
 //     compRat_clear(compDist);
-    
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchy_discard_compBox_list += (double) (clock() - start);
+#endif    
     return res.appPrec;
 }
 
 void cauchy_bisect_connCmp( connCmp_list_t dest, 
                               connCmp_t cc, 
                               connCmp_list_t discardedCcs, 
-                              compBox_list_t bDiscarded, 
-                              cacheApp_t cache, 
+                              compBox_list_t bDiscarded,
                               cacheCauchy_t cacheCau,
                               slong nbMsols, 
                               metadatas_t meta, 
                               slong nbThreads){
+#ifdef CCLUSTER_TIMINGS     
+    clock_t start=clock();
+#endif
     
     slong prec = connCmp_appPr(cc);
     compBox_list_t subBoxes;
@@ -189,12 +210,13 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
         ccluster_free(btemp);
     }
     
-    prec = cauchy_discard_compBox_list( subBoxes, bDiscarded, cache, cacheCau, nbMsols, prec, meta);
+    prec = cauchy_discard_compBox_list( subBoxes, bDiscarded, cacheCau, nbMsols, prec, meta);
     
     while (!compBox_list_is_empty(subBoxes)) {
         btemp = compBox_list_pop(subBoxes);
         connCmp_union_compBox( ltemp, btemp);
     }
+    
     int specialFlag = 1;
     if (connCmp_list_get_size(ltemp) == 1)
         specialFlag = 0;
@@ -244,13 +266,17 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
     
     compBox_list_clear(subBoxes);
     connCmp_list_clear(ltemp);
+
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchy_bisect_connCmp += (double) (clock() - start);
+#endif
+    
 }
 
 void cauchy_prep_loop( compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t qPrepLoop, 
-                         connCmp_list_t discardedCcs, 
-                         cacheApp_t cache,
+                         connCmp_list_t discardedCcs,
                          cacheCauchy_t cacheCau,
                          metadatas_t meta) {
     
@@ -273,7 +299,7 @@ void cauchy_prep_loop( compBox_list_t bDiscarded,
         if ( connCmp_is_confined(ctemp, metadatas_initBref(meta)) && (realRat_cmp(diam, halfwidth)<0) )
             connCmp_list_insert_sorted(qMainLoop, ctemp);
         else {
-            cauchy_bisect_connCmp( ltemp, ctemp, discardedCcs, bDiscarded, cache, cacheCau, -1, meta, metadatas_useNBThreads(meta));
+            cauchy_bisect_connCmp( ltemp, ctemp, discardedCcs, bDiscarded, cacheCau, -1, meta, metadatas_useNBThreads(meta));
             
             while (!connCmp_list_is_empty(ltemp))
                 connCmp_list_push(qPrepLoop, connCmp_list_pop(ltemp));
@@ -293,8 +319,13 @@ void cauchy_prep_loop( compBox_list_t bDiscarded,
 slong cauchy_MaxNumberOfRootsInCC( const connCmp_t ccur,
                                    connCmp_list_t qMainLoop,
                                    slong nbSolsInQResults,
-                                   cacheApp_t cache, 
+                                   cacheCauchy_t cacheCau, 
                                    metadatas_t meta ){
+    
+#ifdef CCLUSTER_TIMINGS    
+    clock_t start = clock();
+#endif
+    
     slong nbMaxSol=connCmp_nSolsref(ccur);
     if (nbMaxSol==-1) {
         nbMaxSol=0;
@@ -315,10 +346,15 @@ slong cauchy_MaxNumberOfRootsInCC( const connCmp_t ccur,
         }
         nbMaxSol += nbSolsInQResults;
 //         printf("nbMaxSol: %ld\n", nbMaxSol);
-        nbMaxSol = cacheApp_getDegree(cache) - nbMaxSol;
+        nbMaxSol = cacheCauchy_degreeref(cacheCau) - nbMaxSol;
         if ( (metadatas_useRealCoeffs(meta)) && (connCmp_is_imaginary_positive(ccur)) )
             nbMaxSol = nbMaxSol/2;
     }
+    
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchy_MaxNumberOfRootsInCC += (double) (clock() - start);
+#endif
+    
     return nbMaxSol;
 }
 
@@ -335,18 +371,21 @@ connCmp_ptr cauchy_compression( connCmp_ptr ccur,
                                 const compDsk_t ccDisk,
                                 slong m,
                                 const realRat_t eps,
-                                cacheApp_t cache, 
                                 cacheCauchy_t cacheCau,
                                 slong prec,
                                 metadatas_t meta,
                                 slong depth ) {
+
+#ifdef CCLUSTER_TIMINGS
+    clock_t start = clock();
+#endif    
     
     int level = 3;
     
     /* let epsp = max( eps, r/( (1 + 3d/m)^2 ) ) */
     realRat_t epsp;
     realRat_init(epsp);
-    realRat_set_si( epsp, (slong) connCmp_nSolsref(ccur), (slong) connCmp_nSolsref(ccur) + 3*cacheApp_getDegree(cache) );
+    realRat_set_si( epsp, (slong) connCmp_nSolsref(ccur), (slong) connCmp_nSolsref(ccur) + 3*cacheCauchy_degreeref(cacheCau) );
     realRat_mul( epsp, epsp, epsp );
     realRat_mul( epsp, epsp, compDsk_radiusref(ccDisk) );
     /* case where eps = +inf; eps = 1/0 */
@@ -377,7 +416,7 @@ connCmp_ptr cauchy_compression( connCmp_ptr ccur,
     realRat_init(theta);
     realRat_set_si(theta, 2, 1);
     
-    slong precres = cauchy_compressionIntoRigidDisk( res, ccDisk, m, theta, epspp, cache, cacheCau, prec, meta, depth);
+    slong precres = cauchy_compressionIntoRigidDisk( res, ccDisk, m, theta, epspp, cacheCau, prec, meta, depth);
     
     if (metadatas_getVerbo(meta)>=level) {
         printf("#---------Precision after compression: %ld\n", precres);
@@ -415,7 +454,7 @@ connCmp_ptr cauchy_compression( connCmp_ptr ccur,
         } else {
             /* the Disk D(c'', (1 + 3d/m)r'') is (1 + 3d/m) isolated */
             realRat_mul_si( compDsk_radiusref(res), compDsk_radiusref(res), 
-                            connCmp_nSolsref(ccur) + 3*cacheApp_getDegree(cache) );
+                            connCmp_nSolsref(ccur) + 3*cacheCauchy_degreeref(cacheCau) );
             realRat_div_ui( compDsk_radiusref(res), compDsk_radiusref(res), 
                             connCmp_nSolsref(ccur) );
             /* cover D(c'',(1 + 3d/m)r'') with at most 9 sub-boxes of the subdivision tree */
@@ -437,15 +476,22 @@ connCmp_ptr cauchy_compression( connCmp_ptr ccur,
     realRat_clear(epsp);
     realRat_clear(epspp);
     
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchy_compression += (double) (clock() - start);
+#endif
+    
     return ccur;
 }
 
 newton_res cauchy_newton ( connCmp_ptr * ccur,
                            const compBox_t componentBox,
-                           cacheApp_t cache, 
                            cacheCauchy_t cacheCau,
                            slong prec,
                            metadatas_t meta){
+
+#ifdef CCLUSTER_TIMINGS
+    clock_t start = clock();
+#endif 
     
     newton_res resNewton;
     
@@ -459,7 +505,7 @@ newton_res cauchy_newton ( connCmp_ptr * ccur,
     connCmp_ptr nCC;
     nCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
     connCmp_init(nCC);
-    resNewton = newton_cauchy_newton_connCmp( nCC, *ccur, cache, cacheCau, initPoint, prec, meta);
+    resNewton = newton_cauchy_newton_connCmp( nCC, *ccur, cacheCau, initPoint, prec, meta);
             
     compRat_clear(initPoint);
     
@@ -480,7 +526,11 @@ newton_res cauchy_newton ( connCmp_ptr * ccur,
         connCmp_clear(nCC);
         ccluster_free(nCC);
     }
-            
+       
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchy_newton += (double) (clock() - start);
+#endif
+    
     return resNewton;
 }
 
@@ -555,6 +605,10 @@ int  cauchy_compDsk_is_separated( const compDsk_t d, connCmp_list_t qMainLoop, c
 
 int cauchy_connCmp_is_separated( connCmp_t cc, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, metadatas_t meta ) {
     
+#ifdef CCLUSTER_TIMINGS
+    clock_t start = clock();
+#endif
+    
     if (connCmp_isSepref(cc) == 1)
         return 1;
     
@@ -579,10 +633,18 @@ int cauchy_connCmp_is_separated( connCmp_t cc, connCmp_list_t qMainLoop, connCmp
     compBox_clear(componentBox);
     compDsk_clear(ccDisk);
     
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchy_connCmp_is_separated += (double) (clock() - start);
+#endif
+    
     return res;
 }
 
 int cauchy_connCmp_is_separated_certified( connCmp_t cc, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, metadatas_t meta ) {
+    
+#ifdef CCLUSTER_TIMINGS
+    clock_t start = clock();
+#endif
     
     if (connCmp_isSepCertref(cc) == 1)
         return 1;
@@ -630,6 +692,10 @@ int cauchy_connCmp_is_separated_certified( connCmp_t cc, connCmp_list_t qMainLoo
     compDsk_clear(sixCCDisk);
     compDsk_clear(twoCCDisk);
     
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchy_connCmp_is_separated_certified += (double) (clock() - start);
+#endif
+    
     return res;
 }
 
@@ -637,11 +703,14 @@ int cauchy_main_loop( connCmp_list_t qResults,
                          compBox_list_t bDiscarded,
                          connCmp_list_t qMainLoop, 
                          connCmp_list_t discardedCcs, 
-                         const realRat_t eps, 
-                         cacheApp_t cache, 
+                         const realRat_t eps,
                          cacheCauchy_t cacheCau,
                          int certified,
                          metadatas_t meta){
+ 
+#ifdef CCLUSTER_TIMINGS
+    clock_t startt = clock();
+#endif
     
     /* for prints */
     int level = 3;
@@ -691,9 +760,7 @@ int cauchy_main_loop( connCmp_list_t qResults,
     
     int failure = 0;
     
-    double timeInRealCoeffs = 0.0;
-    double timeInMaxNumberOfRoots = 0.0;
-    double timeInIsSeparated = 0.0;
+    connCmp_list_iterator it = connCmp_list_end();
     
     while ( (failure==0)&&(!connCmp_list_is_empty(qMainLoop)) ) {
         
@@ -711,20 +778,21 @@ int cauchy_main_loop( connCmp_list_t qResults,
         /* try to upper bound the number of roots in ccur */
         /* at least one sol per connected comp in qMainLoop, */
         /* 2 if use real coeffs and the CC does not contain the real line */
-        clock_t start2=clock();
-        slong nbMaxSol= cauchy_MaxNumberOfRootsInCC( ccur, qMainLoop, nbSolsInQResults, cache,  meta );
-        timeInMaxNumberOfRoots += (double) (clock() - start2);
+        slong nbMaxSol= cauchy_MaxNumberOfRootsInCC( ccur, qMainLoop, nbSolsInQResults, cacheCau,  meta );
         
+#ifdef CCLUSTER_TIMINGS
+        clock_t startt3 = clock();
+#endif
         /* Real Coeff */
-        start2=clock();
         pushConjugFlag = 0;
         if (metadatas_useRealCoeffs(meta)) {
             /* if the component contains the real line in its interior */
             if (!connCmp_is_imaginary_positive(ccur))
                 ccur = cauchy_connCmp_set_conjugate_closure( ccur, meta);
         }
-        timeInRealCoeffs += (double) (clock() - start2);
-        
+#ifdef CCLUSTER_TIMINGS    
+        time_in_real_coeffs += (double) (clock() - startt3);
+#endif        
         connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
         compBox_get_containing_dsk(ccDisk, componentBox);
         compDsk_inflate_realRat(fourCCDisk, ccDisk, four);
@@ -732,15 +800,17 @@ int cauchy_main_loop( connCmp_list_t qResults,
         prec = connCmp_appPr(ccur);
         depth = connCmp_getDepth(ccur, metadatas_initBref(meta));
         
-        start2=clock();
         separationFlag = cauchy_connCmp_is_separated( ccur, qMainLoop, discardedCcs, meta );
-        timeInIsSeparated += (double) (clock() - start2);
         
         widthFlag      = (realRat_cmp( compBox_bwidthref(componentBox), neps)<=0);
         compactFlag    = (realRat_cmp( compBox_bwidthref(componentBox), threeWidth)<=0);
         rigidFlag      = 0;
         isolaFlag      = 0;
         
+//         printf("#------number of boxes in ccur:          %d\n", connCmp_nb_boxes(ccur));
+//         printf("#------connCmp_nSolsref(ccur):           %d\n", connCmp_nSolsref(ccur));
+//         printf("#------max number of roots in ccur:      %ld\n\n", nbMaxSol); 
+            
         if (metadatas_getVerbo(meta)>=level) {
             printf("\n#---depth: %d\n", (int) depth);
 //             printf("------component Box:"); compBox_print(componentBox); printf("\n");
@@ -764,12 +834,19 @@ int cauchy_main_loop( connCmp_list_t qResults,
                         printf("#------run Cauchy probabilistic counter:\n");
                     }
                     
+#ifdef CCLUSTER_TIMINGS
+                    clock_t startt2 = clock();
+#endif
                     compDsk_inflate_realRat(twoCCDisk, ccDisk, two);
-                    cauchyTest_res resCauchy = cauchyTest_probabilistic_counting( twoCCDisk, cache, cacheCau, prec, meta, depth);
+                    cauchyTest_res resCauchy = cauchyTest_probabilistic_counting( twoCCDisk, cacheCau, prec, meta, depth);
                     connCmp_nSolsref(ccur) = resCauchy.nbOfSol;
                     prec = resCauchy.appPrec;
                     slong m = connCmp_nSols(ccur);
                     
+#ifdef CCLUSTER_TIMINGS    
+                    time_in_proba_counting += (double) (clock() - startt2);
+#endif
+    
                     if (resCauchy.nbOfSol == -1) {
                         failure = 1;
                         continue;
@@ -788,7 +865,7 @@ int cauchy_main_loop( connCmp_list_t qResults,
                         }
 
                         ccur = cauchy_compression( ccur, &rigidFlag, &widthFlag, &isolaFlag, 
-                                                   twoCCDisk, m, neps, cache, cacheCau, prec, meta, depth );
+                                                   twoCCDisk, m, neps, cacheCau, prec, meta, depth );
                         
                         connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
                         compBox_get_containing_dsk(ccDisk, componentBox);
@@ -799,6 +876,8 @@ int cauchy_main_loop( connCmp_list_t qResults,
                             printf("\n");
                         }
                         
+                        metadatas_add_time_CompTot(meta, (double) (clock() - start2));
+                        
                     }
                     
                 
@@ -806,7 +885,7 @@ int cauchy_main_loop( connCmp_list_t qResults,
         }
         
         if ( ( separationFlag && (connCmp_nSols(ccur) >0) && metadatas_useNewton(meta) && 
-               ( (!widthFlag)||( connCmp_nSols(ccur)== cacheApp_getDegree(cache) ) )
+               ( (!widthFlag)||( connCmp_nSols(ccur)== cacheCauchy_degreeref(cacheCau) ) )
                && ( (!metadatas_useCompression(meta))||(connCmp_isRigref(ccur)==0)) ) ) {
             
             if (metadatas_getVerbo(meta)>=level)
@@ -814,7 +893,7 @@ int cauchy_main_loop( connCmp_list_t qResults,
         
             start = clock();
         
-            resNewton = cauchy_newton ( &ccur, componentBox, cache, cacheCau, prec, meta);
+            resNewton = cauchy_newton ( &ccur, componentBox, cacheCau, prec, meta);
             
             if (metadatas_getVerbo(meta)>=level)
                 printf("#---------res_newton: %d \n", resNewton.nflag);
@@ -825,26 +904,31 @@ int cauchy_main_loop( connCmp_list_t qResults,
         }
         
         if (certified && (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag) {
-            start2=clock();
             separationFlag = cauchy_connCmp_is_separated_certified( ccur, qMainLoop, discardedCcs, meta );
-            timeInIsSeparated += (double) (clock() - start2);
             if (metadatas_getVerbo(meta)>=level)
                 printf("#------is separated Certified: %d\n", separationFlag );
         }
-            
+        
+#ifdef CCLUSTER_TIMINGS
+        startt3 = clock();
+#endif
         /* Real Coeff */
-        start2=clock();
         if ( metadatas_useRealCoeffs(meta)
             && ( ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) ) ) {
             
             cauchy_conjugate ( &ccurConj, &pushConjugFlag, &separationFlag, ccur, meta );
 
         }
-        timeInRealCoeffs += (double) (clock() - start2);
-
-        if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && (connCmp_nSols(ccur)<cacheApp_getDegree(cache))) {
+#ifdef CCLUSTER_TIMINGS    
+        time_in_real_coeffs += (double) (clock() - startt3);
+#endif 
+        
+        if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && (connCmp_nSols(ccur)<cacheCauchy_degreeref(cacheCau))) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
-            
+
+#ifdef CCLUSTER_TIMINGS
+        startt3 = clock();
+#endif            
             if (certified) { 
                 slong m = connCmp_nSols(ccur);
                 realRat_mul_si(compDsk_radiusref(twoCCDisk), compDsk_radiusref(ccDisk), 2);
@@ -854,10 +938,10 @@ int cauchy_main_loop( connCmp_list_t qResults,
                     slong q = cauchyTest_getNbEvals_counting_combinatorial_with_isoRatio(compDsk_centerref(ccDisk), compDsk_radiusref(twoCCDisk), two, m, cacheCau);
                     if (metadatas_getVerbo(meta)>=2) {
                         printf("#precision before Pellet counting: %ld\n", prec);
-                        printf("#number of eval points with Pellet: %ld\n", cacheApp_getDegree(cache)+1);
+                        printf("#number of eval points with Pellet: %ld\n", cacheCauchy_degreeref(cacheCau)+1);
                         printf("#number of eval points with Combin: %ld\n", q);
                     }
-                    resCert = cauchyTest_Pellet_counting( compDsk_centerref(ccDisk), compDsk_radiusref(twoCCDisk), two, m, cache, cacheCau, prec, 
+                    resCert = cauchyTest_Pellet_counting( compDsk_centerref(ccDisk), compDsk_radiusref(twoCCDisk), two, m, cacheCau, prec, 
                                                             meta, depth);
                     if (metadatas_getVerbo(meta)>=level) {
                         printf("#result: %d, precision: %ld\n", resCert.nbOfSol, resCert.appPrec);
@@ -875,6 +959,9 @@ int cauchy_main_loop( connCmp_list_t qResults,
                 metadatas_add_nbClusterCertified( meta, 1);
                 connCmp_infate_realRat_inPlace(ccur,  two, metadatas_initBref(meta) );
             }
+#ifdef CCLUSTER_TIMINGS    
+        time_in_certified += (double) (clock() - startt3);
+#endif
             
             connCmp_list_push(qResults, ccur);
             nbSolsInQResults += connCmp_nSols(ccur);
@@ -884,7 +971,6 @@ int cauchy_main_loop( connCmp_list_t qResults,
             
 //             printf("metadatas_useRealCoeffs(meta): %d, pushConjugFlag: %d\n", metadatas_useRealCoeffs(meta), pushConjugFlag);
             /* Real Coeff */
-            start2=clock();
             if ((metadatas_useRealCoeffs(meta))&&(pushConjugFlag)){
                 /*compute the complex conjugate*/
                 metadatas_add_validated( meta, depth, connCmp_nSols(ccurConj) );
@@ -894,14 +980,19 @@ int cauchy_main_loop( connCmp_list_t qResults,
                     metadatas_add_nbClusterCertified( meta, 1);
                 }
             }
-            timeInRealCoeffs += (double) (clock() - start2);
         }
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && resNewton.nflag ) {
             
             if (metadatas_getVerbo(meta)>=level)
                 printf("------push in working queue after newton success %d roots\n", connCmp_nSols(ccur));
-            
-            connCmp_list_insert_sorted(qMainLoop, ccur);
+#ifdef CCLUSTER_TIMINGS
+            startt3 = clock();
+#endif            
+//             connCmp_list_insert_sorted(qMainLoop, ccur);
+            it = connCmp_list_insert_sorted_from_end(qMainLoop, ccur, it);
+#ifdef CCLUSTER_TIMINGS    
+            time_in_insert_sorted += (double) (clock() - startt3);
+#endif
         }
         
         else if ( (connCmp_nSols(ccur)>0) && separationFlag && (resNewton.nflag==0) && (fmpz_cmp_si(connCmp_nwSpdref(ccur),4)>0) ){
@@ -909,17 +1000,31 @@ int cauchy_main_loop( connCmp_list_t qResults,
 
             if (metadatas_getVerbo(meta)>=level)
                 printf("------push in working queue after newton fail %d roots\n", connCmp_nSols(ccur));
-            
-            connCmp_list_insert_sorted(qMainLoop, ccur);
+#ifdef CCLUSTER_TIMINGS
+            startt3 = clock();
+#endif            
+//             connCmp_list_insert_sorted(qMainLoop, ccur);
+            it = connCmp_list_insert_sorted_from_end(qMainLoop, ccur, it);
+#ifdef CCLUSTER_TIMINGS    
+            time_in_insert_sorted += (double) (clock() - startt3);
+#endif
         }
         else {
 
             if (metadatas_getVerbo(meta)>=level)
                 printf("------bisect and push in working queue\n");
             
-            cauchy_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cache, cacheCau, nbMaxSol, meta,1);
-            while (!connCmp_list_is_empty(ltemp))
-                connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
+            cauchy_bisect_connCmp( ltemp, ccur, discardedCcs, bDiscarded, cacheCau, nbMaxSol, meta,1);
+            while (!connCmp_list_is_empty(ltemp)) {
+#ifdef CCLUSTER_TIMINGS
+                startt3 = clock();
+#endif
+//                 connCmp_list_insert_sorted(qMainLoop, connCmp_list_pop(ltemp));
+                it = connCmp_list_insert_sorted_from_end(qMainLoop, connCmp_list_pop(ltemp), it);
+#ifdef CCLUSTER_TIMINGS    
+                time_in_insert_sorted += (double) (clock() - startt3);
+#endif
+            }
             connCmp_clear(ccur);
             ccluster_free(ccur);
         }
@@ -937,36 +1042,70 @@ int cauchy_main_loop( connCmp_list_t qResults,
     realRat_clear(threeWidth);
     connCmp_list_clear(ltemp);
     
-    printf("time in realCoeffs: %f\n", timeInRealCoeffs/CLOCKS_PER_SEC);
-    printf("time in MaxNumberOfRoots: %f\n", timeInMaxNumberOfRoots/CLOCKS_PER_SEC);
-    printf("time in IsSeparated: %f\n", timeInIsSeparated/CLOCKS_PER_SEC);
+//     printf("time in UnionFind: %f\n", timeInUnionFind/CLOCKS_PER_SEC);
+
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchy_main_loop += (double) (clock() - startt);
+#endif
+    
     return failure;
 }
 
 int cauchy_algo_global( connCmp_list_t qResults, 
                            compBox_list_t bDiscarded,
-                           const compBox_t initialBox, 
                            const realRat_t eps, 
-                           cacheApp_t cache, 
                            cacheCauchy_t cacheCau,
                            int certified,
                            metadatas_t meta){
     
+#ifdef CCLUSTER_TIMINGS
+    time_in_cauchy_discard_compBox_list   = 0.0;
+    time_in_cauchy_bisect_connCmp         = 0.0;
+    time_in_cauchy_MaxNumberOfRootsInCC   = 0.0;
+    time_in_cauchy_compression            = 0.0;
+    time_in_cauchy_newton                 = 0.0;
+    time_in_cauchy_connCmp_is_separated           = 0.0;
+    time_in_cauchy_connCmp_is_separated_certified = 0.0;
+    time_in_cauchy_main_loop                      = 0.0;
+    time_in_proba_counting                        = 0.0;
+    time_in_real_coeffs                           = 0.0;
+    time_in_certified                             = 0.0;
+    time_in_insert_sorted                         = 0.0;
+    
+    time_in_cauchyTest_getEvaluationPoints =0.0;
+    time_in_cauchyTest_rootsOfUnits        =0.0; 
+    time_in_cauchyTest_shift_points        =0.0; 
+    time_in_cauchyTest_computeSsApprox        =0.0; 
+    time_in_cauchyTest_computeSsApprox_fromVals        =0.0; 
+    time_in_cacheCauchy_set_bounds        =0.0; 
+#endif
+    
     clock_t start = clock();
+    int level = 3;
     
 //     realRat_t factor;
 //     realRat_init(factor);
 //     realRat_set_si(factor, 5, 4);
     
-    compBox_ptr box;
-    box = (compBox_ptr) ccluster_malloc (sizeof(compBox));
-    compBox_init(box);
-    compBox_set(box, initialBox);
-    compBox_nbMSolref(box) = cacheApp_getDegree ( cache );
+    compBox_ptr initialBox;
+    initialBox = (compBox_ptr) ccluster_malloc (sizeof(compBox));
+    compBox_init(initialBox);
+    compBox_set_si(initialBox, 0,1,0,1,0,1);
+    
+    /* automaticly set initialBox */
+    /* with evaluation function */
+    cauchyRootRadii_root_bound( compBox_bwidthref(initialBox), cacheCau, meta );
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("#root bound with eval function: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+    }
+    realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
+    
+    metadatas_setInitBox(meta, initialBox);
+    compBox_nbMSolref(initialBox) = cacheCauchy_degreeref(cacheCau);
     
     connCmp_ptr initialCC;
     initialCC = (connCmp_ptr) ccluster_malloc (sizeof(connCmp));
-    connCmp_init_compBox(initialCC, box);
+    connCmp_init_compBox(initialCC, initialBox);
     
     connCmp_list_t qMainLoop, discardedCcs;
     connCmp_list_init(qMainLoop);
@@ -977,7 +1116,7 @@ int cauchy_algo_global( connCmp_list_t qResults,
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster preploop: \n");
 //     ccluster_prep_loop( qMainLoop, qPrepLoop, discardedCcs, cache, meta);
 //     if (metadatas_getVerbo(meta)>3) printf("Ccluster mainloop: \n");
-    int failure = cauchy_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cache, cacheCau, certified, meta);
+    int failure = cauchy_main_loop( qResults, bDiscarded,  qMainLoop, discardedCcs, eps, cacheCau, certified, meta);
     
     
 //     realRat_clear(factor);
@@ -988,10 +1127,38 @@ int cauchy_algo_global( connCmp_list_t qResults,
 //     chronos_toc_CclusAl(metadatas_chronref(meta));
     metadatas_add_time_CclusAl(meta, (double) (clock() - start));
     
+#ifdef CCLUSTER_TIMINGS
+//     printf("time_in_cauchy_discard_compBox_list          : %f\n", time_in_cauchy_discard_compBox_list           /CLOCKS_PER_SEC);
+    printf("time_in_cauchy_bisect_connCmp                : %f\n", time_in_cauchy_bisect_connCmp                 /CLOCKS_PER_SEC);
+    printf("time_in_cauchy_MaxNumberOfRootsInCC          : %f\n", time_in_cauchy_MaxNumberOfRootsInCC           /CLOCKS_PER_SEC);
+    printf("time_in_proba_counting                       : %f\n", time_in_proba_counting                        /CLOCKS_PER_SEC);
+    printf("time_in_cauchy_compression                   : %f\n", time_in_cauchy_compression                    /CLOCKS_PER_SEC);
+    printf("time_in_cauchy_newton                        : %f\n", time_in_cauchy_newton                         /CLOCKS_PER_SEC);
+    printf("time_in_cauchy_connCmp_is_separated          : %f\n", time_in_cauchy_connCmp_is_separated           /CLOCKS_PER_SEC);
+    printf("time_in_cauchy_connCmp_is_separated_certified: %f\n", time_in_cauchy_connCmp_is_separated_certified /CLOCKS_PER_SEC);
+    printf("time_in_real_coeffs                          : %f\n", time_in_real_coeffs                           /CLOCKS_PER_SEC);
+    printf("time_in_certified                            : %f\n", time_in_certified                             /CLOCKS_PER_SEC);
+    printf("time_in_insert_sorted                        : %f\n", time_in_insert_sorted                         /CLOCKS_PER_SEC);
+    printf("                                             ---------\n");
+    double total = time_in_cauchy_bisect_connCmp + time_in_cauchy_MaxNumberOfRootsInCC + time_in_proba_counting
+                 + time_in_cauchy_compression    + time_in_cauchy_newton + time_in_cauchy_connCmp_is_separated
+                 + time_in_cauchy_connCmp_is_separated_certified + time_in_real_coeffs + time_in_certified
+                 + time_in_insert_sorted; 
+    printf("                                               %f\n", total                                         /CLOCKS_PER_SEC);
+    printf("time_in_cauchy_main_loop                     : %f\n", time_in_cauchy_main_loop                      /CLOCKS_PER_SEC);
+    printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
+    printf("time_in_cauchyTest_getEvaluationPoints       : %f\n", time_in_cauchyTest_getEvaluationPoints        /CLOCKS_PER_SEC);
+    printf("time_in_cauchyTest_rootsOfUnits              : %f\n", time_in_cauchyTest_rootsOfUnits               /CLOCKS_PER_SEC);
+    printf("time_in_cauchyTest_shift_points              : %f\n", time_in_cauchyTest_shift_points               /CLOCKS_PER_SEC);
+    printf("time_in_cauchyTest_computeSsApprox           : %f\n", time_in_cauchyTest_computeSsApprox            /CLOCKS_PER_SEC);
+    printf("time_in_cauchyTest_computeSsApprox_fromVals  : %f\n", time_in_cauchyTest_computeSsApprox_fromVals   /CLOCKS_PER_SEC);
+    printf("time_in_cacheCauchy_set_bounds               : %f\n", time_in_cacheCauchy_set_bounds                /CLOCKS_PER_SEC);
+#endif
+    
     return failure;
 }
 
-int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheApp_t cache, cacheCauchy_t cacheCau, int certified){
+int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, cacheCauchy_t cacheCau, int certified){
     int r=1;
     char temp[1000];
     
@@ -999,7 +1166,8 @@ int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, 
     r = fprintf(file, "# -------------------Cauchy Root Finder: ------------------------------\n");
     r = fprintf(file, "# -------------------Input:    ----------------------------------------\n");
     if (metadatas_getVerbo(meta)>=2) {
-    slong degree = cacheApp_getDegree( cache );
+    slong degree = cacheCauchy_degreeref(cacheCau);
+    cacheApp_ptr cache = cacheCauchy_cacheAppref(cacheCau);
     if (cacheCauchy_evalFastref(cacheCau) == NULL) {
         if (cache->_from_poly) {
             slong bitsize = cacheApp_getBitsize (cache);

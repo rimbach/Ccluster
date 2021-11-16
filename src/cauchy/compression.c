@@ -63,7 +63,6 @@ void cauchy_setRadSup( compDsk_t res, const compDsk_t Delta, const realRat_t the
 //                                   const realRat_t theta,
 //                                   slong m,
 //                                   const compRat_t cprime,
-//                                   cacheApp_t cache,
 //                                   cacheCauchy_t cacheCau,
 //                                   slong prec, metadatas_t meta, slong depth) {
 //     
@@ -91,7 +90,7 @@ void cauchy_setRadSup( compDsk_t res, const compDsk_t Delta, const realRat_t the
 //         compApp_init( Shs + i );
 //         
 //     /* compute m power sums s1, s2, ..., sm of roots of p(c + rz) in D(0,1) at precision eps */
-//     cauchyTest_res resT = cauchyTest_computeSgNcompDsk( Shs, theta, Delta, m, 1, m, cache, cacheCau, eps, prec2, meta, depth);
+//     cauchyTest_res resT = cauchyTest_computeSgNcompDsk( Shs, theta, Delta, m, 1, m, cacheCau, eps, prec2, meta, depth);
 //     
 //     realRat_clear(eps);
 //     
@@ -171,7 +170,6 @@ slong cauchy_rootBound_deflation( realApp_t lbound,
                                    const realRat_t theta,
                                    slong m,
                                    const compRat_t cprime,
-                                   cacheApp_t cache,
                                    cacheCauchy_t cacheCau,
                                    slong prec, metadatas_t meta, slong depth) {
     
@@ -223,7 +221,7 @@ slong cauchy_rootBound_deflation( realApp_t lbound,
     while ( enoughPrec == -1 ) {
         
         /* compute m power sums s1, s2, ..., sm of roots of p(c + rz) in D(0,1) at precision eps */
-        res = cauchyTest_computeSgNcompDsk( Shs, theta, Delta, m, 1, m, cache, cacheCau, epsp, prec2, meta, depth);
+        res = cauchyTest_computeSgNcompDsk( Shs, theta, Delta, m, 1, m, cacheCau, epsp, prec2, meta, depth);
     
         if ( res.nbOfSol == -2 ) {
             if (metadatas_getVerbo(meta)>=level) {
@@ -299,7 +297,6 @@ slong cauchy_rootBound_deflation_Turan( realRat_t lbound,
                                         slong m,
                                         const compRat_t cprime,
                                         const realRat_t eps,
-                                        cacheApp_t cache,
                                         cacheCauchy_t cacheCau,
                                         slong prec, metadatas_t meta, slong depth) {
     
@@ -357,7 +354,7 @@ slong cauchy_rootBound_deflation_Turan( realRat_t lbound,
     while ( enoughPrec == -1 ) {
         
         /* compute m power sums s1, s2, ..., sm of roots of p(c + rz) in D(0,1) at precision eps */
-        res = cauchyTest_computeSgNcompDsk( Shs, theta, Delta, m, 1, m, cache, cacheCau, epsp, prec2, meta, depth);
+        res = cauchyTest_computeSgNcompDsk( Shs, theta, Delta, m, 1, m, cacheCau, epsp, prec2, meta, depth);
     
         if ( res.nbOfSol == -2 ) {
             if (metadatas_getVerbo(meta)>=level) {
@@ -497,12 +494,11 @@ slong cauchy_rootBound_deflation_Turan( realRat_t lbound,
 /* either r' <= eps */
 /*     or res is m/((2m-2)*theta) rigid */
 slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slong m, const realRat_t theta, const realRat_t eps,
-                                       cacheApp_t cache,
                                        cacheCauchy_t cacheCau,
                                        slong prec, metadatas_t meta, slong depth) {
     
     int level = 4;
-    clock_t start=clock();
+//     clock_t start=clock();
     
     realRat_t epsp;
     realRat_init(epsp);
@@ -543,7 +539,7 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
     
     clock_t start2=clock();
     /* compute a disk of radius less than m*eps/theta containing s1(p,Delta) */
-    slong appPrec = cauchyTest_computeS1compDsk( res, theta, Delta, m, cache, cacheCau, epsp, meta, depth );
+    slong appPrec = cauchyTest_computeS1compDsk( res, theta, Delta, m, cacheCau, epsp, meta, depth );
     metadatas_add_time_CompCen(meta, (double) (clock() - start2));
     
     /* if m=1 then res is equivalent to Delta and has radius less than eps/2 */
@@ -555,7 +551,7 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
         }
         
         metadatas_addComp_nb_1( meta, 1);
-        metadatas_add_time_CompTot(meta, (double) (clock() - start));
+//         metadatas_add_time_CompTot(meta, (double) (clock() - start));
     
         realRat_clear(epsp);
         return appPrec;
@@ -582,7 +578,7 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
     realRat_init(ubound);
     
     start2=clock();
-    cauchy_rootBound_deflation_Turan( lbound, ubound, relativeError, Delta, theta, m, compDsk_centerref(res), epsp, cache, cacheCau, appPrec, meta, depth);
+    cauchy_rootBound_deflation_Turan( lbound, ubound, relativeError, Delta, theta, m, compDsk_centerref(res), epsp, cacheCau, appPrec, meta, depth);
     metadatas_add_time_CompRR2(meta, (double) (clock() - start2));
     
     realRat_set( compDsk_radiusref(res), ubound );
@@ -611,7 +607,7 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
                                  epsp,
                                  theta,   /*isolation ratio of the disk in which is computed rr */ 
                                  m,
-                                 cacheCau, cache, meta );
+                                 cacheCau, meta );
      metadatas_add_time_CompRR1(meta, (double) (clock() - start2));
     
      if (metadatas_getVerbo(meta)>=3) {
@@ -627,7 +623,7 @@ slong cauchy_compressionIntoRigidDisk( compDsk_t res, const compDsk_t Delta, slo
     
     
     metadatas_addComp_nb_p( meta, 1);
-    metadatas_add_time_CompTot(meta, (double) (clock() - start));
+//     metadatas_add_time_CompTot(meta, (double) (clock() - start));
     
     return appPrec;
 }

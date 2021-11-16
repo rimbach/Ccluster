@@ -205,7 +205,7 @@ void * gen_list_data_at_index(const gen_list_t l, int index){
         voyager = voyager->_next;
     return voyager->_elmt;
 }
-
+    
 void gen_list_insert_sorted(gen_list_t l, void * data, int (isless_func)(const void * d1, const void * d2)){
     
     struct gen_elmt * voyager = l->_begin;
@@ -370,4 +370,79 @@ void gen_list_copy(gen_list_t ltarget, const gen_list_t lsrc){
         gen_list_push( ltarget, gen_list_elmt( voyager ) );
         voyager = gen_list_next(voyager);
     }
+}
+
+gen_list_iterator gen_list_insert_sorted_from_end(gen_list_t l, void * data, gen_list_iterator it, int (isless_func)(const void * d1, const void * d2)){
+
+    struct gen_elmt * nelmt = (struct gen_elmt *) ccluster_malloc (sizeof(struct gen_elmt));
+    nelmt->_elmt = data;
+    nelmt->_next = NULL;
+    nelmt->_prev = NULL;
+    struct gen_elmt * voyager = (struct gen_elmt *) it;
+    
+    if (voyager!=NULL) {
+//         printf("NOT NULL\n");
+        if ( voyager->_prev!=NULL ){ /*otherwise voyager=begin*/
+//             printf("NOT NULL 2\n");
+            /* try to insert it before voyager */
+            if ( isless_func( data, (voyager->_elmt) ) && isless_func( (voyager->_prev->_elmt), data ) ) {
+//                 printf("VERY GOOD\n");
+                nelmt->_prev = voyager->_prev;
+                nelmt->_next = voyager;
+                voyager->_prev->_next = nelmt;
+                voyager->_prev = nelmt;
+                l->_size +=1;
+                if ((nelmt->_prev == NULL)||(nelmt->_prev->_prev == NULL))
+                    return NULL;
+                return (gen_list_iterator) nelmt;
+//                 return NULL;
+            }
+        }
+    }
+    
+    voyager = l->_end;
+    
+    /* empty list */
+    if (voyager == NULL) {
+//         printf("HERE\n");
+        l->_begin = l->_end = nelmt;
+    } else {
+        if ( isless_func( voyager->_elmt, data ) ){ /* insert at the end */
+//             printf("GOOD\n");
+            l->_end->_next = nelmt;
+            nelmt->_prev = l->_end;
+            l->_end = nelmt;
+        } else if ( isless_func( data, l->_begin->_elmt ) ){ /* insert at the beginning */
+//             printf("LESS GOOD\n");
+            nelmt->_next = l->_begin;
+            l->_begin->_prev = nelmt;
+            l->_begin = nelmt;
+            
+        } else {
+            slong steps = 0;
+            while (voyager->_prev!=NULL && isless_func( data, (voyager->_prev->_elmt) )) {
+                voyager = voyager->_prev;
+                steps ++;
+            }
+            
+            if (voyager->_prev == NULL) { /* insert at the beginning */
+                
+                nelmt->_next = l->_begin;
+                l->_begin->_prev = nelmt;
+                l->_begin = nelmt;
+                
+            } else {
+//                 printf("STEPS: %ld/%d\n", steps, l->_size);
+                nelmt->_prev = voyager->_prev;
+                nelmt->_next = voyager;
+                voyager->_prev->_next = nelmt;
+                voyager->_prev = nelmt;
+            }
+        } 
+    }
+    l->_size +=1;
+    if ((nelmt->_prev == NULL)||(nelmt->_prev->_prev == NULL))
+        return NULL;
+    return (gen_list_iterator) nelmt;
+//     return NULL;
 }

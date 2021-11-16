@@ -28,7 +28,6 @@ extern "C" {
     
 void cauchyRootRadii_root_bound( realRat_t upperBound,
                                  cacheCauchy_t cacheCau,
-                                 cacheApp_t cache,
                                  metadatas_t meta );
 
 /* Assume radInf < r_{d+1-m}(center, p) < radSup */
@@ -43,20 +42,7 @@ void cauchyRootRadii_root_radius( const compRat_t center,
                                   const realRat_t theta,   /*isolation ratio of the disk in which is computed rr */ 
                                   slong nbOfRoots,
                                   cacheCauchy_t cacheCau,
-                                  cacheApp_t cache,
                                   metadatas_t meta );
-  
-void cauchyRootRadii_probabilistic_root_radius( const compRat_t center,
-                                                realRat_t radInf,        /* radInf < r_{d+1-m}(center, p) */
-                                                realRat_t radSup,        /* radSup > r_{d+1-m}(center, p) */
-                                                const realRat_t relativeError, /* want relativeError*radInf >= radSup */ 
-                                                const realRat_t eps,
-                                                const realRat_t theta,   /*isolation ratio of the disk in which is computed rr */ 
-                                                slong nbOfRoots,
-                                                slong prec,
-                                                cacheCauchy_t cacheCau,
-                                                cacheApp_t cache,
-                                                metadatas_t meta );
 
 #ifdef __cplusplus
 }

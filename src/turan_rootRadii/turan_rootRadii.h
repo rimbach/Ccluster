@@ -34,7 +34,6 @@ slong turanRootRadii_root_bound( realApp_t rm,
                                  ulong           N,
                                  const realRat_t eps,
                                  cacheCauchy_t cacheCau,
-                                 cacheApp_t cache,
                                  slong prec,
                                  metadatas_t meta, int depth );
 

@@ -145,7 +145,6 @@ void cauchyRootRadii_root_radius( const compRat_t center,
                                   const realRat_t theta,   /*isolation ratio of the disk in which is computed rr */ 
                                   slong nbOfRoots,
                                   cacheCauchy_t cacheCau,
-                                  cacheApp_t cache,
                                   metadatas_t meta ){
     
     int level = 4;
@@ -190,8 +189,8 @@ void cauchyRootRadii_root_radius( const compRat_t center,
  
         /* Apply deterministic root counter to D(center, epsprime)*/
         realRat_set( compDsk_radiusref(Delta), epsprime );
-        cres = cauchyTest_deterministic_verification( Delta, nbOfRoots, a,
-                                                      cache, cacheCau, cres.appPrec, meta, 0);
+        cres = cauchyTest_rootFreeAnnulus_verification( Delta, nbOfRoots, a,
+                                                      cacheCau, cres.appPrec, meta, 0);
         if (metadatas_getVerbo(meta)>=level)
                 printf("#---------------cauchyRootRadii_root_radius.c: return of deterministic verification: cres.nbOfSol: %d \n", cres.nbOfSol);
         
@@ -228,8 +227,8 @@ void cauchyRootRadii_root_radius( const compRat_t center,
         realRat_set( compDsk_radiusref(Delta), t );
         
         /* Apply deterministic verification to D(center, t)*/
-        cres = cauchyTest_deterministic_verification( Delta, nbOfRoots, a,
-                                                      cache, cacheCau, cres.appPrec, meta, 0);
+        cres = cauchyTest_rootFreeAnnulus_verification( Delta, nbOfRoots, a,
+                                                      cacheCau, cres.appPrec, meta, 0);
         if (metadatas_getVerbo(meta)>=level)
                 printf("#------------cauchyRootRadii_root_radius.c: return of deterministic verification: cres.nbOfSol: %d \n", cres.nbOfSol);
         
@@ -260,129 +259,129 @@ void cauchyRootRadii_root_radius( const compRat_t center,
     realRat_clear(t);
 }
 
-void cauchyRootRadii_probabilistic_root_radius( const compRat_t center,
-                                                realRat_t radInf,        /* radInf < r_{d+1-m}(center, p) */
-                                                realRat_t radSup,        /* radSup > r_{d+1-m}(center, p) */
-                                                const realRat_t relativeError, /* want relativeError*radInf >= radSup */ 
-                                                const realRat_t eps,
-                                                const realRat_t theta,   /*isolation ratio of the disk in which is computed rr */ 
-                                                slong nbOfRoots,
-                                                slong prec,
-                                                cacheCauchy_t cacheCau,
-                                                cacheApp_t cache,
-                                                metadatas_t meta ){
-    
-    int level = 5;
-    cauchyTest_res cres;
-    cres.appPrec = CCLUSTER_DEFAULT_PREC;
-    slong precForT = CCLUSTER_DEFAULT_PREC;
-    
-    compDsk_t Delta;
-    compDsk_init(Delta);
-    compRat_set( compDsk_centerref(Delta), center );
-    
-    realRat_t epsprime, a, fma;
-    realRat_init(a);
-    realRat_init(fma);
-    realRat_init(epsprime);
-    
-    realRat_t t;
-    realRat_init(t);
-    
-    realRat_div(epsprime, eps, theta);
-    
-    realRat_set_si(a, 12, 11);
-    cauchyTest_fmatheta(fma, a, cacheCauchy_isoRatioref( cacheCau ) );
-    
-//     realRat_t isoRatioP;
-//     realRat_init(isoRatioP);
-//     realRat_inv(isoRatioP, fma);
-    
-    int stop = _cauchyRootRadii_stoppingCriterion ( radInf, radSup, relativeError, eps, meta );
-    
-//     if (metadatas_getVerbo(meta)>=3) {
-//         printf("#------------cauchyRootRadii_root_radius.c: radInf is "); realRat_print(radInf); printf("\n");
-//         printf("#------------cauchyRootRadii_root_radius.c: radSup is "); realRat_print(radSup); printf("\n");
-//         printf("#------------cauchyRootRadii_root_radius.c: stop is %d \n", stop);
+/* DEPRECATED */
+// void cauchyRootRadii_probabilistic_root_radius( const compRat_t center,
+//                                                 realRat_t radInf,        /* radInf < r_{d+1-m}(center, p) */
+//                                                 realRat_t radSup,        /* radSup > r_{d+1-m}(center, p) */
+//                                                 const realRat_t relativeError, /* want relativeError*radInf >= radSup */ 
+//                                                 const realRat_t eps,
+//                                                 const realRat_t theta,   /*isolation ratio of the disk in which is computed rr */ 
+//                                                 slong nbOfRoots,
+//                                                 slong prec,
+//                                                 cacheCauchy_t cacheCau,
+//                                                 metadatas_t meta ){
+//     
+//     int level = 5;
+//     cauchyTest_res cres;
+//     cres.appPrec = CCLUSTER_DEFAULT_PREC;
+//     slong precForT = CCLUSTER_DEFAULT_PREC;
+//     
+//     compDsk_t Delta;
+//     compDsk_init(Delta);
+//     compRat_set( compDsk_centerref(Delta), center );
+//     
+//     realRat_t epsprime, a, fma;
+//     realRat_init(a);
+//     realRat_init(fma);
+//     realRat_init(epsprime);
+//     
+//     realRat_t t;
+//     realRat_init(t);
+//     
+//     realRat_div(epsprime, eps, theta);
+//     
+//     realRat_set_si(a, 12, 11);
+//     cauchyTest_fmatheta(fma, a, cacheCauchy_isoRatioref( cacheCau ) );
+//     
+// //     realRat_t isoRatioP;
+// //     realRat_init(isoRatioP);
+// //     realRat_inv(isoRatioP, fma);
+//     
+//     int stop = _cauchyRootRadii_stoppingCriterion ( radInf, radSup, relativeError, eps, meta );
+//     
+// //     if (metadatas_getVerbo(meta)>=3) {
+// //         printf("#------------cauchyRootRadii_root_radius.c: radInf is "); realRat_print(radInf); printf("\n");
+// //         printf("#------------cauchyRootRadii_root_radius.c: radSup is "); realRat_print(radSup); printf("\n");
+// //         printf("#------------cauchyRootRadii_root_radius.c: stop is %d \n", stop);
+// //     }
+//         
+//     if ( (stop==0) && ( realRat_is_zero( radInf ) ) ) {
+//         
+//         if (metadatas_getVerbo(meta)>=level) {
+//             printf("#---------------cauchyRootRadii_probabilistic_root_radius.c: radInf is 0 \n");
+//         }
+//  
+//         /* Apply deterministic root counter to D(center, epsprime)*/
+//         realRat_set( compDsk_radiusref(Delta), epsprime );
+//         cres = cauchyTest_probabilistic_verification( Delta, nbOfRoots, a,
+//                                                       cacheCau, cres.appPrec, meta, 0);
+//         if (metadatas_getVerbo(meta)>=level)
+//                 printf("#---------------cauchyRootRadii_probabilistic_root_radius.c: return of probabilistic verification: cres.nbOfSol: %d \n", cres.nbOfSol);
+//         
+//         if (cres.nbOfSol == -1) { /* A(center, fma*epsprime, fpa*epsprime) contains a root */
+//                                   /* r_{d+1-m}(center, p) > fma*epsprime */
+//             realRat_mul( radInf, fma, epsprime );
+//         } else if ( cres.nbOfSol < nbOfRoots ) {
+//                                   /* r_{d+1-m}(center, p) > epsprime */
+//             realRat_set( radInf, epsprime );
+//         } else {                  /* cres.nbOfSol = nbOfRoots */
+//                                   /* r_{d+1-m}(center, p) < epsprime < eps */
+//             realRat_set( radSup, eps );
+//         }
+//         
+//         stop = _cauchyRootRadii_stoppingCriterion ( radInf, radSup, relativeError, eps, meta );
+//     
+// //         if (metadatas_getVerbo(meta)>=3) {
+// //             printf("#---------------cauchyRootRadii_root_radius.c: radInf is "); realRat_print(radInf); printf("\n");
+// //             printf("#---------------cauchyRootRadii_root_radius.c: radSup is "); realRat_print(radSup); printf("\n");
+// //             printf("#---------------cauchyRootRadii_root_radius.c: stop is %d \n", stop);
+// //         }
+//     
 //     }
-        
-    if ( (stop==0) && ( realRat_is_zero( radInf ) ) ) {
-        
-        if (metadatas_getVerbo(meta)>=level) {
-            printf("#---------------cauchyRootRadii_probabilistic_root_radius.c: radInf is 0 \n");
-        }
- 
-        /* Apply deterministic root counter to D(center, epsprime)*/
-        realRat_set( compDsk_radiusref(Delta), epsprime );
-        cres = cauchyTest_probabilistic_verification( Delta, nbOfRoots, a,
-                                                      cache, cacheCau, cres.appPrec, meta, 0);
-        if (metadatas_getVerbo(meta)>=level)
-                printf("#---------------cauchyRootRadii_probabilistic_root_radius.c: return of probabilistic verification: cres.nbOfSol: %d \n", cres.nbOfSol);
-        
-        if (cres.nbOfSol == -1) { /* A(center, fma*epsprime, fpa*epsprime) contains a root */
-                                  /* r_{d+1-m}(center, p) > fma*epsprime */
-            realRat_mul( radInf, fma, epsprime );
-        } else if ( cres.nbOfSol < nbOfRoots ) {
-                                  /* r_{d+1-m}(center, p) > epsprime */
-            realRat_set( radInf, epsprime );
-        } else {                  /* cres.nbOfSol = nbOfRoots */
-                                  /* r_{d+1-m}(center, p) < epsprime < eps */
-            realRat_set( radSup, eps );
-        }
-        
-        stop = _cauchyRootRadii_stoppingCriterion ( radInf, radSup, relativeError, eps, meta );
-    
-//         if (metadatas_getVerbo(meta)>=3) {
-//             printf("#---------------cauchyRootRadii_root_radius.c: radInf is "); realRat_print(radInf); printf("\n");
-//             printf("#---------------cauchyRootRadii_root_radius.c: radSup is "); realRat_print(radSup); printf("\n");
-//             printf("#---------------cauchyRootRadii_root_radius.c: stop is %d \n", stop);
+//     
+//     while( stop == 0 ) {
+//     
+//         /* compute a rational t so that */
+//         /* sqrt(radInf*radSup) <= t < (relativeError)^(1/4)*sqrt(radInf*radSup) */
+//         precForT = _cauchyRootRadii_findRational ( t, radInf, radSup, relativeError, precForT );
+//         
+//         if (metadatas_getVerbo(meta)>=level) {
+//             printf("#------------cauchyRootRadii_probabilistic_root_radius.c: t is "); realRat_print(t); printf("\n");
 //         }
-    
-    }
-    
-    while( stop == 0 ) {
-    
-        /* compute a rational t so that */
-        /* sqrt(radInf*radSup) <= t < (relativeError)^(1/4)*sqrt(radInf*radSup) */
-        precForT = _cauchyRootRadii_findRational ( t, radInf, radSup, relativeError, precForT );
-        
-        if (metadatas_getVerbo(meta)>=level) {
-            printf("#------------cauchyRootRadii_probabilistic_root_radius.c: t is "); realRat_print(t); printf("\n");
-        }
-        realRat_set( compDsk_radiusref(Delta), t );
-        
-        /* Apply probabilistic verification to D(center, t)*/
-        cres = cauchyTest_probabilistic_verification( Delta, nbOfRoots, a,
-                                                      cache, cacheCau, cres.appPrec, meta, 0);
-        if (metadatas_getVerbo(meta)>=level)
-                printf("#------------cauchyRootRadii_probabilistic_root_radius.c: return of probabilistic verification: cres.nbOfSol: %d \n", cres.nbOfSol);
-        
-        if (cres.nbOfSol == -1) { /* A(center, fma*t, fpa*t) contains a root */
-                                  /* r_{d+1-m}(center, p) > fma*t */
-            realRat_mul( radInf, fma, t );
-        } else if ( cres.nbOfSol < nbOfRoots ) {
-                                  /* r_{d+1-m}(center, p) > t */
-            realRat_set( radInf, t );
-        } else {                  /* cres.nbOfSol = nbOfRoots */
-                                  /* r_{d+1-m}(center, p) < t */
-            realRat_set( radSup, t );
-        }
-        
-        stop = _cauchyRootRadii_stoppingCriterion ( radInf, radSup, relativeError, eps, meta );
-        
-//         if (metadatas_getVerbo(meta)>=3) {
-//             printf("#------------cauchyRootRadii_root_radius.c: radInf is "); realRat_print(radInf); printf("\n");
-//             printf("#------------cauchyRootRadii_root_radius.c: radSup is "); realRat_print(radSup); printf("\n");
-//             printf("#------------cauchyRootRadii_root_radius.c: stop is %d \n", stop);
+//         realRat_set( compDsk_radiusref(Delta), t );
+//         
+//         /* Apply probabilistic verification to D(center, t)*/
+//         cres = cauchyTest_probabilistic_verification( Delta, nbOfRoots, a,
+//                                                       cacheCau, cres.appPrec, meta, 0);
+//         if (metadatas_getVerbo(meta)>=level)
+//                 printf("#------------cauchyRootRadii_probabilistic_root_radius.c: return of probabilistic verification: cres.nbOfSol: %d \n", cres.nbOfSol);
+//         
+//         if (cres.nbOfSol == -1) { /* A(center, fma*t, fpa*t) contains a root */
+//                                   /* r_{d+1-m}(center, p) > fma*t */
+//             realRat_mul( radInf, fma, t );
+//         } else if ( cres.nbOfSol < nbOfRoots ) {
+//                                   /* r_{d+1-m}(center, p) > t */
+//             realRat_set( radInf, t );
+//         } else {                  /* cres.nbOfSol = nbOfRoots */
+//                                   /* r_{d+1-m}(center, p) < t */
+//             realRat_set( radSup, t );
 //         }
-    }
-    
-    compDsk_clear(Delta);
-    realRat_clear(a);
-    realRat_clear(fma);
-    realRat_clear(epsprime);
-    realRat_clear(t);
-}
+//         
+//         stop = _cauchyRootRadii_stoppingCriterion ( radInf, radSup, relativeError, eps, meta );
+//         
+// //         if (metadatas_getVerbo(meta)>=3) {
+// //             printf("#------------cauchyRootRadii_root_radius.c: radInf is "); realRat_print(radInf); printf("\n");
+// //             printf("#------------cauchyRootRadii_root_radius.c: radSup is "); realRat_print(radSup); printf("\n");
+// //             printf("#------------cauchyRootRadii_root_radius.c: stop is %d \n", stop);
+// //         }
+//     }
+//     
+//     compDsk_clear(Delta);
+//     realRat_clear(a);
+//     realRat_clear(fma);
+//     realRat_clear(epsprime);
+//     realRat_clear(t);
+// }
 
 // void cauchyRootRadii_root_radius( const compRat_t center,
 //                                   realRat_t radInf, /* radInf < r_{d+1-m}(center, p) */

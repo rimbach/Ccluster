@@ -21,7 +21,6 @@ int   cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
                                      int output,
                                      int verb){
 
-    int level = 3;
     cacheApp_t cache;
     cacheCauchy_t cacheCau;
     strategies_t strat;
@@ -38,23 +37,20 @@ int   cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     metadatas_init(meta, initialBox, strat, verb);
     
-    cacheCauchy_init(cacheCau, NULL, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
+    cacheCauchy_init(cacheCau, cache, NULL, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
     
-    cacheCauchy_init_sparseEval ( cacheCau, cache );
+//     /* automaticly set initialBox */
+//     /* with evaluation function */
+//     cauchyRootRadii_root_bound( compBox_bwidthref(initialBox), cacheCau, meta );
+//     if (verb>=level) {
+//         printf("#root bound with eval function: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+//     }
+//     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
-    /* automaticly set initialBox */
-    /* with evaluation function */
-    cauchyRootRadii_root_bound( compBox_bwidthref(initialBox), cacheCau, cache, meta );
-    if (verb>=level) {
-        printf("#root bound with eval function: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
-    }
-    realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
-    
-    metadatas_setInitBox(meta, initialBox);
+//     metadatas_setInitBox(meta, initialBox);
     
     /* automaticly set realCoeffs */
-    if (cacheApp_is_real(cache)==0
-        || compBox_contains_real_line_in_interior(initialBox)==0 )
+    if (cacheApp_is_real(cache)==0)
         strategies_set_realCoeffs(metadatas_stratref(meta), 0);
     
     connCmp_list_init(qRes);
@@ -63,7 +59,7 @@ int   cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    int failure = cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, certified, meta);
+    int failure = cauchy_algo_global( qRes, bDis, eps, cacheCau, certified, meta);
     
     metadatas_count(meta);
     
@@ -77,7 +73,7 @@ int   cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     
     if (!failure) {
     
-        metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau, certified);
+        metadatas_cauchy_fprint(stdout, meta, eps, cacheCau, certified);
     
         if (output==-2) {
             connCmp_list_gnuplot(stdout, qRes, meta, 0);
@@ -108,7 +104,6 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
                                            int nbThreads,
                                            int output,
                                            int verb){
-    int level = 3;
     cacheApp_t cache;
     cacheCauchy_t cacheCau;
     strategies_t strat;
@@ -126,23 +121,20 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
 //     compBox_set_si(initialBox, 1,1,0,1,0,1);
     metadatas_init(meta, initialBox, strat, verb);
     
-    cacheCauchy_init(cacheCau, NULL, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
+    cacheCauchy_init(cacheCau, cache, NULL, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
     
-    cacheCauchy_init_sparseEval ( cacheCau, cache );
+//     /* automaticly set initialBox */
+//     /* with evaluation function */
+//     cauchyRootRadii_root_bound( compBox_bwidthref(initialBox), cacheCau, meta );
+//     if (verb>=level) {
+//         printf("#root bound with eval function: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+//     }
+//     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
-    /* automaticly set initialBox */
-    /* with evaluation function */
-    cauchyRootRadii_root_bound( compBox_bwidthref(initialBox), cacheCau, cache, meta );
-    if (verb>=level) {
-        printf("#root bound with eval function: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
-    }
-    realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
-    
-    metadatas_setInitBox(meta, initialBox);
+//     metadatas_setInitBox(meta, initialBox);
     
     /* automaticly set realCoeffs */
-    if (cacheApp_is_real(cache)==0
-        || compBox_contains_real_line_in_interior(initialBox)==0 )
+    if (cacheApp_is_real(cache)==0)
         strategies_set_realCoeffs(metadatas_stratref(meta), 0);
     
     connCmp_list_init(qRes);
@@ -151,7 +143,7 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    int failure = cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, certified, meta);
+    int failure = cauchy_algo_global( qRes, bDis, eps, cacheCau, certified, meta);
     metadatas_count(meta);
     
     if ( metadatas_getNbSolutions(meta) != (int) cacheCauchy_degreeref(cacheCau) ){
@@ -163,7 +155,7 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
     
     if (!failure) {
     
-        metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau, certified);
+        metadatas_cauchy_fprint(stdout, meta, eps, cacheCau, certified);
     
         if (output==-2) {
             connCmp_list_gnuplot(stdout, qRes, meta, 0);
@@ -197,7 +189,6 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                    int output,
                                    int verb){
 
-    int level = 3;
     cacheApp_t cache;
     cacheCauchy_t cacheCau;
     strategies_t strat;
@@ -214,21 +205,20 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     metadatas_init(meta, initialBox, strat, verb);
     
-    cacheCauchy_init(cacheCau, evalFast, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
+    cacheCauchy_init(cacheCau, cache, evalFast, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
     
-    /* automaticly set initialBox */
-    /* with evaluation function */
-    cauchyRootRadii_root_bound( compBox_bwidthref(initialBox), cacheCau, cache, meta );
-    if (verb>=level) {
-        printf("root bound with eval function: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
-    }
-    realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
+//     /* automaticly set initialBox */
+//     /* with evaluation function */
+//     cauchyRootRadii_root_bound( compBox_bwidthref(initialBox), cacheCau, meta );
+//     if (verb>=level) {
+//         printf("root bound with eval function: "); realRat_print(compBox_bwidthref(initialBox)); printf("\n");
+//     }
+//     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
-    metadatas_setInitBox(meta, initialBox);
+//     metadatas_setInitBox(meta, initialBox);
     
     /* automaticly set realCoeffs */
-    if (cacheApp_is_real(cache)==0
-        || compBox_contains_real_line_in_interior(initialBox)==0 )
+    if (cacheApp_is_real(cache)==0)
         strategies_set_realCoeffs(strat, 0);
  
     connCmp_list_init(qRes);
@@ -237,7 +227,7 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     if (output==-3) 
         metadatas_setDrSub(meta, 1);
     
-    int failure = cauchy_algo_global( qRes, bDis, initialBox, eps, cache, cacheCau, certified, meta);
+    int failure = cauchy_algo_global( qRes, bDis, eps, cacheCau, certified, meta);
     metadatas_count(meta);
     
     if ( metadatas_getNbSolutions(meta) != (int) cacheCauchy_degreeref(cacheCau) ){
@@ -249,7 +239,7 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     
     if (!failure) {
 
-        metadatas_cauchy_fprint(stdout, meta, eps, cache, cacheCau, certified);
+        metadatas_cauchy_fprint(stdout, meta, eps, cacheCau, certified);
         
         if (output==-2) {
             connCmp_list_gnuplot(stdout, qRes, meta, 0);

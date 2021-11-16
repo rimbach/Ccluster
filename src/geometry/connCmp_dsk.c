@@ -29,6 +29,34 @@ int connCmp_intersection_has_non_empty_interior_compDsk( const connCmp_t cc, con
 /*                       false otherwise                   */
 /*               boxes of cc and b have not necessarily the same width */
 int connCmp_intersection_is_not_empty_compDsk( const connCmp_t cc, const compDsk_t d ){
+    
+    realRat_t temp;
+    realRat_init(temp);
+    realRat_add(temp, compRat_realref(compDsk_centerref(d)), compDsk_radiusref(d));
+    if (realRat_cmp(temp, connCmp_infReref(cc)) < 0) {
+        realRat_clear(temp);
+        return 0;
+    }
+    
+    realRat_sub(temp, compRat_realref(compDsk_centerref(d)), compDsk_radiusref(d));
+    if (realRat_cmp(temp, connCmp_supReref(cc)) > 0) {
+        realRat_clear(temp);
+        return 0;
+    }
+    
+    realRat_add(temp, compRat_imagref(compDsk_centerref(d)), compDsk_radiusref(d));
+    if (realRat_cmp(temp, connCmp_infImref(cc)) < 0) {
+        realRat_clear(temp);
+        return 0;
+    }
+    
+    realRat_sub(temp, compRat_imagref(compDsk_centerref(d)), compDsk_radiusref(d));
+    if (realRat_cmp(temp, connCmp_supImref(cc)) > 0) {
+        realRat_clear(temp);
+        return 0;
+    }
+    realRat_clear(temp);
+    
     compBox_list_iterator it = compBox_list_begin( connCmp_boxesref (cc) );
     while (it!=compBox_list_end()) {
         if (compBox_intersection_is_not_empty_compDsk(compBox_list_elmt(it) ,d))

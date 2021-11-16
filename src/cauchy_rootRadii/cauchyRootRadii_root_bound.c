@@ -13,7 +13,6 @@
 
 void cauchyRootRadii_root_bound( realRat_t upperBound,
                                  cacheCauchy_t cacheCau,
-                                 cacheApp_t cache,
                                  metadatas_t meta ) {
     
     int level = 10;
@@ -26,8 +25,8 @@ void cauchyRootRadii_root_bound( realRat_t upperBound,
     /* initialize double exponential sieve */
     realRat_set_si(compDsk_radiusref(Delta), 2, 1);
     
-    cres = cauchyTest_deterministic_verification( Delta, cacheCauchy_degreeref(cacheCau), cacheCauchy_isoRatioref(cacheCau), 
-                                                  cache, cacheCau, cres.appPrec, meta, 0);
+    cres = cauchyTest_rootFreeAnnulus_verification( Delta, cacheCauchy_degreeref(cacheCau), cacheCauchy_isoRatioref(cacheCau), 
+                                                  cacheCau, cres.appPrec, meta, 0);
     
     if (metadatas_getVerbo(meta)>=level) {
         printf("#---cauchy root bound algorithm: \n");
@@ -38,8 +37,8 @@ void cauchyRootRadii_root_bound( realRat_t upperBound,
     
     while (cres.nbOfSol!=cacheCauchy_degreeref(cacheCau)) {
         realRat_mul(compDsk_radiusref(Delta), compDsk_radiusref(Delta), compDsk_radiusref(Delta));
-        cres = cauchyTest_deterministic_verification( Delta, cacheCauchy_degreeref(cacheCau), cacheCauchy_isoRatioref(cacheCau), 
-                                                      cache, cacheCau, cres.appPrec, meta, 0);
+        cres = cauchyTest_rootFreeAnnulus_verification( Delta, cacheCauchy_degreeref(cacheCau), cacheCauchy_isoRatioref(cacheCau), 
+                                                      cacheCau, cres.appPrec, meta, 0);
         if (metadatas_getVerbo(meta)>=level) {
             printf("#-------cauchy test res %d\n", cres.nbOfSol);
             printf("#------ upperBound: "); realRat_print(compDsk_radiusref(Delta)); printf("\n");
