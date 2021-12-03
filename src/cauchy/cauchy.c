@@ -1078,6 +1078,8 @@ int cauchy_algo_global( connCmp_list_t qResults,
     time_in_cauchyTest_computeSsApprox        =0.0; 
     time_in_cauchyTest_computeSsApprox_fromVals        =0.0; 
     time_in_cacheCauchy_set_bounds        =0.0; 
+    time_in_cacheCauchy_eval              =0.0;
+    time_in_cacheCauchy_eval_powering     =0.0;
 #endif
     
     clock_t start = clock();
@@ -1153,6 +1155,8 @@ int cauchy_algo_global( connCmp_list_t qResults,
     printf("time_in_cauchyTest_computeSsApprox           : %f\n", time_in_cauchyTest_computeSsApprox            /CLOCKS_PER_SEC);
     printf("time_in_cauchyTest_computeSsApprox_fromVals  : %f\n", time_in_cauchyTest_computeSsApprox_fromVals   /CLOCKS_PER_SEC);
     printf("time_in_cacheCauchy_set_bounds               : %f\n", time_in_cacheCauchy_set_bounds                /CLOCKS_PER_SEC);
+    printf("time_in_cacheCauchy_eval                     : %f\n", time_in_cacheCauchy_eval                 /CLOCKS_PER_SEC);
+    printf("time_in_cacheCauchy_eval_powering            : %f\n", time_in_cacheCauchy_eval_powering                /CLOCKS_PER_SEC);
 #endif
     
     return failure;

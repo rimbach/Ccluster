@@ -110,6 +110,7 @@ void cacheCauchy_eval( compApp_ptr fvals, compApp_ptr fdervals, compApp_ptr poin
             
             for (slong i = 0; i< nbPoints; i++)
                 cacheCauchy_sparseEval2 ( fvals + i, fdervals + i, cache, points + i, prec);
+//                 cacheCauchy_sparseEval ( fvals + i, fdervals + i, cache, points + i, prec);
         
         } else if ( (cacheCauchy_choiceref(cache) == -1 )&&(nbPoints > 1) ){
             
@@ -120,6 +121,7 @@ void cacheCauchy_eval( compApp_ptr fvals, compApp_ptr fdervals, compApp_ptr poin
             start2 = clock();
             for (slong i=0; i<nbPoints; i++)
                 cacheCauchy_sparseEval2 ( fvals + i, fdervals + i, cache, points + i, prec);
+//                 cacheCauchy_sparseEval ( fvals + i, fdervals + i, cache, points + i, prec);
             double timeInSparse = (double) (clock() - start2);
             if (timeInRectangular <= timeInSparse)
                 cacheCauchy_choiceref(cache) = 0;
@@ -137,6 +139,12 @@ void cacheCauchy_eval( compApp_ptr fvals, compApp_ptr fdervals, compApp_ptr poin
 
 void cacheCauchy_sparseEval2 ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache,
                               const compApp_t point, slong prec) {
+
+//     if (prec > CCLUSTER_DEFAULT_PREC)
+//         printf("cacheCauchy.c, l144: prec: %ld\n", prec); 
+#ifdef CCLUSTER_TIMINGS
+    clock_t start2 = clock();
+#endif
     
     compApp_poly_ptr app    = cacheApp_getApproximation ( cacheCauchy_cacheAppref(cache), prec );
     
@@ -158,10 +166,16 @@ void cacheCauchy_sparseEval2 ( compApp_t fval, compApp_t fderval, cacheCauchy_t 
     
     compApp_init(pows+0);
     compApp_set(pows+0, point);
+// #ifdef CCLUSTER_TIMINGS
+//     clock_t start = clock();
+// #endif
     for (int i=1; i<log2deg; i++){
         compApp_init(pows+i);
         compApp_sqr(pows+i, pows+(i-1), prec); 
     }
+// #ifdef CCLUSTER_TIMINGS
+//     time_in_cacheCauchy_eval_powering+=(double) (clock() - start);
+// #endif
     
     for (slong i=0; i<nbNZC; i++){
 //         printf("i: %ld, inNZC[i]: %ld\n", i, inNZC[i]);
@@ -175,6 +189,9 @@ void cacheCauchy_sparseEval2 ( compApp_t fval, compApp_t fderval, cacheCauchy_t 
             compApp_set (powd, pows + 0);
             compApp_set (powp, pows + 1);
         } else {
+// #ifdef CCLUSTER_TIMINGS
+//             start = clock();
+// #endif
             compApp_one (powd);
             slong pow = inNZC[i] - 1;
             int indmax = (int) ceil(log2( pow ));
@@ -185,6 +202,9 @@ void cacheCauchy_sparseEval2 ( compApp_t fval, compApp_t fderval, cacheCauchy_t 
                 pow=pow>>1;
             }
             compApp_mul(powp, powd, point, prec);
+// #ifdef CCLUSTER_TIMINGS
+//             time_in_cacheCauchy_eval_powering+=(double) (clock() - start);
+// #endif
         }
         compApp_mul_si(powd, powd, inNZC[i], prec);
         compApp_addmul(fval,    powp, (app->coeffs) + inNZC[i], prec);
@@ -196,7 +216,11 @@ void cacheCauchy_sparseEval2 ( compApp_t fval, compApp_t fderval, cacheCauchy_t 
     
     ccluster_free(pows);
     compApp_clear(powp);
-    compApp_clear(powd);   
+    compApp_clear(powd);  
+    
+#ifdef CCLUSTER_TIMINGS
+    time_in_cacheCauchy_eval+=(double) (clock() - start2);
+#endif
 }
 
 // void cacheCauchy_sparseEval2 ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache,
@@ -272,11 +296,15 @@ void cacheCauchy_sparseEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t c
     compApp_init(xp);
     compApp_init(mon);
     
+//     realApp_t pow;
+//     realApp_init(pow);
+    
     slong ind=0;
     if (inNZC[ind] == 0)
         ind++;
-//     compApp_pow_si( x, point, inNZC[ind], prec );
     compApp_pow_si( xp, point, inNZC[ind]-1, prec );
+//     realApp_set_si( pow, inNZC[ind]-1);
+//     compApp_mpow_realApp( xp, point, pow, prec );
     compApp_mul(x, xp, point, prec);
     
     while ( ind < nbNZC ){
@@ -301,6 +329,8 @@ void cacheCauchy_sparseEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t c
             
             /* old */
             compApp_pow_si(mon, point, inNZC[ind] - inNZC[ind-1], prec);
+//             realApp_set_si( pow, inNZC[ind] - inNZC[ind-1]);
+//             compApp_mpow_realApp( mon, point, pow, prec );
             compApp_mul( x, x, mon, prec);
             compApp_mul( xp, xp, mon, prec);
         }
@@ -312,6 +342,7 @@ void cacheCauchy_sparseEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t c
     compApp_clear(xp);
     compApp_clear(mon);
     
+//     realApp_clear(pow);
 }
 
 void cacheCauchy_rectangularEval ( compApp_t fval, compApp_t fderval, cacheCauchy_t cache, const compApp_t point, slong prec) {

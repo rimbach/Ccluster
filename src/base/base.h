@@ -45,6 +45,8 @@ double time_in_cauchyTest_shift_points;
 double time_in_cauchyTest_computeSsApprox;
 double time_in_cauchyTest_computeSsApprox_fromVals;
 double time_in_cacheCauchy_set_bounds;
+double time_in_cacheCauchy_eval;
+double time_in_cacheCauchy_eval_powering;
 #endif
 
 #include <stdlib.h> /* for size_t */
