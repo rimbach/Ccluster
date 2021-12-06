@@ -18,6 +18,13 @@ void Legendre_polynomial(realRat_poly_t dest, int degree);
 void randomDense_polynomial( realRat_poly_t dest, int degree, int bitsize);
 void randomSparse_polynomial( realRat_poly_t dest, int degree, int bitsize, int nbterms);
 
+#define TWOPI 2*3.14159265358979323846264338327
+/* generating random numbers with normal distribution */
+/* uses Box-Muller transform: https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform */
+double rand_gauss( double mu, double sigma );
+void fmpq_rand_gauss( fmpq_t res, double mu, double sigma );
+void gaussianDense_polynomial( realRat_poly_t dest, int degree, double mu, double sigma );
+
 void Mandelbrot_polynomial( realRat_poly_t dest, int iterations);
 void Runnels_polynomial( realRat_poly_t dest, int iterations);
 void Wilkinson_polynomial(realRat_poly_t dest, int degree);
@@ -52,6 +59,7 @@ int main(int argc, char **argv){
         printf("       %s Chebyshev2     degree    filename [OPTIONS: format] \n", argv[0]);
         printf("       %s Legendre       degree    filename [OPTIONS: format] \n", argv[0]);
         printf("       %s randomDense    degree    filename [OPTIONS: format bitsize] \n", argv[0]);
+        printf("       %s gaussianDense  degree    filename [OPTIONS: format mean stddev] \n", argv[0]);
         printf("       %s randomSparse   degree    filename [OPTIONS: format bitsize nbterms] \n", argv[0]);
         printf("       %s Wilkinson      degree    filename [OPTIONS: format] \n", argv[0]);
         printf("       %s WilkRat        degree    filename [OPTIONS: format] \n", argv[0]);
@@ -84,6 +92,11 @@ int main(int argc, char **argv){
         printf("                       3: [default] or a positive integer            \n");
         printf("       -a : relative width of nested clusters, \n");
         printf("                       16: [default] or an integer >=2            \n");
+        printf("       OPTIONS ONLY FOR gaussianDense:                                \n");
+        printf("       -m , --mean   : expected value, \n");
+        printf("                       0: [default], or a double           \n");
+        printf("       -s , --stddev : standard deviation, \n");
+        printf("                       1: [default] or a double >0            \n");
         return -1;
     }
     
@@ -99,6 +112,9 @@ int main(int argc, char **argv){
     int precision = 53;
     int c = 3;
     int a = 16;
+    /*for pols with random gaussian coefficients */
+    double mu = 0.;
+    double sigma = 1.;
     
     char bernoulli[] = "Bernoulli\0";
     char mignotte[] = "Mignotte\0";
@@ -111,6 +127,7 @@ int main(int argc, char **argv){
     char Legendre[] = "Legendre\0";
     char randomDense[] = "randomDense\0";
     char randomSparse[] = "randomSparse\0";
+    char gaussianDense[] = "gaussianDense\0";
     char Wilkinson[] = "Wilkinson\0";
     char WilkMul[] = "WilkMul\0";
     char WilkRat[] = "WilkRat\0";
@@ -171,7 +188,7 @@ int main(int argc, char **argv){
         if ( (strcmp( argv[arg], "-p" ) == 0) || (strcmp( argv[arg], "--power" ) == 0) ) {
             if (argc>arg+1) {
                 parse = parse*sscanf(argv[arg+1], "%d", &power);
-                if (nbterms<=0){
+                if (power<=0){
                     printf("%s ERROR: NON-VALID POWER (should >0) \n", argv[0]);
                     parse = 0;
                 }
@@ -182,7 +199,7 @@ int main(int argc, char **argv){
         if ( (strcmp( argv[arg], "-L" ) == 0) || (strcmp( argv[arg], "--precision" ) == 0) ) {
             if (argc>arg+1) {
                 parse = parse*sscanf(argv[arg+1], "%d", &precision);
-                if (nbterms<=0){
+                if (precision<=0){
                     printf("%s ERROR: NON-VALID PRECISION (should >0) \n", argv[0]);
                     parse = 0;
                 }
@@ -206,6 +223,24 @@ int main(int argc, char **argv){
                 parse = parse*sscanf(argv[arg+1], "%d", &a);
                 if (a<=1){
                     printf("%s ERROR: NON-VALID a (should be >=2) \n", argv[0]);
+                    parse = 0;
+                }
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-m" ) == 0) || (strcmp( argv[arg], "--mean" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%lf", &mu);
+                arg++;
+            }
+        }
+        
+        if ( (strcmp( argv[arg], "-s" ) == 0) || (strcmp( argv[arg], "--stddev" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%lf", &sigma);
+                if (sigma<=0){
+                    printf("%s ERROR: NON-VALID standard deviation (should be >0) \n", argv[0]);
                     parse = 0;
                 }
                 arg++;
@@ -260,6 +295,10 @@ int main(int argc, char **argv){
     
     if (strcmp(poly, randomDense)==0) {
         randomDense_polynomial(p, firstArg, bitsize);
+    } else
+        
+    if (strcmp(poly, gaussianDense)==0) {
+        gaussianDense_polynomial(p, firstArg, mu, sigma);
     } else
     
     if (strcmp(poly, randomSparse)==0) {
@@ -562,6 +601,44 @@ void randomDense_polynomial( realRat_poly_t dest, int degree, int bitsize) {
         realRat_poly_set_coeff_si_ui(dest, (slong) i, num, den);
     }
     
+}
+
+/* generating random numbers with normal distribution */
+/* uses Box-Muller transform: https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform */
+double rand_gauss( double mu, double sigma ){
+    /* u0 and u1 are uniformly distributed in [0, 1] */
+    /* u0 <> 0 */
+    int u = rand();
+    while (u==0)
+        u = rand();
+    double u0 = (double) u / RAND_MAX;
+    double u1 = (double) rand() / RAND_MAX;
+    double m  = sigma*sqrt(-2.0*log(u0)); 
+    double z0 = m*cos(TWOPI * u1) + mu;
+//     double z1 = m*sin(TWOPI * u1) + mu;
+    
+    return z0;
+}
+void fmpq_rand_gauss( fmpq_t res, double mu, double sigma ){
+    arf_t f;
+    arf_init(f);
+    arf_set_d(f, rand_gauss( mu, sigma ) );
+    arf_get_fmpq(res, f);
+    arf_clear(f);
+}
+
+void gaussianDense_polynomial( realRat_poly_t dest, int degree, double mu, double sigma ){
+    
+    realRat_poly_fit_length(dest, (slong) degree+1);
+    realRat_poly_zero(dest);
+    realRat_t coeff;
+    realRat_init(coeff);
+    for (int i=0;i<=degree; i++){
+        fmpq_rand_gauss(coeff, mu, sigma);
+        realRat_poly_set_coeff_realRat(dest, (slong) i, coeff);
+    }
+    
+    realRat_clear(coeff);
 }
 
 int  isIntinListInt (int el, int * lis, int length){
