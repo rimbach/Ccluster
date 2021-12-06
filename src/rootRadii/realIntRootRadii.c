@@ -125,10 +125,52 @@ int realIntRootRadii_liesBelow( slong i, const realApp_t absPi,
              realApp_one(temp);
              realApp_div_ui(temp, temp, 2, prec);
              if (realApp_lt(leftSide, temp)==1) 
-                 /* with strictly less that 1, contains as unique integer 0*/
+                 /* with strictly less than 1, contains as unique integer 0*/
                  res = 1;
              else {/* otherwise can not say if it is zero or not */
                  res = -1;
+//                  printf("realIntRootRadii_liesBelow: i, j, k: %ld, %ld, %ld\n", i, j, k);
+                 realApp_t logAbsPi, logAbsPj, logAbsPk;
+                 realApp_init(logAbsPi);
+                 realApp_init(logAbsPj);
+                 realApp_init(logAbsPk);
+                 realApp_log_base_ui( logAbsPi, absPi, 2, prec );
+                 realApp_log_base_ui( logAbsPj, absPj, 2, prec );
+                 realApp_log_base_ui( logAbsPk, absPk, 2, prec );
+                 
+                 if (    (mag_cmp_2exp_si( arb_radref(logAbsPi), -1 ) < 0)
+                      && (mag_cmp_2exp_si( arb_radref(logAbsPj), -1 ) < 0)
+                      && (mag_cmp_2exp_si( arb_radref(logAbsPk), -1 ) < 0) ) {
+//                      printf("realIntRootRadii_liesBelow: error OK\n");
+                     /*  <=> if (log|pj| - log|pi|)/(j-i) <= (log|pk| - log|pi|)/(k-i)                 */
+                    mag_zero( arb_radref(logAbsPi) );
+                    mag_zero( arb_radref(logAbsPj) );
+                    mag_zero( arb_radref(logAbsPk) );
+                    realApp_sub(leftSide, logAbsPj, logAbsPi, prec);
+                    realApp_mul_si(leftSide, leftSide, k-i, prec); 
+                    realApp_sub(rightSide, logAbsPk, logAbsPi, prec);
+                    realApp_mul_si(rightSide, leftSide, j-i, prec); 
+//                     printf("leftSide: "); realApp_printd(leftSide, 10); printf("\n");
+//                     printf("rightSide: "); realApp_printd(rightSide, 10); printf("\n");
+                    if (realApp_le(leftSide, rightSide)==1){
+                        res = 1;
+//                         printf("leftSide <= rightSide\n");
+                    }
+                    else if (realApp_gt(leftSide, rightSide)==1) {
+                        res = 0;
+//                         printf("leftSide > rightSide\n");
+                    } else {
+                        res = -1;
+//                         printf("can not decide\n");
+                    }
+                 } else {
+                     res = -1;
+//                      printf("can not decide\n");
+                 }
+                 realApp_clear(logAbsPi);
+                 realApp_clear(logAbsPj);
+                 realApp_clear(logAbsPk);
+                 
              }
     }
     

@@ -31,6 +31,8 @@ void Laguerre_polynomial(  realRat_poly_t dest, int degree);
 
 void nestedClusters_polynomial(  realRat_poly_t dest, int nbRoots, int relativeWidth, int iterations);
 
+void testHefRoots_polynomial( realRat_poly_t dest, int degree);
+
 void genSpiralPolFile( FILE * file, int degree, int prec);
 void genClusterPolFile( FILE * file, int iteration, int prec);
 
@@ -67,6 +69,7 @@ int main(int argc, char **argv){
         printf("                      2:           MPsolve  (.mpl)                  \n");
         printf("                      3:           ANewDsc  (.dsc)                  \n");
         printf("                      4:           msolve   (.ms)                   \n");
+        printf("                      5:           hefroots (.hef)                  \n");
         printf("       -b , --bitsize: the bitsize of the coeffs (for Mignotte, randomDense, randomSparse\n");
         printf("                      8: [default] or a positive integer            \n");
         printf("       -n , --nbterms: the number of non-zero coeffs (for randomSparse)\n");
@@ -116,6 +119,7 @@ int main(int argc, char **argv){
     char Runnels[] = "Runnels\0";
     char Laguerre[] = "Laguerre\0";
     char Spiral[] = "Spiral\0";
+    char testHefRoots[] = "testHefRoots\0";
     char nestedClusters[] = "nestedClusters\0";
     
     int parse=1;
@@ -134,8 +138,8 @@ int main(int argc, char **argv){
         if ( (strcmp( argv[arg], "-f" ) == 0) || (strcmp( argv[arg], "--format" ) == 0) ) {
             if (argc>arg+1) {
                 parse = parse*sscanf(argv[arg+1], "%d", &format);
-                if ((format<=0)||(format>4)) {
-                    printf("%s ERROR: NON-VALID FORMAT (should be 1, 2 or 3) \n", argv[0]);
+                if ((format<=0)||(format>5)) {
+                    printf("%s ERROR: NON-VALID FORMAT (should be in {1,...,5}) \n", argv[0]);
                     parse = 0;
                 }
                 arg++;
@@ -317,6 +321,10 @@ int main(int argc, char **argv){
         nestedClusters_polynomial( p, c, a, firstArg );
     } else
         
+    if (strcmp(poly, testHefRoots)==0) {
+        testHefRoots_polynomial( p, firstArg );
+    } else
+        
     if ((strcmp(poly, Spiral)==0)&&(parse==1)) {
         FILE * curFile;
         printf ("%s PARSING OK; output file: %s\n", argv[0], filename);
@@ -408,6 +416,13 @@ int main(int argc, char **argv){
         fprintf(curFile, "0\n");
         fmpq_poly_fprint_pretty(curFile, p, var);
         fprintf(curFile, "\n");
+    }  else if (format==5) {
+        fmpq_poly_canonicalise(p);
+//          fprintf(curFile, "%ld\n", p->length -1);
+         for (slong i=0; i<p->length; i++){
+             fmpz_fprint(curFile, p->coeffs + i);
+             fprintf(curFile, "\n");
+         }
     }
     else 
         printf("format %d not implemented\n", format);
@@ -624,6 +639,42 @@ void Mandelbrot_polynomial( realRat_poly_t pmand, int iterations){
     
     realRat_poly_clear(pone);
     realRat_poly_clear(px);    
+}
+
+void testHefRoots_polynomial( realRat_poly_t p, int degree){
+    
+    slong halfdeg = degree/2;
+    realRat_poly_init2(p, halfdeg+1);
+    p->length = halfdeg+1;
+    
+    realRat_poly_t temp;
+    realRat_poly_init2(temp, degree-halfdeg + 1);
+    temp->length=degree-halfdeg + 1;
+    
+    realRat_t ratio, ration;
+    realRat_init(ratio);
+    realRat_init(ration);
+    realRat_set_si(ratio, 1, 2);
+    realRat_set_si(ration, 1, 2);
+    realRat_poly_set_coeff_si_ui(p, 0, 1, 1);
+    for(slong index = 1; index <=halfdeg; index++) {
+        realRat_poly_set_coeff_realRat(p, index, ration);
+        realRat_mul(ration, ration, ratio);
+    }
+    
+    realRat_set_si(ratio, 2, 1);
+    realRat_set_si(ration, 2, 1);
+    realRat_poly_set_coeff_si_ui(temp, 0, 1, 1);
+    for(slong index = 1; index <=degree-halfdeg; index++) {
+        realRat_poly_set_coeff_realRat(temp, index, ration);
+        realRat_mul(ration, ration, ratio);
+    }
+    
+    realRat_poly_mul(p, p, temp);
+        
+    realRat_clear(ratio);
+    realRat_clear(ration);
+    realRat_poly_clear(temp);
 }
 
 void Runnels_polynomial( realRat_poly_t prun, int iterations){
