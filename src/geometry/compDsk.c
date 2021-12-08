@@ -72,6 +72,25 @@ int compDsk_is_point_strictly_in_dsk( const compRat_t p, const compDsk_t d){
     return res;
 }
 
+int compDsk_intersect_compDsk       ( const compDsk_t a, const compDsk_t b) {
+    
+    compRat_t cbmca;
+    compRat_init(cbmca);
+    compRat_sub(cbmca, compDsk_centerref(b), compDsk_centerref(a) );
+    realRat_pow_si( compRat_realref(cbmca), compRat_realref(cbmca), 2); 
+    realRat_pow_si( compRat_imagref(cbmca), compRat_imagref(cbmca), 2);
+    realRat_add( compRat_realref(cbmca), compRat_realref(cbmca), compRat_imagref(cbmca) );
+    realRat_add( compRat_imagref(cbmca), compDsk_radiusref(a), compDsk_radiusref(b));
+    realRat_pow_si( compRat_imagref(cbmca), compRat_imagref(cbmca), 2);
+    realRat_sub( compRat_realref(cbmca), compRat_realref(cbmca), compRat_imagref(cbmca) );
+    
+    int res = ( realRat_sgn(compRat_realref(cbmca)) <= 0 );
+    
+    compRat_clear(cbmca);
+    
+    return res;
+}
+
 /* RealCoeffs */
 /* Precondition:                                                                               */
 /* Specification: returns true only if forall p\in cc, Im(p)>0                                 */

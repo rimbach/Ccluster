@@ -32,6 +32,23 @@
 #define CCLUSTER_V2(A)         ( ((&(A)->strat)->_additionalFlags)&(0x1<<3) )         /* strat + 512 */
 #define CCLUSTER_V5(A)         ( ((&(A)->strat)->_additionalFlags)&(0x1<<4) )         /* strat + 1024 */
 
+/* for Cauchy Root Finder */
+// #define DEFLATION
+// #define CAUCHY_CERTIFIED
+// #define DEFLATION_TURAN
+
+// #define CCLUSTER_TIMINGS
+#ifdef CCLUSTER_TIMINGS
+double time_in_cauchyTest_getEvaluationPoints;
+double time_in_cauchyTest_rootsOfUnits;
+double time_in_cauchyTest_shift_points;
+double time_in_cauchyTest_computeSsApprox;
+double time_in_cauchyTest_computeSsApprox_fromVals;
+double time_in_cacheCauchy_set_bounds;
+double time_in_cacheCauchy_eval;
+double time_in_cacheCauchy_eval_powering;
+#endif
+
 #include <stdlib.h> /* for size_t */
 #include "flint/flint.h" /* for memory managment */ 
 

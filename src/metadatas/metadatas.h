@@ -82,6 +82,10 @@ typedef metadatas * metadatas_ptr;
 void metadatas_init(metadatas_t m, const compBox_t initialBox, const strategies_t strategy, int verbosity);
 void metadatas_clear(metadatas_t m);
 
+METADATAS_INLINE void metadatas_setInitBox(metadatas_t m, const compBox_t initialBox){
+    compBox_set( metadatas_initBref(m), initialBox);
+}
+
 // void metadatas_join(metadatas_t m1, const metadatas_t m2);
 
 METADATAS_INLINE void metadatas_lock(metadatas_t m){
@@ -164,6 +168,9 @@ METADATAS_INLINE int metadatas_useRootRadii      ( const metadatas_t m ) { retur
 METADATAS_INLINE int metadatas_useScaAndRou      ( const metadatas_t m ) { return strategies_useScaAndRou      (metadatas_stratref(m)); }
 // METADATAS_INLINE int metadatas_pwSuTest         ( const metadatas_t m ) { return strategies_pwSuTest           (metadatas_stratref(m)); }
 METADATAS_INLINE int metadatas_forTests          ( const metadatas_t m ) { return strategies_forTests          (metadatas_stratref(m)); }
+
+METADATAS_INLINE int metadatas_useCompression    ( const metadatas_t m ) { return strategies_useCompression    (metadatas_stratref(m)); }
+
 // /* counters */
 METADATAS_INLINE void metadatas_add_discarded( metadatas_t m, int depth ) { 
 #ifdef CCLUSTER_HAVE_PTHREAD
@@ -565,6 +572,366 @@ METADATAS_INLINE double metadatas_get_time_DefEval ( const metadatas_t m ) { ret
 METADATAS_INLINE double metadatas_get_time_DefScal ( const metadatas_t m ) { return chronos_get_time_DefScal (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_DefGrae ( const metadatas_t m ) { return chronos_get_time_DefGrae (metadatas_chronref(m)); }
 METADATAS_INLINE double metadatas_get_time_DefTsta ( const metadatas_t m ) { return chronos_get_time_DefTsta (metadatas_chronref(m)); }
+
+/* Cauchy root finder */
+METADATAS_INLINE void metadatas_add_time_CauExTo(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CauExTo( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CauExTo ( const metadatas_t m ) { return chronos_get_time_CauExTo (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CauExEv(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CauExEv( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CauExEv ( const metadatas_t m ) { return chronos_get_time_CauExEv (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CauExDS(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CauExDS( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CauExDS ( const metadatas_t m ) { return chronos_get_time_CauExDS (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CauExCS(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CauExCS( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CauExCS ( const metadatas_t m ) { return chronos_get_time_CauExCS (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CauCoTo(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CauCoTo( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CauCoTo ( const metadatas_t m ) { return chronos_get_time_CauCoTo (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CauCoEv(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CauCoEv( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CauCoEv ( const metadatas_t m ) { return chronos_get_time_CauCoEv (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CauCoDS(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CauCoDS( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CauCoDS ( const metadatas_t m ) { return chronos_get_time_CauCoDS (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CauCoCS(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CauCoCS( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CauCoCS ( const metadatas_t m ) { return chronos_get_time_CauCoCS (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_CauchyExTest ( metadatas_t m, int depth, slong prec ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_CauchyExTest(metadatas_countref(m), depth, prec );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE int  metadatas_getNbCauchyExTests ( const metadatas_t m ){ return counters_getNbCauchyExTests   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_CauchyExEvals ( metadatas_t m, int depth, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_CauchyExEvals(metadatas_countref(m), depth, nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE int  metadatas_getNbCauchyExEvals ( const metadatas_t m ){ return counters_getNbCauchyExEvals   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_CauchyCoTest ( metadatas_t m, int depth, slong prec ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_CauchyCoTest(metadatas_countref(m), depth, prec );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE int  metadatas_getNbCauchyCoTests ( const metadatas_t m ){ return counters_getNbCauchyCoTests   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_CauchyCoEvals ( metadatas_t m, int depth, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_CauchyCoEvals(metadatas_countref(m), depth, nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE int  metadatas_getNbCauchyCoEvals ( const metadatas_t m ){ return counters_getNbCauchyCoEvals   (metadatas_countref(m));}
+
+/* compression algorithm */
+METADATAS_INLINE int  metadatas_getComp_nb_1 ( const metadatas_t m ){ return counters_getComp_nb_1   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_addComp_nb_1 ( metadatas_t m, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_addComp_nb_1(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE int  metadatas_getComp_nb_p ( const metadatas_t m ){ return counters_getComp_nb_p   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_addComp_nb_p ( metadatas_t m, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_addComp_nb_p(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE void metadatas_add_time_CompCen(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CompCen( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CompCen ( const metadatas_t m ) { return chronos_get_time_CompCen (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CompRR1(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CompRR1( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CompRR1 ( const metadatas_t m ) { return chronos_get_time_CompRR1 (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CompRR2(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CompRR2( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CompRR2 ( const metadatas_t m ) { return chronos_get_time_CompRR2 (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CompRR3(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CompRR3( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CompRR3 ( const metadatas_t m ) { return chronos_get_time_CompRR3 (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CompTot(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CompTot( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CompTot ( const metadatas_t m ) { return chronos_get_time_CompTot (metadatas_chronref(m)); }
+
+/* Cauchy root finder: certification */
+METADATAS_INLINE int  metadatas_get_nbClusterCertified ( const metadatas_t m ){ return counters_get_nbClusterCertified   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_nbClusterCertified ( metadatas_t m, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_nbClusterCertified(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE int  metadatas_get_nbCertifiedWithPellet ( const metadatas_t m ){ return counters_get_nbCertifiedWithPellet   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_nbCertifiedWithPellet ( metadatas_t m, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_nbCertifiedWithPellet(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE slong  metadatas_get_nbEvalsInPellet ( const metadatas_t m ){ return counters_get_nbEvalsInPellet   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_nbEvalsInPellet ( metadatas_t m, slong nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_nbEvalsInPellet(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE int  metadatas_get_nbGraeffeInPellet ( const metadatas_t m ){ return counters_get_nbGraeffeInPellet   (metadatas_countref(m));}
+
+METADATAS_INLINE void metadatas_add_nbGraeffeInPellet ( metadatas_t m, int nb ) {
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    counters_add_nbGraeffeInPellet(metadatas_countref(m), nb );
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+
+METADATAS_INLINE void metadatas_add_time_CertPel(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CertPel( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CertPel ( const metadatas_t m ) { return chronos_get_time_CertPel (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CertPEv(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CertPEv( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CertPEv ( const metadatas_t m ) { return chronos_get_time_CertPEv (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CertPIn(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CertPIn( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CertPIn ( const metadatas_t m ) { return chronos_get_time_CertPIn (metadatas_chronref(m)); }
+
+METADATAS_INLINE void metadatas_add_time_CertPGr(metadatas_t m, double d){
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_lock(m);
+#endif
+    chronos_add_time_CertPGr( metadatas_chronref(m), d, metadatas_useNBThreads(m));
+#ifdef CCLUSTER_HAVE_PTHREAD
+                if (metadatas_useNBThreads(m) >1)
+                    metadatas_unlock(m);
+#endif
+}
+METADATAS_INLINE double metadatas_get_time_CertPGr ( const metadatas_t m ) { return chronos_get_time_CertPGr (metadatas_chronref(m)); }
 
 /* printing */
 char * compBox_sprint_for_stat(char * out, const compBox_t x);

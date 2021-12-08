@@ -79,6 +79,11 @@ NUMBERS_INLINE void compRat_set_sisi(compRat_t x, slong preal, ulong qreal, slon
     realRat_set_si(compRat_imagref(x), pimag, qimag);
 }
 
+NUMBERS_INLINE void compRat_zero(compRat_t x) { 
+    realRat_set_si(compRat_realref(x), 0, 1); 
+    realRat_set_si(compRat_imagref(x), 0, 1);
+}
+
 NUMBERS_INLINE void compRat_one(compRat_t x) { 
     realRat_set_si(compRat_realref(x), 1, 1); 
     realRat_set_si(compRat_imagref(x), 0, 1);
@@ -102,6 +107,31 @@ void compRat_mul(compRat_t dest, const compRat_t x, const compRat_t y);
 NUMBERS_INLINE void compRat_neg(compRat_t dest, const compRat_t src) { 
     realRat_neg(compRat_realref(dest), compRat_realref(src)); 
     realRat_neg(compRat_imagref(dest), compRat_imagref(src));
+}
+
+NUMBERS_INLINE void compRat_add(compRat_t dest, const compRat_t x, const compRat_t y) { 
+    realRat_add(compRat_realref(dest), compRat_realref(x), compRat_realref(y)); 
+    realRat_add(compRat_imagref(dest), compRat_imagref(x), compRat_imagref(y));
+}
+
+NUMBERS_INLINE void compRat_sub(compRat_t dest, const compRat_t x, const compRat_t y) { 
+    realRat_sub(compRat_realref(dest), compRat_realref(x), compRat_realref(y)); 
+    realRat_sub(compRat_imagref(dest), compRat_imagref(x), compRat_imagref(y));
+}
+
+NUMBERS_INLINE void compRat_div_ui(compRat_t dest, const compRat_t x, ulong y) { 
+    realRat_div_ui(compRat_realref(dest), compRat_realref(x), y); 
+    realRat_div_ui(compRat_imagref(dest), compRat_imagref(x), y);
+}
+
+NUMBERS_INLINE void compRat_mul_realRat(compRat_t dest, const compRat_t x, const realRat_t y) { 
+    realRat_mul(compRat_realref(dest), compRat_realref(x), y); 
+    realRat_mul(compRat_imagref(dest), compRat_imagref(x), y);
+}
+
+NUMBERS_INLINE void compRat_div_realRat(compRat_t dest, const compRat_t x, const realRat_t y) { 
+    realRat_div(compRat_realref(dest), compRat_realref(x), y); 
+    realRat_div(compRat_imagref(dest), compRat_imagref(x), y);
 }
 
 /* geometric operations */

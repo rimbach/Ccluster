@@ -111,6 +111,9 @@ POLYNOMIALS_INLINE  void compApp_poly_evaluate(compApp_t y, const compApp_poly_t
 POLYNOMIALS_INLINE  void compApp_poly_evaluate_horner(compApp_t y, const compApp_poly_t f, const compApp_t x, slong prec){
     acb_poly_evaluate_horner(y, f, x, prec);
 }
+POLYNOMIALS_INLINE  void compApp_poly_evaluate_rectangular(compApp_t y, const compApp_poly_t f, const compApp_t x, slong prec){
+    acb_poly_evaluate_rectangular(y, f, x, prec);
+}
 POLYNOMIALS_INLINE  void compApp_poly_evaluate2(compApp_t y, compApp_t z, const compApp_poly_t f, const compApp_t x, slong prec){
     acb_poly_evaluate2_rectangular(y, z, f, x, prec);
 }
@@ -127,6 +130,11 @@ POLYNOMIALS_INLINE  void compApp_poly_evaluate2_horner(compApp_t y, compApp_t z,
 POLYNOMIALS_INLINE  void compApp_poly_derivative(compApp_poly_t fp, const compApp_poly_t f, slong prec){
     acb_poly_derivative(fp, f, prec);
 }
+
+/* bound greatest root radius for monic polynomial */
+void compApp_poly_monic_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, slong prec);
+/* bound greatest root radius for polynomial */
+void compApp_poly_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, slong prec);
 
 /* sum absolute values of coeffs */
 void compApp_poly_sum_abs_coeffs( realApp_t res, const compApp_poly_t f, slong prec );

@@ -58,6 +58,29 @@ void compApp_poly_scale_realRat_in_place( compApp_ptr fptr, const realRat_t r, s
     realApp_clear(factor);
 }
 
+void compApp_poly_scale_realRat_in_place_monic( compApp_ptr fptr, const realRat_t r, slong len, slong prec ){
+    
+    slong i;
+    realApp_t temp, factor;
+    
+    realApp_init(temp);
+    realApp_init(factor);
+    realApp_set_realRat(temp, r, prec);
+    compApp_abs(factor, fptr + (len-1), prec);
+    realApp_mul(factor, factor, temp, prec);
+    
+    for (i = len-2; i >= 0; i--){
+        compApp_div_realApp( fptr + i, fptr + i, factor, prec);
+        if (i > 0)
+            realApp_mul(factor, factor, temp, prec);
+    }
+    
+    compApp_one(fptr + (len-1));
+    
+    realApp_clear(temp);
+    realApp_clear(factor);
+}
+
 /* evaluate at order 1 on an interval geven by center + width */
 void realApp_poly_evaluate_order_one( realApp_t y, const realApp_poly_t f, const realApp_poly_t fder, const realRat_t c, const realRat_t w, slong prec){
     
@@ -189,6 +212,16 @@ void compApp_poly_taylorShift_in_place_noscale( compApp_poly_t f,
     
     compApp_clear(c);
 }
+
+// void compApp_poly_taylorShift_in_place_noscale_compApp( compApp_poly_t f, 
+//                                                         const compApp_t center, 
+//                                                         slong prec ){
+//     
+//     compApp_ptr fptr = f->coeffs;
+//     const slong len  = f->length;
+//     _acb_poly_taylor_shift_convolution(fptr, center, len, prec);
+//     
+// }
 
 void realApp_poly_taylorShift_in_place_noscale( realApp_poly_t f, 
                                         const realRat_t center, 

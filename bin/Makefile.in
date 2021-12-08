@@ -15,7 +15,12 @@ build: ccluster\
        ccluster_spiral\
        ccluster_nested\
        ccluster_zero\
-       ccluster_near_zero
+       ccluster_near_zero\
+       cauchy\
+       cauchy_mandelbrot\
+       cauchy_runnels\
+       cauchy_nested\
+       cauchy_mignotte
 
 # TESTING VARIABLES
 degree=64
@@ -87,3 +92,32 @@ ccluster_near_zero: ccluster_near_zero.o
 	    	-o $@ $< $(INCLUDE_PATH) \
 	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
 	
+cauchy: cauchy.o parseArgs.h
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+
+cauchy_mandelbrot: cauchy_mandelbrot.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	
+cauchy_runnels: cauchy_runnels.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+
+cauchy_nested: cauchy_nested.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	
+cauchy_mignotte: cauchy_mignotte.o
+# 	@echo "Building $@"
+	$(QUIET_CC) $(CC) $(CFLAGS) \
+	    	-o $@ $< $(INCLUDE_PATH) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \

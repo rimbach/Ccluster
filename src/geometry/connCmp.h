@@ -47,6 +47,7 @@ typedef struct {
                         /*               2 iff the last newton iteration was unsuccessful*/
                         /*               0 iff newton has not been tested on the cc*/
     int          isSep; /* a flag set to 1 if the connected component is separated from the other ones*/
+                        /* or 0 if it is not or has not been tested */
     
     /* for deflation */
     int          isDef; /* a flag set to 1 if a deflation has been computed */
@@ -72,6 +73,12 @@ typedef struct {
     int          reuNg;    /* number of Graeffe iterations */
     slong        reuPr;    /* precision used */
     compApp_poly reuPo;    /* computed pol */
+    
+    /* for Cauchy root finder */
+    int          isRig;    /* 1 => rigidity ratio of containing disc is m/( (2m-2)*theta ) with theta = 2 */
+    int          isIso;    /* 1 => isolation ratio is containing disc is 1 + 3d/m */
+    int          isSepCert;/* a flag set to 1 if 2*the connected component is separated from 2*the other ones*/
+                           /* or 0 if it is not or has not been tested */ 
 } connCmp;
 
 typedef connCmp connCmp_t[1];
@@ -103,6 +110,10 @@ typedef connCmp * connCmp_ptr;
 #define connCmp_reuNgref(X) ( (X)->reuNg)
 #define connCmp_reuPrref(X) ( (X)->reuPr)
 #define connCmp_reuPoref(X) (&(X)->reuPo)
+
+#define connCmp_isRigref(X) ( (X)->isRig)
+#define connCmp_isIsoref(X) ( (X)->isIso)
+#define connCmp_isSepCertref(X) ( (X)->isSepCert)
 
 /* memory managment */
 void connCmp_init(connCmp_t x);
@@ -297,6 +308,9 @@ int connCmp_is_imaginary_positive               ( const connCmp_t cc  );
 void connCmp_set_conjugate                      ( connCmp_t res, const connCmp_t cc  );
 
 void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t cc, const compBox_t initBox   );
+
+/* assume inflation maintain the number of roots in cc */
+void connCmp_infate_realRat_inPlace             ( connCmp_t cc,  const realRat_t factor, const compBox_t initBox   );
 
 /* DEPRECATED
 void connCmp_find_point_outside_connCmp_for_julia( realRat_t resRe, realRat_t resIm, const connCmp_t cc, const compBox_t initialBox );

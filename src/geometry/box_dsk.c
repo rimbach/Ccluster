@@ -34,7 +34,6 @@ void compBox_get_containing_dsk( compDsk_t d, const compBox_t b) {
     realRat_clear(ratio);
 }
 
-
 int compBox_intersection_is_not_empty_compDsk ( const compBox_t b, const compDsk_t d){
     
     int res;

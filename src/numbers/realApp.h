@@ -40,6 +40,7 @@ NUMBERS_INLINE void realApp_clear(realApp_t x) { arb_clear(x); }
 /* setting */
 NUMBERS_INLINE void realApp_zero      (realApp_t x                                ) { arb_zero     (x); }
 NUMBERS_INLINE void realApp_one       (realApp_t x                                ) { arb_one      (x); }
+NUMBERS_INLINE void realApp_pi        (realApp_t x, slong prec                    ) { arb_const_pi(x, prec); }
 NUMBERS_INLINE void realApp_set       (realApp_t y, const realApp_t x             ) { arb_set      (y, x); }
 NUMBERS_INLINE void realApp_set_fmpq  (realApp_t y, const fmpq_t    x, slong prec ) { arb_set_fmpq (y, x, prec); }
 NUMBERS_INLINE void realApp_set_fmpz  (realApp_t y, const fmpz_t    x, slong prec ) { arb_set_fmpz (y, x); }
@@ -121,11 +122,17 @@ NUMBERS_INLINE void realApp_mul_2exp_si(realApp_t y, const realApp_t x, slong e)
 NUMBERS_INLINE void realApp_sqr (realApp_t z, const realApp_t x, slong prec) { arb_sqr (z, x, prec); }
 NUMBERS_INLINE void realApp_sqrt(realApp_t z, const realApp_t x, slong prec) { arb_sqrt(z, x, prec); }
 
+/* assume x is positive and compute its e-th root */
+               void realApp_pos_root_ui   ( realApp_t dest, const realApp_t x, ulong e, slong prec);
+               
 /* logarithm */
 NUMBERS_INLINE void realApp_log(realApp_t z, const realApp_t x, slong prec) { arb_log(z, x, prec); }
 NUMBERS_INLINE void realApp_log_base_ui(realApp_t z, const realApp_t x, ulong base, slong prec) { arb_log_base_ui(z, x, base, prec); }
 
 /* other */
+
+NUMBERS_INLINE void realApp_max(realApp_t z, const realApp_t x, const realApp_t y, slong prec) { arb_max(z, x, y, prec); }
+
 NUMBERS_INLINE slong realApp_ceil_si(const realApp_t x, slong prec){
     slong res;
     arf_t ubound;

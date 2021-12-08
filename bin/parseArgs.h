@@ -173,6 +173,34 @@ int scan_epsilon( char * argv, realRat_t target ){
         
 }
 
+int scan_isoRatio( char * argv, realRat_t target ){
+    
+    if ( realRat_set_str_pretty(target, argv) == 0 ) {
+        if (realRat_cmp_ui(target, 1)<=0) {
+            printf("error isolation ratio should be > 1 ! %s\n", argv);
+            return 0;
+        }
+        return 1;
+    }
+    
+    printf("error in parsing isolation ratio ! %s\n", argv);
+    
+    return 0;
+        
+}
+
+int scan_nbPows( char * argv, int * target ){
+    
+    int res = sscanf(argv, "%d", target);
+    if ( *target < 0 ) {
+        printf("error nb of power sums should be >=0 ! %d\n", *target);
+        return 0;
+    }
+    
+    return res;
+        
+}
+
 int scan_output( char * argv, int * target ) {
     
     if ( (strcmp( argv, "g" ) == 0)

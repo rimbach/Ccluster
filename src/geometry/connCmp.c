@@ -10,6 +10,7 @@
 /* ************************************************************************** */
 
 #include "geometry/connCmp.h"
+
 void connCmp_init_reu(connCmp_t x) {
     connCmp_reuFlref(x) = 0;
     compRat_init( connCmp_reuCeref(x) );
@@ -114,6 +115,11 @@ void connCmp_init(connCmp_t x){
     
     /* for re-using Taylor shifts */
     connCmp_init_reu(x);
+    
+    /* for Cauchy root finder */
+    connCmp_isRigref(x) = 0;
+    connCmp_isIsoref(x) = 0;
+    connCmp_isSepCertref(x) = 0;
 }
 
 void connCmp_init_compBox(connCmp_t x, compBox_t b){
@@ -177,6 +183,10 @@ void connCmp_set(connCmp_t dest, const connCmp_t src){
     connCmp_appPrref(dest) = connCmp_appPrref(src);
     connCmp_newSuref(dest) = connCmp_newSuref(src);
     connCmp_isSepref(dest) = connCmp_isSepref(src);
+    
+    connCmp_isRigref(dest) = connCmp_isRigref(src);
+    connCmp_isIsoref(dest) = connCmp_isIsoref(src);
+    connCmp_isSepCertref(dest) = connCmp_isSepCertref(src);
     
     /* copy the boxes */
     compBox_ptr nBox;
@@ -759,6 +769,21 @@ void connCmp_set_conjugate_closure              ( connCmp_t res, const connCmp_t
     }
     
     realRat_clear(shift);
+}
+
+/* assume inflation maintain the number of roots in cc */
+void connCmp_infate_realRat_inPlace             ( connCmp_t cc,  const realRat_t factor, const compBox_t initBox   ){
+    compBox_ptr box = (compBox_ptr) ccluster_malloc ( sizeof(compBox) );
+    compBox_init( box );
+    connCmp_componentBox(box, cc, initBox);
+    realRat_mul( compBox_bwidthref(box), compBox_bwidthref(box), factor ); 
+    /* empty list of boxes */
+    compBox_list_clear(connCmp_boxesref(cc));
+    /* add box in list */
+    connCmp_insert_compBox(cc, box);
+    realRat_set(connCmp_widthref(cc), compBox_bwidthref(box));
+    fmpz_set_si(connCmp_nwSpdref(cc), 4);
+    connCmp_newSuref(cc) = 0;
 }
 
 /* DEPRECATED
