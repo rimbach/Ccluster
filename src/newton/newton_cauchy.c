@@ -40,7 +40,7 @@ newton_res newton_cauchy_first_condition( compApp_t fcenter,
     compApp_set_compRat( center, c, res.appPrec );
     realApp_set_realRat( diam, d, res.appPrec);
     
-    cacheCauchy_eval( fcenter, fpcenter, center, 1, cacheCau, res.appPrec);
+    cacheCauchy_eval( fcenter, fpcenter, center, 1, cacheCau, res.appPrec, meta);
     
     compApp_abs(fcenterabs, fcenter, res.appPrec);
     compApp_abs(fpcenterabs, fpcenter, res.appPrec);
@@ -52,7 +52,7 @@ newton_res newton_cauchy_first_condition( compApp_t fcenter,
         compApp_set_compRat( center, c, res.appPrec );
         realApp_set_realRat( diam, d, res.appPrec);
 
-        cacheCauchy_eval( fcenter, fpcenter, center, 1, cacheCau, res.appPrec);
+        cacheCauchy_eval( fcenter, fpcenter, center, 1, cacheCau, res.appPrec, meta);
         
         compApp_abs(fcenterabs, fcenter, res.appPrec);
         compApp_abs(fpcenterabs, fpcenter, res.appPrec);
@@ -114,7 +114,7 @@ newton_res newton_cauchy_iteration( compApp_t iteration,
         res.appPrec *=2;
         compApp_set_compRat( center, c, res.appPrec );
  
-        cacheCauchy_eval( fcenter, fpcenter, center, 1, cacheCau, res.appPrec);
+        cacheCauchy_eval( fcenter, fpcenter, center, 1, cacheCau, res.appPrec, meta);
         
         compApp_div(iteration, fcenter, fpcenter, res.appPrec);
         compApp_mul_si(iteration, iteration, connCmp_nSolsref(CC), res.appPrec);
@@ -176,14 +176,14 @@ newton_res newton_cauchy_interval(  compDsk_t d,
     compApp_set_imag_realApp(ball, bIm);
     compApp_set_compRat(cBall, compDsk_centerref(d), res.appPrec );
     
-    cacheCauchy_eval( dummy, fpBall, ball, 1, cacheCau, res.appPrec);
+    cacheCauchy_eval( dummy, fpBall, ball, 1, cacheCau, res.appPrec, meta);
     
     if (compApp_contains_zero(fpBall)){
         res.nflag=0; /* do nothing */
 //         printf("fpBall contains 0: %d, fpBall: ", compApp_contains_zero(fpBall)); compApp_print(fpBall); printf("\n");
     }
     else {
-        cacheCauchy_eval( fcBall, dummy, cBall, 1, cacheCau, res.appPrec);
+        cacheCauchy_eval( fcBall, dummy, cBall, 1, cacheCau, res.appPrec, meta);
         
         compApp_div( fcBall, fcBall, fpBall, res.appPrec);
         compApp_sub( fcBall, cBall, fcBall, res.appPrec);

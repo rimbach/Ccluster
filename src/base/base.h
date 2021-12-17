@@ -15,6 +15,7 @@
 #define MULTITHREADED
 
 #define CCLUSTER_DEFAULT_PREC 53
+#define CCLUSTER_FPRI_PREC 52
 
 /* when unsure if lcf is non-zero for global solving */
 /* use this as threshold to decide if it is zero */

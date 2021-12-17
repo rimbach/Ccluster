@@ -39,7 +39,54 @@ void fpci_sqr   ( fpci_t dest, const fpci_t x ){
     _fpci_sqr   ( temp, x );
     fpci_set(dest, temp);
     fpci_clear(temp);
-}    
+}
+
+/* does not support aliazing */
+void _fpci_inv( fpci_t dest, const fpci_t x ) {
+#define a fpci_realref(x)
+#define b fpci_imagref(x)
+#define e fpci_realref(dest)
+#define f fpci_imagref(dest)
+    if ( fpri_is_zero(b) ) {
+        fpri_inv(e, a);
+        fpri_zero(f);
+    } else if ( fpri_is_zero(a) ) {
+        fpri_zero(e);
+        fpri_inv(f, b);
+        fpri_neg(f, f);
+    } else {
+        fpri_sqr(e, a);
+        fpri_sqr(f, b);
+        fpri_add(f, e, f); /* f = a^2 + b^2 */
+        fpri_div(e, a, f); /* e = a/(a^2 + b^2) */
+        fpri_div(f, b, f); /* f = b/(a^2 + b^2) */
+        fpri_neg(f, f);    /* f = -b/(a^2 + b^2) */
+    }
+#undef a
+#undef b
+#undef e
+#undef f 
+}
+
+/* supports aliazing */
+void fpci_inv( fpci_t dest, const fpci_t x ) {
+    if (dest!=x){
+        _fpci_inv   ( dest, x );
+        return;
+    }
+    fpci_t temp;
+    fpci_init(temp);
+    _fpci_inv( temp, x );
+    fpci_set(dest, temp);
+    fpci_clear(temp);
+}
+
+void fpci_sqrabs   ( fpri_t dest, const fpci_t x ){
+    fpri_t temp;
+    fpri_sqr( dest, fpci_realref(x) );
+    fpri_sqr( temp, fpci_imagref(x) );
+    fpri_add( dest, dest, temp );
+}
 
 /* does not support aliazing */
 void _fpci_mul   ( fpci_t z, const fpci_t x, const fpci_t y ){
@@ -88,6 +135,12 @@ void _fpci_mul   ( fpci_t z, const fpci_t x, const fpci_t y ){
         _fpri_mul(u, a, d);
         _fpri_mul(v, b, c);
         fpri_add (f, u, v);
+        /* use fma */
+//         fpri_mul(e, b, d);
+//         fpri_neg(e, e);
+//         fpri_addmul(e, a, c);
+//         fpri_mul(f, a, d);
+//         fpri_addmul(f, b, c);
     }
 #undef a
 #undef b
@@ -113,6 +166,28 @@ void fpci_mul   ( fpci_t dest, const fpci_t x, const fpci_t y ){
     }
 }
 
+/* does not support aliazing */
+void _fpci_div     (fpci_t res, const fpci_t x, const fpci_t y){
+     fpci_inv(res, y);
+     fpci_mul(res, res, x);
+}
+/* support aliazing */
+void fpci_div     (fpci_t res, const fpci_t x, const fpci_t y){
+    if (x==y) {
+        fpci_one(res);
+        return;
+    }
+    if (res!=x) {
+        _fpci_div ( res, x, y );
+        return;
+    }
+    fpci_t temp;
+    fpci_init(temp);
+    _fpci_div ( temp, x, y );
+    fpci_set(res, temp);
+    fpci_clear(temp);
+}
+
 void fpci_pow_ui           (fpci_t res, const fpci_t x, ulong p){
     fpci_one(res);
     if (p==1)
@@ -132,6 +207,35 @@ void fpci_pow_ui           (fpci_t res, const fpci_t x, ulong p){
         fpci_clear(temp);
     }
 }
+
+// void fpci_pow_ui           (fpci_t res, const fpci_t x, ulong p){
+//     if (p==0)
+//         fpci_one(res);
+//     else if (p==1)
+//         fpci_set(res, x);
+//     else if (p==2)
+//         fpci_sqr(res, x);
+//     else if (p==3){
+//         fpci_sqr(res, x);
+//         fpci_mul(res, res, x);
+//     } else if (p==4) {
+//         fpci_sqr(res, x);
+//         fpci_sqr(res, res);
+//     } else {
+//         fmpz_t pfmpz;
+//         slong bits, i;
+//         fmpz_init(pfmpz);
+//         fmpz_set_ui(pfmpz, p);
+//         fpci_set(res, x);
+//         bits = fmpz_bits(pfmpz);
+//         for (i = bits - 2; i >= 0; i--) {
+//             fpci_sqr(res, res);
+//             if (fmpz_tstbit(pfmpz, i))
+//                 fpci_mul(res, res, x);
+//         }
+//         fmpz_clear(pfmpz);
+//     }
+// }
 
 void fpci_fprint (FILE * file, const fpci_t x){
     fprintf(file, "( ");

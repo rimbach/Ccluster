@@ -82,6 +82,7 @@ typedef struct {
     int _useRootRadii;
     int _useScaAndRou;
     int _useCompression;
+    int _usefpri;
 } strategies;
 
 typedef strategies strategies_t[1];
@@ -142,6 +143,8 @@ METADATAS_INLINE void strategies_set_ScaAndRou   ( strategies_t strat, int flag 
 METADATAS_INLINE int strategies_useCompression        ( const strategies_t strat ) { return strat->_useCompression      ; }
 METADATAS_INLINE void strategies_set_Compression   ( strategies_t strat, int flag ) { strat->_useCompression=flag      ; }
 
+METADATAS_INLINE int strategies_usefpri        ( const strategies_t strat ) { return strat->_usefpri      ; }
+METADATAS_INLINE void strategies_set_fpri   ( strategies_t strat, int flag ) { strat->_usefpri=flag      ; }
 
 #ifdef __cplusplus
 }

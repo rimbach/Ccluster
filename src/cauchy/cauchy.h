@@ -34,6 +34,11 @@
 #include "turan_rootRadii/turan_rootRadii.h"
 #include "cauchy_tests/cauchy_tests.h"
 
+#include "fpri/fpri.h"
+#include "fpri/fpci.h"
+#include "fpri/fpri_poly.h"
+#include "fpri/fpci_poly.h"
+
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include "ccluster/parallel_discard.h"
 #endif
@@ -47,6 +52,7 @@ int cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
                                   const realRat_t isoRatio,
                                   int nbPows,
                                   int certified,
+                                  int usefpri,
                                   char * stratstr,
                                   int nbThreads,
                                   int output,
@@ -57,6 +63,7 @@ int cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
                                           const realRat_t isoRatio,
                                           int nbPows,
                                           int certified,
+                                          int usefpri,
                                           char * stratstr,
                                           int nbThreads,
                                           int output,
@@ -69,6 +76,7 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                        const realRat_t isoRatio,
                                        int nbPows,
                                        int certified,
+                                       int usefpri,
                                        char * stratstr,
                                        int nbThreads,
                                        int output,

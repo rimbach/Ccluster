@@ -247,7 +247,7 @@ int main(int argc, char **argv){
     
     if (parse==1) {
 //        cauchy_global_interface_func( getApprox_Nested, eps, isoRatio, nbPows, st, nbthreads, output, verbosity); 
-       cauchy_global_interface_func_eval( getApprox_Nested, Nested_evaluate, eps, isoRatio, nbPows, certified, st, nbthreads, output, verbosity);
+       cauchy_global_interface_func_eval( getApprox_Nested, Nested_evaluate, eps, isoRatio, nbPows, certified, 0, st, nbthreads, output, verbosity);
     }
     
     realRat_clear(eps);

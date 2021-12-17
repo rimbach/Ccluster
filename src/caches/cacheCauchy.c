@@ -96,8 +96,103 @@ void cacheCauchy_uBoundApp( realApp_t ubApp, slong degree, const realRat_t isoRa
     realRat_clear(ub);
 }
 
+// void cacheCauchy_eval_52( compApp_ptr fvals, compApp_ptr fdervals, compApp_ptr points, slong nbPoints, 
+//                           cacheCauchy_t cache){
+//     
+// //     printf("here!\n");
+//     fpci_t f, fd, p;
+//     if (cacheCauchy_choiceref(cache) == 1) {
+//             
+//             for (slong i = 0; i< nbPoints; i++) {
+//                 fpci_set_acb(p, points + i);
+//                 fpci_poly_sparse_eval( f, fd, cacheCauchy_pfpciref(cache), cacheCauchy_inNZCref(cache), cacheCauchy_nbNZCref(cache), p);
+//                 fpci_get_acb( fvals + i, f);
+//                 fpci_get_acb( fdervals + i, fd);
+//             }
+//         
+//         } else if ( (cacheCauchy_choiceref(cache) == -1 )&&(nbPoints > 1) ){
+//             
+//             clock_t start2 = clock();
+//             for (slong i=0; i<nbPoints; i++) {
+//                 
+//                 fpci_set_acb(p, points + i);
+//                 fpci_poly_evaluate2_horner( f, fd, cacheCauchy_pfpciref(cache), p);
+//                 fpci_get_acb( fvals + i, f);
+//                 fpci_get_acb( fdervals + i, fd);
+//                 
+//             }
+//             double timeInRectangular = (double) (clock() - start2);
+//             start2 = clock();
+//             for (slong i=0; i<nbPoints; i++) {
+//                 
+//                 fpci_set_acb(p, points + i);
+//                 fpci_poly_sparse_eval( f, fd, cacheCauchy_pfpciref(cache), cacheCauchy_inNZCref(cache), cacheCauchy_nbNZCref(cache), p);
+//                 fpci_get_acb( fvals + i, f);
+//                 fpci_get_acb( fdervals + i, fd);
+//                 
+//             }
+//             double timeInSparse = (double) (clock() - start2);
+//             if (timeInRectangular <= timeInSparse)
+//                 cacheCauchy_choiceref(cache) = 0;
+//             else
+//                 cacheCauchy_choiceref(cache) = 1;
+//         
+//         } else {
+//             for (slong i=0; i<nbPoints; i++) {
+//                 fpci_set_acb(p, points + i);
+//                 fpci_poly_evaluate2_horner( f, fd, cacheCauchy_pfpciref(cache), p);
+//                 fpci_get_acb( fvals + i, f);
+//                 fpci_get_acb( fdervals + i, fd);
+//             }
+//         
+//         }
+//     
+// }
+
+void cacheCauchy_eval_fpri( fpci_ptr fvals, fpci_ptr fdervals, fpci_ptr points, slong nbPoints, 
+                            cacheCauchy_t cache, metadatas_t meta){
+    
+    if (cacheCauchy_fpri_choiceref(cache) == 1) {
+            
+            for (slong i = 0; i< nbPoints; i++) {
+                fpci_poly_sparse_eval( fvals + i, fdervals + i, 
+                                       cacheCauchy_pfpciref(cache), cacheCauchy_inNZCref(cache), cacheCauchy_nbNZCref(cache), 
+                                       points + i);
+            }
+        
+        } else if ( (cacheCauchy_fpri_choiceref(cache) == -1 )&&(nbPoints > 1) ){
+            
+            clock_t start2 = clock();
+            for (slong i=0; i<nbPoints; i++) {
+                fpci_poly_evaluate2_horner( fvals + i, fdervals + i, cacheCauchy_pfpciref(cache), points + i);
+                
+            }
+            double timeInHorner = (double) (clock() - start2);
+            start2 = clock();
+            for (slong i=0; i<nbPoints; i++) {
+                
+                fpci_poly_sparse_eval( fvals + i, fdervals + i, 
+                                       cacheCauchy_pfpciref(cache), cacheCauchy_inNZCref(cache), cacheCauchy_nbNZCref(cache), 
+                                       points + i);
+                
+            }
+            double timeInSparse = (double) (clock() - start2);
+            if (timeInHorner <= timeInSparse)
+                cacheCauchy_fpri_choiceref(cache) = 0;
+            else
+                cacheCauchy_fpri_choiceref(cache) = 1;
+        
+        } else {
+            for (slong i=0; i<nbPoints; i++) {
+                fpci_poly_evaluate2_horner( fvals + i, fdervals + i, cacheCauchy_pfpciref(cache), points + i);
+            }
+        
+        }
+    
+}
+    
 void cacheCauchy_eval( compApp_ptr fvals, compApp_ptr fdervals, compApp_ptr points, slong nbPoints, 
-                       cacheCauchy_t cache, slong prec ){
+                       cacheCauchy_t cache, slong prec, metadatas_t meta ){
     
     if (cacheCauchy_evalFastref(cache)) {
         
@@ -349,6 +444,7 @@ void cacheCauchy_rectangularEval ( compApp_t fval, compApp_t fderval, cacheCauch
     
     compApp_poly_ptr app    = cacheApp_getApproximation ( cacheCauchy_cacheAppref(cache), prec );
     compApp_poly_evaluate2_rectangular(fval, fderval, app, point, prec);
+//     compApp_poly_evaluate2_horner(fval, fderval, app, point, prec);
     
 }
 
@@ -371,6 +467,8 @@ void cacheCauchy_init ( cacheCauchy_t cache, cacheApp_t cacheA,
     cacheCauchy_nbNZCref(cache) = 0;
     cacheCauchy_inNZCref(cache) = NULL;
     cacheCauchy_choiceref(cache) = -1;
+    cacheCauchy_fpri_choiceref(cache) = -1;
+    fpci_poly_init(cacheCauchy_pfpciref(cache));
     if (evalFast==NULL) {
         compApp_poly_ptr app = cacheApp_getApproximation ( cacheCauchy_cacheAppref(cache), CCLUSTER_DEFAULT_PREC );
         cacheCauchy_inNZCref(cache) = (slong *) ccluster_malloc ( (cacheCauchy_degreeref(cache) + 1)*sizeof(slong) );
@@ -383,7 +481,9 @@ void cacheCauchy_init ( cacheCauchy_t cache, cacheApp_t cacheA,
                 cacheCauchy_nbNZCref(cache)+=1;
             }
         }
+        fpci_poly_set_acb_poly(cacheCauchy_pfpciref(cache), app);
     }
+    
     
     realRat_init(cacheCauchy_isoRatioref(cache));
     realRat_set(cacheCauchy_isoRatioref(cache), isoRatio);
@@ -404,6 +504,9 @@ void cacheCauchy_init ( cacheCauchy_t cache, cacheApp_t cacheA,
     realRat_zero(cacheCauchy_curRadiuref(cache));
     realApp_init(cacheCauchy_lBoundApref(cache));
     realApp_init(cacheCauchy_uBoundApref(cache));
+    
+    fpri_init(cacheCauchy_fpri_lBoundApref(cache));
+    fpri_init(cacheCauchy_fpri_uBoundApref(cache));
     
     
     /* compute q1 = ceil ( log_isoRatio (4*degree +1) ) + nbPs*/
@@ -429,11 +532,17 @@ void cacheCauchy_init ( cacheCauchy_t cache, cacheApp_t cacheA,
     
     /* evaluation points for uncertified*/
     cacheCauchy_precEvalExref(cache) = 0;
-    compApp_ptr pointsEx        = (compApp_ptr) ccluster_malloc( q1*sizeof(compApp) );
-    compApp_ptr pointsShiftedEx = (compApp_ptr) ccluster_malloc( q1*sizeof(compApp) );
-    compApp_ptr fvalsEx         = (compApp_ptr) ccluster_malloc( q1*sizeof(compApp) );
-    compApp_ptr fdervalsEx      = (compApp_ptr) ccluster_malloc( q1*sizeof(compApp) );
-    compApp_ptr fdivsEx         = (compApp_ptr) ccluster_malloc( q1*sizeof(compApp) );
+    compApp_ptr pointsEx             = (compApp_ptr) ccluster_malloc( q1*sizeof(compApp) );
+    compApp_ptr pointsShiftedEx      = (compApp_ptr) ccluster_malloc( q1*sizeof(compApp) );
+    compApp_ptr fvalsEx              = (compApp_ptr) ccluster_malloc( q1*sizeof(compApp) );
+    compApp_ptr fdervalsEx           = (compApp_ptr) ccluster_malloc( q1*sizeof(compApp) );
+    compApp_ptr fdivsEx              = (compApp_ptr) ccluster_malloc( q1*sizeof(compApp) );
+    cacheCauchy_fpci_precEvalExref(cache) = 0;
+    fpci_ptr    fpci_pointsEx        = (fpci_ptr) ccluster_malloc( q1*sizeof(fpci_struct) );
+    fpci_ptr    fpci_pointsShiftedEx = (fpci_ptr) ccluster_malloc( q1*sizeof(fpci_struct) );
+    fpci_ptr    fpci_fvalsEx         = (fpci_ptr) ccluster_malloc( q1*sizeof(fpci_struct) );
+    fpci_ptr    fpci_fdervalsEx      = (fpci_ptr) ccluster_malloc( q1*sizeof(fpci_struct) );
+    fpci_ptr    fpci_fdivsEx         = (fpci_ptr) ccluster_malloc( q1*sizeof(fpci_struct) );
     
     for (int i=0; i<q1; i++){
         compApp_init( pointsEx +i );
@@ -441,6 +550,11 @@ void cacheCauchy_init ( cacheCauchy_t cache, cacheApp_t cacheA,
         compApp_init( fvalsEx +i );
         compApp_init( fdervalsEx +i );
         compApp_init( fdivsEx +i );
+        fpci_init( fpci_pointsEx +i );
+        fpci_init( fpci_pointsShiftedEx +i );
+        fpci_init( fpci_fvalsEx +i );
+        fpci_init( fpci_fdervalsEx +i );
+        fpci_init( fpci_fdivsEx +i );
     }
     
     cacheCauchy_pointsExref(cache)        = pointsEx       ; 
@@ -448,6 +562,11 @@ void cacheCauchy_init ( cacheCauchy_t cache, cacheApp_t cacheA,
     cacheCauchy_fvalsExref(cache)         = fvalsEx        ; 
     cacheCauchy_fdervalsExref(cache)      = fdervalsEx     ; 
     cacheCauchy_fdivsExref(cache)         = fdivsEx        ; 
+    cacheCauchy_fpci_pointsExref(cache)        = fpci_pointsEx       ; 
+    cacheCauchy_fpci_pointsShiftedExref(cache) = fpci_pointsShiftedEx; 
+    cacheCauchy_fpci_fvalsExref(cache)         = fpci_fvalsEx        ; 
+    cacheCauchy_fpci_fdervalsExref(cache)      = fpci_fdervalsEx     ; 
+    cacheCauchy_fpci_fdivsExref(cache)         = fpci_fdivsEx        ; 
        
     if (metadatas_getVerbo(meta)>=level) {
         printf("#---cacheCauchy: \n");
@@ -507,6 +626,11 @@ void cacheCauchy_set_bounds( cacheCauchy_t cache, const realRat_t radius, slong 
         realApp_set_realRat(cacheCauchy_uBoundApref(cache), temp, prec);
     
         cacheCauchy_precBounref(cache) = prec;
+        
+        fpri_set_arb( cacheCauchy_fpri_lBoundApref(cache), cacheCauchy_lBoundApref(cache) );
+        fpri_set_arb( cacheCauchy_fpri_uBoundApref(cache), cacheCauchy_uBoundApref(cache) );
+        fpri_sqr( cacheCauchy_fpri_lBoundApref(cache), cacheCauchy_fpri_lBoundApref(cache)); 
+        fpri_sqr( cacheCauchy_fpri_uBoundApref(cache), cacheCauchy_fpri_uBoundApref(cache));
     
         realRat_clear(temp);
     }
@@ -521,6 +645,7 @@ void cacheCauchy_clear ( cacheCauchy_t cache ){
     
     if (cacheCauchy_inNZCref(cache))
         ccluster_free( cacheCauchy_inNZCref(cache) );
+    fpci_poly_clear(cacheCauchy_pfpciref(cache));
     
     realRat_clear(cacheCauchy_isoRatioref(cache));
     realApp_clear(cacheCauchy_precfdivref(cache));
@@ -535,6 +660,8 @@ void cacheCauchy_clear ( cacheCauchy_t cache ){
     realRat_clear(cacheCauchy_curRadiuref(cache));
     realApp_clear(cacheCauchy_lBoundApref(cache));
     realApp_clear(cacheCauchy_uBoundApref(cache));
+    fpri_clear(cacheCauchy_fpri_lBoundApref(cache));
+    fpri_clear(cacheCauchy_fpri_uBoundApref(cache));
     
     /* evaluation points for uncertified*/
     compApp_ptr pointsEx        = cacheCauchy_pointsExref(cache)       ;
@@ -542,6 +669,11 @@ void cacheCauchy_clear ( cacheCauchy_t cache ){
     compApp_ptr fvalsEx         = cacheCauchy_fvalsExref(cache)        ;
     compApp_ptr fdervalsEx      = cacheCauchy_fdervalsExref(cache)        ;
     compApp_ptr fdivsEx         = cacheCauchy_fdivsExref(cache)           ;
+    fpci_ptr fpci_pointsEx        = cacheCauchy_fpci_pointsExref(cache)       ;
+    fpci_ptr fpci_pointsShiftedEx = cacheCauchy_fpci_pointsShiftedExref(cache);
+    fpci_ptr fpci_fvalsEx         = cacheCauchy_fpci_fvalsExref(cache)        ;
+    fpci_ptr fpci_fdervalsEx      = cacheCauchy_fpci_fdervalsExref(cache)        ;
+    fpci_ptr fpci_fdivsEx         = cacheCauchy_fpci_fdivsExref(cache)           ;
     slong q1 = cacheCauchy_nbEvalExref(cache);
     
     for (int i=0; i<q1; i++){
@@ -550,6 +682,11 @@ void cacheCauchy_clear ( cacheCauchy_t cache ){
         compApp_clear( fvalsEx +i );
         compApp_clear( fdervalsEx +i );
         compApp_clear( fdivsEx +i );
+        fpci_clear( fpci_pointsEx +i );
+        fpci_clear( fpci_pointsShiftedEx +i );
+        fpci_clear( fpci_fvalsEx +i );
+        fpci_clear( fpci_fdervalsEx +i );
+        fpci_clear( fpci_fdivsEx +i );
     }
     
     ccluster_free(pointsEx        );
@@ -557,5 +694,10 @@ void cacheCauchy_clear ( cacheCauchy_t cache ){
     ccluster_free(fvalsEx         );
     ccluster_free(fdervalsEx      );
     ccluster_free(fdivsEx         );
+    ccluster_free(fpci_pointsEx        );
+    ccluster_free(fpci_pointsShiftedEx );
+    ccluster_free(fpci_fvalsEx         );
+    ccluster_free(fpci_fdervalsEx      );
+    ccluster_free(fpci_fdivsEx         );
     
 }

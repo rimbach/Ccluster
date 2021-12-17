@@ -16,6 +16,7 @@ int   cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
                                      const realRat_t isoRatio,
                                      int nbPows,
                                      int certified,
+                                     int usefpri,
                                      char * stratstr,
                                      int nbThreads,
                                      int output,
@@ -36,6 +37,8 @@ int   cauchy_global_interface_func( void(*func)(compApp_poly_t, slong),
     compBox_init(initialBox);
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     metadatas_init(meta, initialBox, strat, verb);
+    
+    strategies_set_fpri(metadatas_stratref(meta), usefpri);
     
     cacheCauchy_init(cacheCau, cache, NULL, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
     
@@ -100,6 +103,7 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
                                            const realRat_t isoRatio,
                                            int nbPows,
                                            int certified,
+                                           int usefpri,
                                            char * stratstr,
                                            int nbThreads,
                                            int output,
@@ -111,7 +115,19 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
     connCmp_list_t qRes;
     compBox_list_t bDis;
     
-    cacheApp_init_realRat_poly(cache, poly);
+    /* for test */
+//     realRat_t factor;
+//     realRat_init(factor);
+//     realRat_set_si(factor, 8, 1);
+//     realRat_poly_t p2;
+//     realRat_poly_init(p2);
+//     realRat_poly_rescale(p2, poly, factor);
+    
+// //     if (usefpri)
+//         cacheApp_init_realRat_poly(cache, p2);
+// //     else
+        cacheApp_init_realRat_poly(cache, poly);
+    
     strategies_init(strat);
     strategies_set_str( strat, stratstr, nbThreads );
     
@@ -120,6 +136,8 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
     compBox_set_si(initialBox, 0,1,0,1,0,1);
 //     compBox_set_si(initialBox, 1,1,0,1,0,1);
     metadatas_init(meta, initialBox, strat, verb);
+    
+    strategies_set_fpri(metadatas_stratref(meta), usefpri);
     
     cacheCauchy_init(cacheCau, cache, NULL, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
     
@@ -174,6 +192,9 @@ int  cauchy_global_interface_realRat_poly( const realRat_poly_t poly,
     compBox_list_clear(bDis);
     compBox_clear(initialBox);
     
+//     realRat_clear(factor);
+//     realRat_poly_clear(p2);
+    
     return failure;
 }
 
@@ -184,6 +205,7 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
                                    const realRat_t isoRatio,
                                    int nbPows,
                                    int certified,
+                                   int usefpri,
                                    char * stratstr,
                                    int nbThreads,
                                    int output,
@@ -205,6 +227,8 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     compBox_set_si(initialBox, 0,1,0,1,0,1);
     metadatas_init(meta, initialBox, strat, verb);
     
+    strategies_set_fpri(metadatas_stratref(meta), usefpri);
+    
     cacheCauchy_init(cacheCau, cache, evalFast, cacheApp_getDegree(cache), isoRatio, (slong) nbPows, meta);
     
 //     /* automaticly set initialBox */
@@ -220,7 +244,7 @@ int cauchy_global_interface_func_eval( void(*func)(compApp_poly_t, slong),
     /* automaticly set realCoeffs */
     if (cacheApp_is_real(cache)==0)
         strategies_set_realCoeffs(strat, 0);
- 
+    
     connCmp_list_init(qRes);
     compBox_list_init(bDis);
     

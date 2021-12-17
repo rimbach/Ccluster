@@ -63,6 +63,9 @@ int main(int argc, char **argv){
         printf("                     1 [default]: abstract of input and output\n");
         printf("                     2: detailed reports concerning algorithm\n");
         printf("                     >=3: debugging mode\n");
+        printf("      -f, --machineFloats: use or not machine numbers when possible\n");
+        printf("                     0 [default] : no\n");
+        printf("                     1: yes\n");
         return -1;
     }
     
@@ -79,6 +82,7 @@ int main(int argc, char **argv){
     int global = 2; /* by default, search all the roots */
     int infinity = 2;
     int output = 0;
+    int usefpri = 0;
     
     compBox_t bInit;
     realRat_t eps;
@@ -165,6 +169,16 @@ int main(int argc, char **argv){
             }
         }
         
+        if ( (strcmp( argv[arg], "-f" ) == 0) || (strcmp( argv[arg], "--machineFloats" ) == 0) ) {
+            if (argc>arg+1) {
+                parse = parse*sscanf(argv[arg+1], "%d", &usefpri);
+                if ((usefpri <0) || (usefpri>1)) {
+                    usefpri=0;
+                }
+                arg++;
+            }
+        }
+        
     }
     
     realRat_poly_t prunn;
@@ -177,7 +191,7 @@ int main(int argc, char **argv){
     compRat_poly_set_realRat_poly(p_global,prunn);
     
     if (parse==1) {
-        cauchy_global_interface_func_eval( getApprox, Runnels_evaluate, eps, isoRatio, nbPows, certified, st, nbthreads, output, verbosity);
+        cauchy_global_interface_func_eval( getApprox, Runnels_evaluate, eps, isoRatio, nbPows, certified, usefpri, st, nbthreads, output, verbosity);
     }
     
     realRat_poly_clear(prunn);

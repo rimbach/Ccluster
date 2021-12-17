@@ -161,7 +161,7 @@ cauchyTest_res cauchyTest_probabilistic_counting_withIsoRatio( const realRat_t i
             cauchyTest_computePointPointShifted( point, pointShifted, c, q, i, compDsk_radiusref(Delta), res.appPrec);
             
             start = clock();
-            cacheCauchy_eval( fval, fderval, pointShifted, 1, cacheCau, res.appPrec);
+            cacheCauchy_eval( fval, fderval, pointShifted, 1, cacheCau, res.appPrec, meta);
             evalTime += (double) (clock() - start);
             
             enoughPrec = cauchyTest_compute_fdiv_checkPrecAndBounds( fdiv, fval, fderval, lb, ub, res.appPrec );

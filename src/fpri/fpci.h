@@ -120,6 +120,11 @@ FPRI_INLINE void fpci_set_acb(fpci_t z, const acb_t x) {
     fpri_set_arb(fpci_imagref(z), acb_imagref(x));
 }
 
+FPRI_INLINE int  fpci_get_acb(acb_t x, const fpci_t z) {
+    return ( fpri_get_arb(acb_realref(x), fpci_realref(z) ) &&
+             fpri_get_arb(acb_imagref(x), fpci_imagref(z) ) );
+}
+
 FPRI_INLINE void fpci_set_arb(fpci_t z, const arb_t x) {
     fpri_set_arb(fpci_realref(z), x);
     fpri_zero(fpci_imagref(z));
@@ -127,6 +132,10 @@ FPRI_INLINE void fpci_set_arb(fpci_t z, const arb_t x) {
 
 FPRI_INLINE int fpci_is_zero(const fpci_t z) {
     return ( fpri_is_zero(fpci_realref(z)) && fpri_is_zero(fpci_imagref(z)) );
+}
+
+FPRI_INLINE int fpci_contains_zero(const fpci_t z) {
+    return ( fpri_contains_zero(fpci_realref(z)) && fpri_contains_zero(fpci_imagref(z)) );
 }
 
 /* arithmetic */
@@ -139,6 +148,14 @@ FPRI_INLINE void fpci_neg   ( fpci_t dest, const fpci_t x ) {
             void _fpci_sqr   ( fpci_t dest, const fpci_t x );
 /* support aliazing */
             void fpci_sqr   ( fpci_t dest, const fpci_t x );
+/* does not support aliazing */
+            void _fpci_inv   ( fpci_t dest, const fpci_t x );
+/* support aliazing */
+            void fpci_inv   ( fpci_t dest, const fpci_t x );
+            /* abs is not implemented because fpri_sqrt is not implemented */
+            /* instead compute the square of the abs */
+            void fpci_sqrabs   ( fpri_t dest, const fpci_t x );
+    
 
 FPRI_INLINE void fpci_sub   ( fpci_t dest, const fpci_t x, const fpci_t y) { 
     fpri_sub(fpci_realref(dest), fpci_realref(x), fpci_realref(y));
@@ -163,6 +180,21 @@ FPRI_INLINE void fpci_mul_fpri ( fpci_t dest, const fpci_t x, const fpri_t y) {
 FPRI_INLINE void fpci_mul_si   ( fpci_t dest, const fpci_t x, const slong y) { 
     fpri_mul_si(fpci_realref(dest), fpci_realref(x), y);
     fpri_mul_si(fpci_imagref(dest), fpci_imagref(x), y);
+}
+
+/* does not support aliazing */
+void _fpci_div     (fpci_t res, const fpci_t x, const fpci_t y);
+/* support aliazing */
+void fpci_div     (fpci_t res, const fpci_t x, const fpci_t y);
+
+FPRI_INLINE void fpci_div_fpri ( fpci_t dest, const fpci_t x, const fpri_t y) { 
+    fpri_div(fpci_realref(dest), fpci_realref(x), y);
+    fpri_div(fpci_imagref(dest), fpci_imagref(x), y);
+}
+
+FPRI_INLINE void fpci_div_si   ( fpci_t dest, const fpci_t x, const slong y) { 
+    fpri_div_si(fpci_realref(dest), fpci_realref(x), y);
+    fpri_div_si(fpci_imagref(dest), fpci_imagref(x), y);
 }
 
 void fpci_pow_ui           (fpci_t res, const fpci_t x, ulong p);

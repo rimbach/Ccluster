@@ -51,6 +51,17 @@ int main( ){
     printf("neg(neg(inv(10))): "); fpri_print(b); printf("\n");
     fpri_sqr(b,b);
     printf("sqr(inv(10)): "); fpri_print(b); printf("\n");
+    
+    fpri_set_d_d(b, 0.4, 0.5);
+    fpri_abs(b, b);
+    printf("abs[0.4, 0.5]: "); fpri_print(b); printf("\n");
+    fpri_set_d_d(b, -0.5, -0.4);
+    fpri_abs(b, b);
+    printf("abs[-0.5, -0.4]: "); fpri_print(b); printf("\n");
+    fpri_set_d_d(b, -0.5, 0.4);
+//     printf("[-0.5, 0.4]: "); fpri_print(b); printf("\n");
+    fpri_abs(b, b);
+    printf("abs[-0.5, 0.4]: "); fpri_print(b); printf("\n");
     fpri_clear(b);
     
     fpri_t c, d, e;

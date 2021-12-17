@@ -29,6 +29,11 @@
 
 #include "caches/cacheApp.h"
 
+#include "fpri/fpri.h"
+#include "fpri/fpci.h"
+#include "fpri/fpri_poly.h"
+#include "fpri/fpci_poly.h"
+
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include <pthread.h>
 #endif
@@ -49,7 +54,9 @@ typedef struct {
     slong    _nbNZC;    /* number of non-zero coefficients */
     slong  * _inNZC;  /* table containing the degrees of the non-zero coefficients 
                          when initialized, contains _degree+1 elements*/
-    int      _choice; /* -1 per default;  */
+    int      _choice;      /* -1 per default;  */
+    int      _choice_fpri; /* -1 per default;  */
+    fpci_poly_struct _pfpci;
     
     realRat _isoRatio; /* assumed isolation ratio */
     realApp _precfdiv; /* si* : 1/4 */
@@ -67,6 +74,9 @@ typedef struct {
     realApp _lBoundAp;
     realApp _uBoundAp;
     
+    fpri_struct _fpri_lBoundAp;
+    fpri_struct _fpri_uBoundAp;
+    
     /* evaluation points for uncertified exclusion*/
     slong       _precEvalEx; /* precision of evaluation */
     compApp_ptr _pointsEx;
@@ -74,6 +84,12 @@ typedef struct {
     compApp_ptr _fvalsEx;
     compApp_ptr _fdervalsEx;
     compApp_ptr _fdivsEx;
+    slong       _fpci_precEvalEx; /* precision of evaluation */
+    fpci_ptr    _fpci_pointsEx;
+    fpci_ptr    _fpci_pointsShiftedEx;
+    fpci_ptr    _fpci_fvalsEx;
+    fpci_ptr    _fpci_fdervalsEx;
+    fpci_ptr    _fpci_fdivsEx;
     
 } cacheCauchy;
 
@@ -86,6 +102,8 @@ typedef cacheCauchy * cacheCauchy_ptr;
 #define cacheCauchy_nbNZCref(X)   (X->_nbNZC)
 #define cacheCauchy_inNZCref(X)   (X->_inNZC)
 #define cacheCauchy_choiceref(X)   (X->_choice)
+#define cacheCauchy_fpri_choiceref(X)   (X->_choice_fpri)
+#define cacheCauchy_pfpciref(X)    (&(X)->_pfpci)
 #define cacheCauchy_isoRatioref(X) (&(X)->_isoRatio)
 #define cacheCauchy_precfdivref(X) (&(X)->_precfdiv)
 #define cacheCauchy_nbPwSuExref(X)   (X->_nbPwSuEx)
@@ -98,12 +116,22 @@ typedef cacheCauchy * cacheCauchy_ptr;
 #define cacheCauchy_lBoundApref(X) (&(X)->_lBoundAp)
 #define cacheCauchy_uBoundApref(X) (&(X)->_uBoundAp)
 
+#define cacheCauchy_fpri_lBoundApref(X) (&(X)->_fpri_lBoundAp)
+#define cacheCauchy_fpri_uBoundApref(X) (&(X)->_fpri_uBoundAp)
+
 #define cacheCauchy_precEvalExref(X)      ((X)->_precEvalEx)
 #define cacheCauchy_pointsExref(X)        ((X)->_pointsEx)
 #define cacheCauchy_pointsShiftedExref(X) ((X)->_pointsShiftedEx)
 #define cacheCauchy_fvalsExref(X)         ((X)->_fvalsEx)
 #define cacheCauchy_fdervalsExref(X)      ((X)->_fdervalsEx)
 #define cacheCauchy_fdivsExref(X)         ((X)->_fdivsEx)
+
+#define cacheCauchy_fpci_precEvalExref(X)      ((X)->_fpci_precEvalEx)
+#define cacheCauchy_fpci_pointsExref(X)        ((X)->_fpci_pointsEx)
+#define cacheCauchy_fpci_pointsShiftedExref(X) ((X)->_fpci_pointsShiftedEx)
+#define cacheCauchy_fpci_fvalsExref(X)         ((X)->_fpci_fvalsEx)
+#define cacheCauchy_fpci_fdervalsExref(X)      ((X)->_fpci_fdervalsEx)
+#define cacheCauchy_fpci_fdivsExref(X)         ((X)->_fpci_fdivsEx)
 
 /* compute q = ceil ( log_isoRatio (4*degree +1) ) + nbPs */
 slong cacheCauchy_get_NbOfEvalPoints( slong degree, const realRat_t isoRatio, slong nbPs, slong prec );
@@ -129,7 +157,10 @@ void cacheCauchy_rectangularEval ( compApp_t fval, compApp_t fderval, cacheCauch
                                    const compApp_t point, slong prec);
 
 void cacheCauchy_eval( compApp_ptr fvals, compApp_ptr fdervals, compApp_ptr points, slong nbPoints, 
-                       cacheCauchy_t cache, slong prec );
+                       cacheCauchy_t cache, slong prec, metadatas_t meta );
+
+void cacheCauchy_eval_fpri( fpci_ptr fvals, fpci_ptr fdervals, fpci_ptr points, slong nbPoints, 
+                            cacheCauchy_t cache, metadatas_t meta );
 
 void cacheCauchy_init ( cacheCauchy_t cache,
                         cacheApp_t cacheA,

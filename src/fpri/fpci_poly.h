@@ -81,6 +81,14 @@ FPRI_INLINE void fpci_poly_onei (fpci_poly_t poly){
 
 /* evaluation */
             void fpci_poly_evaluate2_horner(fpci_t y, fpci_t z, const fpci_poly_t p, const fpci_t x); 
+            void fpci_poly_evaluate2_rectangular(fpci_t y, fpci_t z, const fpci_poly_t p, const fpci_t x);
+            void fpci_poly_evaluate2_rectangulart(fpci_t y, fpci_t z, const fpci_poly_t p, const fpci_t x);
+
+/* sparse evaluation */
+            slong fpci_init_sparse_eval( slong ** inNZC, const fpci_poly_t p );
+            void fpci_clear_sparse_eval( slong ** inNZC, slong  nbNZC);
+            void fpci_poly_sparse_eval(fpci_t y, fpci_t z, const fpci_poly_t p, slong inNZC[], slong nbNZC, const fpci_t x); 
+            void fpci_poly_sparse_eval2(fpci_t y, fpci_t z, const fpci_poly_t p, slong inNZC[], slong nbNZC, const fpci_t x);
 /* printing */
             void fpci_poly_fprint (FILE * file, const fpci_poly_t x);
 FPRI_INLINE void fpci_poly_print (const fpci_poly_t x) { fpci_poly_fprint(stdout, x); }

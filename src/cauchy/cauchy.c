@@ -37,9 +37,14 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
     
     int level = 4;
     
-    tstar_res res;
-    res.appPrec = prec;
-    
+//     tstar_res res;
+//     res.appPrec = prec;
+    cauchyTest_res res;
+    if ( (metadatas_usefpri(meta)) && (cacheCauchy_evalFastref(cacheCau)==NULL) )
+        res.appPrec = CCLUSTER_FPRI_PREC;
+    else
+        res.appPrec = CCLUSTER_DEFAULT_PREC;
+        
     slong depth;
     
     compBox_list_t ltemp;
@@ -71,27 +76,14 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
             continue;
         }
         
-        /* test */
-//         if ( compBox_skipref(btemp)==1 ) {
-// //             compBox_skipref(btemp) = 0;
-//             compBox_list_push(ltemp, btemp);
-//             continue;
-//         }
-        
         /* exclusion test */
-        cauchyTest_res resCauchy;
-        resCauchy.nbOfSol = 1;
-        resCauchy.appPrec = CCLUSTER_DEFAULT_PREC;
 
-        resCauchy = cauchyTest_probabilistic_exclusion_test( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
+        res = cauchyTest_probabilistic_exclusion_test( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
                                                             NULL, 0,0,
-                                                            cacheCau, resCauchy.appPrec, meta, depth);
+                                                            cacheCau, res.appPrec, meta, depth);
         if (metadatas_getVerbo(meta)>=level) {
-            printf("#---cauchy exclusion test: res: %d\n", resCauchy.nbOfSol );
+            printf("#---cauchy exclusion test: res: %d\n", res.nbOfSol );
         }
-        
-        res.appPrec = resCauchy.appPrec;
-        res.nbOfSol = resCauchy.nbOfSol;
         
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
@@ -773,6 +765,10 @@ int cauchy_main_loop( connCmp_list_t qResults,
         isolaFlag      = 0;
         resNewton.nflag = 0;
         
+        if ( (!(it==NULL))&&(it==connCmp_list_begin(qMainLoop))) {
+            it=NULL;
+        }
+        
         ccur = connCmp_list_pop(qMainLoop);
         
         /* try to upper bound the number of roots in ccur */
@@ -1102,6 +1098,8 @@ int cauchy_algo_global( connCmp_list_t qResults,
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
+//     compBox_set_si(initialBox, 0,1,0,1,1,2);
+    
     metadatas_setInitBox(meta, initialBox);
     compBox_nbMSolref(initialBox) = cacheCauchy_degreeref(cacheCau);
     
@@ -1203,6 +1201,7 @@ int metadatas_cauchy_fprint(FILE * file, metadatas_t meta, const realRat_t eps, 
     }
     if (metadatas_usePowerSums(meta)) len += sprintf( temp + len, " + powerSums");
     if (metadatas_forTests(meta)) len += sprintf( temp + len, " + test");
+    if (metadatas_usefpri(meta)) len += sprintf( temp + len, " + fpri");
 #ifdef CCLUSTER_HAVE_PTHREAD
     if (metadatas_useNBThreads(meta)>1) len += sprintf( temp + len, " %d threads", metadatas_useNBThreads(meta));
 #endif

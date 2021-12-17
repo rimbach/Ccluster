@@ -74,6 +74,80 @@ int main( ){
     fpci_mul(c, b, c);
     printf("(3+i4)*(5+i6): should be (-9+i38): "); fpci_print(c); printf("\n");
     
+    
+    printf("\ntest inv: \n");
+    acb_t bb, cc, dd;
+    acb_init(bb);
+    acb_init(cc);
+    acb_init(dd);
+    
+    fpci_set_si_si(b, 3, 0);
+//     fpci_set_si_si(c, 5, 6);
+    fpci_inv(d, b);
+    printf("1/3: should be ~(%f) ", 1./3); fpci_print(d); printf("\n");
+    acb_set_si_si(bb, 3, 0);
+//     acb_set_si_si(cc, 5, 6);
+    acb_inv(dd, bb, prec);
+    printf("1/3: in acb "); acb_printd(dd, 10); printf("\n");
+    
+    fpci_set_si_si(b, 0, 4);
+//     fpci_set_si_si(c, 5, 6);
+    fpci_inv(d, b);
+    printf("1/(i4): should be ~(-i%f) ", 1./4); fpci_print(d); printf("\n");
+    acb_set_si_si(bb, 0, 4);
+//     acb_set_si_si(cc, 5, 6);
+    acb_inv(dd, bb, prec);
+    printf("1/(i4): in acb "); acb_printd(dd, 10); printf("\n");
+    
+    fpci_set_si_si(b, 3, 4);
+//     fpci_set_si_si(c, 5, 6);
+    fpci_inv(d, b);
+    printf("1/(3+i4): should be (3-i4)/25: ~(%f -i%f) ", 3./25, 4./25); fpci_print(d); printf("\n");
+    acb_set_si_si(bb, 3, 4);
+//     acb_set_si_si(cc, 5, 6);
+    acb_inv(dd, bb, prec);
+    printf("1/(3+i4): in acb "); acb_printd(dd, 10); printf("\n");
+    
+    fpci_set_si_si(b, 3, 4);
+    fpci_set_si_si(c, 5, 6);
+    fpci_div(d, b, c);
+    printf("(3+i4)/(5+i6) in fpci: "); fpci_print(d); printf("\n");
+    acb_set_si_si(bb, 3, 4);
+    acb_set_si_si(cc, 5, 6);
+    acb_div(dd, bb, cc, prec);
+    printf("(3+i4)/(5+i6) in  acb: "); acb_printd(dd, 10); printf("\n");
+    
+    printf("\ntest aliazing in div: \n");
+    fpci_set_si_si(b, 3, 4);
+    fpci_set_si_si(c, 5, 6);
+    fpci_div(b, b, b);
+    printf("(3+i4)/(3+i4): should be 1: "); fpci_print(b); printf("\n");
+    fpci_set_si_si(b, 3, 4);
+    fpci_set_si_si(c, 5, 6);
+    fpci_div(b, b, c);
+    printf("(3+i4)/(5+i6): "); fpci_print(b); printf("\n");
+    fpci_set_si_si(b, 3, 4);
+    fpci_set_si_si(c, 5, 6);
+    fpci_div(c, b, c);
+    printf("(3+i4)/(5+i6): "); fpci_print(c); printf("\n");
+    
+    fpci_set_si_si(b, 3, 4);
+    fpci_set_si_si(c, 5, 6);
+    fpci_div(d, b, c);
+    fpci_sqrabs(fpci_realref(d), d);
+    printf("|(3+i4)/(5+i6)|^2 in fpci: "); fpri_print(fpci_realref(d)); printf("\n");
+    acb_set_si_si(bb, 3, 4);
+    acb_set_si_si(cc, 5, 6);
+    acb_div(dd, bb, cc, prec);
+    acb_abs(acb_realref(dd), dd, prec);
+    arb_sqr(acb_realref(dd), acb_realref(dd), prec );
+    printf("|(3+i4)/(5+i6)|^2 in  acb: "); arb_printd(acb_realref(dd), 10); printf("\n");
+    
+    
+    acb_clear(bb);
+    acb_clear(cc);
+    acb_clear(dd);
+    
     fpci_clear(b);
     fpci_clear(c);
     fpci_clear(d);
@@ -114,6 +188,18 @@ int main( ){
     printf("acb  (%ld-th root of unit)^%ld: ", order, pow); acb_printd(ff, 16); printf("\n");
     printf("fpci (%ld-th root of unit)^%ld: ", order, pow); fpci_print(f); printf("\n");
     
+    pow = 4;
+    acb_pow_si(ff, ee, pow, prec);
+    fpci_pow_ui(f, e, pow);
+    printf("acb  (%ld-th root of unit)^%ld: ", order, pow); acb_printd(ff, 16); printf("\n");
+    printf("fpci (%ld-th root of unit)^%ld: ", order, pow); fpci_print(f); printf("\n");
+    
+    pow = 5;
+    acb_pow_si(ff, ee, pow, prec);
+    fpci_pow_ui(f, e, pow);
+    printf("acb  (%ld-th root of unit)^%ld: ", order, pow); acb_printd(ff, 16); printf("\n");
+    printf("fpci (%ld-th root of unit)^%ld: ", order, pow); fpci_print(f); printf("\n");
+    
     pow = order;
     acb_pow_si(ff, ee, pow, prec);
     fpci_pow_ui(f, e, pow);
@@ -124,30 +210,70 @@ int main( ){
     clock_t start;
     
     start = clock();
+    acb_unit_root(ee, order, prec);
     for (slong i=1; i<=nbops; i++) {
-        acb_unit_root(ee, nbops, prec);
-        acb_pow_si(ff, ee, nbops+1, prec);
+//         acb_unit_root(ee, nbops, prec);
+//         acb_pow_si(ff, ee, nbops+1, prec);
+        
+//         acb_unit_root(ee, order, prec);
+        acb_pow_si(ff, ee, 1024, prec);
     }
     double time_in_acb = ((double) (clock() - start))/ CLOCKS_PER_SEC;
-    printf("time in acb : %f \n", time_in_acb);
+    printf("time in powering with acb : %f \n", time_in_acb);
     printf("acb  (%ld-th root of unit)^%ld: ", nbops, nbops+1); acb_printd(ff, 16); printf("\n");
     
     start = clock();
+    acb_unit_root(ee, order, prec);
+    fpci_set_acb(e, ee);
     for (slong i=1; i<=nbops; i++) {
-        acb_unit_root(ee, nbops, prec);
-        fpci_set_acb(e, ee);
-        fpci_pow_ui(f, e, nbops+1);
+//         acb_unit_root(ee, nbops, prec);
+//         fpci_set_acb(e, ee);
+//         fpci_pow_ui(f, e, nbops+1);
+        
+//         acb_unit_root(ee, order, prec);
+//         fpci_set_acb(e, ee);
+        fpci_pow_ui(f, e, 1024);
     }
     double time_in_fpci = ((double) (clock() - start))/ CLOCKS_PER_SEC;
-    printf("time in fpci: %f \n", time_in_fpci);
+    printf("time in powering with fpci: %f \n", time_in_fpci);
     printf("fpci (%ld-th root of unit)^%ld: ", nbops, nbops+1); fpci_print(f); printf("\n");
 //     fpri_print(fpci_realref(f)); printf("\n");
 //     fpri_print(fpci_imagref(f)); printf("\n");
     
+    fpci_t g;
+    fpci_init(g);
+    acb_t gg;
+    acb_init(gg);
+    
+    acb_unit_root(ee, nbops, prec);
+    acb_pow_si(ff, ee, nbops+1, prec);
+    fpci_set_acb(e, ee);
+    fpci_set_acb(f, ff);
+        
+    start = clock();
+    for (slong i=1; i<=nbops; i++) {
+        acb_zero(gg);
+        acb_div(gg, ff, ee, prec);
+    }
+    time_in_acb = ((double) (clock() - start))/ CLOCKS_PER_SEC;
+    printf("time in division with acb : %f \n", time_in_acb);
+    printf("acb  (%ld-th root of unit)/(%ld-th root of unit)^%ld: ", nbops, nbops, nbops+1); acb_printd(ff, 16); printf("\n");
+    
+    start = clock();
+    for (slong i=1; i<=nbops; i++) {
+        fpci_zero(g);
+        fpci_div(g, f, e);
+    }
+    time_in_fpci = ((double) (clock() - start))/ CLOCKS_PER_SEC;
+    printf("time in division with fpci: %f \n", time_in_fpci);
+    printf("fpci (%ld-th root of unit)/(%ld-th root of unit)^%ld: ", nbops, nbops, nbops+1); fpci_print(f); printf("\n");
+    
     acb_clear(ee);
     acb_clear(ff);
+    acb_clear(gg);
     fpci_clear(e);
     fpci_clear(f);
+    fpci_clear(g);
     
     
     return 0;
