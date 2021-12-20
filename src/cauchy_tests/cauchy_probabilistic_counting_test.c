@@ -28,6 +28,8 @@ cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,
     if (metadatas_getVerbo(meta)>=level) {
         printf("#---cauchy probabilistic counting: \n");
         printf("#------ isoRatio: "); realRat_print(cacheCauchy_isoRatioref(cacheCau)); printf("\n");
+        printf("#------ disk: "); compDsk_print( Delta ); printf("\n");
+        
     }
     
     compApp_t s0;
@@ -37,6 +39,27 @@ cauchyTest_res cauchyTest_probabilistic_counting( const compDsk_t Delta,
     res = cauchyTest_computeS0Approx(s0, compDsk_centerref(Delta), compDsk_radiusref(Delta),
                                      NULL, 0, 0, &alreadyEvaluated, cacheCau, prec, CAUCHYTEST_INCOUNTIN, meta, depth );
     
+//     if ( (depth==5)&&(compRat_is_zero(compDsk_centerref(Delta))) ) {
+//             printf("ICI&&&&&&&&&&&&&&&&&\n");
+//             
+//             slong nbPoints = cacheCauchy_nbEvalExref(cacheCau);
+//             compApp_ptr points = cacheCauchy_pointsExref(cacheCau);
+//             compApp_ptr pointsShifted = cacheCauchy_pointsShiftedExref(cacheCau);
+//             compApp_ptr fvals = cacheCauchy_fvalsExref(cacheCau);
+//             compApp_ptr fdervals = cacheCauchy_fdervalsExref(cacheCau);
+//             for (slong i=0; i<nbPoints; i++) {
+//                 printf(" %ld-th point             : ", i); compApp_printd(pointsShifted + i, 16); printf("\n");
+//                 cacheCauchy_sparseEval2 ( fvals + i, fdervals + i, cacheCau, points + i, prec);
+//                 printf(" fval    with sparse     : "); compApp_printd(fvals + i, 16); printf("\n");
+//                 printf(" fderval with sparse     : "); compApp_printd(fdervals + i, 16); printf("\n");
+//                 cacheCauchy_rectangularEval ( fvals + i, fdervals + i, cacheCau, points + i, prec);
+//                 printf(" fval    with rectangular: "); compApp_printd(fvals + i, 16); printf("\n");
+//                 printf(" fderval with rectangular: "); compApp_printd(fdervals + i, 16); printf("\n");
+//             }
+//             
+//     
+//     }
+        
     res.nbOfSol = ( res.nbOfSol==-2? -1:0 );
     
     if (res.nbOfSol==0) {

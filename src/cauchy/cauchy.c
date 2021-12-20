@@ -35,8 +35,11 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
     clock_t start=clock();
 #endif
     
-    int level = 4;
+//     int level = 4;
     
+    /* for test */
+//     nbMSols = -1;
+
 //     tstar_res res;
 //     res.appPrec = prec;
     cauchyTest_res res;
@@ -81,9 +84,9 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
         res = cauchyTest_probabilistic_exclusion_test( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
                                                             NULL, 0,0,
                                                             cacheCau, res.appPrec, meta, depth);
-        if (metadatas_getVerbo(meta)>=level) {
-            printf("#---cauchy exclusion test: res: %d\n", res.nbOfSol );
-        }
+//         if (metadatas_getVerbo(meta)>=level) {
+//             printf("#---cauchy exclusion test: res: %d\n", res.nbOfSol );
+//         }
         
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
@@ -810,8 +813,8 @@ int cauchy_main_loop( connCmp_list_t qResults,
         if (metadatas_getVerbo(meta)>=level) {
             printf("\n#---depth: %d\n", (int) depth);
 //             printf("------component Box:"); compBox_print(componentBox); printf("\n");
-//             printf("#------length of working queue :         %d\n", connCmp_list_get_size(qMainLoop));
-//             printf("#------length of results queue :         %d\n", connCmp_list_get_size(qResults));
+            printf("#------length of working queue :         %d\n", connCmp_list_get_size(qMainLoop));
+            printf("#------length of results queue :         %d\n", connCmp_list_get_size(qResults));
             printf("#------number of boxes in ccur:          %d\n", connCmp_nb_boxes(ccur));
             printf("#------connCmp_nSolsref(ccur):           %d\n", connCmp_nSolsref(ccur)); 
             if (connCmp_nSolsref(ccur) == -1)
@@ -838,6 +841,11 @@ int cauchy_main_loop( connCmp_list_t qResults,
                     connCmp_nSolsref(ccur) = resCauchy.nbOfSol;
                     prec = resCauchy.appPrec;
                     slong m = connCmp_nSols(ccur);
+                    
+//                     if (metadatas_getVerbo(meta)>=level) {
+//                         tstar_res resTstar = tstar_interface( cacheCauchy_cacheAppref(cacheCau), ccDisk, cacheApp_getDegree(cacheCauchy_cacheAppref(cacheCau)), 0, 0, prec, depth, NULL, meta);
+//                         printf("#------resTstar: %d\n", (int) resTstar.nbOfSol);
+//                     }
                     
 #ifdef CCLUSTER_TIMINGS    
                     time_in_proba_counting += (double) (clock() - startt2);
@@ -944,7 +952,7 @@ int cauchy_main_loop( connCmp_list_t qResults,
                     }
                 }
                 
-                if (resCert.nbOfSol == -1) {
+                if (resCert.nbOfSol <= -1) {
                                 failure = 1;
                                 printf("#FAILURE: CERTIFICATION FAILED: A DISK is NOT 2-ISOLATED \n");
                                 continue;
@@ -1098,7 +1106,7 @@ int cauchy_algo_global( connCmp_list_t qResults,
     }
     realRat_mul_si(compBox_bwidthref(initialBox), compBox_bwidthref(initialBox), 2);
     
-//     compBox_set_si(initialBox, 0,1,0,1,1,2);
+//     compBox_set_si(initialBox, 0,1,0,1,1024,1);
     
     metadatas_setInitBox(meta, initialBox);
     compBox_nbMSolref(initialBox) = cacheCauchy_degreeref(cacheCau);

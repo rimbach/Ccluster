@@ -85,6 +85,12 @@ cauchyTest_res cauchyTest_rootFreeAnnulus_verification( const compDsk_t Delta,
     realRat_set(radSup, compDsk_radiusref(Delta));
     realRat_mul(radSup, radSup, a);
     
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("#---cauchy probabilistic counting: \n");
+        printf("#------ isoRatio: "); realRat_print(cacheCauchy_isoRatioref(cacheCau)); printf("\n");
+        printf("#------ disk: "); compDsk_print( Delta ); printf("\n");
+    }
+    
     /* first call probabilistic test */
     if (realRat_cmp(a, cacheCauchy_isoRatioref(cacheCau))==0) {
         res = cauchyTest_probabilistic_counting( Delta, cacheCau, res.appPrec, meta, depth);
