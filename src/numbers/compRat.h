@@ -101,6 +101,10 @@ NUMBERS_INLINE void compRat_set(compRat_t dest, const compRat_t src) {
     realRat_set(compRat_imagref(dest), compRat_imagref(src));
 }
 
+NUMBERS_INLINE int compRat_is_zero(const compRat_t x) { 
+    return (realRat_is_zero(compRat_realref(x)))&&(realRat_is_zero(compRat_imagref(x))); 
+}
+
 /*arithmetic*/
 void compRat_mul(compRat_t dest, const compRat_t x, const compRat_t y);
 

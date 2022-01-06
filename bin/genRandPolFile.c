@@ -92,7 +92,7 @@ int main(int argc, char **argv){
             if (argc>arg+1) {
                 parse = parse*sscanf(argv[arg+1], "%d", &nbterms);
                 if (nbterms<=0){
-                    printf("%s ERROR: NON-VALID BITSIZE (should be >0) \n", argv[0]);
+                    printf("%s ERROR: NON-VALID nb of terms (should be >0) \n", argv[0]);
                     parse = 0;
                 }
                 arg++;
@@ -137,7 +137,7 @@ int main(int argc, char **argv){
 //     printf ("%s PARSING OK, degree: %d, format: %d\n", argv[0], firstArg, format);
     
     realRat_poly_t p;
-    realRat_poly_init(p);
+//     realRat_poly_init(p);
     
     flint_rand_t state;
     flint_randinit(state);
@@ -145,6 +145,8 @@ int main(int argc, char **argv){
     FILE * curFile;
     
     for (int nbp = 1; nbp<=nbpols; nbp++){
+        
+        realRat_poly_init(p);
         
         if (strcmp(poly, randomDense)==0) {
             if (format==1) {
@@ -167,6 +169,7 @@ int main(int argc, char **argv){
 //         printf("filename: %s \n", filename);
         
         curFile = fopen (filename,"w");
+        
         
         if (strcmp(poly, randomDense)==0) {
             randomDense_polynomial(p, firstArg, bitsize, state);
@@ -214,10 +217,10 @@ int main(int argc, char **argv){
             printf("format %d not implemented\n", format);
         
         fclose (curFile);
-            
+        realRat_poly_clear(p);    
     }
     
-    realRat_poly_clear(p);
+//     realRat_poly_clear(p);
 }
 
 void randomDense_polynomial( realRat_poly_t dest, int degree, int bitsize, flint_rand_t state) {
@@ -243,6 +246,7 @@ int  isIntinListInt (int el, int * lis, int length){
 
 void randomSparse_polynomial( realRat_poly_t dest, int degree, int bitsize, int nbterms, flint_rand_t state){
     
+//     printf("degree: %d, bitsize: %d, nbterms: %d\n", degree, bitsize, nbterms);
     realRat_poly_fit_length(dest, (slong) degree+1);
     realRat_poly_zero(dest);
     

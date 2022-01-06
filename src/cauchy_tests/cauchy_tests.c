@@ -62,6 +62,116 @@ int  cauchyTest_compute_fdiv_checkPrecAndBounds( compApp_t fdiv,
  * pointsShifted = [ c + radius*exp(2*pi*0/nbPoints), ..., c + radius*exp( 2*pi*(nbPoints-1)/nbPoints ) ]
  */
 
+void cauchyTest_getEvaluationPoints_fpri( const compRat_t center,
+                                          const realRat_t radius,
+                                          const realRat_t radius2,
+                                          slong vangle,
+                                          slong vindex,
+                                          cacheCauchy_t cacheCau ) {
+#ifdef CCLUSTER_TIMINGS    
+    clock_t start = clock();
+#endif
+    
+    slong nbPoints         = cacheCauchy_nbEvalExref(cacheCau);
+    compApp_ptr points          = cacheCauchy_pointsExref(cacheCau);
+    fpci_ptr fpci_points        = cacheCauchy_fpci_pointsExref(cacheCau);
+//     compApp_ptr pointsShifted   = cacheCauchy_pointsShiftedExref(cacheCau);
+    fpci_ptr fpci_pointsShifted = cacheCauchy_fpci_pointsShiftedExref(cacheCau);
+    
+    compApp_t c, a;
+    realApp_t r;
+    realRat_t argu;
+    
+    compApp_init(c);
+    compApp_init(a);
+    realApp_init(r);
+    realRat_init(argu);
+
+    fpci_t cfpci;
+    fpci_init(cfpci);
+    fpri_t rfpri;
+    fpri_init(rfpri);
+    
+    realApp_set_realRat(r, radius, CCLUSTER_DEFAULT_PREC);
+    fpri_set_arb(rfpri, r);
+    
+#ifdef CCLUSTER_TIMINGS    
+    clock_t start2 = clock();
+#endif    
+    /* recompute roots of unity only if necessary */
+    if ( cacheCauchy_fpci_precEvalExref(cacheCau) == 0 ){
+        
+        if ( cacheCauchy_precEvalExref(cacheCau) == 0 ){
+            for(slong i=0; i<nbPoints; i++) {
+                realRat_set_si(argu, -2*i, nbPoints);
+                compApp_set_realRat(a, argu, CCLUSTER_DEFAULT_PREC);
+                acb_exp_pi_i( points + i, a, CCLUSTER_DEFAULT_PREC);
+//                 fpci_set_acb( fpci_points + i, points + i );
+//                 printf(" fpci_points + i: "); fpci_print( fpci_points + i ); printf("\n");
+//                 printf("  acb_points + i: "); acb_printd( points + i, 16 ); printf("\n\n");
+            }
+            cacheCauchy_precEvalExref(cacheCau) = CCLUSTER_DEFAULT_PREC;
+        }
+        for(slong i=0; i<nbPoints; i++) {
+            fpci_set_acb( fpci_points + i, points + i );
+//             printf(" fpci_points + i: "); fpci_print( fpci_points + i ); printf("\n");
+        }
+        cacheCauchy_fpci_precEvalExref(cacheCau) = CCLUSTER_FPRI_PREC;
+    }
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchyTest_rootsOfUnits += (double) (clock() - start2);
+#endif
+    if (radius2==NULL)
+        compApp_set_compRat(c, center, CCLUSTER_DEFAULT_PREC);
+    else {
+    /* compute approximation of the center */
+        compApp_set_compRat         (c,    center,   2*CCLUSTER_DEFAULT_PREC);
+        realRat_set_si              (argu, 2*vindex, vangle);
+        compApp_set_realRat         (a,    argu,     2*CCLUSTER_DEFAULT_PREC);
+        acb_exp_pi_i                (a,    a,        2*CCLUSTER_DEFAULT_PREC);
+        compApp_mul_realRat_in_place(a,    radius2,  2*CCLUSTER_DEFAULT_PREC);
+        compApp_add                 (c,    c, a,     2*CCLUSTER_DEFAULT_PREC);
+    }
+    
+    fpci_set_acb(cfpci, c);
+    
+#ifdef CCLUSTER_TIMINGS    
+    start2 = clock();
+#endif
+    for(slong i=0; i<nbPoints; i++) {
+//         printf(" rfpri: "); fpri_print( rfpri ); printf("\n");
+//         printf(" r    : ");  arb_printd( r, 16 ); printf("\n");
+//         printf(" fpci_points + i: "); fpci_print( fpci_points + i ); printf("\n");
+//         printf("  acb_points + i: "); acb_printd( points + i, 16 ); printf("\n\n");
+        _fpri_mul( fpci_realref(fpci_pointsShifted + i), fpci_realref(fpci_points + i), rfpri );
+        _fpri_mul( fpci_imagref(fpci_pointsShifted + i), fpci_imagref(fpci_points + i), rfpri );
+//         printf(" fpci_pointsShifted + i: "); fpci_print( fpci_pointsShifted + i ); printf("\n");
+        fpci_add(  fpci_pointsShifted + i, fpci_pointsShifted + i, cfpci);
+        
+//         printf(" fpci_pointsShifted + i: "); fpci_print( fpci_pointsShifted + i ); printf("\n");
+//         
+//         compApp_set( pointsShifted + i, c);
+//         compApp_addmul_realApp(pointsShifted + i, points + i, r, CCLUSTER_DEFAULT_PREC);
+//         printf("  acb_pointsShifted + i: "); acb_printd( pointsShifted + i, 16 ); printf("\n\n");
+    }
+//     printf("\n\n");
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchyTest_shift_points += (double) (clock() - start2);
+#endif    
+    compApp_clear(c);
+    compApp_clear(a);
+    realApp_clear(r);
+    realRat_clear(argu);
+    
+    fpci_clear(cfpci);
+    fpri_clear(rfpri);
+    
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchyTest_getEvaluationPoints += (double) (clock() - start);
+#endif
+    
+}
+
 void cauchyTest_getEvaluationPoints( const compRat_t center,
                                      const realRat_t radius,
                                      const realRat_t radius2,
@@ -69,6 +179,12 @@ void cauchyTest_getEvaluationPoints( const compRat_t center,
                                      slong vindex,
                                      cacheCauchy_t cacheCau,
                                      slong prec ) {
+    
+    if (prec==CCLUSTER_FPRI_PREC) {
+        cauchyTest_getEvaluationPoints_fpri( center, radius, radius2, vangle, vindex, cacheCau );
+        return;
+    }
+    
 #ifdef CCLUSTER_TIMINGS    
     clock_t start = clock();
 #endif   
@@ -138,10 +254,44 @@ void cauchyTest_getEvaluationPoints( const compRat_t center,
 #endif
 }
 
+void cauchyTest_evaluateAtPoints_fpri( cacheCauchy_t cacheCau,
+                                       int inCounting,
+                                       metadatas_t meta, int depth){
+    
+    slong nbPoints = cacheCauchy_nbEvalExref(cacheCau);
+    fpci_ptr fpci_pointsShifted = cacheCauchy_fpci_pointsShiftedExref(cacheCau);
+    fpci_ptr fpci_fvals         = cacheCauchy_fpci_fvalsExref(cacheCau);
+    fpci_ptr fpci_fdervals      = cacheCauchy_fpci_fdervalsExref(cacheCau);
+    
+    clock_t start = clock();
+    
+    cacheCauchy_eval_fpri( fpci_fvals, fpci_fdervals, fpci_pointsShifted, nbPoints, cacheCau, meta);
+    
+//     for (slong i=0; i<nbPoints; i++) {
+//         fpci_get_acb( cacheCauchy_fvalsExref(cacheCau) + i, fpci_fvals + i );
+//         fpci_get_acb( cacheCauchy_fdervalsExref(cacheCau) + i, fpci_fdervals + i );
+//     }
+    
+    if (metadatas_haveToCount(meta)) {
+        if (inCounting == CAUCHYTEST_INCOUNTIN) {
+            metadatas_add_time_CauCoEv(meta, (double) (clock() - start));
+            metadatas_add_CauchyCoEvals(meta, depth, nbPoints);
+        } else {
+            metadatas_add_time_CauExEv(meta, (double) (clock() - start));
+            metadatas_add_CauchyExEvals(meta, depth, nbPoints);
+        }
+    }
+}
+
 void cauchyTest_evaluateAtPoints( cacheCauchy_t cacheCau,
                                   slong prec,
                                   int inCounting,
                                   metadatas_t meta, int depth){
+    
+    if (prec==CCLUSTER_FPRI_PREC) {
+        cauchyTest_evaluateAtPoints_fpri( cacheCau, inCounting, meta, depth);
+        return;
+    }
     
     slong nbPoints = cacheCauchy_nbEvalExref(cacheCau);
     compApp_ptr pointsShifted = cacheCauchy_pointsShiftedExref(cacheCau);
@@ -150,7 +300,7 @@ void cauchyTest_evaluateAtPoints( cacheCauchy_t cacheCau,
     
     clock_t start = clock();
     
-    cacheCauchy_eval( fvals, fdervals, pointsShifted, nbPoints, cacheCau, prec);
+    cacheCauchy_eval( fvals, fdervals, pointsShifted, nbPoints, cacheCau, prec, meta);
     
     if (metadatas_haveToCount(meta)) {
         if (inCounting == CAUCHYTEST_INCOUNTIN) {
@@ -166,10 +316,75 @@ void cauchyTest_evaluateAtPoints( cacheCauchy_t cacheCau,
 /* returns -1: should increase precision
  *         -2: disk is has not expected isolation ratio; should stop
  *          1: OK! */
+int cauchyTest_computeFdivs_fromVals_fpri(cacheCauchy_t cacheCau, 
+                                          int inCounting,
+                                          metadatas_t meta){
+    
+    int res=1;
+    
+    slong nbPoints    = cacheCauchy_nbEvalExref(cacheCau);
+    fpci_ptr fvals    = cacheCauchy_fpci_fvalsExref(cacheCau);
+    fpci_ptr fdervals = cacheCauchy_fpci_fdervalsExref(cacheCau);
+    fpci_ptr fdivs    = cacheCauchy_fpci_fdivsExref(cacheCau);
+    
+    clock_t start = clock();
+    
+    fpri_t modulus;
+    fpri_init(modulus);
+    
+    fpri_ptr lb = cacheCauchy_fpri_lBoundApref(cacheCau);
+    fpri_ptr ub = cacheCauchy_fpri_uBoundApref(cacheCau);
+    
+    /* compute fdivs; check if fvals contains zero and 
+     *                has modulus less than lower bound*/
+    for (slong i = 0; (i<nbPoints) && (res==1) ; i++) {
+        fpci_sqrabs(modulus, fvals +i);
+        if (fpci_contains_zero( fvals +i )){
+            /* compute modulus of fvals +i */
+            if (fpri_lt( modulus, lb )){
+                res=-2;
+            }
+            else {
+                res=-1;
+            }
+        }
+        else if (fpri_lt( modulus, lb )) {
+            res = -2;
+        }
+        else if (!fpri_ge( modulus, lb )){
+            res = -1;
+        }
+        fpci_div(fdivs +i, fdervals + i, fvals + i);
+        /* check if the ratio is less than the upper bound */
+       fpci_sqrabs(modulus, fdivs +i);
+        if (fpri_gt( modulus, ub )) {
+            res = -2;
+        }
+        
+        fpci_get_acb( cacheCauchy_fdivsExref(cacheCau) + i, fdivs + i );
+    }
+
+    fpri_clear(modulus);
+    
+    if (metadatas_haveToCount(meta)) {
+        if (inCounting == CAUCHYTEST_INCOUNTIN) {
+            metadatas_add_time_CauCoDS(meta, (double) (clock() - start));
+        } else {
+            metadatas_add_time_CauExDS(meta, (double) (clock() - start));
+        }
+    }
+    
+    return res;
+}
+
 int cauchyTest_computeFdivs_fromVals(cacheCauchy_t cacheCau,
                                      slong prec,
                                      int inCounting,
                                      metadatas_t meta){
+    
+    if (prec == CCLUSTER_FPRI_PREC) {
+        return cauchyTest_computeFdivs_fromVals_fpri(cacheCau, inCounting, meta);
+    }
     
     int res=1;
     
@@ -282,6 +497,118 @@ int cauchyTest_computeS0Approx_fromVals(compApp_t ps,
 /* returns -1: should increase precision
  *         -2: disk is has not expected isolation ratio; should stop
  *          1: OK! */
+int cauchyTest_computeSsApprox_fromVals_fpri(compApp_ptr ps,
+                                             const realRat_t radius,
+                                             cacheCauchy_t cacheCau,
+                                             int inCounting,
+                                             metadatas_t meta){
+#ifdef CCLUSTER_TIMINGS    
+    clock_t start2 = clock();
+#endif   
+    
+    int res=1;
+    
+    slong nbPoints     = cacheCauchy_nbEvalExref(cacheCau);
+    slong nbPowerSums  = cacheCauchy_nbPwSuExref(cacheCau);
+    realApp_ptr    wP  = cacheCauchy_precfdivref(cacheCau);
+    fpci_ptr fpci_points = cacheCauchy_fpci_pointsExref(cacheCau);
+    fpci_ptr fpci_fdivs  = cacheCauchy_fpci_fdivsExref(cacheCau);
+//     compApp_ptr points = cacheCauchy_pointsExref(cacheCau);
+//     compApp_ptr fdivs  = cacheCauchy_fdivsExref(cacheCau);
+    
+    clock_t start = clock();
+    
+    realApp_t radRe, radIm;
+    realApp_init(radRe);
+    realApp_init(radIm);
+    fpci_t temp;
+    fpci_init(temp);
+    fpri_t r;
+    fpri_init(r);
+    realApp_set_realRat(radRe, radius, CCLUSTER_DEFAULT_PREC);
+    fpri_set_arb(r, radRe);
+    
+//     printf("-----------------------------------------------\n");
+    fpci_ptr psfpci = (fpci_ptr) ccluster_malloc ( nbPowerSums * sizeof(fpci_struct) );
+    for (slong j = 0; j<nbPowerSums; j++)
+        fpci_init(psfpci+j);
+    
+    /* compute powerSums */
+    for (slong j = 0; j<nbPowerSums; j++) {
+        fpci_mul(psfpci+j, fpci_fdivs + 0, fpci_points + 0);
+//         compApp_mul(ps+j, fdivs + 0, points + 0, CCLUSTER_DEFAULT_PREC);
+//         printf("psfpci+%ld: ", j); fpri_print(fpci_realref(psfpci+j)); printf("\n");
+//         printf("psfpci+%ld: ", j); fpri_print(fpci_imagref(psfpci+j)); printf("\n");
+//         printf("    ps+%ld: ", j); arb_printd(acb_realref(ps+j),16); printf("\n");
+//         printf("    ps+%ld: ", j); arb_printd(acb_imagref(ps+j),16); printf("\n");
+    }
+//     printf("\n");
+    for (slong i = 1; i<nbPoints; i++) {
+//         printf("&&& i: %ld &&& \n", i);
+        for (slong j = 0; j<nbPowerSums; j++) {
+            fpci_mul(temp, fpci_fdivs + i, fpci_points + ((j+1)*i)%nbPoints);
+            fpci_add(psfpci+j, psfpci+j, temp);
+//             compApp_addmul(ps+j , fdivs + i, points + ((j+1)*i)%nbPoints, CCLUSTER_DEFAULT_PREC);
+//             printf("psfpci+%ld: ", j); fpri_print(fpci_realref(psfpci+j)); printf("\n");
+//             printf("psfpci+%ld: ", j); fpri_print(fpci_imagref(psfpci+j)); printf("\n");
+//             printf("    ps+%ld: ", j); arb_printd(acb_realref(ps+j),16); printf("\n");
+//             printf("    ps+%ld: ", j); arb_printd(acb_imagref(ps+j),16); printf("\n");
+        }
+//         printf("\n");
+    }
+    for (slong j = 0; j<nbPowerSums; j++) {
+//         compApp_div_si(ps+j, ps+j, nbPoints, CCLUSTER_DEFAULT_PREC);
+        fpci_div_si(psfpci+j, psfpci+j, nbPoints);
+//         printf("psfpci+%ld: ", j); fpri_print(fpci_realref(psfpci+j)); printf("\n");
+//         printf("psfpci+%ld: ", j); fpri_print(fpci_imagref(psfpci+j)); printf("\n");
+//         printf("    ps+%ld: ", j); arb_printd(acb_realref(ps+j),16); printf("\n");
+//         printf("    ps+%ld: ", j); arb_printd(acb_imagref(ps+j),16); printf("\n");
+        
+//         compApp_mul_realRat_in_place(ps+j, radius, CCLUSTER_DEFAULT_PREC);
+        fpri_mul(fpci_realref(psfpci+j), fpci_realref(psfpci+j), r);
+        fpri_mul(fpci_imagref(psfpci+j), fpci_imagref(psfpci+j), r);
+//         printf("psfpci+%ld: ", j); fpri_print(fpci_realref(psfpci+j)); printf("\n");
+//         printf("psfpci+%ld: ", j); fpri_print(fpci_imagref(psfpci+j)); printf("\n");
+//         printf("    ps+%ld: ", j); arb_printd(acb_realref(ps+j),16); printf("\n");
+//         printf("    ps+%ld: ", j); arb_printd(acb_imagref(ps+j),16); printf("\n");
+//         printf("\n");
+        fpci_get_acb(ps+j, psfpci+j);
+//         if (fpci_get_acb(ps+j, psfpci+j) == 0)
+//             res = -1;
+    }
+    
+    /* check if precision is OK */
+    if (res==1)
+        for (slong j = 0; j<nbPowerSums; j++){
+            realApp_get_rad_realApp( radRe, compApp_realref(ps+j) );
+            realApp_get_rad_realApp( radIm, compApp_imagref(ps+j) );
+            res = res && (realApp_lt( radRe, wP )) && (realApp_lt( radIm, wP ));
+            res = ((res==1)? 1:-1);
+        }
+        
+    realApp_clear(radRe);
+    realApp_clear(radIm);
+    fpci_clear(temp);
+    fpri_clear(r);
+    for (slong j = 0; j<nbPowerSums; j++)
+        fpci_clear(psfpci+j);
+    ccluster_free(psfpci);
+    
+    if (metadatas_haveToCount(meta)) {
+        if (inCounting == CAUCHYTEST_INCOUNTIN) {
+            metadatas_add_time_CauCoCS(meta, (double) (clock() - start));
+        } else {
+            metadatas_add_time_CauExCS(meta, (double) (clock() - start));
+        }
+    }
+
+#ifdef CCLUSTER_TIMINGS    
+    time_in_cauchyTest_computeSsApprox_fromVals += (double) (clock() - start2);
+#endif
+    
+    return res;
+}
+
 int cauchyTest_computeSsApprox_fromVals(compApp_ptr ps,
                                         const realRat_t radius,
                                         cacheCauchy_t cacheCau,
@@ -291,6 +618,10 @@ int cauchyTest_computeSsApprox_fromVals(compApp_ptr ps,
 #ifdef CCLUSTER_TIMINGS    
     clock_t start2 = clock();
 #endif 
+    
+    if (prec==CCLUSTER_FPRI_PREC) {
+        return cauchyTest_computeSsApprox_fromVals_fpri(ps, radius, cacheCau, inCounting, meta);
+    }
     
     int res=1;
     
@@ -427,7 +758,8 @@ cauchyTest_res cauchyTest_computeSsApprox(compApp_ptr ps,
         
         res.nbOfSol = cauchyTest_computeFdivs_fromVals(cacheCau, res.appPrec, inCounting, meta);
         if ( res.nbOfSol ==-1 )
-            res.appPrec = 2*res.appPrec;
+//             res.appPrec = 2*res.appPrec;
+            res.appPrec = ( res.appPrec==CCLUSTER_FPRI_PREC? CCLUSTER_DEFAULT_PREC : 2*res.appPrec);
     }
     
     if (res.nbOfSol == -2)
@@ -437,7 +769,8 @@ cauchyTest_res cauchyTest_computeSsApprox(compApp_ptr ps,
     res.nbOfSol = cauchyTest_computeSsApprox_fromVals(ps, radius, cacheCau, res.appPrec, inCounting, meta);
     
     while ( res.nbOfSol ==-1 ) {
-        res.appPrec = 2*res.appPrec;
+//         res.appPrec = 2*res.appPrec;
+        res.appPrec =  ( res.appPrec==CCLUSTER_FPRI_PREC? CCLUSTER_DEFAULT_PREC : 2*res.appPrec);
         
         cauchyTest_getEvaluationPoints( center, radius, 
                                         radius2, vangle, vindex,
@@ -526,7 +859,7 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
             cauchyTest_computePointPointShifted( point, pointShifted, c, q, i, compDsk_radiusref(Delta), appPrec );
             
             start = clock();
-            cacheCauchy_eval( fval, fderval, pointShifted, 1, cacheCau, appPrec );
+            cacheCauchy_eval( fval, fderval, pointShifted, 1, cacheCau, appPrec, meta );
             evalTime += (double) (clock() - start);
             
             if (compApp_contains_zero( fval )){
@@ -745,7 +1078,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
         
         for(slong i=0; i<q; i++) {
             cauchyTest_computePointPointShifted( point, pointShifted, c, q, i, compDsk_radiusref(Delta), appPrec );
-            cacheCauchy_eval( fval, fderval, pointShifted, 1, cacheCau, appPrec );
+            cacheCauchy_eval( fval, fderval, pointShifted, 1, cacheCau, appPrec, meta );
             
             if (compApp_contains_zero( fval )){
                 if (metadatas_getVerbo(meta)>=level) {
@@ -909,7 +1242,7 @@ cauchyTest_res cauchyTest_computeSScompDsk( compApp_ptr SS,
         
         for(slong i=0; (i<qmax) && (enoughPrec==1) ; i++) {
             
-            cacheCauchy_eval( fval, fderval, pointsShifted + i, 1, cacheCau, appPrec );
+            cacheCauchy_eval( fval, fderval, pointsShifted + i, 1, cacheCau, appPrec, meta );
             enoughPrec = cauchyTest_compute_fdiv_checkPrecAndBounds( fdiv, fval, fderval, lbound, ubound, appPrec );
             if (enoughPrec==1) {
                 for (slong j = 0; j< h; j++) 
@@ -1088,7 +1421,7 @@ cauchyTest_res cauchyTest_computeSgNcompDsk( compApp_ptr SgN,
             compApp_zero( SgN + (g-1) );
         
         for(slong i=0; (i<qmax) && (enoughPrec==1) ; i++) {
-            cacheCauchy_eval( fval, fderval, pointsShifted + i, 1, cacheCau, appPrec );
+            cacheCauchy_eval( fval, fderval, pointsShifted + i, 1, cacheCau, appPrec, meta );
             enoughPrec = cauchyTest_compute_fdiv_checkPrecAndBounds( fdiv, fval, fderval, lbound, ubound, appPrec );
             if (!(enoughPrec==1)) {
                 if (metadatas_getVerbo(meta)>=level) {

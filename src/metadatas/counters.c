@@ -42,9 +42,14 @@ void boxes_by_prec_adjust_table( boxes_by_prec_t bt, int index ){
 }
 
 void boxes_by_prec_add_int( boxes_by_prec_t bt, slong prec, int nbBoxes ){
-    int indexpow2 = ((int) prec/CCLUSTER_DEFAULT_PREC);
-    int index=0;
-    while (0x1<<index < indexpow2) index+=1;
+    int index = 0;
+    if (prec==CCLUSTER_FPRI_PREC) {
+        index = 0;
+    } else {
+        int indexpow2 = ((int) prec/CCLUSTER_DEFAULT_PREC);
+        while (0x1<<index < indexpow2) index+=1;
+        index += 1;
+    }
     boxes_by_prec_adjust_table(bt, index);
     bt->table[index] +=nbBoxes;
 }
@@ -59,9 +64,14 @@ void boxes_by_prec_add_boxes_by_prec( boxes_by_prec_t bt, boxes_by_prec_t t ){
 
 int  boxes_by_prec_fprint( FILE * file, const boxes_by_prec_t bt ){
     int r = 0;
-    for (int index = 0; index < bt->size; index ++ ){
+    if (bt->table[0]) {
         char buffer[50];
-        r = sprintf (buffer, "boxes with %d:", ( 0x1<<(index) )*CCLUSTER_DEFAULT_PREC);
+        r = sprintf (buffer, "boxes with fpri:");
+        r = fprintf(file, "#|%-39s %14d %14s|\n", buffer,           bt->table[0],    " " );
+    }
+    for (int index = 1; index < bt->size; index ++ ){
+        char buffer[50];
+        r = sprintf (buffer, "boxes with %d:", ( 0x1<<(index-1) )*CCLUSTER_DEFAULT_PREC);
         r = fprintf(file, "#|%-39s %14d %14s|\n", buffer,           bt->table[index],    " " );
     }
     return r;

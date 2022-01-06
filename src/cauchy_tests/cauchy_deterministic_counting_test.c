@@ -279,7 +279,7 @@ int cauchyTest_shift( compApp_poly_t dest, const compRat_t c, const realRat_t r,
     slong nbEvals = 0;
     clock_t start = clock();
     for(nbEvals=0; (nbEvals<q) && (res==1); nbEvals++) {
-        cacheCauchy_eval( pvals + nbEvals, pder, rootsShifted + nbEvals, 1, cacheCau, prec );
+        cacheCauchy_eval( pvals + nbEvals, pder, rootsShifted + nbEvals, 1, cacheCau, prec, meta );
         res = cauchyTest_compute_fdiv_checkPrecAndBounds( pdiv, pvals + nbEvals, pder, lbound, ubound, prec );
     }
     if (metadatas_haveToCount(meta)) {

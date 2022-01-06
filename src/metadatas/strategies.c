@@ -67,6 +67,7 @@ void strategies_set( strategies_t strat, const strategies_t strat2) {
     strat->_useRootRadii             = strat2->_useRootRadii  ;
     strat->_useScaAndRou             = strat2->_useScaAndRou  ;
     strat->_useCompression             = strat2->_useCompression  ;
+    strat->_usefpri             = strat2->_usefpri  ;
 }
 
 void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
@@ -87,6 +88,7 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
     strat->_useScaAndRou         = 0;
     
     strat->_useCompression         = 0;
+    strat->_usefpri         = 0;
     
     strat->_useNBThreads          = nbThreads;
     

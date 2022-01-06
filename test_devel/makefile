@@ -207,3 +207,62 @@ test_debug: test_debug.c
 test_multipoint_eval: test_multipoint_eval.c
 	@echo "Building $@"
 	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_fpri: test_fpri.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_fpri_run: test_fpri
+	@echo "Testing fpri"
+	test_fpri
+	valgrind --tool=memcheck --leak-check=yes test_fpri
+	
+test_fpci: test_fpci.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+test_fpci_run: test_fpci
+	@echo "Testing fpci"
+	test_fpci
+# 	valgrind --tool=memcheck --leak-check=yes test_fpci
+	
+test_fpri_poly: test_fpri_poly.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+deg=100
+test_fpri_poly_run: test_fpri_poly
+	@echo "Testing fpri_poly"
+# 	echo "7 49/128 -7/16 -213/128 35/16 9/32 -7/4 1" > test_poly.txt
+	../bin/genPolFile randomDense ${deg} test_poly.txt
+	test_fpri_poly test_poly.txt
+# 	valgrind --tool=memcheck --leak-check=yes test_fpri_poly test_poly.txt
+	rm -rf test_poly.txt
+	
+test_fpci_poly: test_fpci_poly.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+deg=100
+nbt=10
+test_fpci_poly_run: test_fpci_poly
+	@echo "Testing fpci_poly"
+# 	echo "7 49/128 -7/16 -213/128 35/16 9/32 -7/4 1" > test_poly.txt
+	../bin/genPolFile randomDense ${deg} test_poly.txt
+# 	../bin/genPolFile randomSparse ${deg} test_poly.txt -n ${nbt}
+	test_fpci_poly test_poly.txt
+# 	valgrind --tool=memcheck --leak-check=yes test_fpri_poly test_poly.txt
+	rm -rf test_poly.txt
+
+time_fpci_sparse_eval: time_fpci_sparse_eval.c
+	@echo "Building $@"
+	$(CC) $(CCFLAGS) -o $@ $< $(INCLUDE_PATH) $(LIBRARY_PATH) $(LIBRARY_FLAG) -lm
+	
+time_fpci_sparse_eval_run: time_fpci_sparse_eval
+	@echo "Testing fpci_poly"
+# 	echo "7 49/128 -7/16 -213/128 35/16 9/32 -7/4 1" > test_poly.txt
+	../bin/genPolFile randomDense ${deg} test_poly.txt
+# 	../bin/genPolFile randomSparse ${deg} test_poly.txt -n ${nbt}
+	time_fpci_sparse_eval test_poly.txt
+# 	valgrind --tool=memcheck --leak-check=yes test_fpri_poly test_poly.txt
+	rm -rf test_poly.txt

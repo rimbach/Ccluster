@@ -70,6 +70,7 @@ POLYNOMIALS_INLINE void realRat_poly_get_coeff_realRat(realRat_t x, const realRa
 POLYNOMIALS_INLINE void realRat_poly_set_coeff_realRat(realRat_poly_t poly, slong n, const realRat_t x) {
     fmpq_poly_set_coeff_fmpq(poly, n, x);
 }
+
 POLYNOMIALS_INLINE void realRat_poly_set_coeff_si_ui(realRat_poly_t poly, slong n, slong num, ulong den) {
     realRat_t temp; 
     realRat_init( temp );
@@ -117,6 +118,11 @@ POLYNOMIALS_INLINE void realRat_poly_shift_right(realRat_poly_t res, const realR
 POLYNOMIALS_INLINE void realRat_poly_derivative( realRat_poly_t dest, const realRat_poly_t src) {
     fmpq_poly_derivative( dest, src);
 }
+
+POLYNOMIALS_INLINE void realRat_poly_rescale( realRat_poly_t dest, const realRat_poly_t src, const realRat_t factor) {
+    fmpq_poly_rescale( dest, src, factor);
+}
+
 /* printing */
 POLYNOMIALS_INLINE int realRat_poly_fprint       (FILE * file, const realRat_poly_t poly) { return fmpq_poly_fprint(file, poly);}
 POLYNOMIALS_INLINE int realRat_poly_fprint_pretty(FILE * file, const realRat_poly_t poly, const char * var) {

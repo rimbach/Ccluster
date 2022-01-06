@@ -170,6 +170,7 @@ METADATAS_INLINE int metadatas_useScaAndRou      ( const metadatas_t m ) { retur
 METADATAS_INLINE int metadatas_forTests          ( const metadatas_t m ) { return strategies_forTests          (metadatas_stratref(m)); }
 
 METADATAS_INLINE int metadatas_useCompression    ( const metadatas_t m ) { return strategies_useCompression    (metadatas_stratref(m)); }
+METADATAS_INLINE int metadatas_usefpri    ( const metadatas_t m ) { return strategies_usefpri    (metadatas_stratref(m)); }
 
 // /* counters */
 METADATAS_INLINE void metadatas_add_discarded( metadatas_t m, int depth ) { 
