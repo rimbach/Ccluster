@@ -116,6 +116,14 @@ int metadatas_fprint(FILE * file, metadatas_t meta, cacheApp_t cache, const real
          metadatas_usePredictPrec(meta) &&
          metadatas_useAnticipate(meta) &&
          metadatas_useRealCoeffs(meta) &&
+         metadatas_useRootRadii(meta) &&
+         metadatas_useCompression(meta)
+       ) len += sprintf( temp + len, " default (rootRadii + subdivision + compression)");
+    else if ( metadatas_useNewton(meta) &&
+         metadatas_useTstarOptim(meta) &&
+         metadatas_usePredictPrec(meta) &&
+         metadatas_useAnticipate(meta) &&
+         metadatas_useRealCoeffs(meta) &&
          metadatas_useRootRadii(meta) 
        ) len += sprintf( temp + len, " default (rootRadii + subdivision)");
     else if (

@@ -42,6 +42,7 @@ extern "C" {
 
 #define STRAT_STR_ONLSUBD "onlySubd"
 #define STRAT_STR_DEFAULT "default"
+#define STRAT_STR_COMPRES "compression"
 
 #define STRAT_STR_V1 "V1"
 #define STRAT_STR_V3 "V3"

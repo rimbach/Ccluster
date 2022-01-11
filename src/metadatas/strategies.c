@@ -103,6 +103,22 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         strat->_forTests              = 0;
         strat->_useRootRadii          = 1;
         strat->_useScaAndRou          = 1;
+        strat->_useCompression        = 0;
+        return;
+    }
+    
+    if (strcmp( stratName, STRAT_STR_COMPRES ) == 0) {
+        strat->_useNewton             = 1;
+        strat->_useTstarOptim         = 1;
+        strat->_usePredictPrec        = 1;
+        strat->_useAnticipate         = 1;
+        strat->_useRealCoeffs         = 1;
+        strat->_useDeflation          = 1;
+        strat->_usePowerSums          = 0;
+        strat->_forTests              = 0;
+        strat->_useRootRadii          = 1;
+        strat->_useScaAndRou          = 1;
+        strat->_useCompression        = 1;
         return;
     }
     
