@@ -222,6 +222,14 @@ void strategies_set_str ( strategies_t strat, char * stratName, int nbThreads){
         return;
     }
     
+    if (strcmp( stratName, STRAT_STR_C3 ) == 0) {
+        strat->_useNewton             = 0;
+        strat->_usePredictPrec        = 1;
+        strat->_useRealCoeffs         = 1;
+        strat->_useCompression        = 1;
+        return;
+    }
+    
     /* otherwise set strategy to default */
     strategies_set_str ( strat, STRAT_STR_DEFAULT, nbThreads);
 }

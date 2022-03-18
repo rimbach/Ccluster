@@ -141,6 +141,7 @@ void realApp_get_realRat( realRat_t res, realApp_t x){
     
     if (fmpz_abs_fits_ui(exponent)==0) { /*TODO: not safe at all...*/
         realRat_clear(res);
+//         printf("QQQQQQQQQQQQQQQQQQQQQ\n");
     }
     else {
         exponent_ulong = fmpz_get_ui(exponent);

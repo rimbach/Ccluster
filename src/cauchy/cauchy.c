@@ -24,7 +24,309 @@ double time_in_proba_counting;
 double time_in_real_coeffs;
 double time_in_certified;
 double time_in_insert_sorted;
+int    nbPos;
 #endif
+
+int   schroeders_inclusion_test_get_rho( realApp_t rho, const compDsk_t Delta, cacheCauchy_t cacheCau, slong prec, metadatas_t meta){
+    /* let Delta = D(c, r)                                */
+    /*     pc(x) = p(c+rx)                                */
+    /*     t(x)  = pc_reverse(x) = x^d * p(c + r/x)       */
+    /* if returns 1 then rho > r1(0, t)                 */
+    /* if returns 0 then r_d(0, pc) <= rb with b \simeq 2^-53 */
+//     int level = 2;
+    int res = 0;
+    slong s = -CCLUSTER_DEFAULT_PREC;
+//     slong s = -30;
+    compApp_t cApp, pval, pderval;
+    compApp_init(cApp);
+    compApp_init(pval);
+    compApp_init(pderval);
+    compApp_set_compRat(cApp, compDsk_centerref(Delta), prec);
+    mag_add_ui_2exp_si( arb_radref(compApp_realref(cApp)), arb_radref(compApp_realref(cApp)), 1, s );
+    mag_mul_fmpz( arb_radref(compApp_realref(cApp)), arb_radref(compApp_realref(cApp)), fmpq_numref( compDsk_radiusref(Delta) ) );
+    mag_div_fmpz( arb_radref(compApp_realref(cApp)), arb_radref(compApp_realref(cApp)), fmpq_denref( compDsk_radiusref(Delta) ) );
+    mag_add_ui_2exp_si( arb_radref(compApp_imagref(cApp)), arb_radref(compApp_realref(cApp)), 1, s );
+    mag_mul_fmpz( arb_radref(compApp_imagref(cApp)), arb_radref(compApp_imagref(cApp)), fmpq_numref( compDsk_radiusref(Delta) ) );
+    mag_div_fmpz( arb_radref(compApp_imagref(cApp)), arb_radref(compApp_imagref(cApp)), fmpq_denref( compDsk_radiusref(Delta) ) );
+    mag_max( arb_radref(compApp_realref(cApp)), arb_radref(compApp_realref(cApp)), arb_radref(compApp_imagref(cApp)) );
+    mag_set( arb_radref(compApp_imagref(cApp)), arb_radref(compApp_realref(cApp)) );
+    /* cApp = c +/- rb with b > 2^-s */
+    /* eval p at cApp */
+    cacheCauchy_eval( pval, pderval, cApp, 1, cacheCau, prec, meta );
+    /* check if pval contains 0 */
+    if ( compApp_contains_zero( pval ) ) {
+        /* r_d(0, pc) <= rb : do not want to apply the test because delta probably contains a root */
+        res = 0;
+    } else {
+        res = 1;
+        arf_t rho2;
+        arf_init(rho2);
+        realApp_get_rad_realApp( rho, compApp_realref(cApp) );
+        /* rho < r_d(0, t) */
+        realApp_inv( rho, rho, prec );
+        arb_get_ubound_arf(rho2, rho, prec);
+        arb_set_arf(rho, rho2);
+        /* rho > r_1(0, t) */
+        arf_clear(rho2);
+    }
+    
+    compApp_clear(cApp);
+    compApp_clear(pval);
+    compApp_clear(pderval);
+    return res;
+}
+
+int   schroeders_inclusion_test( compDsk_t Delta, cacheCauchy_t cacheCau, slong prec, metadatas_t meta){
+    /* assume d>=2 */
+    /* let Delta = D(c, r)                                */
+    /*     pc(x) = p(c+rx)                                */
+    /*     t(x)  = pc_reverse(x) = x^d * p(c + r/x)       */
+    /* then t'(x) = dx^(d-1) * p(c + r/x) - rx^(d-2) * p'(c + r/x) */
+    int level = 2;
+    if (metadatas_getVerbo(meta)>=level) {
+            printf("#---schroeders_inclusion_test: begin \n");
+    }
+    int res=0;
+    slong d = cacheCauchy_degreeref(cacheCau);
+    int l=0;
+    slong q = 0x1;
+    while (q<=d) {
+        l++;
+        q = q << 1;
+    }
+    if (metadatas_getVerbo(meta)>=level) {
+            printf("#---schroeders_inclusion_test: d: %ld, l:%d, q:%ld \n", d, l, q);
+    }
+    realApp_t rho;
+    realApp_init(rho);
+    res = schroeders_inclusion_test_get_rho( rho, Delta, cacheCau, prec, meta);
+    if (res==1) {
+        if (metadatas_getVerbo(meta)>=level) {
+            printf("#---                               rho: "); realApp_printd(rho, 10); printf("\n");
+        }
+        realApp_mul_si( rho, rho, 2, prec );
+        compApp_t x, y, c, pval, pderval, t, u;
+        compApp_init(x);
+        compApp_init(y);
+        compApp_init(c);
+        compApp_init(pval);
+        compApp_init(pderval);
+        compApp_init(t);
+        compApp_init(u);
+        realApp_t abs, one;
+        realApp_init(abs);
+        realApp_init(one);
+        realApp_one(one);
+        compApp_set_compRat(c, compDsk_centerref(Delta), prec);
+        res = 0;
+        for (slong g = 0; (g < q) && (res==0) ; g++){
+            compApp_zero(x);
+            /* compute x = 2\rho*e^(2*i*pi g / q) */
+            realApp_set_si     ( compApp_realref(x), 2*g );
+            realApp_div_ui     ( compApp_realref(x), compApp_realref(x), q, prec );
+            compApp_exp_pi_i   ( x,                  x, prec);
+//             compApp_mul_realApp( x,                  x, rho, prec );
+            compApp_mul_si( x,                  x, 2, prec );
+            /* compute y = c + r/x */
+            compApp_inv( y, x, prec );
+            compApp_mul_realRat( y, y, compDsk_radiusref(Delta), prec );
+            compApp_add(y, c, y, prec);                                    /* y = c + r/x */
+            /* compute t(x)  = x^d * p(c + r/x) */
+            /*     and t'(x) = dx^(d-1) * p(c + r/x) - rx^(d-2) * p'(c + r/x) */
+            /* evaluate p and p' at y = c+r/x */
+            cacheCauchy_eval( pval, pderval, y, 1, cacheCau, prec, meta );
+            compApp_pow_si( t, x, d-2, prec );                             /* t <- x^(d-2) */
+            compApp_mul(pderval, pderval, t, prec);                        /* pderval <- x^(d-2)*p'(c + r/x) */
+            compApp_mul_realRat(pderval, pderval, compDsk_radiusref(Delta), prec ); /* pderval <- r*x^(d-2)*p'(c + r/x) */
+            compApp_mul(t, t, x, prec );                                   /* t <- x^(d-1) */
+            compApp_mul(u, t, pval, prec);                                 /* u <- x^(d-1)*p(c + r/x) */
+            compApp_mul_si(u, u, d, prec );                                /* u <- d*x^(d-1)*p(c + r/x) */       
+            compApp_sub(pderval, u, pderval, prec);                        /* pderval <- u - pderval */
+            compApp_mul(t, t, x, prec );                                   /* t <- x^d */
+            compApp_mul(pval, pval, t, prec );                             /* pval <- x^d*p(c + r/x) */
+            /* compute one schroeder iteration: c = x - d*t(x)/t'(x) */
+            compApp_mul_si(pval, pval, d, prec);
+            compApp_div( pval, pval, pderval, prec );
+            compApp_sub( y, x, pval, prec );
+            compApp_abs( abs, y, prec);
+            if (metadatas_getVerbo(meta)>=level) {
+//                 printf("#---                               x  : "); compApp_printd(x, 10); printf("\n");
+//                 printf("#---                               z  : "); compApp_printd(y, 10); printf("\n");
+//                 printf("#---                              |z| : "); realApp_printd(abs, 10); printf("\n");
+                printf("#---                     g = %ld |z|>1? : %d, |z|: ", g, realApp_gt(abs, one)); realApp_printd(abs, 10); printf("\n");
+//                 realApp_set_realRat( compApp_realref(x), compDsk_radiusref(Delta), prec);
+//                 printf("#---                               r  : "); realApp_printd(compApp_realref(x), 10); printf("\n");
+            }
+            res = realApp_gt(abs, one);
+//             /* compute t2(x)  = p(c + r/x) */
+//             /*     and t2'(x) = - rx^(-2) * p'(c + r/x) */
+//             /* evaluate p and p' at y = c+r/x */
+//             cacheCauchy_eval( pval, pderval, y, 1, cacheCau, prec, meta );
+//             compApp_pow_si( t, x, -2, prec );                             /* t <- x^(-2) */
+//             compApp_mul(pderval, pderval, t, prec);                        /* pderval <- x^(-2)*p'(c + r/x) */
+//             compApp_mul_realRat(pderval, pderval, compDsk_radiusref(Delta), prec ); /* pderval <- r*x^(-2)*p'(c + r/x) */
+//             compApp_neg(pderval, pderval); /* pderval <- -r*x^(-2)*p'(c + r/x) */
+//             /* compute one schroeder iteration: y = x - d*t(x)/t'(x) */
+//             compApp_mul_si(pval, pval, d, prec);
+//             compApp_div( pval, pval, pderval, prec );
+//             compApp_sub( y, x, pval, prec );
+//             compApp_abs( abs, y, prec);
+//             if (metadatas_getVerbo(meta)>=level) {
+//                 printf("#---                               x  : "); compApp_printd(x, 10); printf("\n");
+//                 printf("#---                               z  : "); compApp_printd(y, 10); printf("\n");
+//                 printf("#---                              |z| : "); realApp_printd(abs, 10); printf("\n");
+//                 printf("#---                           |z|>1? : %d\n", realApp_gt(abs, one));
+//             }
+//             res = realApp_gt(abs, one);
+        }
+        realApp_clear(one);
+        realApp_clear(abs);
+        compApp_clear(u);
+        compApp_clear(t);
+        compApp_clear(pval);
+        compApp_clear(pderval);
+        compApp_clear(c);
+        compApp_clear(y);
+        compApp_clear(x);
+    }
+    realApp_clear(rho);
+    if (metadatas_getVerbo(meta)>=level) {
+            printf("#---schroeders_inclusion_test: end; res: %d \n", res);
+    }
+    return res;
+}
+
+// void  cauchy_num_lth_der( compApp_t res, const compApp_t point, int l, const realApp_t eps, 
+//                           cacheCauchy_t cacheCau, slong prec, metadatas_t meta ) {
+//         if (l==1) {
+//             compApp_t dummy;
+//             compApp_init(dummy);
+//             cacheCauchy_eval( dummy, res, point, 1, cacheCau, prec, meta );
+//             compApp_clear(dummy);
+//         } else {
+//             compApp_t pointPeps;
+//             compApp_init(pointPeps);
+//             realApp_add( compApp_realref(pointPeps), compApp_realref(point), eps, CCLUSTER_DEFAULT_PREC);
+//             realApp_add( compApp_imagref(pointPeps), compApp_imagref(point), eps, CCLUSTER_DEFAULT_PREC);
+//             cauchy_num_lth_der( res, pointPeps, l-1, eps, cacheCau, prec, meta );
+//             cauchy_num_lth_der( pointPeps, point, l-1, eps, cacheCau, prec, meta );
+//             compApp_sub(res, res, pointPeps, prec);
+//             compApp_div_realApp(res, res, eps, prec);
+//             compApp_clear(pointPeps);
+//         }
+// }
+
+int   cauchy_inclusionTests( const compDsk_t Delta, cacheCauchy_t cacheCau, slong prec, metadatas_t meta ) {
+    
+    int res = 0;
+    compApp_t c, cPe, cP2e;
+    compApp_t Pc, Ppc, PpcPe, PpcP2e, Pppc, Ppppc, eps;
+    compApp_init(c);
+    compApp_init(cPe);
+    compApp_init(cP2e);
+    compApp_init(Pc);
+    compApp_init(Ppc);
+    compApp_init(PpcPe);
+    compApp_init(PpcP2e);
+    compApp_init(Pppc);
+    compApp_init(Ppppc);
+    compApp_init(eps);
+    
+    realApp_t r, rd;
+    realApp_init(r);
+    realApp_init(rd);
+    compApp_set_compRat(c, compDsk_centerref(Delta), prec);
+    realApp_set_realRat(r, compDsk_radiusref(Delta), prec);
+    realApp_div_ui(compApp_realref(eps), r, 1000000, prec);
+    realApp_div_ui(compApp_imagref(eps), r, 1000000, prec);
+    
+    slong d = cacheCauchy_degreeref(cacheCau);
+    /* evaluate P and Pp at c */
+    cacheCauchy_eval( Pc, Ppc, c, 1, cacheCau, prec, meta );
+    /* compute rd = d|Pc/Ppc| */
+    compApp_div(cPe, Pc, Ppc, prec);
+    compApp_abs(rd, cPe, prec);
+    realApp_mul_si(rd, rd, d, prec);
+    res = realApp_le(rd, r);
+    
+    if (res){
+            printf("INCLUSION TEST 1 IN EXCLUSION SUCCEEDS\n");
+        }
+        
+    if (res==0) {
+        /* compute Pppc numerically */
+        compApp_add( cPe, c, eps, prec);
+        /* evaluate Pp at c+eps */
+        cacheCauchy_eval( Pppc, PpcPe, cPe, 1, cacheCau, prec, meta );
+        /* compute Pppc = (Pp(c+eps) - Pp(c))/eps */
+        compApp_sub( Pppc, PpcPe, Ppc, prec);
+        compApp_div( Pppc, Pppc, eps, prec );
+        /* compute 1 / (p'(x)/p(x))' evaluated at c := 1/ ( (p''(c)p(c) -p'(c)p'(c))/(p(c)*p(c)) ) */
+        compApp_mul( c,     Pppc, Pc, prec);/* c     <- p''(c)p(c) */
+        compApp_sqr( Ppppc, Ppc, prec );    /* Ppppc <- (p'(c)^2) */
+        compApp_sub( c, c, Ppppc, prec);
+        compApp_sqr( Ppppc,     Pc,  prec );/* Ppppc <- (p(c)^2) */
+        compApp_div( c, Ppppc, c, prec );
+        compApp_abs(rd, c, prec);
+        realApp_mul_si(rd, rd, d, prec);
+        realApp_sqrt(rd, rd, prec);
+        res = realApp_le(rd, r);
+        
+        if (res){
+            printf("INCLUSION TEST 2 IN EXCLUSION SUCCEEDS\n");
+        }
+    }
+    
+    if (res==0) {
+        /* compute Ppppc numerically */
+        compApp_add( cP2e, cPe, eps, prec);
+        /* evaluate Pp at c+2eps */
+        cacheCauchy_eval( Ppppc, PpcP2e, cP2e, 1, cacheCau, prec, meta );
+        /* compute Ppppc = (PpcP2e - 2*PpcPe + Ppc)/eps^2 */
+        compApp_mul_si(PpcPe, PpcPe, 2, prec);
+        compApp_sub(   Ppppc, PpcP2e, PpcPe, prec );
+        compApp_add(   Ppppc, Ppppc, Ppc, prec );
+        compApp_sqr(   eps,   eps,        prec );
+        compApp_div(   Ppppc, Ppppc, eps, prec ); /* Ppppc <- p'''(c) */
+        compApp_div(   Ppppc, Ppppc, Pc,  prec ); /* Ppppc <- p'''(c)/p(c) */
+        compApp_sqr(   c,     Pc,         prec ); /* c     <- p(c)^2 */
+        compApp_mul_si(Pppc,  Pppc,  3,   prec ); /* Pppc  <- 3p''(c) */
+        compApp_mul(   Pppc,  Pppc,  Ppc, prec ); /* Pppc  <- 3p''(c)p'(c) */
+        compApp_div(   Pppc,  Pppc,  c,   prec ); /* Pppc  <- 3p''(c)p'(c) / p(c)^2 */
+        compApp_pow_si(Ppc,   Ppc,   3,   prec ); /* Ppc   <- p'(c)^3 */
+        compApp_mul_si(Ppc,   Ppc,   2,   prec ); /* Ppc   <- 2p'(c)^3 */
+        compApp_pow_si(Pc,    Pc,    3,   prec ); /* Pc    <- p(c)^3 */
+        compApp_div   (Ppc,   Ppc,   Pc,  prec ); /* Ppc   <- 2p'(c)^3/p(c)^3 */
+        compApp_sub   (c,     Ppppc, Pppc,prec ); /*   c   <- */
+        compApp_add   (c,     c,     Ppc, prec );
+        compApp_abs   (rd,    c,          prec );
+        realApp_inv   (rd,    rd,         prec );
+        realApp_mul_si(rd,    rd,    d,   prec );
+        realApp_root_ui(rd,   rd,    4,   prec );
+        
+        res = realApp_le(rd, r);
+        
+        if (res){
+            printf("INCLUSION TEST 3 IN EXCLUSION SUCCEEDS\n");
+        }
+        
+    }
+    
+    realApp_clear(r);
+    realApp_clear(rd);
+    compApp_clear(eps);
+    compApp_clear(c);
+    compApp_clear(cPe);
+    compApp_clear(cP2e);
+    compApp_clear(Pc);
+    compApp_clear(Ppc);
+    compApp_clear(PpcPe);
+    compApp_clear(PpcP2e);
+    compApp_clear(Pppc);
+    compApp_clear(Ppppc);
+    
+    return res;
+}
 
 slong cauchy_discard_compBox_list( compBox_list_t boxes, 
                                      compBox_list_t bDiscarded,
@@ -78,7 +380,11 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
 //             }
             continue;
         }
-        
+
+// #ifdef CAUCHY_INCLUSION
+//         int successTest = cauchy_inclusionTests( bdisk, cacheCau, 8*CCLUSTER_DEFAULT_PREC, meta );
+// #endif
+
         /* exclusion test */
 
         res = cauchyTest_probabilistic_exclusion_test( compDsk_centerref(bdisk), compDsk_radiusref(bdisk), 
@@ -87,7 +393,21 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
 //         if (metadatas_getVerbo(meta)>=level) {
 //             printf("#---cauchy exclusion test: res: %d\n", res.nbOfSol );
 //         }
-        
+// #ifdef CAUCHY_INCLUSION
+//         if (successTest){
+//             printf("                 res: %d\n", res.nbOfSol);
+//         }
+// #endif  
+//         if (res.nbOfSol>0){
+//             printf("#---cauchy exclusion test: res: %d\n", res.nbOfSol );
+//             int successTest3 = schroeders_inclusion_test( bdisk, cacheCau, 8*res.appPrec, meta);
+//             printf("#---Schroeder's inclusion test, res: %d\n", successTest3 );
+//         }
+#ifdef CCLUSTER_TIMINGS
+        if (res.nbOfSol>0){
+            nbPos++;
+        }
+#endif
         if (res.nbOfSol==0) {
             if (metadatas_haveToCount(meta)){
                 metadatas_add_discarded( meta, depth);
@@ -387,6 +707,13 @@ connCmp_ptr cauchy_compression( connCmp_ptr ccur,
     if (realRat_is_den_zero(eps)==0)
         realRat_max_2_realRat(epsp, eps);
     
+    if (!(metadatas_useNewton(meta))) {
+        if (realRat_is_den_zero(eps)==0)
+            realRat_set(epsp, eps);
+        else 
+            realRat_one(epsp);
+    }
+    
     /* let epspp = (2/9) epsp */
     /* compute a disk D(c'',r'') s.t. */
     /* either D(c'',r'') is rigid with radius r'' > epspp = (2/9) epsp */
@@ -413,6 +740,18 @@ connCmp_ptr cauchy_compression( connCmp_ptr ccur,
     
     slong precres = cauchy_compressionIntoRigidDisk( res, ccDisk, m, theta, epspp, cacheCau, prec, meta, depth);
     
+//     compDsk_t twoCCDisk;
+//     compDsk_init(twoCCDisk);
+//     compDsk_set(twoCCDisk, res);
+//     realRat_mul_si( compDsk_radiusref(twoCCDisk), compDsk_radiusref(res), 2);
+//     cauchyTest_res resCauchy = cauchyTest_probabilistic_counting( twoCCDisk, cacheCau, prec, meta, depth);
+//     printf("m: %ld, resCauchy.nbOfSol: %d\n", m, resCauchy.nbOfSol);
+//     if ( resCauchy.nbOfSol == 0 ) {
+//         printf("m: %ld, resCauchy.nbOfSol: %d\n", m, resCauchy.nbOfSol);
+//         printf("#FAILURE: A DISK is not certified to contain at least one root \n");
+//     }
+//     compDsk_clear(twoCCDisk);
+//     printf("#---------Precision after compression: %ld\n", precres);
     if (metadatas_getVerbo(meta)>=level) {
         printf("#---------Precision after compression: %ld\n", precres);
         printf("#---------res: "); compDsk_print( res ); printf("\n");
@@ -446,6 +785,7 @@ connCmp_ptr cauchy_compression( connCmp_ptr ccur,
             if (metadatas_getVerbo(meta)>=level) {
                 printf("#---------disk with size smaller than epsilon\n");
             }
+    
         } else {
             /* the Disk D(c'', (1 + 3d/m)r'') is (1 + 3d/m) isolated */
             realRat_mul_si( compDsk_radiusref(res), compDsk_radiusref(res), 
@@ -513,7 +853,7 @@ newton_res cauchy_newton ( connCmp_ptr * ccur,
         connCmp_appPrref(*ccur) = resNewton.appPrec;
         
         /* it was separated; 8 time the new cc disk is included in four times the old one */
-        connCmp_isSepCertref(*ccur) = 1;
+//         connCmp_isSepCertref(*ccur) = 1; -> can not say about separated from 2*qMainLoop!
     
     }
     else {
@@ -635,8 +975,8 @@ int cauchy_connCmp_is_separated( connCmp_t cc, connCmp_list_t qMainLoop, connCmp
     return res;
 }
 
+// int cauchy_connCmp_is_separated_certified( int *separated_certified, connCmp_t cc, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, metadatas_t meta ) {
 int cauchy_connCmp_is_separated_certified( connCmp_t cc, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, metadatas_t meta ) {
-    
 #ifdef CCLUSTER_TIMINGS
     clock_t start = clock();
 #endif
@@ -645,47 +985,58 @@ int cauchy_connCmp_is_separated_certified( connCmp_t cc, connCmp_list_t qMainLoo
         return 1;
     
     compBox_t componentBox;
-    compDsk_t sixCCDisk, twoCCDisk;
+    compDsk_t sixCCDisk, twoCCDisk, otherCCDisk;
     compBox_init(componentBox);
     compDsk_init(sixCCDisk);
     compDsk_init(twoCCDisk);
+    compDsk_init(otherCCDisk);
     connCmp_componentBox(componentBox, cc, metadatas_initBref(meta));
-    compBox_get_containing_dsk(sixCCDisk, componentBox);
-    realRat_mul_si( compDsk_radiusref(sixCCDisk), compDsk_radiusref(sixCCDisk), 6);
+    compBox_get_containing_dsk(twoCCDisk, componentBox);
+    realRat_mul_si( compDsk_radiusref(twoCCDisk), compDsk_radiusref(twoCCDisk), 2);
+    compDsk_set(sixCCDisk, twoCCDisk);
+    realRat_mul_si( compDsk_radiusref(sixCCDisk), compDsk_radiusref(twoCCDisk), 3);
     
     int res = 1;
+//     *separated_certified = 1;
+//     *sep_certified = 1;
     connCmp_list_iterator it = connCmp_list_begin(qMainLoop);
     while ( res && (it!=connCmp_list_end()) ) {
         connCmp_componentBox(componentBox, connCmp_list_elmt(it), metadatas_initBref(meta));
-        compBox_get_containing_dsk(twoCCDisk, componentBox);
-        realRat_mul_si( compDsk_radiusref(twoCCDisk), compDsk_radiusref(twoCCDisk), 2);
-        res = res && (! compDsk_intersect_compDsk(sixCCDisk, twoCCDisk) );
+        compBox_get_containing_dsk(otherCCDisk, componentBox);
+        realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 2);
+        res = res && (! compDsk_intersect_compDsk(sixCCDisk, otherCCDisk) );
+        /* test */
+//         realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 3);
+//         res = res && (! compDsk_intersect_compDsk(twoCCDisk, otherCCDisk) );
+        /* end test */
         it = connCmp_list_next(it);
     }
     it = connCmp_list_begin(discardedCcs);
     while ( res && (it!=connCmp_list_end()) ) {
         connCmp_componentBox(componentBox, connCmp_list_elmt(it), metadatas_initBref(meta));
-        compBox_get_containing_dsk(twoCCDisk, componentBox);
-        realRat_mul_si( compDsk_radiusref(twoCCDisk), compDsk_radiusref(twoCCDisk), 2);
-        res = res && (! compDsk_intersect_compDsk(sixCCDisk, twoCCDisk) );
+        compBox_get_containing_dsk(otherCCDisk, componentBox);
+        realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 2);
+        res = res && (! compDsk_intersect_compDsk(sixCCDisk, otherCCDisk) );
         it = connCmp_list_next(it);
     }
     
     if (res && metadatas_useRealCoeffs(meta) && connCmp_is_imaginary_positive(cc) ) {
         /* check if the cc is separated from its complex conjugate */
         connCmp_componentBox(componentBox, cc, metadatas_initBref(meta));
-        compBox_get_containing_dsk(twoCCDisk, componentBox);
-        realRat_mul_si( compDsk_radiusref(twoCCDisk), compDsk_radiusref(twoCCDisk), 2);
+        compBox_get_containing_dsk(otherCCDisk, componentBox);
+        realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 2);
         
         realRat_neg( compRat_imagref(compDsk_centerref(sixCCDisk)), compRat_imagref(compDsk_centerref(sixCCDisk)) );
-        res = res && (! compDsk_intersect_compDsk(sixCCDisk, twoCCDisk) );
+        res = res && (! compDsk_intersect_compDsk(sixCCDisk, otherCCDisk) );
     }
     
+//     connCmp_isSepCertref(cc) = res && (*separated_certified);
     connCmp_isSepCertref(cc) = res;
         
     compBox_clear(componentBox);
     compDsk_clear(sixCCDisk);
     compDsk_clear(twoCCDisk);
+    compDsk_clear(otherCCDisk);
     
 #ifdef CCLUSTER_TIMINGS    
     time_in_cauchy_connCmp_is_separated_certified += (double) (clock() - start);
@@ -711,6 +1062,8 @@ int cauchy_main_loop( connCmp_list_t qResults,
     int level = 3;
     
     int separationFlag;
+//     int separationFlag_certified;
+//     int do_not_bisect_flag=0;
     int widthFlag;
     int compactFlag;
     int rigidFlag; /* the disk is m/( (2m-2)theta )-rigid */
@@ -767,6 +1120,8 @@ int cauchy_main_loop( connCmp_list_t qResults,
         rigidFlag      = 0;
         isolaFlag      = 0;
         resNewton.nflag = 0;
+//         do_not_bisect_flag = 0;
+//         separationFlag_certified = 0;
         
         if ( (!(it==NULL))&&(it==connCmp_list_begin(qMainLoop))) {
             it=NULL;
@@ -867,13 +1222,13 @@ int cauchy_main_loop( connCmp_list_t qResults,
                             printf("\n#---Compression into rigid disc for a CC with depth %ld with %d roots \n", depth, connCmp_nSolsref(ccur));
                             printf("#------Disk: "); compDsk_print(twoCCDisk); printf("\n");
                         }
-
+                        
+                        realRat_t widthSave;
+                        realRat_init(widthSave);
+                        realRat_set(widthSave, connCmp_widthref(ccur));
+                        
                         ccur = cauchy_compression( ccur, &rigidFlag, &widthFlag, &isolaFlag, 
                                                    twoCCDisk, m, neps, cacheCau, prec, meta, depth );
-                        
-                        connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
-                        compBox_get_containing_dsk(ccDisk, componentBox);
-                        realRat_mul(threeWidth, three, connCmp_widthref(ccur));
                         
                         if (metadatas_getVerbo(meta)>=level) {
                             printf("#------time spent in compression: %f\n", ((double) (clock() - start2))/CLOCKS_PER_SEC );
@@ -881,6 +1236,23 @@ int cauchy_main_loop( connCmp_list_t qResults,
                         }
                         
                         metadatas_add_time_CompTot(meta, (double) (clock() - start2));
+                        
+                        connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
+                        compBox_get_containing_dsk(ccDisk, componentBox);
+                        realRat_mul(threeWidth, three, connCmp_widthref(ccur)); /* not used???*/
+                        
+                        /* test if component has been reduced */
+                        if ( realRat_cmp( connCmp_widthref(ccur), widthSave ) < 0 ) {
+#ifdef CCLUSTER_TIMINGS
+                            startt3 = clock();
+#endif            
+//                          connCmp_list_insert_sorted(qMainLoop, ccur);
+                            it = connCmp_list_insert_sorted_from_end(qMainLoop, ccur, it);
+#ifdef CCLUSTER_TIMINGS    
+                            time_in_insert_sorted += (double) (clock() - startt3);
+#endif
+                            continue;
+                        }
                         
                     }
                     
@@ -905,12 +1277,34 @@ int cauchy_main_loop( connCmp_list_t qResults,
             if (metadatas_haveToCount(meta)){
                 metadatas_add_Newton   ( meta, depth, resNewton.nflag, (double) (clock() - start) );
             }
+            
+            if (resNewton.nflag) {
+#ifdef CCLUSTER_TIMINGS
+                startt3 = clock();
+#endif            
+//              connCmp_list_insert_sorted(qMainLoop, ccur);
+                it = connCmp_list_insert_sorted_from_end(qMainLoop, ccur, it);
+#ifdef CCLUSTER_TIMINGS    
+                time_in_insert_sorted += (double) (clock() - startt3);
+#endif
+                continue;                
+            }
+                
         }
         
         if (certified && (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag) {
             separationFlag = cauchy_connCmp_is_separated_certified( ccur, qMainLoop, discardedCcs, meta );
+//             separationFlag = cauchy_connCmp_is_separated_certified( &separationFlag_certified, ccur, qMainLoop, discardedCcs, meta );
             if (metadatas_getVerbo(meta)>=level)
                 printf("#------is separated Certified: %d\n", separationFlag );
+//             if (metadatas_useNewton(meta) && certified) {
+//                 separationFlag = separationFlag && separationFlag_certified;
+//                 separationFlag_certified = separationFlag;
+//                 do_not_bisect_flag = 0;
+//             } else {
+//                 if ( certified && separationFlag && !separationFlag_certified )
+//                     do_not_bisect_flag = 1;
+//             }
         }
         
 #ifdef CCLUSTER_TIMINGS
@@ -918,7 +1312,9 @@ int cauchy_main_loop( connCmp_list_t qResults,
 #endif
         /* Real Coeff */
         if ( metadatas_useRealCoeffs(meta)
-            && ( ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag ) ) ) {
+            && ( ( (connCmp_nSols(ccur)>0) && separationFlag 
+//             && ((!certified)||separationFlag_certified)
+            && widthFlag && compactFlag ) ) ) {
             
             cauchy_conjugate ( &ccurConj, &pushConjugFlag, &separationFlag, ccur, meta );
 
@@ -927,7 +1323,9 @@ int cauchy_main_loop( connCmp_list_t qResults,
         time_in_real_coeffs += (double) (clock() - startt3);
 #endif 
         
-        if ( (connCmp_nSols(ccur)>0) && separationFlag && widthFlag && compactFlag && (connCmp_nSols(ccur)<cacheCauchy_degreeref(cacheCau))) {
+        if ( (connCmp_nSols(ccur)>0) && separationFlag 
+//             && ((!certified)||separationFlag_certified)
+            && widthFlag && compactFlag && (connCmp_nSols(ccur)<cacheCauchy_degreeref(cacheCau))) {
             metadatas_add_validated( meta, depth, connCmp_nSols(ccur) );
 
 #ifdef CCLUSTER_TIMINGS
@@ -935,7 +1333,12 @@ int cauchy_main_loop( connCmp_list_t qResults,
 #endif            
             if (certified) { 
                 slong m = connCmp_nSols(ccur);
+                connCmp_componentBox(componentBox, ccur, metadatas_initBref(meta));
+                compBox_get_containing_dsk(ccDisk, componentBox);
+                        
+                compDsk_set(twoCCDisk, ccDisk);
                 realRat_mul_si(compDsk_radiusref(twoCCDisk), compDsk_radiusref(ccDisk), 2);
+                
                 cauchyTest_res resCert; 
                 resCert.nbOfSol = 1;
                 if (m>1) {
@@ -950,6 +1353,20 @@ int cauchy_main_loop( connCmp_list_t qResults,
                     if (metadatas_getVerbo(meta)>=level) {
                         printf("#result: %d, precision: %ld\n", resCert.nbOfSol, resCert.appPrec);
                     }
+                } 
+                else if (metadatas_useCompression(meta) ){ /* m=1 */
+                    clock_t start2 = clock();
+//                     realRat_mul_si(compDsk_radiusref(twoCCDisk), compDsk_radiusref(ccDisk), 1);
+                    /* check that twoCCDisk contains at least a root with proba root counter */
+                    cauchyTest_res resCauchy = cauchyTest_probabilistic_counting( ccDisk, cacheCau, prec, meta, depth);
+                    if ( resCauchy.nbOfSol == 0 ) {
+                        resCert.nbOfSol = -1;
+                        failure = 1;
+//                         printf("m: %ld, resCauchy.nbOfSol: %d\n", m, resCauchy.nbOfSol);
+                        printf("#FAILURE: CERTIFICATION FAILED: A DISK is not certified to contain at least one root \n");
+                        continue;
+                    }
+                    metadatas_add_time_CompTot(meta, (double) (clock() - start2));
                 }
                 
                 if (resCert.nbOfSol <= -1) {
@@ -1013,6 +1430,9 @@ int cauchy_main_loop( connCmp_list_t qResults,
             time_in_insert_sorted += (double) (clock() - startt3);
 #endif
         }
+//         else if (do_not_bisect_flag ){
+//             it = connCmp_list_insert_sorted_from_end(qMainLoop, ccur, it);
+//         }
         else {
 
             if (metadatas_getVerbo(meta)>=level)
@@ -1084,6 +1504,7 @@ int cauchy_algo_global( connCmp_list_t qResults,
     time_in_cacheCauchy_set_bounds        =0.0; 
     time_in_cacheCauchy_eval              =0.0;
     time_in_cacheCauchy_eval_powering     =0.0;
+    nbPos = 0;
 #endif
     
     clock_t start = clock();
@@ -1163,6 +1584,7 @@ int cauchy_algo_global( connCmp_list_t qResults,
     printf("time_in_cacheCauchy_set_bounds               : %f\n", time_in_cacheCauchy_set_bounds                /CLOCKS_PER_SEC);
     printf("time_in_cacheCauchy_eval                     : %f\n", time_in_cacheCauchy_eval                 /CLOCKS_PER_SEC);
     printf("time_in_cacheCauchy_eval_powering            : %f\n", time_in_cacheCauchy_eval_powering                /CLOCKS_PER_SEC);
+    printf("number of exclusion test returning >0        :%d \n", nbPos);
 #endif
     
     return failure;

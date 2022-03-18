@@ -39,7 +39,7 @@ int main(int argc, char **argv){
     }
     
     char poly[100];
-    char filename[100];
+    char filename[1000];
     int firstArg  = 0;
     char location[100];
     sprintf(location, "." );

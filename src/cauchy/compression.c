@@ -632,6 +632,21 @@ connCmp_ptr cauchy_actualizeCCafterCompression( connCmp_ptr CC, const compDsk_t 
     
     int level = 4;
     
+//     /* save the containing disk */
+//     compBox_t componentBox;
+//     compDsk_t ccDisk, nccDisk;
+//     compBox_init(componentBox);
+//     compDsk_init(ccDisk);
+//     compDsk_init(nccDisk);
+//     connCmp_componentBox(componentBox, CC, metadatas_initBref(meta));
+//     compBox_get_containing_dsk(ccDisk, componentBox);
+    
+//     if (metadatas_getVerbo(meta)>=3) {
+//         printf("#---------connCmp before compression: ");
+//         connCmp_print(CC);
+//         printf("\n");
+//     }
+    
     realRat_t r;
     realRat_init(r);
     realRat_set(r, compDsk_radiusref(Delta) );
@@ -650,13 +665,17 @@ connCmp_ptr cauchy_actualizeCCafterCompression( connCmp_ptr CC, const compDsk_t 
             subdBox_quadrisect_intersect_compDsk(ltemp, btemp, Delta);  
             compBox_clear(btemp);                                       
             ccluster_free(btemp);
-        }
+    }
     
     if (metadatas_getVerbo(meta)>=level) {
         printf("#---------size of ltemp after bisection: %d\n", compBox_list_get_size(ltemp));
     }
     
     btemp = compBox_list_pop(ltemp);
+//     if (metadatas_getVerbo(meta)>=level) {
+//         printf("compBox_intersection_has_non_empty_interior_compDsk: %d\n",
+//                compBox_intersection_has_non_empty_interior_compDsk (btemp, Delta) );
+//     }
     realRat_set(connCmp_widthref(nCC), compBox_bwidthref(btemp));
     connCmp_insert_compBox(nCC, btemp);
     while (!compBox_list_is_empty(ltemp))
@@ -666,6 +685,26 @@ connCmp_ptr cauchy_actualizeCCafterCompression( connCmp_ptr CC, const compDsk_t 
     connCmp_isSepCertref(nCC) = connCmp_isSepCertref(CC);
     fmpz_set(connCmp_nwSpdref(nCC), connCmp_nwSpdref(CC));
     connCmp_appPrref(nCC) = appPrec;
+    
+//     /* set connCmp_isSepCertref(nCC) */
+//     /* check if six time the cont disc of the new CC is included in 4 times the old one */
+//     connCmp_componentBox(componentBox, nCC, metadatas_initBref(meta));
+//     compBox_get_containing_dsk(nccDisk, componentBox);
+//     realRat_mul_si( compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 4 );
+//     realRat_mul_si( compDsk_radiusref(nccDisk), compDsk_radiusref(nccDisk), 6 );
+//     realRat_t left, right;
+//     realRat_init(left);
+//     realRat_init(right);
+//     compRat_comp_distance( left, compDsk_centerref(CC), compDsk_centerref(nCC) );
+//     realRat_sub(right, compDsk_radiusref(ccDisk), compDsk_radiusref(nccDisk) );
+//     realRat_mul(right, right, right);
+//     if ( realRat_cmp( left, right ) <=0 )
+//         connCmp_isSepCertref(nCC) = 1;
+//     realRat_clear(left);
+//     realRat_clear(right);
+//     compBox_clear(componentBox);
+//     compDsk_clear(ccDisk);
+//     compDsk_clear(nccDisk);
     
     connCmp_clear(CC);
     ccluster_free(CC);

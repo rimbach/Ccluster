@@ -63,6 +63,7 @@ NUMBERS_INLINE void compApp_set_imag_realApp(compApp_t x, const realApp_t im) { 
 /* arithmetic */
 NUMBERS_INLINE void compApp_abs   ( realApp_t dest, const compApp_t x, slong prec )                   { acb_abs   (dest, x, prec ); }
 NUMBERS_INLINE void compApp_neg   ( compApp_t dest, const compApp_t x )                               { acb_neg   (dest, x ); }
+NUMBERS_INLINE void compApp_inv   ( compApp_t dest, const compApp_t x, slong prec )                   { acb_inv   (dest, x, prec ); }
 NUMBERS_INLINE void compApp_sub   ( compApp_t dest, const compApp_t x, const compApp_t y, slong prec) { acb_sub   (dest, x, y, prec); }
 NUMBERS_INLINE void compApp_sub_ui( compApp_t dest, const compApp_t x, ulong y, slong prec)           { acb_sub_ui(dest, x, y, prec); }
 NUMBERS_INLINE void compApp_sub_si( compApp_t z, const compApp_t x, slong c, slong prec)           { 

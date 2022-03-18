@@ -49,6 +49,7 @@ double time_in_cacheCauchy_set_bounds;
 double time_in_cacheCauchy_eval;
 double time_in_cacheCauchy_eval_powering;
 #endif
+#define CAUCHY_INCLUSION
 
 #include <stdlib.h> /* for size_t */
 #include "flint/flint.h" /* for memory managment */ 

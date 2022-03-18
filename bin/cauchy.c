@@ -37,6 +37,7 @@ int main(int argc, char **argv){
         printf("      -m, --mode: the version of the algorithm\n");
         printf("                     C1: subdivision without compression  \n");
         printf("                     C2 [default]: subdivision with compression  \n");
+        printf("                     C3 : subdivision without Schroeder's iteration with compression  \n");
         printf("      -i, --isoRatio: the assumed isolation ratio\n");
         printf("                      a positive, >1, rational as 2 or 4/3 [default]\n");
         printf("      -n, --nbPows:  the number of power sums computed for uncertified exclusion\n");

@@ -1008,7 +1008,8 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
     realRat_t error;
     realRat_init(error);
     realRat_div_ui(error, eps, 2);
-    realRat_div(error, error, compDsk_radiusref(Delta) );
+//     realRat_div_ui(error, eps, 4);
+//     realRat_div(error, error, compDsk_radiusref(Delta) );
     realApp_t errAp;
     realApp_init(errAp);
     realApp_set_realRat(errAp, error, CCLUSTER_DEFAULT_PREC);    /* errAp = contains error */
@@ -1025,6 +1026,9 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
     realApp_init(logIsoRatio);
     realApp_set_realRat(logIsoRatio, isoRatio,                                               CCLUSTER_DEFAULT_PREC);
     realApp_log        (logIsoRatio, logIsoRatio,                                            CCLUSTER_DEFAULT_PREC);
+    if (metadatas_getVerbo(meta)>=level) {
+        printf("#------------cauchy_tests.c: logIsoRatio\n"); realApp_printd(logIsoRatio, 10); printf("\n");
+    }
 //     realApp_set_realRat(qApp,        compDsk_radiusref(Delta),                               CCLUSTER_DEFAULT_PREC);
     realApp_one        (qApp);
     realApp_mul_realRat(qApp,        qApp,                     isoRatio,                     CCLUSTER_DEFAULT_PREC);
@@ -1102,6 +1106,7 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
             realApp_get_rad_realApp( radIm, compApp_imagref(s1) );
 //             realApp_mul_realRat( radRe, radRe, compDsk_radiusref(Delta), appPrec );
 //             realApp_mul_realRat( radIm, radIm, compDsk_radiusref(Delta), appPrec );
+//             if ( !(realApp_lt( radRe, errAp )) || !(realApp_lt( radIm, errAp )) ){
             if ( realApp_ge( radRe, errAp ) || realApp_ge( radIm, errAp ) ){
                 if (metadatas_getVerbo(meta)>=level)
                     printf("#------------cauchy_tests.c: cauchyTest_computeS1compDsk: s1 not precise enough, i: %ld\n", i);
@@ -1134,10 +1139,27 @@ slong cauchyTest_computeS1compDsk( compDsk_t res,
     realRat_mul_si( compRat_realref(mc), compRat_realref(mc), nbOfRoots);
     realRat_mul_si( compRat_imagref(mc), compRat_imagref(mc), nbOfRoots);
     compApp_get_compRat( compDsk_centerref(res), s1 );
+    
+//     if (metadatas_getVerbo(meta)>=level) {
+//         printf("#------------cauchy_tests.c: s1:"); compApp_printd(s1, 10); printf("\n");
+//         compApp_t temp;
+//         compApp_init(temp);
+//         compApp_set_compRat(temp, compDsk_centerref(res), appPrec);
+//         printf("#------------cauchy_tests.c: s1':"); compApp_printd(temp, 10); printf("\n");
+//         compApp_clear(temp);
+//     }
+    
     compRat_add(compDsk_centerref(res), compDsk_centerref(res), mc);
 //     realRat_set_si(compDsk_radiusref(res), 2, 1);
 //     realRat_pow_si(compDsk_radiusref(res), compDsk_radiusref(res), -prec);
     realRat_set(compDsk_radiusref(res), eps);
+    
+//     if (metadatas_getVerbo(meta)>=level) {
+//         cauchyTest_res resCauchy = cauchyTest_probabilistic_counting( Delta, cacheCau, appPrec, meta, depth);
+//         printf("m: %ld, resCauchy.nbOfSol: %d\n", nbOfRoots, resCauchy.nbOfSol);
+//                        resCauchy = cauchyTest_probabilistic_counting( res, cacheCau, appPrec, meta, depth);
+//         printf("m: %ld, resCauchy.nbOfSol: %d\n", nbOfRoots, resCauchy.nbOfSol);
+//     }
     
     realRat_clear(error);
     realApp_clear(errAp);

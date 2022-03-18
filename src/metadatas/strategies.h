@@ -63,6 +63,7 @@ extern "C" {
 /* for Cauchy */
 #define STRAT_STR_C1 "C1"
 #define STRAT_STR_C2 "C2"
+#define STRAT_STR_C3 "C3"
 
 typedef struct {
     int _useNewton;
