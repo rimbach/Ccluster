@@ -72,6 +72,38 @@ int compDsk_is_point_strictly_in_dsk( const compRat_t p, const compDsk_t d){
     return res;
 }
 
+int compDsk_is_stricly_in         ( const compDsk_t d1, const compDsk_t d2){
+    
+    if ( realRat_cmp(compDsk_radiusref(d1), compDsk_radiusref(d2)) >=0 )
+        return 0;
+    
+    /* here radius(d1) < radius(d2) */
+    
+    int res = 1;
+    compRat_t dist;
+    compRat_init(dist);
+    compRat_comp_distance(dist, compDsk_centerref(d1), compDsk_centerref(d2));
+    
+    realRat_mul( compRat_realref(dist), compRat_realref(dist), compRat_realref(dist));
+    realRat_mul( compRat_imagref(dist), compRat_imagref(dist), compRat_imagref(dist));
+    realRat_add( compRat_realref(dist), compRat_realref(dist), compRat_imagref(dist));
+    
+    realRat_mul( compRat_imagref(dist), compDsk_radiusref(d2), compDsk_radiusref(d2));
+    
+    if ( realRat_cmp(compRat_realref(dist), compRat_imagref(dist)) >=0 )
+        res = 0;
+    else {
+        /* here center(d1) is strictly in d2 */
+        realRat_sub( compRat_imagref(dist), compDsk_radiusref(d2), compDsk_radiusref(d1));
+        realRat_mul( compRat_imagref(dist), compRat_imagref(dist), compRat_imagref(dist));
+        if ( realRat_cmp(compRat_realref(dist), compRat_imagref(dist)) >= 0 )
+            res = 0;
+    } 
+    
+    compRat_clear(dist);
+    return res;
+}
+
 int compDsk_intersect_compDsk       ( const compDsk_t a, const compDsk_t b) {
     
     compRat_t cbmca;

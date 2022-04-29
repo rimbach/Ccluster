@@ -106,7 +106,10 @@ void compDsk_inflate_realRat(compDsk_t d, const compDsk_t e, const realRat_t f);
 /* geometric predicates */
 int compDsk_is_point_in_dsk         ( const compRat_t p, const compDsk_t d);
 int compDsk_is_point_strictly_in_dsk( const compRat_t p, const compDsk_t d);
-int compDsk_intersect_compDsk       ( const compDsk_t a, const compDsk_t b); 
+int compDsk_intersect_compDsk       ( const compDsk_t a, const compDsk_t b);
+
+int compDsk_is_stricly_in         ( const compDsk_t d1, const compDsk_t d2);
+
 /* RealCoeffs */
 /* Precondition:                                                                               */
 /* Specification: returns true only if forall p\in cc, Im(p)>0                                 */

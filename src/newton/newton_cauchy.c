@@ -363,6 +363,9 @@ newton_res newton_cauchy_newton_connCmp( connCmp_t nCC,
         /* test */
         connCmp_isSep(nCC) = connCmp_isSep(CC);
         connCmp_isSepCertref(nCC) = connCmp_isSepCertref(CC);
+        
+        compDsk_set( connCmp_grSepDiskref(nCC), connCmp_grSepDiskref(CC) );
+        
         /* end test */
         /*connCmp_appPrref(nCC) = res.appPrec;*/ /*adjust the precision in the main loop*/
         

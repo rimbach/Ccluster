@@ -79,6 +79,9 @@ typedef struct {
     int          isIso;    /* 1 => isolation ratio is containing disc is 1 + 3d/m */
     int          isSepCert;/* a flag set to 1 if 2*the connected component is separated from 2*the other ones*/
                            /* or 0 if it is not or has not been tested */ 
+    compDsk      grSepDisk;/* a disk containing the connCmp s.t. its 2times itself does not intersect any other cc in the main queue */
+                           /* and in the list of discarded ccs */
+                           /* always initialized but set only when isSep is set to one */
 } connCmp;
 
 typedef connCmp connCmp_t[1];
@@ -114,6 +117,7 @@ typedef connCmp * connCmp_ptr;
 #define connCmp_isRigref(X) ( (X)->isRig)
 #define connCmp_isIsoref(X) ( (X)->isIso)
 #define connCmp_isSepCertref(X) ( (X)->isSepCert)
+#define connCmp_grSepDiskref(X) (&(X)->grSepDisk)
 
 /* memory managment */
 void connCmp_init(connCmp_t x);

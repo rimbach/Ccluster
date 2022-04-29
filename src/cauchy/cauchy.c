@@ -100,7 +100,7 @@ int   schroeders_inclusion_test( compDsk_t Delta, cacheCauchy_t cacheCau, slong 
     realApp_t rho;
     realApp_init(rho);
     res = schroeders_inclusion_test_get_rho( rho, Delta, cacheCau, prec, meta);
-    if (res==1) {
+//     if (res==1) {
         if (metadatas_getVerbo(meta)>=level) {
             printf("#---                               rho: "); realApp_printd(rho, 10); printf("\n");
         }
@@ -130,7 +130,11 @@ int   schroeders_inclusion_test( compDsk_t Delta, cacheCauchy_t cacheCau, slong 
             /* compute y = c + r/x */
             compApp_inv( y, x, prec );
             compApp_mul_realRat( y, y, compDsk_radiusref(Delta), prec );
+//             compApp_mul_si( y,                  y, 4, prec );
             compApp_add(y, c, y, prec);                                    /* y = c + r/x */
+            
+//             compApp_one(y);
+//             compApp_mul_si( y,                  y, 40, prec );
             /* compute t(x)  = x^d * p(c + r/x) */
             /*     and t'(x) = dx^(d-1) * p(c + r/x) - rx^(d-2) * p'(c + r/x) */
             /* evaluate p and p' at y = c+r/x */
@@ -188,7 +192,7 @@ int   schroeders_inclusion_test( compDsk_t Delta, cacheCauchy_t cacheCau, slong 
         compApp_clear(c);
         compApp_clear(y);
         compApp_clear(x);
-    }
+//     }
     realApp_clear(rho);
     if (metadatas_getVerbo(meta)>=level) {
             printf("#---schroeders_inclusion_test: end; res: %d \n", res);
@@ -398,11 +402,11 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
 //             printf("                 res: %d\n", res.nbOfSol);
 //         }
 // #endif  
-//         if (res.nbOfSol>0){
-//             printf("#---cauchy exclusion test: res: %d\n", res.nbOfSol );
-//             int successTest3 = schroeders_inclusion_test( bdisk, cacheCau, 8*res.appPrec, meta);
-//             printf("#---Schroeder's inclusion test, res: %d\n", successTest3 );
-//         }
+        if (res.nbOfSol>0){
+            printf("#---cauchy exclusion test: res: %d\n", res.nbOfSol );
+            int successTest3 = schroeders_inclusion_test( bdisk, cacheCau, 8*res.appPrec, meta);
+            printf("#---Schroeder's inclusion test, res: %d\n", successTest3 );
+        }
 #ifdef CCLUSTER_TIMINGS
         if (res.nbOfSol>0){
             nbPos++;
@@ -570,6 +574,7 @@ void cauchy_bisect_connCmp( connCmp_list_t dest,
                 connCmp_isSep(ctemp) = connCmp_isSep(cc);
                 connCmp_isSepCertref(ctemp) = connCmp_isSepCertref(cc);
                 connCmp_isRigref(ctemp) = connCmp_isRigref(cc);
+                compDsk_set( connCmp_grSepDiskref(ctemp), connCmp_grSepDiskref(cc) );
             }
             connCmp_list_push(dest, ctemp);
         }
@@ -961,6 +966,14 @@ int cauchy_connCmp_is_separated( connCmp_t cc, connCmp_list_t qMainLoop, connCmp
         /* check if the cc is separated from its complex conjugate */
         realRat_neg( compRat_imagref(compDsk_centerref(ccDisk)), compRat_imagref(compDsk_centerref(ccDisk)) );
         res = res&&(!connCmp_intersection_is_not_empty_compDsk( cc, ccDisk));
+        /* in order to save the containing disk later */
+        realRat_neg( compRat_imagref(compDsk_centerref(ccDisk)), compRat_imagref(compDsk_centerref(ccDisk)) );
+    }
+    
+    if ( (!connCmp_isSepref(cc)) && (res==1) ) {
+        compBox_get_containing_dsk(ccDisk, componentBox);
+        realRat_mul_si( compDsk_radiusref(ccDisk), compDsk_radiusref(ccDisk), 2);
+        compDsk_set( connCmp_grSepDiskref(cc) , ccDisk );
     }
     
     connCmp_isSepref(cc) = res;
@@ -977,12 +990,13 @@ int cauchy_connCmp_is_separated( connCmp_t cc, connCmp_list_t qMainLoop, connCmp
 
 // int cauchy_connCmp_is_separated_certified( int *separated_certified, connCmp_t cc, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, metadatas_t meta ) {
 int cauchy_connCmp_is_separated_certified( connCmp_t cc, connCmp_list_t qMainLoop, connCmp_list_t discardedCcs, metadatas_t meta ) {
-#ifdef CCLUSTER_TIMINGS
-    clock_t start = clock();
-#endif
     
     if (connCmp_isSepCertref(cc) == 1)
         return 1;
+    
+#ifdef CCLUSTER_TIMINGS
+    clock_t start = clock();
+#endif
     
     compBox_t componentBox;
     compDsk_t sixCCDisk, twoCCDisk, otherCCDisk;
@@ -996,38 +1010,47 @@ int cauchy_connCmp_is_separated_certified( connCmp_t cc, connCmp_list_t qMainLoo
     compDsk_set(sixCCDisk, twoCCDisk);
     realRat_mul_si( compDsk_radiusref(sixCCDisk), compDsk_radiusref(twoCCDisk), 3);
     
+//     printf(" cauchy_connCmp_is_separated_certified: \n");
+//     printf(" --- greatest separated containing disk       : "); compDsk_print( connCmp_grSepDiskref(cc) ); printf("\n");
+//     printf(" --- six time containing disk                 : "); compDsk_print( sixCCDisk ); printf("\n");
+//     printf(" --- is sixCCDisk in connCmp_grSepDiskref(cc) : %d\n", compDsk_is_stricly_in(sixCCDisk, connCmp_grSepDiskref(cc) ) );
+    
     int res = 1;
+    
+    if (!compDsk_is_stricly_in(sixCCDisk, connCmp_grSepDiskref(cc) )) {
 //     *separated_certified = 1;
 //     *sep_certified = 1;
-    connCmp_list_iterator it = connCmp_list_begin(qMainLoop);
-    while ( res && (it!=connCmp_list_end()) ) {
-        connCmp_componentBox(componentBox, connCmp_list_elmt(it), metadatas_initBref(meta));
-        compBox_get_containing_dsk(otherCCDisk, componentBox);
-        realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 2);
-        res = res && (! compDsk_intersect_compDsk(sixCCDisk, otherCCDisk) );
-        /* test */
-//         realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 3);
-//         res = res && (! compDsk_intersect_compDsk(twoCCDisk, otherCCDisk) );
-        /* end test */
-        it = connCmp_list_next(it);
-    }
-    it = connCmp_list_begin(discardedCcs);
-    while ( res && (it!=connCmp_list_end()) ) {
-        connCmp_componentBox(componentBox, connCmp_list_elmt(it), metadatas_initBref(meta));
-        compBox_get_containing_dsk(otherCCDisk, componentBox);
-        realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 2);
-        res = res && (! compDsk_intersect_compDsk(sixCCDisk, otherCCDisk) );
-        it = connCmp_list_next(it);
-    }
-    
-    if (res && metadatas_useRealCoeffs(meta) && connCmp_is_imaginary_positive(cc) ) {
-        /* check if the cc is separated from its complex conjugate */
-        connCmp_componentBox(componentBox, cc, metadatas_initBref(meta));
-        compBox_get_containing_dsk(otherCCDisk, componentBox);
-        realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 2);
+        connCmp_list_iterator it = connCmp_list_begin(qMainLoop);
+        while ( res && (it!=connCmp_list_end()) ) {
+            connCmp_componentBox(componentBox, connCmp_list_elmt(it), metadatas_initBref(meta));
+            compBox_get_containing_dsk(otherCCDisk, componentBox);
+            realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 2);
+            res = res && (! compDsk_intersect_compDsk(sixCCDisk, otherCCDisk) );
+            /* test */
+    //         realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 3);
+    //         res = res && (! compDsk_intersect_compDsk(twoCCDisk, otherCCDisk) );
+            /* end test */
+            it = connCmp_list_next(it);
+        }
+        it = connCmp_list_begin(discardedCcs);
+        while ( res && (it!=connCmp_list_end()) ) {
+            connCmp_componentBox(componentBox, connCmp_list_elmt(it), metadatas_initBref(meta));
+            compBox_get_containing_dsk(otherCCDisk, componentBox);
+            realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 2);
+            res = res && (! compDsk_intersect_compDsk(sixCCDisk, otherCCDisk) );
+            it = connCmp_list_next(it);
+        }
         
-        realRat_neg( compRat_imagref(compDsk_centerref(sixCCDisk)), compRat_imagref(compDsk_centerref(sixCCDisk)) );
-        res = res && (! compDsk_intersect_compDsk(sixCCDisk, otherCCDisk) );
+        if (res && metadatas_useRealCoeffs(meta) && connCmp_is_imaginary_positive(cc) ) {
+            /* check if the cc is separated from its complex conjugate */
+            connCmp_componentBox(componentBox, cc, metadatas_initBref(meta));
+            compBox_get_containing_dsk(otherCCDisk, componentBox);
+            realRat_mul_si( compDsk_radiusref(otherCCDisk), compDsk_radiusref(otherCCDisk), 2);
+            
+            realRat_neg( compRat_imagref(compDsk_centerref(sixCCDisk)), compRat_imagref(compDsk_centerref(sixCCDisk)) );
+            res = res && (! compDsk_intersect_compDsk(sixCCDisk, otherCCDisk) );
+        }
+    
     }
     
 //     connCmp_isSepCertref(cc) = res && (*separated_certified);
@@ -1041,6 +1064,9 @@ int cauchy_connCmp_is_separated_certified( connCmp_t cc, connCmp_list_t qMainLoo
 #ifdef CCLUSTER_TIMINGS    
     time_in_cauchy_connCmp_is_separated_certified += (double) (clock() - start);
 #endif
+    
+//     if ( (res==0) && compDsk_is_stricly_in(sixCCDisk, connCmp_grSepDiskref(cc) ) )
+//         printf(" cauchy_connCmp_is_separated_certified ERROR    : %d\n", res);
     
     return res;
 }

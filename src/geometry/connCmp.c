@@ -120,6 +120,7 @@ void connCmp_init(connCmp_t x){
     connCmp_isRigref(x) = 0;
     connCmp_isIsoref(x) = 0;
     connCmp_isSepCertref(x) = 0;
+    compDsk_init( connCmp_grSepDiskref(x) );
 }
 
 void connCmp_init_compBox(connCmp_t x, compBox_t b){
@@ -154,6 +155,9 @@ void connCmp_clear(connCmp_t x){
     
     /* for re-using Taylor shifts */
     connCmp_clear_reu(x);
+    
+    /* for Cauchy root finder */
+    compDsk_clear( connCmp_grSepDiskref(x) );
 }
 
 void connCmp_clear_for_tables(connCmp_t x){
@@ -170,6 +174,9 @@ void connCmp_clear_for_tables(connCmp_t x){
     
     /* for re-using Taylor shifts */
     connCmp_clear_reu(x);
+    
+    /* for Cauchy root finder */
+    compDsk_clear( connCmp_grSepDiskref(x) );
 }
 
 void connCmp_set(connCmp_t dest, const connCmp_t src){
@@ -187,6 +194,7 @@ void connCmp_set(connCmp_t dest, const connCmp_t src){
     connCmp_isRigref(dest) = connCmp_isRigref(src);
     connCmp_isIsoref(dest) = connCmp_isIsoref(src);
     connCmp_isSepCertref(dest) = connCmp_isSepCertref(src);
+    compDsk_set(connCmp_grSepDiskref(dest), connCmp_grSepDiskref(src) );
     
     /* copy the boxes */
     compBox_ptr nBox;

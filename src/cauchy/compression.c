@@ -683,6 +683,9 @@ connCmp_ptr cauchy_actualizeCCafterCompression( connCmp_ptr CC, const compDsk_t 
     connCmp_nSols(nCC) = connCmp_nSols(CC);
     connCmp_isSep(nCC) = connCmp_isSep(CC);
     connCmp_isSepCertref(nCC) = connCmp_isSepCertref(CC);
+    
+    compDsk_set( connCmp_grSepDiskref(nCC), connCmp_grSepDiskref(CC) );
+    
     fmpz_set(connCmp_nwSpdref(nCC), connCmp_nwSpdref(CC));
     connCmp_appPrref(nCC) = appPrec;
     
