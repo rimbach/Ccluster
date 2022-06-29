@@ -402,11 +402,11 @@ slong cauchy_discard_compBox_list( compBox_list_t boxes,
 //             printf("                 res: %d\n", res.nbOfSol);
 //         }
 // #endif  
-        if (res.nbOfSol>0){
-            printf("#---cauchy exclusion test: res: %d\n", res.nbOfSol );
-            int successTest3 = schroeders_inclusion_test( bdisk, cacheCau, 8*res.appPrec, meta);
-            printf("#---Schroeder's inclusion test, res: %d\n", successTest3 );
-        }
+//         if (res.nbOfSol>0){
+//             printf("#---cauchy exclusion test: res: %d\n", res.nbOfSol );
+//             int successTest3 = schroeders_inclusion_test( bdisk, cacheCau, 8*res.appPrec, meta);
+//             printf("#---Schroeder's inclusion test, res: %d\n", successTest3 );
+//         }
 #ifdef CCLUSTER_TIMINGS
         if (res.nbOfSol>0){
             nbPos++;

@@ -38,7 +38,7 @@
 // #define CAUCHY_CERTIFIED
 // #define DEFLATION_TURAN
 
-#define CCLUSTER_TIMINGS
+// #define CCLUSTER_TIMINGS
 #ifdef CCLUSTER_TIMINGS
 double time_in_cauchyTest_getEvaluationPoints;
 double time_in_cauchyTest_rootsOfUnits;
