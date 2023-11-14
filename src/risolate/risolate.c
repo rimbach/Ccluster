@@ -670,10 +670,7 @@ void connCmp_risolate_print_for_results_withOutput(FILE * f, const connCmp_t c, 
     compDsk_t containingDisk;
     compDsk_init(containingDisk);
     
-    if (connCmp_nSols(c) <= (10^6)-1)
-        fprintf(f, "#--solution with mult. %5d: ", connCmp_nSols(c));
-    else
-        fprintf(f, "#--solution with mult. %5d: ", connCmp_nSols(c));
+    fprintf(f, "#--solution with mult. %5d: ", connCmp_nSols(c));
     
     connCmp_componentBox( containingBox, c, metadatas_initBref(meta));
     risolate_compBox_get_containing_dsk( containingDisk, containingBox);
