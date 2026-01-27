@@ -1,0 +1,44 @@
+# MacOS crap
+.DS_Store
+
+# objects
+*.o
+*.lo
+
+# .ccl files
+*.ccl
+
+# libraries
+*.dylib
+*.a
+*.dylib*
+
+# auto-generated Makefiles
+Makefile
+benchs/Makefile
+bin/ISSAC20/Makefile
+bin/MACIS19/Makefile
+bin/Makefile
+test/Makefile
+
+# executable files
+*.exe
+
+bin/ISSAC20/ccluster_issac20
+bin/ISSAC20/ccluster_issac20_mandelbrot
+bin/ISSAC20/ccluster_issac20_runnels
+bin/MACIS19/ccluster_mandelbrot
+bin/MACIS19/ccluster_runnels
+bin/cauchy
+bin/cauchy_mandelbrot
+bin/cauchy_mignotte
+bin/cauchy_nested
+bin/cauchy_runnels
+bin/ccluster
+bin/ccluster_near_zero
+bin/ccluster_nested
+bin/ccluster_spiral
+bin/ccluster_zero
+bin/genPolFile
+bin/genRandPolFile
+bin/risolate
