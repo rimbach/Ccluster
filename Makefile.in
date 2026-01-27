@@ -105,7 +105,7 @@ distclean: clean testclean
 	
 $(CCLUSTER_LIB): $(LIB_LOBJS) $(LIB_SOURCES) $(LIB_HEADERS)
 	@echo "Building $@"
-	$(CC) $(CFLAGS) -o $@ -shared $(LIB_LOBJS) $(LIBS2) ;
+	$(CC) $(CFLAGS) -o $@ -shared $(LIB_LOBJS) $(LIBS2) $(EXTRA_SHARED_FLAGS);
 	ln -sf "$(CCLUSTER_LIB)" "$(CCLUSTER_LIBNAME)"; \
 	ln -sf "$(CCLUSTER_LIB)" "$(CCLUSTER_LIBNAME).$(CCLUSTER_MAJOR)"; \
 
