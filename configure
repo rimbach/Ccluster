@@ -629,7 +629,8 @@ if [ -z "$CFLAGS" ]; then
       CFLAGS="-std=c99 -O2 -funroll-loops -g -D _WIN64 $POPCNT_FLAG $ABI_FLAG"
    else
 #       CFLAGS="-ansi -pedantic -Wall -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
-      CFLAGS="-std=c99 -pedantic -Wall -Wno-strict-prototypes -Wno-unused-but-set-variable -Wno-stringop-overread -Wno-format-overflow= -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
+#       CFLAGS="-std=c99 -pedantic -Wall -Wno-strict-prototypes -Wno-unused-but-set-variable -Wno-stringop-overread -Wno-format-overflow -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
+      CFLAGS="-std=c99 -pedantic -Wall -Wno-strict-prototypes -Wno-unused-but-set-variable -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
    fi
 fi
 
