@@ -133,7 +133,7 @@ void counters_by_depth_init( counters_by_depth_t st) {
 //     c1->nbEval                     += c2->nbEval                    ;
 // }
 
-void counters_init( counters * st) {
+void counters_init( counters_t st) {
     st->size = 0;
     st->size_allocated = INIT_SIZE_STATS;
     st->table = (counters_by_depth_ptr) ccluster_malloc (INIT_SIZE_STATS*sizeof(counters_by_depth));
@@ -158,7 +158,7 @@ void counters_init( counters * st) {
 #endif    
 }
 
-void counters_clear( counters * st) {
+void counters_clear( counters_t st) {
     
     for (int i = 0; i<st->size; i++)
         counters_by_depth_clear( (st->table + i) );
