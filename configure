@@ -800,8 +800,13 @@ cat Makefile.in >> Makefile
 
 EXTRA_LINK_ARG=""
 case "$OS" in
-      Darwin)
+      CYGWIN* | MINGW*)
+         ;;
+      Darwin*)
          EXTRA_LINK_ARG="-Wl,-rpath,@executable_path/..";;
+      *)
+         HERE=`pwd`
+         EXTRA_LINK_ARG="-Wl,-rpath,$HERE:$FLINT_LIB_DIR:$GMP_LIB_DIR:$MPFR_LIB_DIR:$ARB_LIB_DIR";;
 esac
 
 #write out bin/Makefile
@@ -818,8 +823,13 @@ cat bin/Makefile.in >> bin/Makefile
 
 EXTRA_LINK_ARG=""
 case "$OS" in
+      CYGWIN* | MINGW*)
+         ;;
       Darwin)
          EXTRA_LINK_ARG="-Wl,-rpath,@executable_path/../..";;
+      *)
+         HERE=`pwd`
+         EXTRA_LINK_ARG="-Wl,-rpath,$HERE:$FLINT_LIB_DIR:$GMP_LIB_DIR:$MPFR_LIB_DIR:$ARB_LIB_DIR";;
 esac
 
 #write out bin/MACIS19/Makefile
@@ -855,8 +865,13 @@ cat test/Makefile.in >> test/Makefile
 
 EXTRA_LINK_ARG=""
 case "$OS" in
+      CYGWIN* | MINGW*)
+         ;;
       Darwin)
          EXTRA_LINK_ARG="-Wl,-rpath,@executable_path/..";;
+      *)
+         HERE=`pwd`
+         EXTRA_LINK_ARG="-Wl,-rpath,$HERE:$FLINT_LIB_DIR:$GMP_LIB_DIR:$MPFR_LIB_DIR:$ARB_LIB_DIR";;
 esac
 
 #write out benchs/Makefile
