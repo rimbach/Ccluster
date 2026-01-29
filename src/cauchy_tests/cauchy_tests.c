@@ -810,8 +810,8 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
     
     slong res = -1;
     
-    clock_t start = clock();
-    double evalTime=0;
+    // clock_t start = clock();
+    // double evalTime=0;
     
     slong appPrec = CCLUSTER_DEFAULT_PREC;
     /* want |s0*-s0| less than 1/4 */
@@ -858,9 +858,9 @@ slong cauchyTest_computeS0compDsk( const realRat_t isoRatio,
         for(slong i=0; i<q; i++) {
             cauchyTest_computePointPointShifted( point, pointShifted, c, q, i, compDsk_radiusref(Delta), appPrec );
             
-            start = clock();
+            // start = clock();
             cacheCauchy_eval( fval, fderval, pointShifted, 1, cacheCau, appPrec, meta );
-            evalTime += (double) (clock() - start);
+            // evalTime += (double) (clock() - start);
             
             if (compApp_contains_zero( fval )){
                 if (metadatas_getVerbo(meta)>=3)

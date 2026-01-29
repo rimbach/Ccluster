@@ -419,10 +419,10 @@ gen_list_iterator gen_list_insert_sorted_from_end(gen_list_t l, void * data, gen
             l->_begin = nelmt;
             
         } else {
-            slong steps = 0;
+            // slong steps = 0;
             while (voyager->_prev!=NULL && isless_func( data, (voyager->_prev->_elmt) )) {
                 voyager = voyager->_prev;
-                steps ++;
+                // steps ++;
             }
             
             if (voyager->_prev == NULL) { /* insert at the beginning */

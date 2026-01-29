@@ -628,9 +628,8 @@ if [ -z "$CFLAGS" ]; then
    elif [ "$OS" = "CYGWIN64" ]; then
       CFLAGS="-std=c99 -O2 -funroll-loops -g -D _WIN64 $POPCNT_FLAG $ABI_FLAG"
    else
-#       CFLAGS="-ansi -pedantic -Wall -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
-      CFLAGS="-std=c99 -pedantic -Wall -Wno-stringop-overread -Wno-stringop-overflow -Wno-format-overflow -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
-#       CFLAGS="-std=c99 -pedantic -Wall -Wno-strict-prototypes -Wno-unused-but-set-variable -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
+      CFLAGS_W_WNO="-Wall -Wno-strict-prototypes -Wno-stringop-overread -Wno-stringop-overflow -Wno-format-overflow -Wno-unknown-warning-option"
+      CFLAGS="-std=c99 -pedantic $CFLAGS_W_WNO -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
    fi
 fi
 
