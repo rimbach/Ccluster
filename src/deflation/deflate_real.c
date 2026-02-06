@@ -420,7 +420,7 @@ tstar_res deflate_real_tstar_test( connCmp_t CC, cacheApp_t cache, const compDsk
     realApp_clear(sum);
     
     if ((restemp==0)||(restemp==-2)) res.nbOfSol = -2;
-    if ((restemp==-1)) res.nbOfSol = -1;
+    if (restemp==-1) res.nbOfSol = -1;
     
     if (metadatas_haveToCount(meta))
 //         if (discard)

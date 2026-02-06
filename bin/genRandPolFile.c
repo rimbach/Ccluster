@@ -19,7 +19,7 @@ int main(int argc, char **argv){
     
     srand(time(NULL));
     
-    if (argc<4){
+    if (argc<3){
         printf("usage: %s randomDense  degree [OPTIONS: format bitsize         nbpols location] \n", argv[0]);
         printf("       %s randomSparse degree [OPTIONS: format bitsize nbterms nbpols location] \n", argv[0]);
         printf("                                                                    \n");
@@ -39,7 +39,7 @@ int main(int argc, char **argv){
     }
     
     char poly[100];
-    char filename[100];
+    char filename[1000];
     int firstArg  = 0;
     char location[100];
     sprintf(location, "." );
@@ -61,7 +61,7 @@ int main(int argc, char **argv){
     if (firstArg<0) {
         printf("%s ERROR: NON-VALID DEGREE/ITERATION (should be positive) \n", argv[0]);
     }
-    parse = parse*sscanf(argv[3], "%s", filename);
+    // parse = parse*sscanf(argv[3], "%s", filename);
     
     /* loop on arguments to figure out options */
     for (int arg = 3; arg< argc; arg++) {

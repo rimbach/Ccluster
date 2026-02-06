@@ -40,13 +40,13 @@ slong ccluster_discard_compBox_list( compBox_list_t boxes,
 //     compBox_list_init(ltempDetermined);
     /* End For test */
     
-    slong degree = cacheApp_getDegree(cache);
-    slong dtemp = 1;
-    int log2d = 0;
-    while (degree>=dtemp){
-        dtemp = 2*dtemp;
-        log2d++;
-    }
+    // slong degree = cacheApp_getDegree(cache);
+    // slong dtemp = 1;
+    // int log2d = 0;
+    // while (degree>=dtemp){
+    //     dtemp = 2*dtemp;
+    //     log2d++;
+    // }
     
     while (!compBox_list_is_empty(boxes)){
         

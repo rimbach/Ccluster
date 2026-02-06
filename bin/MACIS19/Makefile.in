@@ -32,10 +32,10 @@ ccluster_runnels: ccluster_runnels.o ../parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG)\
 	    	
 ccluster_mandelbrot: ccluster_mandelbrot.o ../parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG)\

@@ -48,76 +48,76 @@ ccluster: ccluster.o parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG)\
 
 risolate: risolate.o parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 
 genPolFile: genPolFile.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 	    	
 genRandPolFile: genRandPolFile.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 	    	
 ccluster_spiral: ccluster_spiral.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 
 ccluster_nested: ccluster_nested.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 	    	
 ccluster_zero: ccluster_zero.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 	    	
 ccluster_near_zero: ccluster_near_zero.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 	
 cauchy: cauchy.o parseArgs.h
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 
 cauchy_mandelbrot: cauchy_mandelbrot.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 	
 cauchy_runnels: cauchy_runnels.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 
 cauchy_nested: cauchy_nested.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \
 	    	
 cauchy_mignotte: cauchy_mignotte.o
 # 	@echo "Building $@"
 	$(QUIET_CC) $(CC) $(CFLAGS) \
 	    	-o $@ $< $(INCLUDE_PATH) \
-	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) \
+	    	$(LIBRARY_PATH) $(LIBRARY_FLAG) $(EXTRA_LINK_ARG) \

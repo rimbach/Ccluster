@@ -454,7 +454,7 @@ tstar_res deflate_tstar_test( connCmp_t CC, cacheApp_t cache, const compDsk_t d,
     realApp_clear(sum);
     
     if ((restemp==0)||(restemp==-2)) res.nbOfSol = -2;
-    if ((restemp==-1)) res.nbOfSol = -1;
+    if (restemp==-1) res.nbOfSol = -1;
     
     if (metadatas_haveToCount(meta))
 //         if (discard)
@@ -532,7 +532,7 @@ tstar_res deflate_tstar_test_rescale( connCmp_t CC, cacheApp_t cache, const comp
     
 //     if ((restemp==0)||(restemp==-1)||(restemp==-2)) res.nbOfSol = -1;
     if ((restemp==0)||(restemp==-2)) res.nbOfSol = -2;
-    if ((restemp==-1)) res.nbOfSol = -1;
+    if (restemp==-1) res.nbOfSol = -1;
     
     
     compApp_poly_clear(pApprox);
