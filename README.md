@@ -29,8 +29,13 @@ if you use it in your research.
 
 ## Dependencies
 
-Ccluster depends on flint2 (>= 2.5.2, https://github.com/wbhart/flint2)
-and arb (>= 2.17.0, https://github.com/fredrik-johansson/arb).
+`Ccluster` depends on `flint2` (>= 2.5.2, https://github.com/wbhart/flint2)
+and `arb` (>= 2.17.0, https://github.com/fredrik-johansson/arb).
+
+Update: the Flint and Arb projects have merged, and `flint` >= 3.0.0 comes with Arb.
+`Ccluster` can be compiled with `flint` >= 3.4.0 (without Arb).
+
+Visualization tools depend on `gnuplot`.
 
 ## Installation
 
@@ -51,6 +56,7 @@ To run simple tests together with a short tutorial about binaries provided in Cc
 ```
 make test
 ```
+(if `gnuplot` is not on the system this will fail).
 
 ## Using the library in a c programm
 
