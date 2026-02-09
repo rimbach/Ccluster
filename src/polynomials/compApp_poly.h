@@ -140,6 +140,12 @@ void compApp_poly_bound_r1( realApp_t lb, realApp_t ub, const compApp_poly_t f, 
 void compApp_poly_sum_abs_coeffs( realApp_t res, const compApp_poly_t f, slong prec );
 
 /* taylor shift */
+
+#ifdef ARB_IN_FLINT
+void _acb_poly_taylor_shift_convolution(acb_ptr poly, const acb_t c, slong n, slong prec);
+void acb_poly_taylor_shift_convolution(acb_poly_t g, const acb_poly_t f, const acb_t c, slong prec);
+#endif
+
 void compApp_poly_taylor_shift_conv_pre(compApp_poly_t dest, const compApp_poly_t p, realApp_t f, compApp_ptr t, slong prec);
 void _compApp_poly_taylor_shift_convolution(compApp_ptr p, realApp_t f, compApp_ptr t, const compApp_t c, slong len, slong prec);
 void compApp_poly_taylor_shift_convolution(compApp_poly_t g, const compApp_poly_t f, const compApp_t c, slong prec);

@@ -22,6 +22,10 @@
 #include "fpci.h"
 #include "fpri_poly.h"
 
+#ifdef ARB_IN_FLINT
+#include "flint/ulong_extras.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

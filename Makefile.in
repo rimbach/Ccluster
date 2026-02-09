@@ -67,6 +67,9 @@ testBernoulli: library bins
 testMandelbrot: library bins
 	cd test && make testMandelbrotVerbose && cd ..
 
+test: library bins
+	cd test && make && cd ..
+
 ################## End tests ######################################################
 ################## Generate benchs of papers ######################################
 benchICMS2018: library bins
