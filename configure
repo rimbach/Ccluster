@@ -252,6 +252,7 @@ fi
 LIB_DIRS="${LIB_DIRS} ${GMP_LIB_DIR}"
 INC_DIRS="${INC_DIRS} ${GMP_INC_DIR}"
 LIBS="${LIBS} gmp"
+LIBRARY_FLAGS="-lgmp $LIBRARY_FLAGS"
 # 
 if [ -d "${MPFR_DIR}/lib" ]; then
    MPFR_LIB_DIR="${MPFR_DIR}/lib"
@@ -306,38 +307,49 @@ LIB_DIRS="${LIB_DIRS} ${FLINT_LIB_DIR}"
 INC_DIRS="${INC_DIRS} ${FLINT_INC_DIR}"
 LIBS="${LIBS} flint"
 
+FLINT_MAJOR_VERSION=$(grep "__FLINT_VERSION" ${FLINT_INC_DIR}"/flint/flint.h" | head -n 1 | awk '{print $3}')
+echo "FLINT major version: set to ${FLINT_MAJOR_VERSION}"
+ARB_IN_FLINT=$([ "$FLINT_MAJOR_VERSION" -ge 3 ] && echo 1 || echo 0)
+
 #arb
-if [ -d "${ARB_DIR}/lib" ]; then
-   ARB_LIB_DIR="${ARB_DIR}/lib"
-   ARB_INC_DIR="${ARB_DIR}/include"
-elif [ -d "${ARB_DIR}/lib64" ]; then
-   ARB_LIB_DIR="${ARB_DIR}/lib64"
-   ARB_INC_DIR="${ARB_DIR}/include"
-elif [ -d "${ARB_DIR}/.libs" ]; then
-   ARB_LIB_DIR="${ARB_DIR}/.libs"
-   ARB_INC_DIR="${ARB_DIR}"
-elif [ -d "${ARB_DIR}" ]; then
-   ARB_LIB_DIR="${ARB_DIR}"
-   ARB_INC_DIR="${ARB_DIR}"
+if [ $ARB_IN_FLINT -eq 0 ]; then
+   if [ -d "${ARB_DIR}/lib" ]; then
+      ARB_LIB_DIR="${ARB_DIR}/lib"
+      ARB_INC_DIR="${ARB_DIR}/include"
+   elif [ -d "${ARB_DIR}/lib64" ]; then
+      ARB_LIB_DIR="${ARB_DIR}/lib64"
+      ARB_INC_DIR="${ARB_DIR}/include"
+   elif [ -d "${ARB_DIR}/.libs" ]; then
+      ARB_LIB_DIR="${ARB_DIR}/.libs"
+      ARB_INC_DIR="${ARB_DIR}"
+   elif [ -d "${ARB_DIR}" ]; then
+      ARB_LIB_DIR="${ARB_DIR}"
+      ARB_INC_DIR="${ARB_DIR}"
+   else
+      echo "Invalid ARB directory"
+      exit 1
+   fi
+
+   if [ -d "${ARB_INC_DIR}/arb" ]; then
+      ARB_INC_DIR="${ARB_INC_DIR}"
+   elif [ -f "${ARB_INC_DIR}/arb.h" ]; then
+      mkdir -p build/include
+      ln -sf ${ARB_INC_DIR} build/include/arb
+      ARB_INC_DIR="${PWD}/build/include"
+   fi
+
+   echo "ARB_LIB_DIR set to ${ARB_LIB_DIR}"
+   echo "ARB_INC_DIR set to ${ARB_INC_DIR}"
+
+   LIB_DIRS="${LIB_DIRS} ${ARB_LIB_DIR}"
+   INC_DIRS="${INC_DIRS} ${ARB_INC_DIR}"
+   LIBS="${LIBS} arb"
 else
-   echo "Invalid ARB directory"
-   exit 1
+   ARB_INC_DIR="${FLINT_INC_DIR}/flint"
+   INC_DIRS="${INC_DIRS} ${ARB_INC_DIR}"
+   echo "ARB is in FLINT"
+   echo "ARB_INC_DIR set to ${ARB_INC_DIR}"
 fi
-
-if [ -d "${ARB_INC_DIR}/arb" ]; then
-   ARB_INC_DIR="${ARB_INC_DIR}"
-elif [ -f "${ARB_INC_DIR}/arb.h" ]; then
-   mkdir -p build/include
-   ln -sf ${ARB_INC_DIR} build/include/arb
-   ARB_INC_DIR="${PWD}/build/include"
-fi
-
-echo "ARB_LIB_DIR set to ${ARB_LIB_DIR}"
-echo "ARB_INC_DIR set to ${ARB_INC_DIR}"
-
-LIB_DIRS="${LIB_DIRS} ${ARB_LIB_DIR}"
-INC_DIRS="${INC_DIRS} ${ARB_INC_DIR}"
-LIBS="${LIBS} arb"
 
 LIB_DIRS="${LIB_DIRS} ${LIB_LOC} ."
 
@@ -410,7 +422,9 @@ if [ "$FOR_WIN32" = "1" ]; then
     ABI=32
     LIBS="${LIBS} gmp"
     ln -sf w32-libflint.dll binaries/libflint.dll
-    ln -sf w32-libarb.dll binaries/libarb.dll
+    if [ $ARB_IN_FLINT -eq 0 ]; then
+      ln -sf w32-libarb.dll binaries/libarb.dll
+    fi
     ln -sf w32-libwinpthread-1.dll binaries/libpthread.dll
     ln -sf w32-libgmp-16.dll binaries/libgmp.dll
 fi
@@ -423,7 +437,9 @@ if [ "$FOR_WIN64" = "1" ]; then
     LIB_DIRS="${PWD}/binaries ${LIB_DIRS}"
     ABI=64
     ln -sf w64-libflint.dll binaries/libflint.dll
-    ln -sf w64-libarb.dll binaries/libarb.dll
+    if [ $ARB_IN_FLINT -eq 0 ]; then
+      ln -sf w64-libarb.dll binaries/libarb.dll
+    fi
     ln -sf w64-libwinpthread-1.dll binaries/libpthread.dll
     ln -sf w64-libgmp-16.dll binaries/libgmp.dll
 fi
@@ -624,12 +640,12 @@ fi
 
 if [ -z "$CFLAGS" ]; then
    if [ "$OS" = "MINGW64" ]; then
-      CFLAGS="-std=c99 -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
+      CFLAGS="-std=c11 -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
    elif [ "$OS" = "CYGWIN64" ]; then
-      CFLAGS="-std=c99 -O2 -funroll-loops -g -D _WIN64 $POPCNT_FLAG $ABI_FLAG"
+      CFLAGS="-std=c11 -O2 -funroll-loops -g -D _WIN64 $POPCNT_FLAG $ABI_FLAG"
    else
       CFLAGS_W_WNO="-Wall -Wno-strict-prototypes -Wno-stringop-overread -Wno-stringop-overflow -Wno-format-overflow -Wno-unknown-warning-option"
-      CFLAGS="-std=c99 -pedantic $CFLAGS_W_WNO -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
+      CFLAGS="-std=c11 -pedantic $CFLAGS_W_WNO -O2 -funroll-loops -g $POPCNT_FLAG $ABI_FLAG"
    fi
 fi
 
@@ -659,6 +675,9 @@ if [ -z "$DFLAGS" ]; then
     fi
     if [ "$PTHREAD" = "1" ]; then
         DFLAGS="$DFLAGS -DCCLUSTER_HAVE_PTHREAD"
+    fi
+    if [ $ARB_IN_FLINT -eq 1 ]; then
+      DFLAGS="$DFLAGS -DARB_IN_FLINT"
     fi
 fi
 
@@ -814,6 +833,7 @@ echo "DFLAGS=$DFLAGS" >> bin/Makefile
 echo "INCS=$INCS" >> bin/Makefile
 echo "LIBS=$LLIBS" >> bin/Makefile
 echo "EXTRA_LINK_ARG=$EXTRA_LINK_ARG" >> bin/Makefile
+echo "LIBRARY_FLAG=$lLIBS" >> bin/Makefile
 cat bin/Makefile.in >> bin/Makefile
 
 EXTRA_LINK_ARG=""
@@ -832,6 +852,7 @@ echo "DFLAGS=$DFLAGS" >> bin/MACIS19/Makefile
 echo "INCS=$INCS" >> bin/MACIS19/Makefile
 echo "LIBS=$LLIBS" >> bin/MACIS19/Makefile
 echo "EXTRA_LINK_ARG=$EXTRA_LINK_ARG" >> bin/MACIS19/Makefile
+echo "LIBRARY_FLAG=$lLIBS" >> bin/MACIS19/Makefile
 cat bin/MACIS19/Makefile.in >> bin/MACIS19/Makefile
 
 #write out bin/ISSAC20/Makefile
@@ -844,6 +865,7 @@ echo "DFLAGS=$DFLAGS" >> bin/ISSAC20/Makefile
 echo "INCS=$INCS" >> bin/ISSAC20/Makefile
 echo "LIBS=$LLIBS" >> bin/ISSAC20/Makefile
 echo "EXTRA_LINK_ARG=$EXTRA_LINK_ARG" >> bin/ISSAC20/Makefile
+echo "LIBRARY_FLAG=$lLIBS" >> bin/MACIS19/Makefile
 cat bin/ISSAC20/Makefile.in >> bin/ISSAC20/Makefile
 
 #write out test/Makefile
@@ -872,6 +894,7 @@ echo "DFLAGS=$DFLAGS" >> benchs/Makefile
 echo "INCS=$INCS" >> benchs/Makefile
 echo "LIBS=$LLIBS" >> benchs/Makefile
 echo "EXTRA_LINK_ARG=$EXTRA_LINK_ARG" >> benchs/Makefile
+echo "LIBRARY_FLAG=$lLIBS" >> benchs/Makefile
 cat benchs/Makefile.in >> benchs/Makefile
 
 echo "CCLUSTER was successfully configured."

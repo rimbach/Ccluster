@@ -105,6 +105,11 @@ slong realApp_poly_get_relOne_accuracy_max( const realApp_poly_t poly);
 slong realApp_poly_get_absolute_accuracy_min( const realApp_poly_t poly);
 slong realApp_poly_get_absolute_accuracy_max( const realApp_poly_t poly);
 
+#ifdef ARB_IN_FLINT
+void _arb_poly_taylor_shift_convolution(arb_ptr poly, const arb_t c, slong n, slong prec);
+void arb_poly_taylor_shift_convolution(arb_poly_t g, const arb_poly_t f, const arb_t c, slong prec);
+#endif
+
 /* derivation */
 POLYNOMIALS_INLINE  void realApp_poly_derivative(realApp_poly_t fp, const realApp_poly_t f, slong prec){
     arb_poly_derivative(fp, f, prec);

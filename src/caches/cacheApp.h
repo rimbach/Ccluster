@@ -25,6 +25,10 @@
 #include "polynomials/compApp_poly.h"
 #include "polynomials/app_rat_poly.h"
 
+#ifdef ARB_IN_FLINT
+#include "flint/fmpz_poly.h"
+#endif
+
 #ifdef CCLUSTER_HAVE_PTHREAD
 #include <pthread.h>
 #endif
