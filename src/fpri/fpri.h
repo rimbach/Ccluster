@@ -59,13 +59,12 @@ FPRI_INLINE void   _fpri_free(void * ptr)                 {        FPRI_DEFAULT_
                                               void *(*realloc_func) (void *, size_t),
                                               void  (*free_func)    (void *) );
 
-typedef double number;
 typedef struct {
     /* Assuming rounding upward; 
      *low stores MINUS the lower 
      * bound of the interval;*/
-    number low;
-    number upp;
+    double low;
+    double upp;
 } fpri_struct;
 
 typedef fpri_struct fpri_t[1];

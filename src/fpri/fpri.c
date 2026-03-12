@@ -11,6 +11,8 @@
 
 #include "fpri.h"
 
+typedef double number;
+
 void fpri_swap (fpri_t x, fpri_t y) {
     number t1 = x->low, t2 = x->upp;
     x->low = y->low;
