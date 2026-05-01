@@ -82,7 +82,7 @@ usage()
    echo "     AR=<name>            Use the AR library builder with the given name (default: ar)"
    echo "     CFLAGS=<flags>       Pass the given flags to the compiler"
    echo "     ABI=[32|64]          Tell the compiler to use given ABI (default: empty)"
-   
+
    echo "     --experimental       Use experimental version"
    echo "     --for_win32          build binaries for win32"
    echo "     --for_win64          build binaries for win64"
@@ -253,7 +253,7 @@ LIB_DIRS="${LIB_DIRS} ${GMP_LIB_DIR}"
 INC_DIRS="${INC_DIRS} ${GMP_INC_DIR}"
 LIBS="${LIBS} gmp"
 LIBRARY_FLAGS="-lgmp $LIBRARY_FLAGS"
-# 
+#
 if [ -d "${MPFR_DIR}/lib" ]; then
    MPFR_LIB_DIR="${MPFR_DIR}/lib"
    MPFR_INC_DIR="${MPFR_DIR}/include"
@@ -370,7 +370,7 @@ LIB_DIRS="${LIB_DIRS} ${LIB_LOC} ."
 #    EXTRA_LIB_DIRS="${EXTRA_LIB_DIRS} ${NTL_LIB_DIR}"
 #    EXTRA_LIBS="${EXTRA_LIBS} ntl"
 # fi
-# 
+#
 # if [ "$WANT_BLAS" = "1" ]; then
 #    if [ -d "${BLAS_DIR}" ]; then
 #       BLAS_LIB_DIR="${BLAS_DIR}"
@@ -384,7 +384,7 @@ LIB_DIRS="${LIB_DIRS} ${LIB_LOC} ."
 #    EXTRA_LIBS="${EXTRA_LIBS} openblas"
 # fi
 # CONFIG_BLAS="#define HAVE_BLAS ${WANT_BLAS}"
-# 
+#
 # if [ "$WANT_GC" = "1" ]; then
 #    if [ -d "${GC_DIR}" ]; then
 #       GC_LIB_DIR="${GC_DIR}/lib"
@@ -593,7 +593,7 @@ case "$OS" in
       ;;
    *)
       ;;
-esac 
+esac
 
 #test for popcnt flag and set needed CFLAGS
 
@@ -601,12 +601,12 @@ mkdir -p build
 rm -f build/test-popcnt > /dev/null 2>&1
 MSG="Testing __builtin_popcountl..."
 printf "%s" "$MSG"
-echo "int main(int argc, char ** argv) { 
+echo "int main(int argc, char ** argv) {
 #if defined(_WIN64)
 return __builtin_popcountll(argc) == 100;
 #else
 return __builtin_popcountl(argc) == 100;
-#endif 
+#endif
 }" > build/test-popcnt.c
 $CC build/test-popcnt.c -o ./build/test-popcnt > /dev/null 2>&1
 if [ $? -eq 0 ]; then
@@ -654,6 +654,7 @@ fi
 if [ "$KERNEL" = Darwin ]; then
    CFLAGS="-fno-common $CFLAGS"
 fi
+echo $CFLAGS
 
 #PIC flag
 
@@ -685,7 +686,7 @@ fi
 #test support for thread-local storage
 
 # CONFIG_TLS="#define HAVE_TLS 0"
-# 
+#
 # if [ "$TLS" = "1" ]; then
 #    mkdir -p build
 #    rm -f build/test-tls > /dev/null 2>&1
